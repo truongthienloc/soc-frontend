@@ -1,0 +1,97 @@
+.keyboard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: scale(75%);
+    --key-width: 50px;
+    --delete-width: 100px;
+    --space-width: 350px;
+    --shift-width: 70px;
+    --enter-width: 80px;
+    --key-font-size: 1.3rem;
+    --special-key-font-size: 1.3rem;
+}
+
+/* .keyboard button:disabled {
+  
+  } */
+
+.keyboard .delete,
+.keyboard .shift,
+.keyboard .space {
+    font-size: var(--special-key-font-size);
+    text-transform: capitalize;
+}
+.keyboard .delete {
+    width: var(--delete-width);
+}
+.keyboard .shift {
+    width: var(--shift-width);
+}
+.keyboard .space {
+    width: var(--space-width);
+}
+.keyboard .enter {
+    width: var(--enter-width);
+}
+
+.keyboard button {
+    background-color: rgb(104, 104, 255);
+    border: none;
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    margin: 0.3rem;
+    font-size: var(--key-font-size);
+    color: #fff;
+    width: var(--key-width);
+    height: 50px;
+    border-radius: 0.5rem;
+}
+
+.monitor {
+    width: 100%;
+    height: 250px;
+    resize: none;
+    padding: 0.5rem;
+    font-size: 1.2rem;
+    outline: none;
+    border: 2px solid rgb(104, 104, 255);
+    border-radius: 0.5rem;
+    transform: scale(75%);
+
+    background: #000;
+    color: white;
+    font-family: monospace;
+    overflow-y: auto;
+}
+
+.monitor .line {
+    display: flex;
+}
+
+.monitor .pointer {
+    animation: pointer 1000ms reverse infinite cubic-bezier(1, 0, 0, 1);
+    width: 5px;
+    /* height: 10px; */
+    background-color: white;
+}
+
+@keyframes pointer {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0.9;
+    }
+}
+
+.container__simulate {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: 2fr 1fr;
+}
+
+#logs {
+    background-color: #000;
+    color: white;
+}

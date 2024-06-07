@@ -13,7 +13,7 @@ export default class NCKHBoard {
     public cpu: CPU
 
     constructor(containerId: string) {
-        Scene.CELL = 17
+        Scene.CELL = 25
         const scene = new Scene(containerId, 30, 25)
         const { X, Y } = this
 

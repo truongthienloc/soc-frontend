@@ -100,6 +100,8 @@ export default class Monitor {
     }
 
     public destroy() {
+        console.log('Monitor destroy');
+        
         this.closeMonitorBehavior()
         this.monitorIO.getEvent().off(Module.EVENT.ACTIVATE, this.openMonitorBehavior)
         this.monitorIO.getEvent().off(Module.EVENT.INACTIVATE, this.closeMonitorBehavior)

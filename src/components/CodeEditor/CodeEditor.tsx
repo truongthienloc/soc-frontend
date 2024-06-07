@@ -7,104 +7,102 @@ import { defineMode } from '~/services/codemirror'
 // import 'codemirror/addon/mode/simple'
 
 interface CodeEditorProps {
-	value?: string
-	onChange?: (value: string) => void
-	disable?: boolean
-	hidden?: boolean
+    value?: string
+    onChange?: (value: string) => void
+    disable?: boolean
+    hidden?: boolean
 }
 
 function CodeEditor({ value = '', onChange, disable = false, hidden }: CodeEditorProps) {
-	const textareaRef = useRef<HTMLTextAreaElement>(null)
-	const containerRef = useRef<HTMLDivElement>(null)
-	const codeRef = useRef<CodeMirror.EditorFromTextArea>()
-	const isStart = useRef<boolean>(true)
+    const textareaRef = useRef<HTMLTextAreaElement>(null)
+    const containerRef = useRef<HTMLDivElement>(null)
+    const codeRef = useRef<CodeMirror.EditorFromTextArea>()
+    const isStart = useRef<boolean>(true)
 
-	const handleContainerResize = useCallback(() => {
-		// console.log('Resizing container');
-		if (!containerRef.current || !codeRef.current) {
-			return
-		}
+    const handleContainerResize = useCallback(() => {
+        // console.log('Resizing container');
+        if (!containerRef.current || !codeRef.current) {
+            return
+        }
 
-		// const width = containerRef.current.clientWidth
-		// const height = containerRef.current.clientHeight
+        // const width = containerRef.current.clientWidth
+        // const height = containerRef.current.clientHeight
 
-		// console.log("width=" + width + " height=" + height);
+        // console.log("width=" + width + " height=" + height);
 
-		// codeRef.current.setSize(width, height)
-	}, [])
+        // codeRef.current.setSize(width, height)
+    }, [])
 
-	const createCodeEditor = useCallback(async () => {
-		if (codeRef.current) {
-			return
-		}
+    const createCodeEditor = useCallback(async () => {
+        if (codeRef.current) {
+            return
+        }
 
-		const CodeMirror = (await import('codemirror')).default
-		// console.log(CodeMirror.defineMode);
+        const CodeMirror = (await import('codemirror')).default
+        // console.log(CodeMirror.defineMode);
 
-		defineMode(CodeMirror)
+        defineMode(CodeMirror)
 
-		if (!textareaRef.current || !containerRef.current) {
-			return
-		}
+        if (!textareaRef.current || !containerRef.current) {
+            return
+        }
 
-		const code = CodeMirror.fromTextArea(textareaRef.current, {
-			mode: 'risc-v',
-			// mode: 'javascript',
-			theme: 'codewars',
-			lineNumbers: true,
-		})
-		codeRef.current = code
+        const code = CodeMirror.fromTextArea(textareaRef.current, {
+            mode: 'risc-v',
+            // mode: 'javascript',
+            theme: 'codewars',
+            lineNumbers: true,
+        })
+        codeRef.current = code
 
-		code.setOption('readOnly', disable)
+        code.setOption('readOnly', disable)
 
-		code.setValue(value)
-		code.setSize(
-			400,
-			400
-		)
+        code.setValue(value)
+        code.setSize(400, 400)
 
         // console.log('container size: ', containerRef.current.clientWidth, containerRef.current.clientHeight);
-        
-		code.on('change', (ins) => {
-			onChange?.(ins.getValue())
-		})
-	}, [])
 
-	useEffect(() => {
-		if (isStart.current && !hidden) {
-			isStart.current = false
-			// import('codemirror')
-			createCodeEditor()
-		}
-		import('codemirror/addon/mode/simple')
-			
-		window.addEventListener('resize', handleContainerResize)
+        code.on('change', (ins) => {
+            onChange?.(ins.getValue())
+        })
+    }, [])
 
-		return () => {
-			window.removeEventListener('resize', handleContainerResize)
-		}
-	}, [handleContainerResize, createCodeEditor, hidden])
+    useEffect(() => {
+        if (isStart.current && !hidden) {
+            isStart.current = false
+            // import('codemirror')
+            createCodeEditor()
+        }
+        import('codemirror/addon/mode/simple')
 
-	useEffect(() => {
-		if (codeRef.current) {
-			codeRef.current.setOption('readOnly', disable)
-		}
-	}, [disable])
+        window.addEventListener('resize', handleContainerResize)
 
-	useEffect(() => {
-		if (codeRef.current && disable) {
-			codeRef.current.setValue(value)
-		}
-	}, [value])
+        return () => {
+            window.removeEventListener('resize', handleContainerResize)
+        }
+    }, [handleContainerResize, createCodeEditor, hidden])
 
-	return (
-		<div
-			ref={containerRef}
-			className='flex-1 min-w-[250px] h-full min-h-[300px] text-base'
-			onResize={handleContainerResize}>
-			<textarea ref={textareaRef} name='code-editor' id='code-editor'></textarea>
-		</div>
-	)
+    useEffect(() => {
+        if (codeRef.current) {
+            codeRef.current.setOption('readOnly', disable)
+        }
+    }, [disable])
+
+    useEffect(() => {
+        if (codeRef.current && disable) {
+            codeRef.current.setValue(value)
+        }
+    }, [value])
+
+    return (
+        <div
+            ref={containerRef}
+            className="h-full min-h-[300px] min-w-[250px] flex-1 text-base"
+            onResize={handleContainerResize}
+        >
+            <textarea ref={textareaRef} name="code-editor" id="code-editor"></textarea>
+        </div>
+    )
 }
 
 export default CodeEditor

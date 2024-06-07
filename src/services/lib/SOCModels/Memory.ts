@@ -1,13 +1,13 @@
 // TypeScript
 
-import Slave from './Slave';
+import Slave from './Slave'
 
 export default class Memory {
-    DataMemory: { [key: string]: string };
-    slave: Slave;
+    DataMemory: { [key: string]: string }
+    slave: Slave
 
     constructor() {
-        this.DataMemory = {};
-        this.slave = new Slave('DataMemory', true);
+        this.DataMemory = {}
+        this.slave = new Slave('DataMemory', true)
     }
 }

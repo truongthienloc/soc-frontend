@@ -44,10 +44,10 @@ export default function SocPage({}: Props) {
                 cpu.getEvent().on(Agent.Event.CLICK, handleCPUClick)
                 // cpu.setIsRunning(true)
 
-                const cpuModel = new RiscVProcessor('cpu', '00')
+                const cpuModel = new RiscVProcessor('cpu', '00', true)
                 socModelRef.current = cpuModel
                 cpuModel.setLogger(logs)
-                cpuModel.setImen('.text\nlui      x25 , 9\nlui      x23 , 9')
+                // cpuModel.setImen('.text\nlui      x25 , 9\nlui      x23 , 9')
                 cpuModel.RunAll()
                 setRegistersData(convertRegisters2TwinRegisters(cpuModel.getRegisters()))
             }
@@ -172,7 +172,7 @@ export default function SocPage({}: Props) {
                         <p className="text-xl font-bold">Logs:</p>
                         <div
                             id="logs"
-                            className="mt-2 h-[200px] rounded-lg border border-black p-2 overflow-auto"
+                            className="mt-2 h-[200px] overflow-auto rounded-lg border border-black p-2"
                         ></div>
                     </div>
                 </div>

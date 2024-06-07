@@ -3,16 +3,17 @@
 import dynamic from 'next/dynamic'
 import { useRef, useEffect, useCallback } from 'react'
 import { defineMode } from '~/services/codemirror'
-import CodeMirror from 'codemirror'
-import 'codemirror/addon/mode/simple'
+// import CodeMirror from 'codemirror'
+// import 'codemirror/addon/mode/simple'
 
 interface CodeEditorProps {
 	value?: string
 	onChange?: (value: string) => void
 	disable?: boolean
+	hidden?: boolean
 }
 
-function CodeEditor({ value = '', onChange, disable = false }: CodeEditorProps) {
+function CodeEditor({ value = '', onChange, disable = false, hidden }: CodeEditorProps) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
 	const containerRef = useRef<HTMLDivElement>(null)
 	const codeRef = useRef<CodeMirror.EditorFromTextArea>()
@@ -36,7 +37,8 @@ function CodeEditor({ value = '', onChange, disable = false }: CodeEditorProps) 
 		if (codeRef.current) {
 			return
 		}
-		// const CodeMirror = (await import('codemirror')).default
+
+		const CodeMirror = (await import('codemirror')).default
 		// console.log(CodeMirror.defineMode);
 
 		defineMode(CodeMirror)
@@ -69,17 +71,19 @@ function CodeEditor({ value = '', onChange, disable = false }: CodeEditorProps) 
 	}, [])
 
 	useEffect(() => {
-		if (isStart.current) {
+		if (isStart.current && !hidden) {
 			isStart.current = false
+			// import('codemirror')
 			createCodeEditor()
 		}
-
+		import('codemirror/addon/mode/simple')
+			
 		window.addEventListener('resize', handleContainerResize)
 
 		return () => {
 			window.removeEventListener('resize', handleContainerResize)
 		}
-	}, [handleContainerResize, createCodeEditor])
+	}, [handleContainerResize, createCodeEditor, hidden])
 
 	useEffect(() => {
 		if (codeRef.current) {

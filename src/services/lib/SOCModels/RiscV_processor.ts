@@ -8,12 +8,14 @@ import { Logger } from './soc';
 
 export default class RiscVProcessor {
     name: string;
+    active: boolean;
     master: Master;
     register: { [key: string]: string };
     Data_memory: { [key: string]: string };
     Instruction_memory: { [key: string]: string };
-    pc: number;
+    pc= 0;
     logger?: Logger
+    
 
     ALUOp: any;
     zero : any;
@@ -64,8 +66,9 @@ export default class RiscVProcessor {
         pc0 = 0;
         this.Instruction_memory = instruction_memory0;
     }
-    constructor(name: string, source: string) {
+    constructor(name: string, source: string, active: boolean) {
         this.name = name;
+        this.active= active;
         this.master = new Master(name, true, source);
         this.register = {
             '00000': '00000000000000000000000000000000',
@@ -107,30 +110,29 @@ export default class RiscVProcessor {
     }
 
     RunAll () {
-        for (const key in this.Instruction_memory) {
-            if (Object.prototype.hasOwnProperty.call(this.Instruction_memory, key)) {
-                const element = this.Instruction_memory[key];  
-                this.println('CPU is running')
-                this.run(element, this.pc);  
-            }
-
+        while (this.pc> Object.values(this.Instruction_memory).length * 4) {
+            const element = this.Instruction_memory[this.pc]
+            this.println('CPU is running')
+            this.run(element, this.pc)
         }
     }
 
-    dataMemory(address: string, memRead: string, memWrite: string, writeData: string): string {
-        let readData = '00000000000000000000000000000000';
+    dataMemory (address: string, memRead: string, memWrite: string, writeData: string): string {
+        
+        console.log('memRead',memRead)
+        console.log('check address', !(address in this.Data_memory))
         if (memRead[0] === '1') {
             if (!(address in this.Data_memory)) {
-                readData = '00000000000000000000000000000000';
+                return '00000000000000000000000000000000';
             }
             if (memRead === '100') {
-                readData = this.Data_memory[address].slice(-8);
+                return this.Data_memory[address].slice(-8);
             }
             if (memRead === '101') {
-                readData = this.Data_memory[address].slice(-16);
+                return this.Data_memory[address].slice(-16);
             }
             if (memRead === '110') {
-                readData = this.Data_memory[address];
+                return this.Data_memory[address];
             }
         }
 
@@ -148,7 +150,7 @@ export default class RiscVProcessor {
                 this.Data_memory[address] = writeData;
             }
         }
-        return readData;
+        return '00000000000000000000000000000000';
     }
 
     ALU(operand1: any, operand2: any, operation: string): string {
@@ -305,6 +307,7 @@ export default class RiscVProcessor {
                 this.memToReg = 0; this.unsigned = 0; this.memRead = '000'; this.memWrite = '000';
                 this.ALUSrc = 1; this.regWrite = 1; this.ALUOp = '11';
                 if (funct3 === '010' || funct3 === '011') this.slt = 1;
+                else this.slt= 0;
                 break;
             case '1100111': // this.JALR
                 this.jal = 0; this.jalr = 1; this.branch = '000'; this.auiOrLui = 0; this.wb = 0;
@@ -484,6 +487,7 @@ export default class RiscVProcessor {
         // let this.zero = 0;
         let signBit = 0;
         let readData = '';
+        console.log("Instruction",instruction)
 
         //(`RISC-V ${this.name} processor is processing`);
 
@@ -516,15 +520,19 @@ export default class RiscVProcessor {
             address = ALUResult;
         }
 
+        
         readData = this.dataMemory(ALUResult, this.memRead, this.memWrite, readData2);
+        
         readData = this.dataGen(readData, this.unsigned);
-
+        
         let writeDataR = mux(mux(mux(mux(ALUResult, readData, this.memToReg), pc.toString(2).padStart(32, '0'), this.jump), mux('00000000000000000000000000000000', '00000000000000000000000000000001', signBit), this.slt), mux((dec(imm) << 12).toString(2).padStart(32, '0') + pc.toString(2).padStart(32, '0'), (dec(imm) << 12).toString(2).padStart(32, '0'), this.auiOrLui), this.wb);
-        if (this.jump === 1) {
-            writeDataR = writeDataR.padStart(32, '0');
-        }
-
-        writeDataR = writeDataR.padStart(32, writeDataR[0]);
+        console.log(writeDataR)
+        console.log(this.slt)
+        //console.log(ALUResult, readData, this.memToReg, pc.toString(2).padStart(32, '0'), this.jump,'00000000000000000000000000000000', '00000000000000000000000000000001', signBit, this.slt, (dec(imm) << 12).toString(2).padStart(32, '0') + pc.toString(2).padStart(32, '0'), (dec(imm) << 12).toString(2).padStart(32, '0'), this.auiOrLui, this.wb)
+        // if (this.jump === 1) {
+        //     writeDataR = writeDataR.padStart(32, '0');
+        // } else writeDataR = writeDataR.padStart(32, writeDataR[0]);
+        writeDataR = writeDataR.padStart(32, '0');
         if (this.regWrite === 1) {
             this.register[writeRegister] = writeDataR;
         }

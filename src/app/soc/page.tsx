@@ -78,15 +78,9 @@ export default function SocPage({}: Props) {
         <div className="container h-dvh">
             <div className="grid h-full grid-cols-[2fr_1fr]">
                 <div className="grid grid-rows-[9fr_1fr]">
-                    <div
-                        id="simulation"
-                        className={cn('flex h-full items-center justify-center', {
-                            hidden: showRegister,
-                        })}
-                    ></div>
-                    <div className={cn({ hidden: !showRegister })}>
-                        <Button onClick={() => setShowRegister(false)}>Back</Button>
-                        <div className="grid grid-cols-2">
+                    <div className="grid grid-cols-2 gap-2">
+                        <div className={cn({ hidden: !showRegister })}>
+                            <Button onClick={() => setShowRegister(false)}>Back</Button>
                             <div className="flex flex-col border border-black">
                                 <CodeEditor
                                     value={code}
@@ -94,7 +88,22 @@ export default function SocPage({}: Props) {
                                     hidden={!showRegister}
                                 />
                             </div>
-                            <RegisterTable data={registersData} isShown={true} />
+
+                            {/* <RegisterTable data={registersData} isShown={true} /> */}
+                        </div>
+                        <div
+                            id="simulation"
+                            className={cn('flex h-full items-center justify-center', {
+                                hidden: showRegister,
+                            })}
+                        ></div>
+
+                        <div className="flex flex-col pr-1">
+                            <p className="text-xl font-bold">Logs:</p>
+                            <div
+                                id="logs"
+                                className="mt-2 h-full overflow-auto rounded-lg border border-black p-2"
+                            ></div>
                         </div>
                     </div>
                     <div className="flex flex-row gap-2">
@@ -167,13 +176,6 @@ export default function SocPage({}: Props) {
                         <div className="row">
                             <button className="space">Space</button>
                         </div>
-                    </div>
-                    <div className="flex flex-col">
-                        <p className="text-xl font-bold">Logs:</p>
-                        <div
-                            id="logs"
-                            className="mt-2 h-[200px] overflow-auto rounded-lg border border-black p-2"
-                        ></div>
                     </div>
                 </div>
             </div>

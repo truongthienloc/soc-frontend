@@ -17,14 +17,15 @@ type Props = {}
 export default function SocPage({}: Props) {
     const isStart = useRef(true)
     const socModelRef = useRef<RiscVProcessor>()
-    const [showRegister, setShowRegister] = useState(false)
+    const [showCodeEditor, setShowCodeEditor] = useState(false)
+    const [disableCodeEditor, setDisableCodeEditor] = useState(false)
     const [registersData, setRegistersData] = useState<TwinRegister[]>([])
     const [code, setCode] = useState('')
 
     useEffect(() => {
         if (isStart.current) {
             isStart.current = false
-            // setTimeout(() => setShowRegister(false), 1000)
+            // setTimeout(() => setShowCodeEditor(false), 1000)
 
             async function firstLoad() {
                 const { Agent, NCKHBoard } = await import('~/services/lib/soc')
@@ -37,7 +38,7 @@ export default function SocPage({}: Props) {
                 const logs = new Logs('#logs')
 
                 const handleCPUClick = () => {
-                    setShowRegister(true)
+                    setShowCodeEditor(true)
                 }
 
                 const cpu = soc.cpu
@@ -74,18 +75,52 @@ export default function SocPage({}: Props) {
         setRegistersData(convertRegisters2TwinRegisters(socModelRef.current.getRegisters()))
     }
 
+    const handleImportClick = () => {
+        const input = document.createElement('input')
+        input.type = 'file'
+        input.accept = '.s,.S'
+
+        input.addEventListener('change', async (e) => {
+            const files = input.files
+            console.log('files:', files)
+
+            if (files?.length && files.length > 0) {
+                const file = files.item(0)
+                if (!file || file.type === 'image/*') {
+                    return
+                }
+                const text = await file.text()
+                setDisableCodeEditor(true)
+                setCode(text)
+
+                setTimeout(() => {
+                    setDisableCodeEditor(false)
+                }, 1000)
+            }
+            input.remove()
+        })
+
+        input.click()
+    }
+
     return (
         <div className="container h-dvh">
             <div className="grid h-full grid-cols-[2fr_1fr]">
                 <div className="grid grid-rows-[9fr_1fr]">
                     <div className="grid grid-cols-2 gap-2">
-                        <div className={cn({ hidden: !showRegister })}>
-                            <Button onClick={() => setShowRegister(false)}>Back</Button>
+                        <div className={cn({ hidden: !showCodeEditor })}>
+                            <div className="flex flex-row justify-between py-1">
+                                <Button onClick={() => setShowCodeEditor(false)}>Back</Button>
+                                <Button variant="outlined" onClick={handleImportClick}>
+                                    Import
+                                </Button>
+                            </div>
                             <div className="flex flex-col border border-black">
                                 <CodeEditor
                                     value={code}
                                     onChange={(value) => setCode(value)}
-                                    hidden={!showRegister}
+                                    disable={disableCodeEditor}
+                                    hidden={!showCodeEditor}
                                 />
                             </div>
 
@@ -94,7 +129,7 @@ export default function SocPage({}: Props) {
                         <div
                             id="simulation"
                             className={cn('flex h-full items-center justify-center', {
-                                hidden: showRegister,
+                                hidden: showCodeEditor,
                             })}
                         ></div>
 

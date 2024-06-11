@@ -68,12 +68,12 @@ function CodeEditor({ value = '', onChange, disable = false, hidden }: CodeEdito
     }, [])
 
     useEffect(() => {
+        import('codemirror/addon/mode/simple')
         if (isStart.current && !hidden) {
             isStart.current = false
             // import('codemirror')
             createCodeEditor()
         }
-        import('codemirror/addon/mode/simple')
 
         window.addEventListener('resize', handleContainerResize)
 

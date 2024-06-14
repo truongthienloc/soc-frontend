@@ -119,14 +119,24 @@ class ChannelD {
 export default class InterConnect {
     Pin: Port[]
     Pout: Port[]
+    numPin: number
+    numPout: number
     ChannelA_queue: ChannelA[]
     ChannelD_queue: ChannelD[]
     ChannelA: string
     ChannelD: string
 
-    constructor() {
-        this.Pin = [createPort(true), createPort(true), createPort(true)]
-        this.Pout = [createPort(true), createPort(true), createPort(true)]
+    constructor(numPin: number, numPout: number) {
+        this.numPin= numPin
+        this.numPout= numPout
+        this.Pin = []
+        this.Pout = []
+        for (let index = 0; index < numPin; index++) {
+            this.Pin.push(createPort(true))
+        }
+        for (let index = 0; index < numPout; index++) {
+            this.Pout.push(createPort(true))
+        }
         this.ChannelA_queue = []
         this.ChannelD_queue = []
         this.ChannelA = ''
@@ -159,11 +169,14 @@ export default class InterConnect {
     TransmitChannelA(): void {
         for (const ChA of this.ChannelA_queue) {
             console.log('cha adrr', dec(ChA.address))
-            if (dec(ChA.address) < 10 && 0 <= dec(ChA.address)) {
+            if (dec('0'+ChA.address) < 399 && 0 <= dec('0'+ChA.address)) {
                 this.Pout[1].data.push(ChA)
             }
-            if (dec(ChA.address) < 20 && 10 <= dec(ChA.address)) {
+            if (dec('0'+ChA.address) < 499 && 400 <= dec('0'+ChA.address)) {
                 this.Pout[2].data.push(ChA)
+            }
+            if (dec('0'+ChA.address) < 599 && 500 <= dec('0'+ChA.address)) {
+                this.Pout[3].data.push(ChA)
             }
         }
         this.ChannelA_queue = []

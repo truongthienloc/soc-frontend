@@ -581,7 +581,7 @@ export default class RiscVProcessor {
         }
     }
 
-    run(instruction: string, pc: number): [string, string, string, string] {
+    run(instruction: string, pc: number): [string, string, string, string, string] {
         //('instruction from run: ', instruction);
 
         // let this.zero = 0;
@@ -592,7 +592,42 @@ export default class RiscVProcessor {
         //(`RISC-V ${this.name} processor is processing`);
 
         this.control(instruction.slice(25, 32), instruction.slice(17, 20))
+        let size = 'none'
+        if (instruction.slice(25, 32)==='0000011')
+        switch (instruction.slice(17, 20)) {
+            case '000': 
+                size= 'lb'
+                break;
+            case '001': 
+                size= 'lh'
+                break;
+            case '010': 
+                size= 'lw'
+            break;
+            case '100': 
+                size= 'lbu'
+                break;
+            case '101': 
+                size= 'lhu'
+            break;
+            default:
+                break;
+        }
 
+        if (instruction.slice(25, 32)==='0100011')
+            switch (instruction.slice(17, 20)) {
+                case '000': //Load
+                    size= 'sb'
+                    break;
+                case '001': //Store
+                    size= 'sh'
+                    break;
+                case '010': //Load
+                    size= 'sw'
+                break;
+                default:
+                    break;
+            }
         const readRegister1 = instruction.slice(12, 17)
         const readRegister2 = instruction.slice(7, 12)
         const writeRegister = instruction.slice(20, 25)
@@ -660,6 +695,6 @@ export default class RiscVProcessor {
 
         this.register['00000'] = '00000000000000000000000000000000'
         this.pc = mux(mux(pc + 4, (dec(imm) << 1) + pc, this.pcSrc1), ALUResult, this.pcSrc2)
-        return [message, data, address, writeRegister]
+        return [message, data, address, writeRegister, size]
     }
 }

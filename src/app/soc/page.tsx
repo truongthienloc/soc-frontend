@@ -51,6 +51,10 @@ export default function SocPage({}: Props) {
                 // cpuModel.setImen('.text\nlui      x25 , 9\nlui      x23 , 9')
                 cpuModel.RunAll()
                 setRegistersData(convertRegisters2TwinRegisters(cpuModel.getRegisters()))
+                // keyboard.getEvent().on(Keyboard.EVENT.LINE_DOWN, (text: string) => {
+                //     console.log('text: ', text);
+                    
+                // })
             }
 
             firstLoad()
@@ -103,6 +107,10 @@ export default function SocPage({}: Props) {
         input.click()
     }
 
+    const handleStepClick = () => {
+
+    }
+
     return (
         <div className="container h-dvh">
             <div className="grid h-full grid-cols-[2fr_1fr]">
@@ -153,9 +161,9 @@ export default function SocPage({}: Props) {
                         >
                             Run All
                         </Button>
-                        {/* <Button className='h-fit' variant='outlined' onClick={() => {}}>
+                        <Button className='h-fit' variant='outlined' onClick={handleStepClick}>
                             Step
-                        </Button> */}
+                        </Button>
                     </div>
                 </div>
                 <div className="border-l-2 border-black px-2">

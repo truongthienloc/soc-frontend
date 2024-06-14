@@ -31,8 +31,7 @@ const directives = [
 const directivesPattern = new RegExp('\\.(?:' + directives.join('|') + ')')
 
 const registers = /x[0-9]\d*|pc/
-const registerAbiNames =
-	/zero|ra|[fsgt]p|t[0-6]|f?s(?:[0-9]|1[01])|f?a[0-7]|ft(?:[0-9]|1[01])/
+const registerAbiNames = /zero|ra|[fsgt]p|t[0-6]|f?s(?:[0-9]|1[01])|f?a[0-7]|ft(?:[0-9]|1[01])/
 
 // https://github.com/riscv-non-isa/riscv-asm-manual/blob/master/riscv-asm.md#assembler-relocation-functions
 // prettier-ignore
@@ -42,13 +41,11 @@ const relocationFunctions = [
   "tls_ie_pcrel_hi", "tls_gd_pcrel_hi", "got_pcrel_hi",
 ];
 const relocationFunctionPatterns = new RegExp(
-	'%(?:' + relocationFunctions.join('|') + ')\\([^)]+\\)'
+    '%(?:' + relocationFunctions.join('|') + ')\\([^)]+\\)',
 )
 
 const instructions = (xs: string[]) =>
-	new RegExp(
-		'\\b(?:' + xs.map((x) => x.replace(/\./g, (_) => '\\.')).join('|') + ')\\b'
-	)
+    new RegExp('\\b(?:' + xs.map((x) => x.replace(/\./g, (_) => '\\.')).join('|') + ')\\b')
 
 // prettier-ignore
 const pseudos = instructions([
@@ -123,44 +120,44 @@ const extC = instructions([
 ]);
 
 export const defineMode = (CodeMirror: any) => {
-	if (!CodeMirror.defineSimpleMode) {
-		return
-	}
-	CodeMirror.defineSimpleMode('risc-v', {
-		meta: {
-			lineComment: '#',
-		},
-		start: [
-			{ regex: /#.*/, token: 'comment' },
+    if (!CodeMirror.defineSimpleMode) {
+        return
+    }
+    CodeMirror.defineSimpleMode('risc-v', {
+        meta: {
+            lineComment: '#',
+        },
+        start: [
+            { regex: /#.*/, token: 'comment' },
 
-			// Labels
-			{ regex: /\w+:/, token: 'tag' },
-			{ regex: /[1-9]\d*:/, token: 'tag' },
-			// Reference to local label
-			{ regex: /[1-9]\d*[bf]/, token: 'variable-2' },
+            // Labels
+            { regex: /\w+:/, token: 'tag' },
+            { regex: /[1-9]\d*:/, token: 'tag' },
+            // Reference to local label
+            { regex: /[1-9]\d*[bf]/, token: 'variable-2' },
 
-			// Registers
-			{ regex: registers, token: 'variable' },
-			{ regex: registerAbiNames, token: 'variable-2' },
+            // Registers
+            { regex: registers, token: 'variable' },
+            { regex: registerAbiNames, token: 'variable-2' },
 
-			// Integer literal
-			{ regex: /-?(?:0|[1-9]\d*|0x[0-9A-Fa-f]+)\b/, token: 'number' },
-			// String literal
-			{ regex: /"(?:[^\\]|\\.)*?(?:"|$)/, token: 'string' },
+            // Integer literal
+            { regex: /-?(?:0|[1-9]\d*|0x[0-9A-Fa-f]+)\b/, token: 'number' },
+            // String literal
+            { regex: /"(?:[^\\]|\\.)*?(?:"|$)/, token: 'string' },
 
-			{ regex: relocationFunctionPatterns, token: 'builtin' },
+            { regex: relocationFunctionPatterns, token: 'builtin' },
 
-			// Directives
-			{ regex: directivesPattern, token: 'attribute' },
-			// Instructions
-			{ regex: extC, token: 'builtin' },
-			{ regex: extFD, token: 'builtin' },
-			{ regex: extA, token: 'builtin' },
-			{ regex: extM, token: 'builtin' },
-			{ regex: baseI, token: 'builtin' },
-			{ regex: pseudos, token: 'builtin' },
-		],
-	})
+            // Directives
+            { regex: directivesPattern, token: 'attribute' },
+            // Instructions
+            { regex: extC, token: 'builtin' },
+            { regex: extFD, token: 'builtin' },
+            { regex: extA, token: 'builtin' },
+            { regex: extM, token: 'builtin' },
+            { regex: baseI, token: 'builtin' },
+            { regex: pseudos, token: 'builtin' },
+        ],
+    })
 
-	CodeMirror.defineMIME('text/x-risc-v', 'risc-v')
+    CodeMirror.defineMIME('text/x-risc-v', 'risc-v')
 }

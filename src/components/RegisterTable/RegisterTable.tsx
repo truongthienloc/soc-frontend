@@ -35,13 +35,21 @@ export default function RegisterTable({ data, isShown }: Props) {
                                 <TableCell className="h-min" sx={{ paddingY: '0.25rem' }}>
                                     {value.register1.name}
                                 </TableCell>
-                                <TableCell className="h-min" align="center" sx={{ paddingY: '0.25rem' }}>
+                                <TableCell
+                                    className="h-min"
+                                    align="center"
+                                    sx={{ paddingY: '0.25rem' }}
+                                >
                                     {value.register1.value}
                                 </TableCell>
                                 <TableCell className="h-min" sx={{ paddingY: '0.25rem' }}>
                                     {value.register2.name}
                                 </TableCell>
-                                <TableCell className="h-min" align="center" sx={{ paddingY: '0.25rem' }}>
+                                <TableCell
+                                    className="h-min"
+                                    align="center"
+                                    sx={{ paddingY: '0.25rem' }}
+                                >
                                     {value.register2.value}
                                 </TableCell>
                             </TableRow>

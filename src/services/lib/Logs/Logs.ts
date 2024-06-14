@@ -33,4 +33,8 @@ export default class Logs {
         this.currentLine = document.createElement('pre')
         this.container.appendChild(this.currentLine)
     }
+
+    public clear(): void {
+        this.container.replaceChildren()
+    }
 }

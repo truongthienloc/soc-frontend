@@ -4,46 +4,57 @@ import React, { useEffect, useRef, useState } from 'react'
 import Button from '@mui/material/Button'
 import RegisterTable from '~/components/RegisterTable/RegisterTable'
 import { cn } from '~/helpers/cn'
-import Keyboard from '~/services/lib/control/Keyboard'
-import Monitor from '~/services/lib/control/Monitor'
-import { Agent, NCKHBoard } from '~/services/lib/soc'
+import Logs from '~/services/lib/Logs/Logs'
+// import { Agent, NCKHBoard } from '~/services/lib/soc'
 import '~/styles/soc.scss'
 import RiscVProcessor from '~/services/lib/SOCModels/RiscV_processor'
 import { Registers, TwinRegister } from '~/types/register'
 import { CodeEditor } from '~/components/CodeEditor'
 import { convertRegisters2TwinRegisters } from '~/helpers/converts/register.convert'
-import Logs from '~/services/lib/Logs/Logs'
 
 type Props = {}
 
 export default function SocPage({}: Props) {
-    const isStart = useRef(true);
-    const [showRegister, setShowRegister] = useState(true)
+    const isStart = useRef(true)
+    const socModelRef = useRef<RiscVProcessor>()
+    const [showCodeEditor, setShowCodeEditor] = useState(false)
+    const [disableCodeEditor, setDisableCodeEditor] = useState(false)
     const [registersData, setRegistersData] = useState<TwinRegister[]>([])
+    const [code, setCode] = useState('')
 
     useEffect(() => {
         if (isStart.current) {
             isStart.current = false
-            setShowRegister(false)
-            const soc = new NCKHBoard('simulation')
-            const monitor = new Monitor('#monitor', soc.monitorModule)
-            const keyboard = new Keyboard('#keyboard', soc.keyboardModule, monitor)
-            const logs = new Logs('#logs')
-    
-            const handleCPUClick = () => {
-                setShowRegister(true)
+            // setTimeout(() => setShowCodeEditor(false), 1000)
+
+            async function firstLoad() {
+                const { Agent, NCKHBoard } = await import('~/services/lib/soc')
+                const Keyboard = (await import('~/services/lib/control/Keyboard')).default
+                const Monitor = (await import('~/services/lib/control/Monitor')).default
+
+                const soc = new NCKHBoard('simulation')
+                const monitor = new Monitor('#monitor', soc.monitorModule)
+                const keyboard = new Keyboard('#keyboard', soc.keyboardModule, monitor)
+                const logs = new Logs('#logs')
+
+                const handleCPUClick = () => {
+                    setShowCodeEditor(true)
+                }
+
+                const cpu = soc.cpu
+                cpu.getEvent().on(Agent.Event.CLICK, handleCPUClick)
+                // cpu.setIsRunning(true)
+
+                const cpuModel = new RiscVProcessor('cpu', '00', true)
+                socModelRef.current = cpuModel
+                cpuModel.setLogger(logs)
+                // cpuModel.setImen('.text\nlui      x25 , 9\nlui      x23 , 9')
+                cpuModel.RunAll()
+                setRegistersData(convertRegisters2TwinRegisters(cpuModel.getRegisters()))
             }
-    
-            const cpu = soc.cpu
-            cpu.getEvent().on(Agent.Event.CLICK, handleCPUClick)
-            // cpu.setIsRunning(true)
-    
-            const cpuModel = new RiscVProcessor('cpu', '00')
-            cpuModel.setLogger(logs)
-            cpuModel.setImen('.text\nlui      x25 , 9\nlui      x23 , 9')
-            cpuModel.RunAll()
-            setRegistersData(convertRegisters2TwinRegisters(cpuModel.getRegisters()))
-    
+
+            firstLoad()
+
             return () => {
                 // cpu.getEvent().off(Agent.Event.CLICK, handleCPUClick)
                 // keyboard.destroy()
@@ -53,25 +64,93 @@ export default function SocPage({}: Props) {
         }
     }, [])
 
+    const handleRunAllClick = () => {
+        console.log('running')
+        if (!socModelRef.current) {
+            return
+        }
+
+        socModelRef.current.setImen(code)
+        socModelRef.current.RunAll()
+        setRegistersData(convertRegisters2TwinRegisters(socModelRef.current.getRegisters()))
+    }
+
+    const handleImportClick = () => {
+        const input = document.createElement('input')
+        input.type = 'file'
+        input.accept = '.s,.S'
+
+        input.addEventListener('change', async (e) => {
+            const files = input.files
+            console.log('files:', files)
+
+            if (files?.length && files.length > 0) {
+                const file = files.item(0)
+                if (!file || file.type === 'image/*') {
+                    return
+                }
+                const text = await file.text()
+                setDisableCodeEditor(true)
+                setCode(text)
+
+                setTimeout(() => {
+                    setDisableCodeEditor(false)
+                }, 1000)
+            }
+            input.remove()
+        })
+
+        input.click()
+    }
+
     return (
         <div className="container h-dvh">
             <div className="grid h-full grid-cols-[2fr_1fr]">
                 <div className="grid grid-rows-[9fr_1fr]">
-                    <div id="simulation" className={cn('h-full flex items-center justify-center', { hidden: showRegister })}></div>
-                    <div className={cn({ hidden: !showRegister })}>
-                        <Button onClick={() => setShowRegister(false)}>Back</Button>
-                        <div className="grid grid-cols-2">
-                            <div className="flex flex-col border border-black">
-                                <CodeEditor value="abc" />
+                    <div className="grid grid-cols-2 gap-2">
+                        <div className={cn({ hidden: !showCodeEditor })}>
+                            <div className="flex flex-row justify-between py-1">
+                                <Button onClick={() => setShowCodeEditor(false)}>Back</Button>
+                                <Button variant="outlined" onClick={handleImportClick}>
+                                    Import
+                                </Button>
                             </div>
-                            <RegisterTable data={registersData} isShown={true} />
+                            <div className="flex flex-col border border-black">
+                                <CodeEditor
+                                    value={code}
+                                    onChange={(value) => setCode(value)}
+                                    disable={disableCodeEditor}
+                                    hidden={!showCodeEditor}
+                                />
+                            </div>
+
+                            {/* <RegisterTable data={registersData} isShown={true} /> */}
+                        </div>
+                        <div
+                            id="simulation"
+                            className={cn('flex h-full items-center justify-center', {
+                                hidden: showCodeEditor,
+                            })}
+                        ></div>
+
+                        <div className="flex flex-col pr-1">
+                            <p className="text-xl font-bold">Logs:</p>
+                            <div
+                                id="logs"
+                                className="mt-2 h-full overflow-auto rounded-lg border border-black p-2"
+                            ></div>
                         </div>
                     </div>
                     <div className="flex flex-row gap-2">
-                        <Button className='h-fit' variant='outlined' onClick={() => {}}>
+                        {/* <Button className="h-fit" variant="outlined" onClick={() => {}}>
                             Run
-                        </Button>
-                        <Button className='h-fit' variant='outlined' onClick={() => {}}>
+                        </Button> */}
+                        <Button
+                            className="h-fit"
+                            variant="outlined"
+                            // disabled
+                            onClick={handleRunAllClick}
+                        >
                             Run All
                         </Button>
                         {/* <Button className='h-fit' variant='outlined' onClick={() => {}}>
@@ -132,13 +211,6 @@ export default function SocPage({}: Props) {
                         <div className="row">
                             <button className="space">Space</button>
                         </div>
-                    </div>
-                    <div className="flex flex-col">
-                        <p className='text-xl font-bold'>Logs:</p>
-                        <div
-                            id="logs"
-                            className="mt-2 h-[200px] rounded-lg border border-black p-2"
-                        ></div>
                     </div>
                 </div>
             </div>

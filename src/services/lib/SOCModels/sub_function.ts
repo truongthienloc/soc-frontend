@@ -57,10 +57,10 @@ export function handleRegister(register: { [key: string]: string }): Register[] 
     }
     // console.log(registers)
     return registers.sort((a, b) => {
-        const numA = parseInt(a.name.match(/\d+/)?.[0] || "0", 10);
-        const numB = parseInt(b.name.match(/\d+/)?.[0] || "0", 10);
-        return numA - numB;
-    });
+        const numA = parseInt(a.name.match(/\d+/)?.[0] || '0', 10)
+        const numB = parseInt(b.name.match(/\d+/)?.[0] || '0', 10)
+        return numA - numB
+    })
 }
 
 export function convertBinToHex(binaryCode: string): string {

@@ -125,8 +125,8 @@ export default class InterConnect {
     ChannelD: string;
 
     constructor() {
-        this.Pin = [createPort(true), createPort(true)];
-        this.Pout = [createPort(true), createPort(true)];
+        this.Pin = [createPort(true), createPort(true), createPort(true)];
+        this.Pout = [createPort(true), createPort(true), createPort(true)];
         this.ChannelA_queue = [];
         this.ChannelD_queue = [];
         this.ChannelA = '';
@@ -158,8 +158,12 @@ export default class InterConnect {
 
     TransmitChannelA(): void {
         for (const ChA of this.ChannelA_queue) {
-            if (ChA.name === 'Port_in[0]') {
-                this.Pout[0].data.push(ChA);
+            console.log('cha adrr',dec(ChA.address))
+            if (dec(ChA.address) <10 && 0<= dec(ChA.address)) {
+                this.Pout[1].data.push(ChA);
+            }
+            if (dec(ChA.address) <20 && 10<= dec(ChA.address)) {
+                this.Pout[2].data.push(ChA);
             }
         }
         this.ChannelA_queue = [];
@@ -167,38 +171,39 @@ export default class InterConnect {
 
     TransmitChannelD(): void {
         let count0 = 0;
-        let count1 = 0;
-        let count2 = 0;
-        let count3 = 0;
+        // let count1 = 0;
+        // let count2 = 0;
+        // let count3 = 0;
 
         for (const ChD of this.ChannelD_queue) {
             if (ChD.source === '00') {
+                console.log('payload cd',ChD.payload)
                 this.Pout[0].data.push(ChD);
                 if (count0 === 0) ChD.Ready('Port_out[0]');
                 this.Pout[0].active = true;
                 count0 += 1;
             }
 
-            if (ChD.source === '01') {
-                this.Pout[1].data.push(ChD);
-                if (count1 === 0) ChD.Ready('Port_out[1]');
-                this.Pout[1].active = true;
-                count1 += 1;
-            }
+            // if (ChD.source === '01') {
+            //     this.Pout[1].data.push(ChD);
+            //     if (count1 === 0) ChD.Ready('Port_out[1]');
+            //     this.Pout[1].active = true;
+            //     count1 += 1;
+            // }
 
-            if (ChD.source === '10') {
-                this.Pout[2].data.push(ChD);
-                if (count2 === 0) ChD.Ready('Port_out[2]');
-                this.Pout[2].active = true;
-                count2 += 1;
-            }
+            // if (ChD.source === '10') {
+            //     this.Pout[2].data.push(ChD);
+            //     if (count2 === 0) ChD.Ready('Port_out[2]');
+            //     this.Pout[2].active = true;
+            //     count2 += 1;
+            // }
 
-            if (ChD.source === '11') {
-                this.Pout[3].data.push(ChD);
-                if (count3 === 0) ChD.Ready('Port_out[3]');
-                this.Pout[3].active = true;
-                count3 += 1;
-            }
+            // if (ChD.source === '11') {
+            //     this.Pout[3].data.push(ChD);
+            //     if (count3 === 0) ChD.Ready('Port_out[3]');
+            //     this.Pout[3].active = true;
+            //     count3 += 1;
+            // }
         }
         this.ChannelD_queue = [];
     }

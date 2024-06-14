@@ -4,10 +4,15 @@ import Slave from './Slave';
 
 export default class Memory {
     DataMemory: { [key: string]: string };
-    slave: Slave;
+    IOMemory: { [key: string]: string };
+    
+    slaveDataMemory: Slave;
+    slaveIOMemory: Slave;
 
     constructor() {
         this.DataMemory = {};
-        this.slave = new Slave('DataMemory', true);
+        this.IOMemory = {};
+        this.slaveDataMemory = new Slave('DataMemory', true);
+        this.slaveIOMemory = new Slave('DataMemory', true);
     }
 }

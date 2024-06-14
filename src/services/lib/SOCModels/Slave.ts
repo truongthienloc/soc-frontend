@@ -38,8 +38,8 @@ export default class Slave {
         if (message === 'AccessAckData') {
             this.AccessAckData += 1;
             //(`Cycle ${cycle}: Slave ${this.name} is sending data: ${BinToHex(data)}`);
-            this.ir = ('001' + '00' + '10' + this.source + '111' + '000' + data + '0' + '0').padEnd(36, '0');
-            return ('001' + '00' + '10' + this.source + '111' + '000' + data + '0' + '0');
+            this.ir = ('001' + '00' + '10' + this.source + '111' + '0' + data + '0' + '0').padEnd(36, '0');
+            return ('001' + '00' + '10' + this.source + '111' + '0' + data + '0' + '0');
         }
 
         return '';
@@ -58,7 +58,7 @@ export default class Slave {
         if (ChannelA.opcode === '000') { // AccessAckData
             //(`Cycle ${cycle}: The data is written: ${BinToHex(ChannelA.data)}`);
         }
-
+        console.log('channelaaa',ChannelA.address)
         return [ChannelA.data, BinToHex(ChannelA.address)];
     }
 }

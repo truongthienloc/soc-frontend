@@ -4,7 +4,7 @@ import { dec, handleRegister } from './sub_function';
 import { mux } from './sub_function';
 import Master from './Master';
 import {assemblerFromIns}   from './assembler';
-import { Logger } from './soc';
+import { Logger } from './soc.d';
 
 export default class RiscVProcessor {
     name: string;

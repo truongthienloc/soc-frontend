@@ -152,6 +152,4 @@ export default class Keyboard {
         this.keyboardIO.getEvent().off(Module.EVENT.INACTIVATE, this.closeKeyboardBehavior)
         this.event.clearAll()
     }
-
-
 }

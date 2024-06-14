@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier --config .prettierrc --write src/**/*.{js,ts,jsx,tsx,css,scss,json}"
+    "format": "prettier --config .prettierrc --write src/**/*.{js,ts,jsx,tsx,css,scss,json}",
+    "test-model": "tsx src/services/lib/SOCModels/index.ts"
   },
   "dependencies": {
     "@emotion/react": "11.11.4",
@@ -35,6 +36,7 @@
     "prettier-plugin-tailwindcss": "0.6.1",
     "sass": "1.77.4",
     "tailwindcss": "^3.4.1",
+    "tsx": "4.15.4",
     "typescript": "^5"
   }
 }

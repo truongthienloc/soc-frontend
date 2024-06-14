@@ -28,7 +28,14 @@ export default class Master {
         this.life -= 1
     }
 
-    send(message: string, address: string, port: string, cycle: number, data: string): string {
+    send(
+        message: string,
+        address: string,
+        port: string,
+        cycle: number,
+        data: string,
+        println: (...args: string[]) => void,
+    ): string {
         if (!this.active) {
             return ''
         }
@@ -37,15 +44,15 @@ export default class Master {
 
         if (message === 'GET') {
             this.count_get += 1
-            //(`Cycle ${cycle}: Master ${this.name} is sending message ${message} to Slave ${SlaveName} at address: ${BinToHex(address)}`);
+            // println(`Cycle ${cycle}: Master ${this.name} is sending message ${message} to Slave ${SlaveName} at address: ${BinToHex(address)}`);
             this.ir = `10000001${this.source}${address.padStart(32, '0')}110000000000000000`
             return `10000001${this.source}${address.padStart(32, '0')}11000000000000000000000000000000000000000000000000`
         }
 
         if (message === 'PUT') {
             this.count_put += 1
-            //(`Cycle ${cycle}: Master ${this.name} is sending message ${message} ${BinToHex(data)} to Slave ${SlaveName} at address: ${BinToHex(address)}`);
-            //(`Cycle ${cycle}: Master ${this.name} is putting data on Port_in[${port}]`);
+            // println(`Cycle ${cycle}: Master ${this.name} is sending message ${message} ${BinToHex(data)} to Slave ${SlaveName} at address: ${BinToHex(address)}`);
+            // println(`Cycle ${cycle}: Master ${this.name} is putting data on Port_in[${port}]`);
             this.ir = `00000010${this.source}${address.padStart(32, '0')}110${data}`
             return `00000010${this.source}${address.padStart(32, '0')}110${data}`
         }
@@ -58,20 +65,21 @@ export default class Master {
         cycle: number,
         port: string,
         channelD: { opcode: string; payload: string },
+        println: (...args: string[]) => void,
     ): string | undefined {
         if (!this.active) {
             return ' '
         }
 
-        //(`Cycle ${cycle}: Master ${this.name} is receiving data from ${port}`);
-        //(`Cycle ${cycle}: Master ${this.name} has received data from Slave ${SlaveName}`);
+        // println(`Cycle ${cycle}: Master ${this.name} is receiving data from ${port}`);
+        // println(`Cycle ${cycle}: Master ${this.name} has received data from Slave ${SlaveName}`);
 
         if (channelD.opcode === '000') {
             return
         }
 
         if (channelD.opcode === '001') {
-            //(`Cycle ${cycle}: The data is gotten: ${BinToHex(channelD.payload)}`);
+            // println(`Cycle ${cycle}: The data is gotten: ${BinToHex(channelD.payload)}`);
             return channelD.payload
         }
     }

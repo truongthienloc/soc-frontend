@@ -14,7 +14,6 @@ export default class RiscVProcessor {
     Data_memory: { [key: string]: string }
     Instruction_memory: { [key: string]: string }
     pc = 0
-    logger?: Logger
 
     ALUOp: any
     zero: any
@@ -41,18 +40,7 @@ export default class RiscVProcessor {
         return handleRegister(this.register)
     }
 
-    public setLogger(logger: Logger) {
-        this.logger = logger
-    }
-
-    public println(...args: string[]) {
-        if (!this.logger) {
-            return
-        }
-        this.logger.println(...args)
-    }
-
-    public setImen(code: string) {
+    public setImem(code: string) {
         let pc0 = 0
         let binary_code: string[] = []
         binary_code = assemblerFromIns(code)
@@ -110,12 +98,51 @@ export default class RiscVProcessor {
         this.pc = 0
     }
 
+    public reset(): void {
+        this.register = {
+            '00000': '00000000000000000000000000000000',
+            '00001': '00000000000000000000000000000000',
+            '00010': '00000000000000000000000000000000',
+            '00011': '00000000000000000000000000000000',
+            '00100': '00000000000000000000000000000000',
+            '00101': '00000000000000000000000000000000',
+            '00110': '00000000000000000000000000000000',
+            '00111': '00000000000000000000000000000000',
+            '01000': '00000000000000000000000000000000',
+            '01001': '00000000000000000000000000000000',
+            '01010': '00000000000000000000000000000000',
+            '01011': '00000000000000000000000000000000',
+            '01100': '00000000000000000000000000000000',
+            '01101': '00000000000000000000000000000000',
+            '01110': '00000000000000000000000000000000',
+            '01111': '00000000000000000000000000000000',
+            '10000': '00000000000000000000000000000000',
+            '10001': '00000000000000000000000000000000',
+            '10010': '00000000000000000000000000000000',
+            '10011': '00000000000000000000000000000000',
+            '10100': '00000000000000000000000000000000',
+            '10101': '00000000000000000000000000000000',
+            '10110': '00000000000000000000000000000000',
+            '10111': '00000000000000000000000000000000',
+            '11000': '00000000000000000000000000000000',
+            '11001': '00000000000000000000000000000000',
+            '11010': '00000000000000000000000000000000',
+            '11011': '00000000000000000000000000000000',
+            '11100': '00000000000000000000000000000000',
+            '11101': '00000000000000000000000000000000',
+            '11110': '00000000000000000000000000000000',
+            '11111': '00000000000000000000000000000000',
+        }
+        this.Data_memory = {}
+        this.Instruction_memory = {}
+        this.pc = 0
+    }
+
     RunAll() {
         this.pc = 0
 
         while (this.pc < Object.values(this.Instruction_memory).length * 4) {
             const element = this.Instruction_memory[this.pc.toString(2)]
-            this.println('CPU is running')
             this.run(element, this.pc)
         }
     }
@@ -593,40 +620,40 @@ export default class RiscVProcessor {
 
         this.control(instruction.slice(25, 32), instruction.slice(17, 20))
         let size = 'none'
-        if (instruction.slice(25, 32)==='0000011')
-        switch (instruction.slice(17, 20)) {
-            case '000': 
-                size= 'lb'
-                break;
-            case '001': 
-                size= 'lh'
-                break;
-            case '010': 
-                size= 'lw'
-            break;
-            case '100': 
-                size= 'lbu'
-                break;
-            case '101': 
-                size= 'lhu'
-            break;
-            default:
-                break;
-        }
+        if (instruction.slice(25, 32) === '0000011')
+            switch (instruction.slice(17, 20)) {
+                case '000':
+                    size = 'lb'
+                    break
+                case '001':
+                    size = 'lh'
+                    break
+                case '010':
+                    size = 'lw'
+                    break
+                case '100':
+                    size = 'lbu'
+                    break
+                case '101':
+                    size = 'lhu'
+                    break
+                default:
+                    break
+            }
 
-        if (instruction.slice(25, 32)==='0100011')
+        if (instruction.slice(25, 32) === '0100011')
             switch (instruction.slice(17, 20)) {
                 case '000': //Load
-                    size= 'sb'
-                    break;
+                    size = 'sb'
+                    break
                 case '001': //Store
-                    size= 'sh'
-                    break;
+                    size = 'sh'
+                    break
                 case '010': //Load
-                    size= 'sw'
-                break;
+                    size = 'sw'
+                    break
                 default:
-                    break;
+                    break
             }
         const readRegister1 = instruction.slice(12, 17)
         const readRegister2 = instruction.slice(7, 12)

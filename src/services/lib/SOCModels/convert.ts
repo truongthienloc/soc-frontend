@@ -280,3 +280,16 @@ export function rs2(instruction: string): string {
     }
     return '-3'
 }
+
+export function stringToAsciiAndBinary(input: string): { binary: string[] } {
+    // const asciiNumbers: number[] = [];
+    const binaryNumbers: string[] = []
+
+    for (let i = 0; i < input.length; i++) {
+        const ascii = input.charCodeAt(i)
+        // asciiNumbers.push(ascii);
+        binaryNumbers.push(ascii.toString(2).padStart(8, '0')) // Convert to binary and pad with zeros
+    }
+
+    return { binary: binaryNumbers }
+}

@@ -127,8 +127,8 @@ export default class InterConnect {
     ChannelD: string
 
     constructor(numPin: number, numPout: number) {
-        this.numPin= numPin
-        this.numPout= numPout
+        this.numPin = numPin
+        this.numPout = numPout
         this.Pin = []
         this.Pout = []
         for (let index = 0; index < numPin; index++) {
@@ -169,13 +169,13 @@ export default class InterConnect {
     TransmitChannelA(): void {
         for (const ChA of this.ChannelA_queue) {
             console.log('cha adrr', dec(ChA.address))
-            if (dec('0'+ChA.address) < 399 && 0 <= dec('0'+ChA.address)) {
+            if (dec('0' + ChA.address) < 399 && 0 <= dec('0' + ChA.address)) {
                 this.Pout[1].data.push(ChA)
             }
-            if (dec('0'+ChA.address) < 499 && 400 <= dec('0'+ChA.address)) {
+            if (dec('0' + ChA.address) < 499 && 400 <= dec('0' + ChA.address)) {
                 this.Pout[2].data.push(ChA)
             }
-            if (dec('0'+ChA.address) < 599 && 500 <= dec('0'+ChA.address)) {
+            if (dec('0' + ChA.address) < 599 && 500 <= dec('0' + ChA.address)) {
                 this.Pout[3].data.push(ChA)
             }
         }

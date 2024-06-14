@@ -28,7 +28,7 @@ export default class Logs {
             this.container.appendChild(this.currentLine)
         }
 
-        this.currentLine.textContent += args.join()
+        this.currentLine.textContent += args.join('')
 
         this.currentLine = document.createElement('pre')
         this.container.appendChild(this.currentLine)
@@ -36,5 +36,6 @@ export default class Logs {
 
     public clear(): void {
         this.container.replaceChildren()
+        this.currentLine = undefined
     }
 }

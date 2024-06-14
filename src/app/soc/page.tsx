@@ -11,12 +11,14 @@ import RiscVProcessor from '~/services/lib/SOCModels/RiscV_processor'
 import { Registers, TwinRegister } from '~/types/register'
 import { CodeEditor } from '~/components/CodeEditor'
 import { convertRegisters2TwinRegisters } from '~/helpers/converts/register.convert'
+import Soc from '~/services/lib/SOCModels/SoC'
 
 type Props = {}
 
 export default function SocPage({}: Props) {
     const isStart = useRef(true)
-    const socModelRef = useRef<RiscVProcessor>()
+    const socModelRef = useRef<Soc>()
+    const logRef = useRef<Logs>()
     const [showCodeEditor, setShowCodeEditor] = useState(false)
     const [disableCodeEditor, setDisableCodeEditor] = useState(false)
     const [registersData, setRegistersData] = useState<TwinRegister[]>([])
@@ -45,15 +47,18 @@ export default function SocPage({}: Props) {
                 cpu.getEvent().on(Agent.Event.CLICK, handleCPUClick)
                 // cpu.setIsRunning(true)
 
-                const cpuModel = new RiscVProcessor('cpu', '00', true)
-                socModelRef.current = cpuModel
-                cpuModel.setLogger(logs)
-                // cpuModel.setImen('.text\nlui      x25 , 9\nlui      x23 , 9')
-                cpuModel.RunAll()
-                setRegistersData(convertRegisters2TwinRegisters(cpuModel.getRegisters()))
+                const socModel = new Soc('abc')
+                socModelRef.current = socModel
+                logRef.current = logs
+                socModel.setLogger(logs)
+                socModel.setKeyboard(keyboard)
+                socModel.setMonitor(monitor)
+                // socModel.setImen('.text\nlui      x25 , 9\nlui      x23 , 9')
+                // socModel.Run()
+                // setRegistersData(convertRegisters2TwinRegisters(socModel.getRegisters()))
                 // keyboard.getEvent().on(Keyboard.EVENT.LINE_DOWN, (text: string) => {
                 //     console.log('text: ', text);
-                    
+
                 // })
             }
 
@@ -69,14 +74,16 @@ export default function SocPage({}: Props) {
     }, [])
 
     const handleRunAllClick = () => {
-        console.log('running')
+        // console.log('running')
         if (!socModelRef.current) {
             return
         }
 
-        socModelRef.current.setImen(code)
-        socModelRef.current.RunAll()
-        setRegistersData(convertRegisters2TwinRegisters(socModelRef.current.getRegisters()))
+        // socModelRef.current.setImen(code)
+        // setTimeout(() => socModelRef.current?.Run(code), 1000)
+        logRef.current?.clear()
+        socModelRef.current.Run(code)
+        // setRegistersData(convertRegisters2TwinRegisters(socModelRef.current.getRegisters()))
     }
 
     const handleImportClick = () => {
@@ -108,7 +115,7 @@ export default function SocPage({}: Props) {
     }
 
     const handleStepClick = () => {
-
+        // logRef.current?.clear()
     }
 
     return (
@@ -141,11 +148,11 @@ export default function SocPage({}: Props) {
                             })}
                         ></div>
 
-                        <div className="flex flex-col pr-1">
+                        <div className="flex max-h-[90dvh] flex-col pr-1">
                             <p className="text-xl font-bold">Logs:</p>
                             <div
                                 id="logs"
-                                className="mt-2 h-full overflow-auto rounded-lg border border-black p-2"
+                                className="mt-2 h-full space-y-1 overflow-y-auto rounded-lg border border-black p-2 [&_pre]:whitespace-pre-wrap"
                             ></div>
                         </div>
                     </div>
@@ -161,7 +168,7 @@ export default function SocPage({}: Props) {
                         >
                             Run All
                         </Button>
-                        <Button className='h-fit' variant='outlined' onClick={handleStepClick}>
+                        <Button className="h-fit" variant="outlined" onClick={handleStepClick}>
                             Step
                         </Button>
                     </div>

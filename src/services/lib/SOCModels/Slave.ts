@@ -1,4 +1,4 @@
-// Import necessary functions from the 'convert' module
+// println Import necessary functions from the 'convert' module
 import { BinToHex } from './convert'
 import { dec } from './convert'
 
@@ -19,14 +19,20 @@ export default class Slave {
         this.source = undefined
     }
 
-    send(cycle: number, port: string, message: string, data: string): string {
+    send(
+        cycle: number,
+        port: string,
+        message: string,
+        data: string,
+        println: (...args: string[]) => void,
+    ): string {
         if (!this.active) {
             return ''
         }
 
         const MasterName = `CPU [${dec('0' + this.source)}]`
-        //(`Cycle ${cycle}: Slave ${this.name} is sending message ${message} to Master`, MasterName);
-        //(`Cycle ${cycle}: Slave ${this.name} is putting data on Port ${port}`);
+        // println(`Cycle ${cycle}: Slave ${this.name} is sending message ${message} to Master`, MasterName);
+        // println(`Cycle ${cycle}: Slave ${this.name} is putting data on Port ${port}`);
 
         if (message === 'AccessAck') {
             this.AccessAck += 1
@@ -41,13 +47,14 @@ export default class Slave {
                 '0' +
                 '0'
             ).padEnd(36, '0')
-            //(`Cycle ${cycle}: Instruction Register of ${this.name}: `, BinToHex(this.ir));
+            // println(`Cycle ${cycle}: Instruction Register of ${this.name}: `, BinToHex(this.ir));
             return '000' + '00' + '01' + this.source + '000' + '0' + '0000000000000000' + '0' + '0'
         }
 
         if (message === 'AccessAckData') {
             this.AccessAckData += 1
-            //(`Cycle ${cycle}: Slave ${this.name} is sending data: ${BinToHex(data)}`);
+
+            // println(`Cycle ${cycle}: Slave ${this.name} is sending data: ${BinToHex(data)}`);
             this.ir = ('001' + '00' + '10' + this.source + '111' + '0' + data + '0' + '0').padEnd(
                 36,
                 '0',
@@ -62,6 +69,7 @@ export default class Slave {
         cycle: number,
         port: string,
         ChannelA: { source: string; opcode: string; data: string; address: string },
+        println: (...args: string[]) => void,
     ): [string, string] {
         if (!this.active) {
             return ['', '']
@@ -69,12 +77,12 @@ export default class Slave {
 
         this.source = ChannelA.source
         const MasterName = 'RISC-V processor'
-        //(`Cycle ${cycle}: Slave ${this.name} is receiving data from ${port}`);
-        //(`Cycle ${cycle}: Slave ${this.name} has received data from Master`, MasterName);
+        // println(`Cycle ${cycle}: Slave ${this.name} is receiving data from ${port}`);
+        // println(`Cycle ${cycle}: Slave ${this.name} has received data from Master`, MasterName);
 
         if (ChannelA.opcode === '000') {
-            // AccessAckData
-            //(`Cycle ${cycle}: The data is written: ${BinToHex(ChannelA.data)}`);
+            // println AccessAckData
+            // println(`Cycle ${cycle}: The data is written: ${BinToHex(ChannelA.data)}`);
         }
         console.log('channelaaa', ChannelA.address)
         return [ChannelA.data, BinToHex(ChannelA.address)]

@@ -1,4 +1,3 @@
-
 import Slave from './Slave'
 
 export default class Memory {

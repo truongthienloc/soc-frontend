@@ -44,15 +44,12 @@ export default class Master {
 
         if (message === 'GET') {
             this.count_get += 1
-            // println(`Cycle ${cycle}: Master ${this.name} is sending message ${message} to Slave ${SlaveName} at address: ${BinToHex(address)}`);
             this.ir = `10000001${this.source}${address.padStart(32, '0')}110000000000000000`
             return `10000001${this.source}${address.padStart(32, '0')}11000000000000000000000000000000000000000000000000`
         }
 
         if (message === 'PUT') {
             this.count_put += 1
-            // println(`Cycle ${cycle}: Master ${this.name} is sending message ${message} ${BinToHex(data)} to Slave ${SlaveName} at address: ${BinToHex(address)}`);
-            // println(`Cycle ${cycle}: Master ${this.name} is putting data on Port_in[${port}]`);
             this.ir = `00000010${this.source}${address.padStart(32, '0')}110${data}`
             return `00000010${this.source}${address.padStart(32, '0')}110${data}`
         }

@@ -535,9 +535,6 @@ export default class RiscVProcessor {
     }
 
     branchControl(jal: number, jalr: number, branch: string): void {
-        // let pcSrc1 = 0;
-        // let pcSrc2 = 0;
-        // let jump = 0;
 
         if (jal === 1) {
             this.jump = 1
@@ -609,14 +606,9 @@ export default class RiscVProcessor {
     }
 
     run(instruction: string, pc: number): [string, string, string, string, string] {
-        //('instruction from run: ', instruction);
-
-        // let this.zero = 0;
         let signBit = 0
         let readData = ''
         console.log('Instruction', instruction)
-
-        //(`RISC-V ${this.name} processor is processing`);
 
         this.control(instruction.slice(25, 32), instruction.slice(17, 20))
         let size = 'none'
@@ -663,7 +655,6 @@ export default class RiscVProcessor {
 
         const imm = this.immGen(instruction)
         this.aluControl(this.ALUOp, instruction.slice(17, 20), instruction.slice(1))
-        //('mux: ', readData2, imm, this.ALUSrc);
 
         const ALUResult = this.ALU(readData1, mux(readData2, imm, this.ALUSrc), this.operation)
         this.branchControl(this.jal, this.jalr, this.branch)
@@ -711,10 +702,6 @@ export default class RiscVProcessor {
         )
         console.log(writeDataR)
         console.log(this.slt)
-        //console.log(ALUResult, readData, this.memToReg, pc.toString(2).padStart(32, '0'), this.jump,'00000000000000000000000000000000', '00000000000000000000000000000001', signBit, this.slt, (dec(imm) << 12).toString(2).padStart(32, '0') + pc.toString(2).padStart(32, '0'), (dec(imm) << 12).toString(2).padStart(32, '0'), this.auiOrLui, this.wb)
-        // if (this.jump === 1) {
-        //     writeDataR = writeDataR.padStart(32, '0');
-        // } else writeDataR = writeDataR.padStart(32, writeDataR[0]);
         writeDataR = writeDataR.padStart(32, '0')
         if (this.regWrite === 1) {
             this.register[writeRegister] = writeDataR

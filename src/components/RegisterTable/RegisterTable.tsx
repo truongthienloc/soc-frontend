@@ -7,12 +7,12 @@ import TableCell from '@mui/material/TableCell'
 import Paper from '@mui/material/Paper'
 import React from 'react'
 import clsx from 'clsx'
-import { Registers } from '~/types/register'
+import { Registers, TwinRegister } from '~/types/register'
 import { cn } from '~/helpers/cn'
 
 type Props = {
     isShown: boolean
-    data: Registers
+    data: TwinRegister[]
 }
 
 export default function RegisterTable({ data, isShown }: Props) {
@@ -21,20 +21,38 @@ export default function RegisterTable({ data, isShown }: Props) {
             <Table stickyHeader>
                 <TableHead>
                     <TableRow>
-                        <TableCell align="center">Register</TableCell>
-                        <TableCell align="center">Hex</TableCell>
-                        {/* <TableCell align='center'>Register</TableCell>
-						<TableCell align='center'>Hex</TableCell> */}
+                        <TableCell align="left">Register</TableCell>
+                        <TableCell align="center">Value</TableCell>
+                        <TableCell align="left">Register</TableCell>
+                        <TableCell align="center">Value</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {data &&
                         data.length > 0 &&
                         data.map((value, index) => (
-                            <TableCell>
-                                <TableCell>{value.name}</TableCell>
-                                <TableCell>{value.value}</TableCell>
-                            </TableCell>
+                            <TableRow key={value.register1.name}>
+                                <TableCell className="h-min" sx={{ paddingY: '0.25rem' }}>
+                                    {value.register1.name}
+                                </TableCell>
+                                <TableCell
+                                    className="h-min"
+                                    align="center"
+                                    sx={{ paddingY: '0.25rem' }}
+                                >
+                                    {value.register1.value}
+                                </TableCell>
+                                <TableCell className="h-min" sx={{ paddingY: '0.25rem' }}>
+                                    {value.register2.name}
+                                </TableCell>
+                                <TableCell
+                                    className="h-min"
+                                    align="center"
+                                    sx={{ paddingY: '0.25rem' }}
+                                >
+                                    {value.register2.value}
+                                </TableCell>
+                            </TableRow>
                         ))}
                 </TableBody>
             </Table>

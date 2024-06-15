@@ -13,7 +13,7 @@ export default class Logs {
 
     protected onReady() {}
 
-    protected print(...args: string[]): void {
+    public print(...args: string[]): void {
         if (!this.currentLine) {
             this.currentLine = document.createElement('pre')
             this.container.appendChild(this.currentLine)
@@ -22,15 +22,20 @@ export default class Logs {
         this.currentLine.textContent += args.join()
     }
 
-    protected println(...args: string[]): void {
+    public println(...args: string[]): void {
         if (!this.currentLine) {
             this.currentLine = document.createElement('pre')
             this.container.appendChild(this.currentLine)
         }
 
-        this.currentLine.textContent += args.join()
+        this.currentLine.textContent += args.join('')
 
         this.currentLine = document.createElement('pre')
         this.container.appendChild(this.currentLine)
+    }
+
+    public clear(): void {
+        this.container.replaceChildren()
+        this.currentLine = undefined
     }
 }

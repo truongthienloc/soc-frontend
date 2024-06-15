@@ -135,14 +135,14 @@ export default class Agent extends TileLinkObject {
     }
 
     protected initTweens(): void {
-        const tween = new Konva.Tween({
+        this.tween = new Konva.Tween({
             node: this.shape,
             duration: 0.8,
             opacity: 0.65,
             easing: Konva.Easings.EaseInOut,
             onFinish: () => {
-                tween.reset()
-                tween.play()
+                this.tween.reset()
+                this.tween.play()
             },
         })
     }

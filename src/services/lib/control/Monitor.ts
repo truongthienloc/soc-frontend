@@ -99,7 +99,32 @@ export default class Monitor {
         }
     }
 
+    public println(...args: string[]): void {
+        const monitor = document.querySelector(this.containerQuery) as HTMLDivElement
+
+        const line = monitor.getElementsByClassName('line')
+        let currentLine = line[line.length - 1]
+        let userSpan = currentLine.getElementsByTagName('span')[0]
+        let writeSpan = currentLine.getElementsByTagName('pre')[0]
+        const pointerSpan = currentLine.getElementsByClassName('pointer')[0]
+
+        writeSpan.textContent = args.join('')
+
+        currentLine = document.createElement('div')
+        currentLine.classList.add('line')
+        userSpan = document.createElement('span')
+        writeSpan = document.createElement('pre')
+        userSpan.textContent = '@User>'
+        currentLine.appendChild(userSpan)
+        currentLine.appendChild(writeSpan)
+        currentLine.appendChild(pointerSpan)
+
+        monitor.appendChild(currentLine)
+    }
+
     public destroy() {
+        console.log('Monitor destroy')
+
         this.closeMonitorBehavior()
         this.monitorIO.getEvent().off(Module.EVENT.ACTIVATE, this.openMonitorBehavior)
         this.monitorIO.getEvent().off(Module.EVENT.INACTIVATE, this.closeMonitorBehavior)

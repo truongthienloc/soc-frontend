@@ -1,0 +1,1 @@
+export { defineMode } from './riscvMode'

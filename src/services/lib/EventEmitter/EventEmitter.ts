@@ -13,6 +13,15 @@ export default class EventEmitter {
         this.events[eventName].push(listener)
     }
 
+    // Register a one-time event listener
+    once(eventName: string, listener: Function): void {
+        const wrapper = (...args: any[]) => {
+            listener(...args)
+            this.off(eventName, wrapper)
+        }
+        this.on(eventName, wrapper)
+    }
+
     // Emit an event
     emit(eventName: string, ...args: any[]): void {
         if (this.events[eventName]) {

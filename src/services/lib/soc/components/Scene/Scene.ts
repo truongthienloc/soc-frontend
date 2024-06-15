@@ -59,11 +59,11 @@ export default class Scene {
         h?: number,
         options?: ModuleOptions,
     ): Module {
-        const module = new Module(this.layer0, x, y, w, h, { ...options, scene: this })
-        module.onReady()
-        const id = module.id
-        this.modules.set(id, module)
-        return module
+        const myModule = new Module(this.layer0, x, y, w, h, { ...options, scene: this })
+        myModule.onReady()
+        const id = myModule.id
+        this.modules.set(id, myModule)
+        return myModule
     }
 
     public createModuleWithC<T extends Module>(
@@ -74,14 +74,14 @@ export default class Scene {
         h?: number,
         options?: any,
     ): T {
-        const module = new Constructor(this.layer0, x, y, w, h, {
+        const myModule = new Constructor(this.layer0, x, y, w, h, {
             ...options,
             scene: this,
         })
-        module.onReady()
-        const id = module.id
-        this.modules.set(id, module)
-        return module
+        myModule.onReady()
+        const id = myModule.id
+        this.modules.set(id, myModule)
+        return myModule
     }
 
     public createAgent(x: number, y: number, w?: number, h?: number): Agent {

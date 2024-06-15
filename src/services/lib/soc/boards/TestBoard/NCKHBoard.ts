@@ -13,7 +13,7 @@ export default class NCKHBoard {
     public cpu: CPU
 
     constructor(containerId: string) {
-        Scene.CELL = 17
+        Scene.CELL = 15
         const scene = new Scene(containerId, 30, 25)
         const { X, Y } = this
 
@@ -98,7 +98,7 @@ export default class NCKHBoard {
         scene.createLink(interBottomAdapter3.shape, memoryModule1.getAdapter().shape)
         scene.createLink(interBottomAdapter4.shape, memoryModule2.getAdapter().shape)
 
-        mmuModule1.setActivated(false)
+        // mmuModule1.setActivated(false)
         // mmuModule2.setActivated(false)
 
         this.monitorModule = ioModule1

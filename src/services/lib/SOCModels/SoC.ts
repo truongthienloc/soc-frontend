@@ -64,33 +64,24 @@ export default class Soc {
     public async Run(code: string) {
         this.cycle = 0
         this.Processor.reset()
-        this.Processor.setImem(
-            // '.text\n addi x25, x0, 1\n lui x23, 9\n sw x25, 401(x0)\n lw x1, 16(x0)',
-            code,
-        )
-        //this.Processor.setImen('.text\n addi x2, x2, 1')
+        this.Processor.setImem(code)
 
         while (this.Processor.pc < Object.values(this.Processor.Instruction_memory).length * 4) {
-            // console.log('this.Processor.pc: ', this.Processor.pc.toString())
-            // this.println('this.Processor.pc: ', this.Processor.pc.toString())
-
-            // if (this.disabled) {
-            //     continue
-            // }
             this.cycle += 1
             const element = this.Processor.Instruction_memory[this.Processor.pc.toString(2)]
 
-            // console.log('Cycle ', this.cycle.toString(), ': CPU is running');
-
-            this.println('Cycle ', this.cycle.toString(), ': CPU is running')
             let [message, data, address, rd, size] = this.Processor.run(
                 element,
-                this.Processor.pc, //- (this.disabled ? 8 : 0),
+                this.Processor.pc, 
             )
-
+            if (dec('0' + address)%4!=0) {
+                this.println("Invaild Address!!!")
+                return
+            }
             if (message == 'PUT') {
                 //STORE
                 if (dec('0' + address) < 399 && 0 <= dec('0' + address)) {
+                    
                     this.println('Cycle ', this.cycle.toString(), ': MMU is running')
                     this.println(
                         'Cycle ',
@@ -153,7 +144,6 @@ export default class Soc {
                         this.MMU.Dmem(address),
                     )
                     address = this.MMU.OutMem(address)
-                    //console.log('aasdhsahd', address)
                     const dm2i = this.Processor.master.send(
                         message,
                         address,
@@ -231,7 +221,6 @@ export default class Soc {
                         this.println.bind(this),
                     )
                     this.println('Cycle ', this.cycle.toString(), ': MEMORY is receiving')
-                    //const di2s= this.Memory.DataMemory[ai2s]
                     const di2s = this.Memory.Memory[ai2s] ?? ''.padStart(32, '0')
                     this.cycle += 1
                     this.println('Cycle ', this.cycle.toString(), ': MEMORY is sending')
@@ -286,11 +275,9 @@ export default class Soc {
                         this.println.bind(this),
                     )
                     this.println('Cycle ', this.cycle.toString(), ': MEMORY is receiving')
-                    //const di2s= this.Memory.DataMemory[ai2s]
                     this.disabled = true
                     this.println('Cycle ', this.cycle.toString(), ': KEYBOARD is waiting')
                     this.keyboard?.getEvent().once('line-down', (text: string) => {
-                        // const di2s = this.Memory.Memory[ai2s]
                         const di2s = text
                         this.cycle += 1
                         this.println('Cycle ', this.cycle.toString(), ': MEMORY is sending')
@@ -305,7 +292,6 @@ export default class Soc {
                         console.log('channelD', doutChD)
                         this.Bus.Port_in_CD(doutChD, 2, this.cycle)
                         this.Bus.TransmitChannelD()
-                        //console.log('wrietData',this.Bus.Port_out(0).payload)
                         const temp = this.Bus.Port_out(0).payload
                         this.println('Cycle ', this.cycle.toString(), ': INTERCONNECT is sending')
                         if (temp === 'undefined' || temp === undefined)

@@ -55,6 +55,7 @@ export default function SocPage({}: Props) {
                 socModelRef.current = socModel
                 logRef.current = logs
                 socModel.setLogger(logs)
+                socModel.setView(soc)
                 socModel.setKeyboard(keyboard)
                 socModel.setMonitor(monitor)
                 // socModel.setImen('.text\nlui      x25 , 9\nlui      x23 , 9')

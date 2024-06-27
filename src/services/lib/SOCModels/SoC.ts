@@ -4,6 +4,7 @@ import MMU from './MMU'
 import { dec, stringToAsciiAndBinary } from './convert'
 import Memory from './Memory'
 import { Keyboard, Logger, Monitor } from './soc.d'
+import { NCKHBoard } from '../soc/boards'
 
 export default class Soc {
     name: string
@@ -19,6 +20,7 @@ export default class Soc {
     logger?: Logger
     keyboard?: Keyboard
     monitor?: Monitor
+    view?: NCKHBoard
 
     public setLogger(logger: Logger) {
         this.logger = logger
@@ -30,6 +32,10 @@ export default class Soc {
 
     public setMonitor(monitor: Monitor) {
         this.monitor = monitor
+    }
+
+    public setView (view: NCKHBoard) {
+        this.view= view
     }
 
     public println(...args: string[]) {
@@ -68,8 +74,10 @@ export default class Soc {
            // ".text\n lui x23, 9\n lui x25, 9\n sw x25 0(x0)\n"
             code
         )
+        this.view?.cpu.setIsRunning(true)
 
         while (this.Processor.pc < Object.values(this.Processor.Instruction_memory).length * 4) {
+            this.println("CPU is processing")
             this.cycle += 1
             const element = this.Processor.Instruction_memory[this.Processor.pc.toString(2)]
 
@@ -314,5 +322,6 @@ export default class Soc {
             console.log('Data memory', this.Memory.Memory)
             console.log('Data memory', this.Processor.register)
         }
+        //this.view?.cpu.setIsRunning(false)
     }
 }

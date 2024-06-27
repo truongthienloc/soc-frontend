@@ -206,36 +206,37 @@ export default class Agent extends TileLinkObject {
 
     public setIsRunning(isRunning: boolean): void {
         if (isRunning) {
-            const toPixel = Scene.toPixel
+            const toPixel   = Scene.toPixel
             const LINE_SIZE = 1.5
-            const DURATION = 0.45
+            const DURATION  = 0.45
+            const COLOR     = 'green'
             // this.tween.play()
             const line1 = new Konva.Line({
                 x: 0,
                 y: 0,
                 points: [0, 0, toPixel(LINE_SIZE), 0],
-                stroke: 'red'
+                stroke: COLOR
             })
 
             const line2 = new Konva.Line({
                 x: toPixel(this.w),
                 y: 0,
                 points: [0, 0, 0, toPixel(LINE_SIZE)],
-                stroke: 'red'
+                stroke: COLOR
             })
 
             const line3 = new Konva.Line({
                 x: toPixel(this.w),
                 y: toPixel(this.h),
                 points: [0, 0, -toPixel(LINE_SIZE), 0],
-                stroke: 'red'
+                stroke: COLOR
             })
 
             const line4 = new Konva.Line({
                 x: 0,
                 y: toPixel(this.h),
                 points: [0, 0, 0, -toPixel(LINE_SIZE)],
-                stroke: 'red'
+                stroke: COLOR
             })
 
             const tweenLine1 = new Konva.Tween({

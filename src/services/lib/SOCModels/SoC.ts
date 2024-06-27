@@ -64,7 +64,10 @@ export default class Soc {
     public async Run(code: string) {
         this.cycle = 0
         this.Processor.reset()
-        this.Processor.setImem(code)
+        this.Processor.setImem(
+            ".text\n lui x23, 9\n lui x25, 9\n sw x25 0(x0)\n"
+            //code
+        )
 
         while (this.Processor.pc < Object.values(this.Processor.Instruction_memory).length * 4) {
             this.cycle += 1

@@ -679,6 +679,19 @@ export default class RiscVProcessor {
 
         readData = this.dataGen(readData, this.unsigned)
 
+        // if (instruction.slice(25, 32) === '0100011') {
+        //     // SW
+        //     message = 'PUT'
+        //     data = readData2
+        //     address = readData
+        // }
+        // if (instruction.slice(25, 32) === '0000011') {
+        //     // LW
+        //     message = 'GET'
+        //     data = ''
+        //     address = readData
+        // }
+        
         let writeDataR = mux(
             mux(
                 mux(

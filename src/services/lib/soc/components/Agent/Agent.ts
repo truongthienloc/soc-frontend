@@ -207,8 +207,8 @@ export default class Agent extends TileLinkObject {
     public setIsRunning(isRunning: boolean): void {
         if (isRunning) {
             const toPixel   = Scene.toPixel
-            const LINE_SIZE = 2
-            const DURATION  = 0.6
+            const LINE_SIZE = 1
+            const DURATION  = 0.3
             const COLOR     = Scene.ACTIVATE_COLOR
             // this.tween.play()
             const line1 = new Konva.Line({

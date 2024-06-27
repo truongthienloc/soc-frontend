@@ -104,6 +104,10 @@ export default class NCKHBoard {
         this.monitorModule = ioModule1
         this.keyboardModule = ioModule2
         this.cpu = cpu1
+        // cpu1.setIsRunning(true)
+        // setTimeout(() => cpu1.setIsRunning(false), 5000)
+        // memory.setIsRunning(true)
+
     }
 
     public destroy() {}

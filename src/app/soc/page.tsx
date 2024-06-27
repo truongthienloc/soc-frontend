@@ -12,6 +12,7 @@ import { Registers, TwinRegister } from '~/types/register'
 import { CodeEditor } from '~/components/CodeEditor'
 import { convertRegisters2TwinRegisters } from '~/helpers/converts/register.convert'
 import Soc from '~/services/lib/SOCModels/SoC'
+import { GuideModal } from '~/components/GuideModal'
 
 type Props = {}
 
@@ -23,6 +24,9 @@ export default function SocPage({}: Props) {
     const [disableCodeEditor, setDisableCodeEditor] = useState(false)
     const [registersData, setRegistersData] = useState<TwinRegister[]>([])
     const [code, setCode] = useState('')
+    const [isOpenGuideModal, setIsOpenGuideModal] = useState(false);
+
+    const handleGuideModalClose = () => setIsOpenGuideModal(false)
 
     useEffect(() => {
         if (isStart.current) {
@@ -114,8 +118,16 @@ export default function SocPage({}: Props) {
         input.click()
     }
 
+    const handleGuideClick = () => {
+        setIsOpenGuideModal(true)
+    }
+
     const handleStepClick = () => {
         // logRef.current?.clear()
+    }
+
+    const handleAssembleClick = () => {
+
     }
 
     return (
@@ -124,9 +136,12 @@ export default function SocPage({}: Props) {
                 <div className="grid grid-rows-[9fr_1fr]">
                     <div className="grid grid-cols-2 gap-2">
                         <div className={cn({ hidden: !showCodeEditor })}>
-                            <div className="flex flex-row justify-between py-1">
+                            <div className="flex flex-row py-1 gap-2">
                                 <Button onClick={() => setShowCodeEditor(false)}>Back</Button>
-                                <Button variant="outlined" onClick={handleImportClick}>
+                                <Button className='ml-auto' variant="outlined" color='error' onClick={handleGuideClick}>
+                                    Guide
+                                </Button>
+                                <Button variant="outlined" color='secondary' onClick={handleImportClick}>
                                     Import
                                 </Button>
                             </div>
@@ -160,6 +175,9 @@ export default function SocPage({}: Props) {
                         {/* <Button className="h-fit" variant="outlined" onClick={() => {}}>
                             Run
                         </Button> */}
+                        <Button className="h-fit" variant="outlined" onClick={handleAssembleClick}>
+                            Assemble
+                        </Button>
                         <Button
                             className="h-fit"
                             variant="outlined"
@@ -229,6 +247,7 @@ export default function SocPage({}: Props) {
                     </div>
                 </div>
             </div>
+            <GuideModal isOpen={isOpenGuideModal} onClose={handleGuideModalClose} />
         </div>
     )
 }

@@ -26,7 +26,11 @@ export default class Agent extends TileLinkObject {
     protected builder?: AgentsBuilder
     protected type: AgentType = 'CPU'
 
-    protected tween!: Konva.Tween
+    // animation
+    protected animLines: Konva.Line[] = []
+    protected animTweens: Konva.Tween[] = []
+
+    // protected tween!: Konva.Tween
     protected event = new EventEmitter()
 
     public static Event = {
@@ -79,7 +83,7 @@ export default class Agent extends TileLinkObject {
         this.initMouseEvent()
         this.initDragEvent()
         this.initText()
-        this.initTweens()
+        this.initTween()
         this.handleClick()
         this.setOption(this.options)
     }
@@ -134,17 +138,8 @@ export default class Agent extends TileLinkObject {
         this.shape.add(text)
     }
 
-    protected initTweens(): void {
-        this.tween = new Konva.Tween({
-            node: this.shape,
-            duration: 0.8,
-            opacity: 0.65,
-            easing: Konva.Easings.EaseInOut,
-            onFinish: () => {
-                this.tween.reset()
-                this.tween.play()
-            },
-        })
+    protected initTween(): void {
+        
     }
 
     private setOption(options?: AgentOptions): void {
@@ -211,10 +206,109 @@ export default class Agent extends TileLinkObject {
 
     public setIsRunning(isRunning: boolean): void {
         if (isRunning) {
-            this.tween.play()
+            const toPixel = Scene.toPixel
+            const LINE_SIZE = 1.5
+            const DURATION = 0.45
+            // this.tween.play()
+            const line1 = new Konva.Line({
+                x: 0,
+                y: 0,
+                points: [0, 0, toPixel(LINE_SIZE), 0],
+                stroke: 'red'
+            })
+
+            const line2 = new Konva.Line({
+                x: toPixel(this.w),
+                y: 0,
+                points: [0, 0, 0, toPixel(LINE_SIZE)],
+                stroke: 'red'
+            })
+
+            const line3 = new Konva.Line({
+                x: toPixel(this.w),
+                y: toPixel(this.h),
+                points: [0, 0, -toPixel(LINE_SIZE), 0],
+                stroke: 'red'
+            })
+
+            const line4 = new Konva.Line({
+                x: 0,
+                y: toPixel(this.h),
+                points: [0, 0, 0, -toPixel(LINE_SIZE)],
+                stroke: 'red'
+            })
+
+            const tweenLine1 = new Konva.Tween({
+                node: line1,
+                x: toPixel(this.w - LINE_SIZE),
+                y: 0,
+                duration: DURATION,
+                easing: Konva.Easings.EaseInOut,
+                onFinish: () => {
+                    tweenLine1.reset()
+                    tweenLine1.play()
+                },
+            })
+
+            const tweenLine2 = new Konva.Tween({
+                node: line2,
+                x: toPixel(this.w),
+                y: toPixel(this.h - LINE_SIZE),
+                duration: DURATION,
+                easing: Konva.Easings.EaseInOut,
+                onFinish: () => {
+                    tweenLine2.reset()
+                    tweenLine2.play()
+                },
+            })
+
+            const tweenLine3 = new Konva.Tween({
+                node: line3,
+                x: toPixel(LINE_SIZE),
+                y: toPixel(this.h),
+                duration: DURATION,
+                easing: Konva.Easings.EaseInOut,
+                onFinish: () => {
+                    tweenLine3.reset()
+                    tweenLine3.play()
+                },
+            })
+
+            const tweenLine4 = new Konva.Tween({
+                node: line4,
+                x: 0,
+                y: toPixel(LINE_SIZE),
+                duration: DURATION,
+                easing: Konva.Easings.EaseInOut,
+                onFinish: () => {
+                    tweenLine4.reset()
+                    tweenLine4.play()
+                },
+            })
+            tweenLine1.play()
+            tweenLine2.play()
+            tweenLine3.play()
+            tweenLine4.play()
+
+            this.shape.add(line1)
+            this.shape.add(line2)
+            this.shape.add(line3)
+            this.shape.add(line4)
+
+            this.animLines.push(line1)
+            this.animLines.push(line2)
+            this.animLines.push(line3)
+            this.animLines.push(line4)
+
+            this.animTweens.push(tweenLine1)
+            this.animTweens.push(tweenLine2)
+            this.animTweens.push(tweenLine3)
+            this.animTweens.push(tweenLine4)
         } else {
-            this.tween.pause()
-            this.tween.reset()
+            this.animTweens.forEach(tween => tween.destroy())
+            this.animLines.forEach(line => line.destroy())
+            this.animTweens = []
+            this.animLines = []
         }
     }
 }

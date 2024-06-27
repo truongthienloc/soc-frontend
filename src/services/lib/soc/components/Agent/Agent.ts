@@ -244,7 +244,7 @@ export default class Agent extends TileLinkObject {
                 x: toPixel(this.w - LINE_SIZE),
                 y: 0,
                 duration: DURATION,
-                easing: Konva.Easings.EaseInOut,
+                //easing: Konva.Easings.EaseInOut,
                 onFinish: () => {
                     tweenLine1.reset()
                     tweenLine1.play()
@@ -256,7 +256,7 @@ export default class Agent extends TileLinkObject {
                 x: toPixel(this.w),
                 y: toPixel(this.h - LINE_SIZE),
                 duration: DURATION,
-                easing: Konva.Easings.EaseInOut,
+                //easing: Konva.Easings.EaseInOut,
                 onFinish: () => {
                     tweenLine2.reset()
                     tweenLine2.play()
@@ -268,7 +268,7 @@ export default class Agent extends TileLinkObject {
                 x: toPixel(LINE_SIZE),
                 y: toPixel(this.h),
                 duration: DURATION,
-                easing: Konva.Easings.EaseInOut,
+                //easing: Konva.Easings.EaseInOut,
                 onFinish: () => {
                     tweenLine3.reset()
                     tweenLine3.play()
@@ -280,7 +280,7 @@ export default class Agent extends TileLinkObject {
                 x: 0,
                 y: toPixel(LINE_SIZE),
                 duration: DURATION,
-                easing: Konva.Easings.EaseInOut,
+                //easing: Konva.Easings.EaseInOut,
                 onFinish: () => {
                     tweenLine4.reset()
                     tweenLine4.play()

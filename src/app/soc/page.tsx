@@ -29,6 +29,9 @@ export default function SocPage({}: Props) {
     const handleGuideModalClose = () => setIsOpenGuideModal(false)
 
     useEffect(() => {
+        const socCode = localStorage.getItem('soc_code') ?? ''
+        setCode(socCode)
+
         if (isStart.current) {
             isStart.current = false
             // setTimeout(() => setShowCodeEditor(false), 1000)
@@ -88,6 +91,8 @@ export default function SocPage({}: Props) {
         // setTimeout(() => socModelRef.current?.Run(code), 1000)
         logRef.current?.clear()
         socModelRef.current.Run(code)
+        localStorage.setItem('soc_code', code)
+        setShowCodeEditor(false)
         // setRegistersData(convertRegisters2TwinRegisters(socModelRef.current.getRegisters()))
     }
 

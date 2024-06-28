@@ -535,7 +535,6 @@ export default class RiscVProcessor {
     }
 
     branchControl(jal: number, jalr: number, branch: string): void {
-
         if (jal === 1) {
             this.jump = 1
             this.pcSrc1 = 1
@@ -691,7 +690,7 @@ export default class RiscVProcessor {
         //     data = ''
         //     address = readData
         // }
-        
+
         let writeDataR = mux(
             mux(
                 mux(

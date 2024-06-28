@@ -11,6 +11,11 @@ export default class NCKHBoard {
     public monitorModule: IOModule
     public keyboardModule: IOModule
     public cpu: CPU
+    public mmu: MMU
+    public memory: Memory
+    public dma: DMA
+    public monitor: Monitor
+    public keyboard: Keyboard
 
     constructor(containerId: string) {
         Scene.CELL = 15
@@ -104,10 +109,14 @@ export default class NCKHBoard {
         this.monitorModule = ioModule1
         this.keyboardModule = ioModule2
         this.cpu = cpu1
+        this.mmu = mmu1
+        this.memory = memory
+        this.dma = dma
+        this.keyboard = keyboard
+        this.monitor = monitor
         // cpu1.setIsRunning(true)
         // setTimeout(() => cpu1.setIsRunning(false), 5000)
         // memory.setIsRunning(true)
-
     }
 
     public destroy() {}

@@ -17,7 +17,7 @@ export default function GuideModal({ isOpen, onClose }: Props) {
                         <CloseIcon />
                     </Button>
                 </div>
-                <div className="space-y-4 px-4 py-4 max-h-[85dvh] overflow-auto">
+                <div className="max-h-[85dvh] space-y-4 overflow-auto px-4 py-4">
                     <h1 className="text-center text-4xl">Hướng dẫn</h1>
                     <div className="">
                         <p>Các lệnh hỗ trợ:</p>

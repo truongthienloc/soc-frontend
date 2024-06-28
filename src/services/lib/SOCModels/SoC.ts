@@ -34,8 +34,8 @@ export default class Soc {
         this.monitor = monitor
     }
 
-    public setView (view: NCKHBoard) {
-        this.view= view
+    public setView(view: NCKHBoard) {
+        this.view = view
     }
 
     public println(...args: string[]) {
@@ -71,28 +71,24 @@ export default class Soc {
         this.cycle = 0
         this.Processor.reset()
         this.Processor.setImem(
-           // ".text\n lui x23, 9\n lui x25, 9\n sw x25 0(x0)\n"
-            code
+            // ".text\n lui x23, 9\n lui x25, 9\n sw x25 0(x0)\n"
+            code,
         )
         this.view?.cpu.setIsRunning(true)
 
         while (this.Processor.pc < Object.values(this.Processor.Instruction_memory).length * 4) {
-            this.println("CPU is processing")
+            this.println('CPU is processing')
             this.cycle += 1
             const element = this.Processor.Instruction_memory[this.Processor.pc.toString(2)]
 
-            let [message, data, address, rd, size] = this.Processor.run(
-                element,
-                this.Processor.pc, 
-            )
-            if (dec('0' + address)%4!=0) {
-                this.println("Invaild Address!!!")
+            let [message, data, address, rd, size] = this.Processor.run(element, this.Processor.pc)
+            if (dec('0' + address) % 4 != 0) {
+                this.println('Invaild Address!!!')
                 return
             }
             if (message == 'PUT') {
                 //STORE
                 if (dec('0' + address) < 399 && 0 <= dec('0' + address)) {
-                    
                     this.println('Cycle ', this.cycle.toString(), ': MMU is running')
                     this.println(
                         'Cycle ',

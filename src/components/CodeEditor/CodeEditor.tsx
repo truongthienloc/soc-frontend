@@ -65,7 +65,7 @@ function CodeEditor({ value = '', onChange, disable = false, hidden }: CodeEdito
         code.on('change', (ins) => {
             onChange?.(ins.getValue())
         })
-    }, [])
+    }, [value])
 
     useEffect(() => {
         import('codemirror/addon/mode/simple')

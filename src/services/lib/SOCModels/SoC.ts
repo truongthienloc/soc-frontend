@@ -37,8 +37,8 @@ export default class Soc {
         this.monitor = monitor
     }
 
-    public setView (view: NCKHBoard) {
-        this.view= view
+    public setView(view: NCKHBoard) {
+        this.view = view
     }
 
     public println(...args: string[]) {

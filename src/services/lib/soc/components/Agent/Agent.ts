@@ -138,9 +138,7 @@ export default class Agent extends TileLinkObject {
         this.shape.add(text)
     }
 
-    protected initTween(): void {
-        
-    }
+    protected initTween(): void {}
 
     private setOption(options?: AgentOptions): void {
         if (!options) {
@@ -206,37 +204,37 @@ export default class Agent extends TileLinkObject {
 
     public setIsRunning(isRunning: boolean): void {
         if (isRunning) {
-            const toPixel   = Scene.toPixel
+            const toPixel = Scene.toPixel
             const LINE_SIZE = 1.2
-            const DURATION  = 0.3
-            const COLOR     = Scene.ACTIVATE_COLOR
+            const DURATION = 0.3
+            const COLOR = Scene.ACTIVATE_COLOR
             // this.tween.play()
             const line1 = new Konva.Line({
                 x: 0,
                 y: 0,
                 points: [0, 0, toPixel(LINE_SIZE), 0],
-                stroke: COLOR
+                stroke: COLOR,
             })
 
             const line2 = new Konva.Line({
                 x: toPixel(this.w),
                 y: 0,
                 points: [0, 0, 0, toPixel(LINE_SIZE)],
-                stroke: COLOR
+                stroke: COLOR,
             })
 
             const line3 = new Konva.Line({
                 x: toPixel(this.w),
                 y: toPixel(this.h),
                 points: [0, 0, -toPixel(LINE_SIZE), 0],
-                stroke: COLOR
+                stroke: COLOR,
             })
 
             const line4 = new Konva.Line({
                 x: 0,
                 y: toPixel(this.h),
                 points: [0, 0, 0, -toPixel(LINE_SIZE)],
-                stroke: COLOR
+                stroke: COLOR,
             })
 
             const tweenLine1 = new Konva.Tween({
@@ -306,8 +304,8 @@ export default class Agent extends TileLinkObject {
             this.animTweens.push(tweenLine3)
             this.animTweens.push(tweenLine4)
         } else {
-            this.animTweens.forEach(tween => tween.destroy())
-            this.animLines.forEach(line => line.destroy())
+            this.animTweens.forEach((tween) => tween.destroy())
+            this.animLines.forEach((line) => line.destroy())
             this.animTweens = []
             this.animLines = []
         }

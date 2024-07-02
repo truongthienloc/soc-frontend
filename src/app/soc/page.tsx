@@ -24,11 +24,14 @@ export default function SocPage({}: Props) {
     const [disableCodeEditor, setDisableCodeEditor] = useState(false)
     const [registersData, setRegistersData] = useState<TwinRegister[]>([])
     const [code, setCode] = useState('')
-    const [isOpenGuideModal, setIsOpenGuideModal] = useState(false);
+    const [isOpenGuideModal, setIsOpenGuideModal] = useState(false)
 
     const handleGuideModalClose = () => setIsOpenGuideModal(false)
 
     useEffect(() => {
+        const socCode = localStorage.getItem('soc_code') ?? ''
+        setCode(socCode)
+
         if (isStart.current) {
             isStart.current = false
             // setTimeout(() => setShowCodeEditor(false), 1000)
@@ -88,6 +91,8 @@ export default function SocPage({}: Props) {
         // setTimeout(() => socModelRef.current?.Run(code), 1000)
         logRef.current?.clear()
         socModelRef.current.Run(code)
+        localStorage.setItem('soc_code', code)
+        setShowCodeEditor(false)
         // setRegistersData(convertRegisters2TwinRegisters(socModelRef.current.getRegisters()))
     }
 
@@ -98,7 +103,7 @@ export default function SocPage({}: Props) {
 
         input.addEventListener('change', async (e) => {
             const files = input.files
-            console.log('files:', files)
+            // console.log('files:', files)
 
             if (files?.length && files.length > 0) {
                 const file = files.item(0)
@@ -127,9 +132,7 @@ export default function SocPage({}: Props) {
         // logRef.current?.clear()
     }
 
-    const handleAssembleClick = () => {
-
-    }
+    const handleAssembleClick = () => {}
 
     return (
         <div className="container h-dvh">
@@ -137,12 +140,21 @@ export default function SocPage({}: Props) {
                 <div className="grid grid-rows-[9fr_1fr]">
                     <div className="grid grid-cols-2 gap-2">
                         <div className={cn({ hidden: !showCodeEditor })}>
-                            <div className="flex flex-row py-1 gap-2">
+                            <div className="flex flex-row gap-2 py-1">
                                 <Button onClick={() => setShowCodeEditor(false)}>Back</Button>
-                                <Button className='ml-auto' variant="outlined" color='error' onClick={handleGuideClick}>
+                                <Button
+                                    className="ml-auto"
+                                    variant="outlined"
+                                    color="error"
+                                    onClick={handleGuideClick}
+                                >
                                     Guide
                                 </Button>
-                                <Button variant="outlined" color='secondary' onClick={handleImportClick}>
+                                <Button
+                                    variant="outlined"
+                                    color="secondary"
+                                    onClick={handleImportClick}
+                                >
                                     Import
                                 </Button>
                             </div>

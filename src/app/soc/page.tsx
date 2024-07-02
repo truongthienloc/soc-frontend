@@ -13,6 +13,7 @@ import { CodeEditor } from '~/components/CodeEditor'
 import { convertRegisters2TwinRegisters } from '~/helpers/converts/register.convert'
 import Soc from '~/services/lib/SOCModels/SoC'
 import { GuideModal } from '~/components/GuideModal'
+import { toast } from 'react-toastify'
 
 type Props = {}
 
@@ -25,6 +26,7 @@ export default function SocPage({}: Props) {
     const [registersData, setRegistersData] = useState<TwinRegister[]>([])
     const [code, setCode] = useState('')
     const [isOpenGuideModal, setIsOpenGuideModal] = useState(false)
+    const [allowRun, setAllowRun] = useState(false)
 
     const handleGuideModalClose = () => setIsOpenGuideModal(false)
 
@@ -132,7 +134,17 @@ export default function SocPage({}: Props) {
         // logRef.current?.clear()
     }
 
-    const handleAssembleClick = () => {}
+    const handleAssembleClick = () => {
+        // console.log('Assemble: ', socModelRef.current?.assemble(code));
+
+        if (!socModelRef.current?.assemble(code)) {
+            toast.error('Syntax error')
+        }
+        else {
+            toast.success('Ready to run')
+            setAllowRun(true)
+        }
+    }
 
     return (
         <div className="container h-dvh">
@@ -194,12 +206,17 @@ export default function SocPage({}: Props) {
                         <Button
                             className="h-fit"
                             variant="outlined"
-                            // disabled
+                            disabled={!allowRun}
                             onClick={handleRunAllClick}
                         >
                             Run All
                         </Button>
-                        <Button className="h-fit" variant="outlined" onClick={handleStepClick}>
+                        <Button
+                            className="h-fit"
+                            variant="outlined"
+                            onClick={handleStepClick}
+                            disabled={!allowRun}
+                        >
                             Step
                         </Button>
                     </div>

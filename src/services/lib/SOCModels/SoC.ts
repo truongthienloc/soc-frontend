@@ -72,7 +72,7 @@ export default class Soc {
 
     public assemble (code: string) {
         this.Processor.Assembler.assemblerFromIns(code)
-        return  this.Processor.Assembler.syntax_error
+        return !this.Processor.Assembler.syntax_error
     }
 
     public async Run(code: string) {

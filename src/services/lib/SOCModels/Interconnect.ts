@@ -168,7 +168,7 @@ export default class InterConnect {
 
     TransmitChannelA(): void {
         for (const ChA of this.ChannelA_queue) {
-            //console.log('cha adrr', dec(ChA.address))
+            console.log('cha adrr', dec(ChA.address))
             if (dec('0' + ChA.address) < 399 && 0 <= dec('0' + ChA.address)) {
                 this.Pout[1].data.push(ChA)
             }

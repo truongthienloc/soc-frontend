@@ -262,7 +262,7 @@ export default class RiscVProcessor {
 
     immGen(instruction: string): string {
         // let imm = '';
-        //("instruction: ", instruction);
+        console.log("instruction: ", instruction);
 
         if (instruction.slice(-7) === '0110011') {
             // R-type
@@ -283,7 +283,7 @@ export default class RiscVProcessor {
                 instruction[0] +
                 instruction[24] +
                 instruction.slice(1, 7) +
-                instruction.slice(20, 24)
+                instruction.slice(20, 25)
         }
         if (instruction.slice(-7) === '1101111') {
             // J-TYPE
@@ -291,7 +291,7 @@ export default class RiscVProcessor {
                 instruction[0] +
                 instruction.slice(12, 20) +
                 instruction[11] +
-                instruction.slice(1, 11)
+                instruction.slice(1, 13)
         }
         if (['0110111', '0010111'].includes(instruction.slice(-7))) {
             // U-TYPE
@@ -301,7 +301,7 @@ export default class RiscVProcessor {
             return this.imm.padStart(32, '0')
         } else {
             return this.imm.padStart(32, this.imm[0])
-        }
+        }   
     }
 
     control(opcode: string, funct3: string): void {
@@ -611,7 +611,6 @@ export default class RiscVProcessor {
     run(instruction: string, pc: number): [string, string, string, string, string] {
         let signBit = 0
         let readData = ''
-        //console.log('Instruction', instruction)
 
         this.control(instruction.slice(25, 32), instruction.slice(17, 20))
         let size = 'none'
@@ -657,6 +656,7 @@ export default class RiscVProcessor {
         const readData2 = this.register[readRegister2]
 
         const imm = this.immGen(instruction)
+        console.log('edas',(dec(imm)) )
         this.aluControl(this.ALUOp, instruction.slice(17, 20), instruction.slice(1))
 
         const ALUResult = this.ALU(readData1, mux(readData2, imm, this.ALUSrc), this.operation)
@@ -725,6 +725,7 @@ export default class RiscVProcessor {
 
         this.register['00000'] = '00000000000000000000000000000000'
         this.pc = mux(mux(pc + 4, (dec(imm) << 1) + pc, this.pcSrc1), ALUResult, this.pcSrc2)
+        console.log('next_pc',this.pc)
         return [message, data, address, writeRegister, size]
     }
 }

@@ -84,6 +84,7 @@ export default class Soc {
         
         this.Processor.setImem(code)
         while (this.Processor.pc < Object.values(this.Processor.Instruction_memory).length * 4) {
+            console.log('ádewq',Object.values(this.Processor.Instruction_memory).length * 4, this.Processor.pc)
             this.println('Cycle ', this.cycle.toString(), ': CPU is processing')
             console.log('Cycle ', this.cycle.toString(), ': CPU is processing')
             this.cycle += 1
@@ -114,7 +115,7 @@ export default class Soc {
                         ': Virtual address: ',
                         BinToHex (address),
                         ' Physical address: ',
-                        this.MMU.Dmem(address),
+                        BinToHex(this.MMU.Dmem(address)),
                     )
 
                     console.log(
@@ -123,7 +124,7 @@ export default class Soc {
                         ': Virtual address: ',
                         BinToHex(address),
                         ' Physical address: ',
-                        this.MMU.Dmem(address),
+                        BinToHex(this.MMU.Dmem(address)),
                     )
 
                     address = this.MMU.Dmem(address)
@@ -196,7 +197,7 @@ export default class Soc {
                         ': Virtual address: ',
                         BinToHex(address),
                         ' Physical address: ',
-                        this.MMU.Dmem(address),
+                        BinToHex(this.MMU.Dmem(address)),
                     )
                     console.log(
                         'Cycle ',
@@ -204,7 +205,7 @@ export default class Soc {
                         ': Virtual address: ',
                         BinToHex(address),
                         ' Physical address: ',
-                        this.MMU.Dmem(address),
+                        BinToHex(this.MMU.Dmem(address)),
                     )
 
                     address = this.MMU.OutMem(address)
@@ -285,7 +286,7 @@ export default class Soc {
                         ': Virtual address: ',
                         BinToHex (address),
                         ' Physical address: ',
-                        this.MMU.Dmem(address),
+                        BinToHex(this.MMU.Dmem(address)),
                     )
                     console.log('Cycle ', this.cycle.toString(), ': MMU is running')
                     console.log(
@@ -294,7 +295,7 @@ export default class Soc {
                         ': Virtual address: ',
                         BinToHex (address),
                         ' Physical address: ',
-                        this.MMU.Dmem(address),
+                        BinToHex (this.MMU.Dmem(address)),
                     )
 
                     const dm2i = this.Processor.master.send(
@@ -368,7 +369,7 @@ export default class Soc {
                         ': Virtual address: ',
                         BinToHex (address),
                         ' Physical address: ',
-                        this.MMU.Dmem(address),
+                        BinToHex(this.MMU.Dmem(address)),
                     )
                     console.log('Cycle ', this.cycle.toString(), ': MMU is running')
                     console.log(
@@ -377,7 +378,7 @@ export default class Soc {
                         ': Virtual address: ',
                         BinToHex (address),
                         ' Physical address: ',
-                        this.MMU.Dmem(address),
+                        BinToHex(this.MMU.Dmem(address)),
                     )
 
                     const dm2i = this.Processor.master.send(
@@ -416,6 +417,7 @@ export default class Soc {
                     this.println('Cycle ', this.cycle.toString(), ': KEYBOARD is waiting')
                     console.log('Cycle ', this.cycle.toString(), ': KEYBOARD is waiting')
 
+                    this.view?.keyboard.setIsRunning(true)
                     this.keyboard?.getEvent().once('line-down', (text: string) => {
                         const di2s = text
                         this.cycle += 1

@@ -381,6 +381,10 @@ export default class Assembler {
 
     private RType(input: string): string {
         const mlist = this.handlerString(input).split(' ')
+        if (mlist.length !=4) {
+            this.syntax_error = true;
+            return ''
+        }
 
         const opcode = this.OPCODE[mlist[0]]
         const funct3 = this.FUNCT3[mlist[0]]
@@ -398,6 +402,10 @@ export default class Assembler {
 
     private IType(input: string): string {
         const mlist = this.handlerString(input).split(' ')
+        if (mlist.length !=4) {
+            this.syntax_error = true;
+            return ''
+        }
         if (mlist.length <4) {
             this.syntax_error = true;
             return ''
@@ -477,6 +485,10 @@ export default class Assembler {
 
     private UJType(input: string): string {
         const mlist = this.handlerString(input).split(' ')
+        if (mlist.length !=3) {
+            this.syntax_error = true;
+            return ''
+        }
         const opcode = this.OPCODE[mlist[0]]
         const rd = this.register[mlist[1]]
         let temp: number
@@ -506,6 +518,10 @@ export default class Assembler {
         const mlist = this.handlerString(input).split(' ')
         const opcode = this.OPCODE[mlist[0]]
         const rs2 = this.register[mlist[1]]
+        if (mlist.length !=4) {
+            this.syntax_error = true;
+            return ''
+        }
         if (mlist[2].startsWith('0x')) {
             mlist[2] = this.convertHexToDec(mlist[2]).toString()
         }
@@ -524,6 +540,10 @@ export default class Assembler {
 
     private SBType(input: string): string {
         const mlist = this.handlerString(input).split(' ')
+        if (mlist.length !=4) {
+            this.syntax_error = true;
+            return ''
+        }
         const opcode = this.OPCODE[mlist[0]]
         const rs1 = this.register[mlist[1]]
         const rs2 = this.register[mlist[2]]
@@ -553,6 +573,10 @@ export default class Assembler {
 
     private UType(input: string): string {
         const mlist = this.handlerString(input).split(' ')
+        if (mlist.length !=3) {
+            this.syntax_error = true;
+            return ''
+        }
         const opcode = this.OPCODE[mlist[0]]
         const rd = this.register[mlist[1]]
         let temp: number

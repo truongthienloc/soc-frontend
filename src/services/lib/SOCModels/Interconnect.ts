@@ -168,7 +168,7 @@ export default class InterConnect {
 
     TransmitChannelA(): void {
         for (const ChA of this.ChannelA_queue) {
-            console.log('cha adrr', dec(ChA.address))
+            //console.log('cha adrr', dec(ChA.address))
             if (dec('0' + ChA.address) < 399 && 0 <= dec('0' + ChA.address)) {
                 this.Pout[1].data.push(ChA)
             }
@@ -190,7 +190,7 @@ export default class InterConnect {
 
         for (const ChD of this.ChannelD_queue) {
             if (ChD.source === '00') {
-                console.log('payload cd', ChD.payload)
+                //console.log('payload cd', ChD.payload)
                 this.Pout[0].data.push(ChD)
                 if (count0 === 0) ChD.Ready('Port_out[0]')
                 this.Pout[0].active = true

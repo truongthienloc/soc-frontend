@@ -377,6 +377,7 @@ function convert_hextodec(input: string): number {
 
 function RType(input: string): string {
     const mlist = input.split(' ')
+
     const opcode = OPCODE[mlist[0]]
     const funct3 = FUNCT3[mlist[0]]
     const funct7 = FUNCT7[mlist[0]]
@@ -504,7 +505,7 @@ function SBType(input: string): string {
 
 function UType(input: string): string {
     const mlist = input.split(' ')
-    console.log('mlist: ', mlist)
+    console.log (input)
 
     const opcode = OPCODE[mlist[0]]
     // console.log('opcode: ' + opcode);
@@ -527,90 +528,9 @@ function UType(input: string): string {
     }
     return imm + rd + opcode
 }
-
-// export function assembler(filePath: string): string[] {
-
-//     const string = fs.readFileSync(filePath, 'utf-8');
-
-//     let result = '';
-//     const ins = string.split('\n');
-//     let PC = 0;
-//     let pos = 0;
-//     while (pos < ins.length - 1) {
-//       ins[pos] = handler_string(ins[pos]);
-//       if (ins[pos] === '.text') {
-//         break;
-//       }
-//       pos++;
-//     }
-
-//     for (let i = pos + 1; i < ins.length; i++) {
-//       ins[i] = handler_string(ins[i]);
-//       if (ins[i] === ' ' || ins[i] === '' || ins[i] === '\n') {
-//         continue;
-//       }
-
-//       const li = ins[i].split(' ');
-//       if (li.length === 1) {
-//         while (ins[i].includes(':')) {
-//           address[ins[i].split(':')[0]] = PC;
-//           ins[i] = ins[i].split(':')[1];
-//         }
-//       } else {
-//         if (ins[i].includes(':')) {
-//           const label = ins[i].split(':')[0].trim();
-//           const instruction = ins[i].split(':')[1].trim();
-//           address[label] = PC;
-//           address[instruction] = PC;
-//           ins[i] = instruction;
-//           PC += 4;
-//         } else {
-//           ins[i] += " " + i.toString();
-//           address[ins[i]] = PC;
-//           PC += 4;
-//         }
-//       }
-//     }
-
-//     for (let i = pos + 1; i < ins.length; i++) {
-//       ins[i] = handler_string(ins[i]);
-//       const t = ins[i].split(' ');
-
-//       if (t.length < 2) {
-//         continue;
-//       }
-//       let string = '';
-
-//       if (FMT[t[0]] === "R") {
-//         string = RType(ins[i]);
-//       }
-//       if (FMT[t[0]] === "I") {
-//         string = IType(ins[i]);
-//       }
-//       if (FMT[t[0]] === "S") {
-//         string = SType(ins[i]);
-//       }
-//       if (FMT[t[0]] === "SB") {
-//         string = SBType(ins[i]);
-//       }
-//       if (FMT[t[0]] === "U") {
-
-//         string = UType(ins[i]);
-//       }
-//       if (FMT[t[0]] === "UJ") {
-//         string = UJType(ins[i]);
-//       }
-
-//       result += (string + '\n');
-//     }
-
-//     const lines = result.split('\n');
-//     lines.pop(); // Remove the last element
-//     return lines;
-//   }
-
 export function assemblerFromIns(code: string): string[] {
     const string = code
+    let check_syntax_error = true
 
     let result = ''
     const ins = string.split('\n')
@@ -655,7 +575,6 @@ export function assemblerFromIns(code: string): string[] {
     for (let i = pos + 1; i < ins.length; i++) {
         ins[i] = handler_string(ins[i])
         const t = ins[i].split(' ')
-
         if (t.length < 2) {
             continue
         }
@@ -688,8 +607,4 @@ export function assemblerFromIns(code: string): string[] {
     return lines
 }
 
-// Example usage
-// (async () => {
-//   const result = await assembler('path/to/assembly/file.s');
-//   //(result);
-// })();
+

@@ -5,6 +5,7 @@ import { mux } from './sub_function'
 import Master from './Master'
 import { assemblerFromIns } from './assembler'
 import { Logger } from './soc.d'
+import Assembler from './check_syntax'
 
 export default class RiscVProcessor {
     name: string
@@ -13,6 +14,7 @@ export default class RiscVProcessor {
     register: { [key: string]: string }
     Data_memory: { [key: string]: string }
     Instruction_memory: { [key: string]: string }
+    Assembler: Assembler
     pc = 0
 
     ALUOp: any
@@ -51,7 +53,7 @@ export default class RiscVProcessor {
         }
         pc0 = 0
         // this.println('Set instruction')
-        console.log('instruction_memory: ', instruction_memory0)
+        //console.log('instruction_memory: ', instruction_memory0)
 
         this.Instruction_memory = instruction_memory0
     }
@@ -96,6 +98,7 @@ export default class RiscVProcessor {
         this.Data_memory = {}
         this.Instruction_memory = {}
         this.pc = 0
+        this.Assembler = new Assembler ()
     }
 
     public reset(): void {
@@ -136,6 +139,7 @@ export default class RiscVProcessor {
         this.Data_memory = {}
         this.Instruction_memory = {}
         this.pc = 0
+
     }
 
     RunAll() {
@@ -148,8 +152,8 @@ export default class RiscVProcessor {
     }
 
     dataMemory(address: string, memRead: string, memWrite: string, writeData: string): string {
-        console.log('memRead', memRead)
-        console.log('check address', !(address in this.Data_memory))
+        //console.log('memRead', memRead)
+        //console.log('check address', !(address in this.Data_memory))
         if (memRead[0] === '1') {
             if (!(address in this.Data_memory)) {
                 return '00000000000000000000000000000000'
@@ -188,7 +192,7 @@ export default class RiscVProcessor {
         let signBit = 0
         let ALUResult: string | number = '0'
 
-        console.log('operand: ', operand1, operand2, operation)
+        //console.log('operand: ', operand1, operand2, operation)
 
         operand1 = dec(operand1)
         operand2 = dec(operand2)
@@ -608,7 +612,7 @@ export default class RiscVProcessor {
     run(instruction: string, pc: number): [string, string, string, string, string] {
         let signBit = 0
         let readData = ''
-        console.log('Instruction', instruction)
+        //console.log('Instruction', instruction)
 
         this.control(instruction.slice(25, 32), instruction.slice(17, 20))
         let size = 'none'
@@ -713,8 +717,8 @@ export default class RiscVProcessor {
             ),
             this.wb,
         )
-        console.log(writeDataR)
-        console.log(this.slt)
+        //console.log(writeDataR)
+        //console.log(this.slt)
         writeDataR = writeDataR.padStart(32, '0')
         if (this.regWrite === 1) {
             this.register[writeRegister] = writeDataR

@@ -462,9 +462,10 @@ export default class Assembler {
         }
         const rs1 = this.register[mlist[2]]
 
+        
         const values = [imm ,rs1 ,funct3 ,rd ,opcode];
-            if (values.some(value => value === undefined)) 
-                this.syntax_error = true;
+        if (values.some(value => value === undefined)) 
+            this.syntax_error = true;
 
         return imm + rs1 + funct3 + rd + opcode
     }
@@ -640,7 +641,7 @@ export default class Assembler {
             }
 
             const type = [ 'R', 'I', 'S', 'SB', 'U', 'UJ']
-            if (!(this.FMT[t[0]] in type)) this.syntax_error= true
+            if (!(type.includes (this.FMT[t[0]]))) this.syntax_error= true
             result += string + '\n'
         }
 

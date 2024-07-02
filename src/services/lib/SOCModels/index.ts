@@ -2,7 +2,7 @@ import Soc from './SoC'
 import Assembler from './check_syntax'
 const SOC = new Soc('super SoC')
 const as = new Assembler ()
-as.assemblerFromIns (".text\n add , x1, x3\n")
+as.assemblerFromIns (".text\n addi x2, x2, 2\n")
 console.log(as.binary_code)
 console.log(as.syntax_error)
 // console.log("123")

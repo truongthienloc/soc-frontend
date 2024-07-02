@@ -71,6 +71,7 @@ export default class Soc {
     }
 
     public assemble (code: string) {
+        this.Processor.Assembler.syntax_error = false
         this.Processor.Assembler.assemblerFromIns(code)
         return !this.Processor.Assembler.syntax_error
     }

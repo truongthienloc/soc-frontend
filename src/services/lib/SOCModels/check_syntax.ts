@@ -462,9 +462,10 @@ export default class Assembler {
         }
         const rs1 = this.register[mlist[2]]
 
+        
         const values = [imm ,rs1 ,funct3 ,rd ,opcode];
-            if (values.some(value => value === undefined)) 
-                this.syntax_error = true;
+        if (values.some(value => value === undefined)) 
+            this.syntax_error = true;
 
         return imm + rs1 + funct3 + rd + opcode
     }

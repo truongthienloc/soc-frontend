@@ -398,6 +398,10 @@ export default class Assembler {
 
     private IType(input: string): string {
         const mlist = this.handlerString(input).split(' ')
+        if (mlist.length <4) {
+            this.syntax_error = true;
+            return ''
+        }
         if (['lb', 'lw', 'lh', 'ld', 'lbu', 'lhu', 'lwu'].includes(mlist[0])) {
             const opcode = this.OPCODE[mlist[0]]
             const funct3 = this.FUNCT3[mlist[0]]
@@ -453,6 +457,7 @@ export default class Assembler {
         const opcode = this.OPCODE[mlist[0]]
         const funct3 = this.FUNCT3[mlist[0]]
         const rd = this.register[mlist[1]]
+        
         if (mlist[3].startsWith('0x')) {
             mlist[3] = this.convertHexToDec(mlist[3]).toString()
         }
@@ -597,6 +602,7 @@ export default class Assembler {
                     this.address[ins[i].split(':')[0]] = PC
                     ins[i] = ins[i].split(':')[1]
                 }
+                this.syntax_error = true
             } else {
                 if (ins[i].includes(':')) {
                     const label = ins[i].split(':')[0].trim()
@@ -614,7 +620,8 @@ export default class Assembler {
         }
 
         for (let i = pos + 1; i < ins.length; i++) {
-            ins[i] = this.handlerString(ins[i])
+            ins[i] = this.handlerString(ins[i]).slice(0, ins[i].length-2)
+            // if (ins[i].length > 1 ) ins[i] = this.handlerString(ins[i]).slice(0, ins[i].length-2)
             const t = ins[i].split(' ')
             if (t.length < 2) {
                 continue

@@ -80,7 +80,7 @@ export default class Soc {
         this.cycle = 0
         this.Processor.reset()
         
-        this.view?.cpu.setIsRunning(true)
+        
         
         this.Processor.setImem(code)
         while (this.Processor.pc < Object.values(this.Processor.Instruction_memory).length * 4) {
@@ -88,8 +88,8 @@ export default class Soc {
             console.log('Cycle ', this.cycle.toString(), ': CPU is processing')
             this.cycle += 1
             const element = this.Processor.Instruction_memory[this.Processor.pc.toString(2)]
-
-            let [message, data, address, rd, size] = this.Processor.run(
+            this.view?.cpu.setIsRunning(true)
+            let [message, data, address, rd] = this.Processor.run(
                 element,
                 this.Processor.pc, 
             )
@@ -100,9 +100,11 @@ export default class Soc {
             }
             if (message == 'PUT') {
                 //STORE
+                this.view?.mmu.setIsRunning(true)
                 if (dec('0' + address) < 399 && 0 <= dec('0' + address)) {
                     
                     this.MMU.setActive()
+                    
                     this.println('Cycle ', this.cycle.toString(), ': MMU is running')
                     console.log('Cycle ', this.cycle.toString(), ': MMU is running')
 
@@ -135,6 +137,7 @@ export default class Soc {
                     )
 
                     this.println('Cycle ', this.cycle.toString(), ': CPU is sending PUT messeage to MEMORY')
+                    
                     this.println('Cycle ', this.cycle.toString(), ': INTERCONNECT is receiving messeage from CPU')
                     console.log('Cycle ', this.cycle.toString(), ': CPU is sending PUT messeage to MEMORY')
                     console.log('Cycle ', this.cycle.toString(), ': INTERCONNECT is receiving messeage from CPU')
@@ -147,7 +150,7 @@ export default class Soc {
                     console.log('Cycle ', this.cycle.toString(),  ': INTERCONNECT is sending message to MEMORY')
 
                     const doutChA = this.Bus.Port_out(1)
-                    
+                    this.view?.memory.setIsRunning(true)
                     this.println('Cycle ', this.cycle.toString(), ': MEMORY is receiving PUT message from INTERCONNECT')
                     console.log('Cycle ', this.cycle.toString(),  ': MEMORY is receiving PUT message from INTERCONNECT')
 
@@ -214,9 +217,9 @@ export default class Soc {
                         this.println.bind(this),
                     )
 
-                    this.println('Cycle ', this.cycle.toString(), ': CPU is sending PUT messeage to MEMORY')
+                    this.println('Cycle ', this.cycle.toString(), ': CPU is sending PUT messeage to MONITOR')
                     this.println('Cycle ', this.cycle.toString(), ': INTERCONNECT is receiving messeage from CPU')
-                    console.log('Cycle ', this.cycle.toString(),  ': CPU is sending PUT messeage to MEMORY')
+                    console.log('Cycle ', this.cycle.toString(),  ': CPU is sending PUT messeage to MONITOR')
                     console.log('Cycle ', this.cycle.toString(),  ': INTERCONNECT is receiving messeage from CPU')                   
                     
                     
@@ -224,13 +227,13 @@ export default class Soc {
                     this.Bus.TransmitChannelA()
                     this.cycle += 1
                     
-                    this.println('Cycle ', this.cycle.toString(), ': INTERCONNECT is sending messeage to MEMORY')
-                    console.log('Cycle ', this.cycle.toString(),  ': INTERCONNECT is sending messeage to MEMORY')
+                    this.println('Cycle ', this.cycle.toString(), ': INTERCONNECT is sending messeage to MONITOR')
+                    console.log('Cycle ', this.cycle.toString(),  ': INTERCONNECT is sending messeage to MONITOR')
                     
                     const doutChA = this.Bus.Port_out(3)
                     
-                    this.println('Cycle ', this.cycle.toString(), ': MEMORY is receiving messeage from INTERCONNECT')
-                    console.log('Cycle ', this.cycle.toString(),  ': MEMORY is receiving messeage from INTERCONNECT')
+                    this.println('Cycle ', this.cycle.toString(), ': MONITOR is receiving messeage from INTERCONNECT')
+                    console.log('Cycle ', this.cycle.toString(),  ': MONITOR is receiving messeage from INTERCONNECT')
                     
                     const [di2s, ai2s] = this.Memory.slaveMemory.receive(
                         this.cycle,
@@ -240,12 +243,13 @@ export default class Soc {
                     )
 
                     this.Memory.Memory[this.MMU.InMem(ai2s)] = di2s
+                    this.view?.monitor.setIsRunning(true)
                     this.monitor?.println(di2s)
 
                     this.cycle += 1
 
-                    this.println('Cycle ', this.cycle.toString(), ': MEMORY is sending ACCESS_ACK messeage to CPU')
-                    console.log('Cycle ', this.cycle.toString(),  ': MEMORY is sending ACCESS_ACK messeage to CPU')
+                    this.println('Cycle ', this.cycle.toString(), ': MONITOR is sending ACCESS_ACK messeage to CPU')
+                    console.log('Cycle ', this.cycle.toString(),  ': MONITOR is sending ACCESS_ACK messeage to CPU')
 
                     const doutChD = this.Memory.slaveMemory.send(
                         this.cycle,
@@ -255,8 +259,8 @@ export default class Soc {
                         this.println.bind(this),
                     )
 
-                    this.println('Cycle ', this.cycle.toString(), ': INTERCONNECT is receiving messeage from MEMORY')
-                    console.log('Cycle ', this.cycle.toString(),  ': INTERCONNECT is receiving messeage from MEMORY')
+                    this.println('Cycle ', this.cycle.toString(), ': INTERCONNECT is receiving messeage from MONITOR')
+                    console.log('Cycle ', this.cycle.toString(),  ': INTERCONNECT is receiving messeage from MONITOR')
                     
                     this.Bus.Port_in_CD(doutChD, 2, this.cycle)
                     this.Bus.TransmitChannelD()
@@ -270,6 +274,7 @@ export default class Soc {
             }
 
             if (message == 'GET') {
+                this.view?.mmu.setIsRunning(true)
                 if (dec('0' + address) < 399 && 0 <= dec('0' + address)) {
                     address = this.MMU.Dmem(address)
                     
@@ -320,7 +325,7 @@ export default class Soc {
                         doutChA,
                         this.println.bind(this),
                     )
-
+                    this.view?.memory.setIsRunning(true)
                     this.println('Cycle ', this.cycle.toString(), ': MEMORY is receiving messeage from INTERCONNECT')
                     console.log('Cycle ', this.cycle.toString(),  ': MEMORY is receiving messeage from INTERCONNECT')
                     

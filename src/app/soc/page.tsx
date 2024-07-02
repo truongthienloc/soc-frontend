@@ -83,6 +83,11 @@ export default function SocPage({}: Props) {
         }
     }, [])
 
+    const handleChangeCode = (code: string) => {
+        setCode(code)
+        setAllowRun(false)
+    }
+
     const handleRunAllClick = () => {
         // console.log('running')
         if (!socModelRef.current) {
@@ -173,7 +178,7 @@ export default function SocPage({}: Props) {
                             <div className="flex flex-col border border-black">
                                 <CodeEditor
                                     value={code}
-                                    onChange={(value) => setCode(value)}
+                                    onChange={handleChangeCode}
                                     disable={disableCodeEditor}
                                     hidden={!showCodeEditor}
                                 />

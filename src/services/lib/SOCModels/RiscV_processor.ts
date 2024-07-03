@@ -42,20 +42,18 @@ export default class RiscVProcessor {
         return handleRegister(this.register)
     }
 
-    public setImem(code: string) {
-        let pc0 = 0
-        let binary_code: string[] = []
-        binary_code = assemblerFromIns(code)
-        let instruction_memory0: { [key: string]: string } = {}
+    public setImem() {
+        let pc_addr = 0
+        let binary_code = this.Assembler.binary_code
+        let instruction_memory: { [key: string]: string } = {}
         for (let i of binary_code) {
-            instruction_memory0[pc0.toString(2)] = i
-            pc0 += 4
+            this.Instruction_memory[pc_addr.toString(2)] = i
+            pc_addr += 4
         }
-        pc0 = 0
-        // this.println('Set instruction')
-        //console.log('instruction_memory: ', instruction_memory0)
-
-        this.Instruction_memory = instruction_memory0
+        pc_addr = 0
+        //console.log ('check binaru code: ', binary_code)
+        //console.log ('check this.Instruction_memory: ', this.Instruction_memory)
+        
     }
     constructor(name: string, source: string, active: boolean) {
         this.name = name
@@ -192,7 +190,7 @@ export default class RiscVProcessor {
         let signBit = 0
         let ALUResult: string | number = '0'
 
-        //console.log('operand: ', operand1, operand2, operation)
+        console.log('operand: ', operand1, operand2, operation)
 
         operand1 = dec(operand1)
         operand2 = dec(operand2)
@@ -262,7 +260,7 @@ export default class RiscVProcessor {
 
     immGen(instruction: string): string {
         // let imm = '';
-        console.log("instruction: ", instruction);
+        //console.log("instruction: ", instruction);
 
         if (instruction.slice(-7) === '0110011') {
             // R-type
@@ -611,7 +609,8 @@ export default class RiscVProcessor {
     run(instruction: string, pc: number): [string, string, string, string, string] {
         let signBit = 0
         let readData = ''
-
+        console.log('Instruction check: ', instruction)
+        //console.log('Instruction memory check: ', this.Instruction_memory)
         this.control(instruction.slice(25, 32), instruction.slice(17, 20))
         let size = 'none'
         if (instruction.slice(25, 32) === '0000011')
@@ -656,7 +655,7 @@ export default class RiscVProcessor {
         const readData2 = this.register[readRegister2]
 
         const imm = this.immGen(instruction)
-        console.log('edas',(dec(imm)) )
+        //console.log('edas',(dec(imm)) )
         this.aluControl(this.ALUOp, instruction.slice(17, 20), instruction.slice(1))
 
         const ALUResult = this.ALU(readData1, mux(readData2, imm, this.ALUSrc), this.operation)

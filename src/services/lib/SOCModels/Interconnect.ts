@@ -184,9 +184,6 @@ export default class InterConnect {
 
     TransmitChannelD(): void {
         let count0 = 0
-        // let count1 = 0;
-        // let count2 = 0;
-        // let count3 = 0;
 
         for (const ChD of this.ChannelD_queue) {
             if (ChD.source === '00') {

@@ -2,7 +2,8 @@ import Soc from './SoC'
 // import Assembler from './check_syntax'
 const SOC = new Soc('super SoC')
 // const as = new Assembler ()
-SOC.Run(".text\naddi x1, x2 8\n")
+SOC.assemble(".text\naddi x1, x2 8\naddi x1, x 8\naddi x1, x2 8\naddi x1, x2 8\n")
+SOC.RunAll()
 // as.assemblerFromIns (".text\n lw x1, 400(x0)\n")
 // console.log(as.binary_code)
 // console.log(as.syntax_error)

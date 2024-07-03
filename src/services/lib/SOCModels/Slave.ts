@@ -79,11 +79,11 @@ export default class Slave {
         const MasterName = 'RISC-V processor'
         // println(`Cycle ${cycle}: Slave ${this.name} is receiving data from ${port}`);
         // println(`Cycle ${cycle}: Slave ${this.name} has received data from Master`, MasterName);
-
         if (ChannelA.opcode === '000') {
             // println AccessAckData
             // println(`Cycle ${cycle}: The data is written: ${BinToHex(ChannelA.data)}`);
         }
+        console.log("BinToHex(ChannelA.address)", ChannelA.address)
         return [ChannelA.data, BinToHex(ChannelA.address)]
     }
 }

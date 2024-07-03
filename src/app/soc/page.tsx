@@ -97,8 +97,7 @@ export default function SocPage({}: Props) {
         // socModelRef.current.setImen(code)
         // setTimeout(() => socModelRef.current?.Run(code), 1000)
         logRef.current?.clear()
-        socModelRef.current.Run(code)
-        localStorage.setItem('soc_code', code)
+        socModelRef.current.RunAll()
         setShowCodeEditor(false)
         // setRegistersData(convertRegisters2TwinRegisters(socModelRef.current.getRegisters()))
     }
@@ -137,6 +136,7 @@ export default function SocPage({}: Props) {
 
     const handleStepClick = () => {
         // logRef.current?.clear()
+        socModelRef.current?.Step()
     }
 
     const handleAssembleClick = () => {
@@ -148,6 +148,7 @@ export default function SocPage({}: Props) {
         else {
             toast.success('Ready to run')
             setAllowRun(true)
+            localStorage.setItem('soc_code', code)
         }
     }
 

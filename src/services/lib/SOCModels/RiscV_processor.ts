@@ -102,6 +102,7 @@ export default class RiscVProcessor {
     }
 
     public reset(): void {
+        this.Assembly_code = []
         this.register = {
             '00000': '00000000000000000000000000000000',
             '00001': '00000000000000000000000000000000',

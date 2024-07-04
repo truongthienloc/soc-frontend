@@ -629,12 +629,11 @@ export default class Assembler {
 
             const li = ins[i].split(' ')
             if (li.length === 1) {
-                if (ins[i].charAt(ins[i].length-1)!==':') this.syntax_error = true
+                if (ins[i].charAt(ins[i].length - 1) !== ':') this.syntax_error = true
                 while (ins[i].includes(':')) {
                     this.address[ins[i].split(':')[0]] = PC
                     ins[i] = ins[i].split(':')[1]
                 }
-                
             } else {
                 if (ins[i].includes(':')) {
                     const label = ins[i].split(':')[0].trim()
@@ -681,10 +680,11 @@ export default class Assembler {
                 string = this.UJType(ins[i])
             }
 
-            const type = [ 'R', 'I', 'S', 'SB', 'U', 'UJ']
-            console.log('check ins[i]',ins[i])
-            console.log('check syntax', this.FMT[t[0]], ins[i].charAt(ins[i].length-1))
-            if (!type.includes(this.FMT[t[0]]) && ins[i].charAt(ins[i].length-1)!==':') this.syntax_error= true
+            const type = ['R', 'I', 'S', 'SB', 'U', 'UJ']
+            console.log('check ins[i]', ins[i])
+            console.log('check syntax', this.FMT[t[0]], ins[i].charAt(ins[i].length - 1))
+            if (!type.includes(this.FMT[t[0]]) && ins[i].charAt(ins[i].length - 1) !== ':')
+                this.syntax_error = true
             result += string + '\n'
         }
 

@@ -14,7 +14,7 @@ export default class RiscVProcessor {
     register: { [key: string]: string }
     Data_memory: { [key: string]: string }
     Instruction_memory: { [key: string]: string }
-    Assembly_code :  any
+    Assembly_code: any
     Assembler: Assembler
     pc = 0
 
@@ -50,12 +50,11 @@ export default class RiscVProcessor {
             this.Instruction_memory[pc_addr.toString(2)] = i
             pc_addr += 4
         }
-        for (let i of this.Assembler.Instructions) 
-            if (i != '.text'&& i!= '') this.Assembly_code.push(i)
+        for (let i of this.Assembler.Instructions)
+            if (i != '.text' && i != '') this.Assembly_code.push(i)
 
-        console.log ('check assembly code: ',   this.Assembly_code)
-        console.log ('check Instruction_memory: ',  this.Instruction_memory)
-        
+        console.log('check assembly code: ', this.Assembly_code)
+        console.log('check Instruction_memory: ', this.Instruction_memory)
     }
     constructor(name: string, source: string, active: boolean) {
         this.name = name
@@ -98,7 +97,7 @@ export default class RiscVProcessor {
         this.Data_memory = {}
         this.Instruction_memory = {}
         this.pc = 0
-        this.Assembler = new Assembler ()
+        this.Assembler = new Assembler()
         this.Assembly_code = []
     }
 
@@ -302,7 +301,7 @@ export default class RiscVProcessor {
             return this.imm.padStart(32, '0')
         } else {
             return this.imm.padStart(32, this.imm[0])
-        }   
+        }
     }
 
     control(opcode: string, funct3: string): void {
@@ -727,7 +726,7 @@ export default class RiscVProcessor {
 
         this.register['00000'] = '00000000000000000000000000000000'
         this.pc = mux(mux(pc + 4, (dec(imm) << 1) + pc, this.pcSrc1), ALUResult, this.pcSrc2)
-        console.log('next_pc',this.pc)
+        console.log('next_pc', this.pc)
         return [message, data, address, writeRegister, size]
     }
 }

@@ -2,7 +2,7 @@ import EventEmitter from '../EventEmitter/EventEmitter'
 
 export type Logger = {
     println: (...args: string[]) => void
-    clear: () => void 
+    clear: () => void
 }
 
 export type Keyboard = {

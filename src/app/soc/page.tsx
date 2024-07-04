@@ -141,28 +141,30 @@ export default function SocPage({}: Props) {
     }
 
     const handleStepClick = () => {
-        // logRef.current?.clear()
         if (!socModelRef.current) {
             return
         }
 
+        // Start Stepping
         if (pc === undefined) {
             setIsStepping(true)
-            console.log('step code: ', socModelRef.current.Processor.Assembly_code);
-            
             setStepCode(socModelRef.current.Processor.Assembly_code)
-            socModelRef.current.Step()
             setPc(socModelRef.current.Processor.pc)
+            setShowCodeEditor(true)
+            socModelRef.current.Step()
             return
         }
 
-        socModelRef.current.Step()
-        setPc(socModelRef.current.Processor.pc)
-        if (socModelRef.current.Processor.pc > stepCode.length * 4) {
+        // End Stepping
+        if (socModelRef.current.Processor.pc >= stepCode.length * 4) {
             setAllowRun(false)
             setPc(undefined)
             setIsStepping(false)
+            return
         }
+
+        setPc(socModelRef.current.Processor.pc)
+        socModelRef.current.Step()
     }
 
     const handleAssembleClick = () => {
@@ -174,8 +176,7 @@ export default function SocPage({}: Props) {
             toast.success('Ready to run')
             setAllowRun(true)
             localStorage.setItem('soc_code', code)
-            console.log('step code: ', socModelRef.current.Processor.Assembly_code);
-            
+            console.log('step code: ', socModelRef.current.Processor.Assembly_code)
         }
     }
 

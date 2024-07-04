@@ -14,13 +14,12 @@ interface Funct7 {
     [key: string]: string
 }
 
-
 export default class Assembler {
     private address: { [key: string]: number } = {}
     public binary_code: string[] = []
     public Instructions: string[] = []
-    public syntax_error : boolean
-    constructor () {
+    public syntax_error: boolean
+    constructor() {
         this.binary_code = []
         this.syntax_error = false
     }
@@ -382,8 +381,8 @@ export default class Assembler {
 
     private RType(input: string): string {
         const mlist = this.handlerString(input).split(' ')
-        if (mlist.length !=4) {
-            this.syntax_error = true;
+        if (mlist.length != 4) {
+            this.syntax_error = true
             return ''
         }
 
@@ -393,22 +392,21 @@ export default class Assembler {
         const rd = this.register[mlist[1]]
         const rs1 = this.register[mlist[2]]
         const rs2 = this.register[mlist[3]]
-        
-        const values = [funct7, rs2, rs1, funct3, rd, opcode];
-        if (values.some(value => value === undefined)) 
-            this.syntax_error = true;
+
+        const values = [funct7, rs2, rs1, funct3, rd, opcode]
+        if (values.some((value) => value === undefined)) this.syntax_error = true
 
         return funct7 + rs2 + rs1 + funct3 + rd + opcode
     }
 
     private IType(input: string): string {
         const mlist = this.handlerString(input).split(' ')
-        if (mlist.length !=4) {
-            this.syntax_error = true;
+        if (mlist.length != 4) {
+            this.syntax_error = true
             return ''
         }
-        if (mlist.length <4) {
-            this.syntax_error = true;
+        if (mlist.length < 4) {
+            this.syntax_error = true
             return ''
         }
         if (['lb', 'lw', 'lh', 'ld', 'lbu', 'lhu', 'lwu'].includes(mlist[0])) {
@@ -424,9 +422,8 @@ export default class Assembler {
             }
             const rs1 = this.register[mlist[3]]
 
-            const values = [ imm ,rs1 ,funct3 ,rd ,opcode];
-            if (values.some(value => value === undefined)) 
-                this.syntax_error = true;
+            const values = [imm, rs1, funct3, rd, opcode]
+            if (values.some((value) => value === undefined)) this.syntax_error = true
 
             return imm + rs1 + funct3 + rd + opcode
         }
@@ -444,9 +441,8 @@ export default class Assembler {
                 imm = (1 << (12 + parseInt(mlist[3]))).toString(2).slice(-5)
             }
             const rs1 = this.register[mlist[2]]
-            const values = [funct7 ,imm , rs1 , funct3 , rd , opcode];
-            if (values.some(value => value === undefined)) 
-                this.syntax_error = true;
+            const values = [funct7, imm, rs1, funct3, rd, opcode]
+            if (values.some((value) => value === undefined)) this.syntax_error = true
             return funct7 + imm + rs1 + funct3 + rd + opcode
         }
 
@@ -456,9 +452,8 @@ export default class Assembler {
             const rd = this.register[mlist[1]]
             const funct7 = this.FUNCT7[mlist[0]]
 
-            const values = [funct7 , funct3 , rd , opcode];
-            if (values.some(value => value === undefined)) 
-                this.syntax_error = true;
+            const values = [funct7, funct3, rd, opcode]
+            if (values.some((value) => value === undefined)) this.syntax_error = true
 
             return funct7 + rd + funct3 + rd + opcode
         }
@@ -466,7 +461,7 @@ export default class Assembler {
         const opcode = this.OPCODE[mlist[0]]
         const funct3 = this.FUNCT3[mlist[0]]
         const rd = this.register[mlist[1]]
-        
+
         if (mlist[3].startsWith('0x')) {
             mlist[3] = this.convertHexToDec(mlist[3]).toString()
         }
@@ -476,18 +471,16 @@ export default class Assembler {
         }
         const rs1 = this.register[mlist[2]]
 
-        
-        const values = [imm ,rs1 ,funct3 ,rd ,opcode];
-        if (values.some(value => value === undefined)) 
-            this.syntax_error = true;
+        const values = [imm, rs1, funct3, rd, opcode]
+        if (values.some((value) => value === undefined)) this.syntax_error = true
 
         return imm + rs1 + funct3 + rd + opcode
     }
 
     private UJType(input: string): string {
         const mlist = this.handlerString(input).split(' ')
-        if (mlist.length !=3) {
-            this.syntax_error = true;
+        if (mlist.length != 3) {
+            this.syntax_error = true
             return ''
         }
         const opcode = this.OPCODE[mlist[0]]
@@ -508,10 +501,9 @@ export default class Assembler {
         }
         imm = imm[0] + imm.slice(10, 20) + imm[9] + imm.slice(1, 9)
 
-        const values = [imm ,rd ,opcode];
-        if (values.some(value => value === undefined)) 
-            this.syntax_error = true;
-        
+        const values = [imm, rd, opcode]
+        if (values.some((value) => value === undefined)) this.syntax_error = true
+
         return imm + rd + opcode
     }
 
@@ -519,8 +511,8 @@ export default class Assembler {
         const mlist = this.handlerString(input).split(' ')
         const opcode = this.OPCODE[mlist[0]]
         const rs2 = this.register[mlist[1]]
-        if (mlist.length !=4) {
-            this.syntax_error = true;
+        if (mlist.length != 4) {
+            this.syntax_error = true
             return ''
         }
         if (mlist[2].startsWith('0x')) {
@@ -532,17 +524,16 @@ export default class Assembler {
         }
         const rs1 = this.register[mlist[3]]
 
-        const values = [imm.slice(0, -5),rs2 ,rs1 ,this.FUNCT3[mlist[0]] , imm.slice(-5), opcode];
-        if (values.some(value => value === undefined)) 
-            this.syntax_error = true;
+        const values = [imm.slice(0, -5), rs2, rs1, this.FUNCT3[mlist[0]], imm.slice(-5), opcode]
+        if (values.some((value) => value === undefined)) this.syntax_error = true
 
         return imm.slice(0, -5) + rs2 + rs1 + this.FUNCT3[mlist[0]] + imm.slice(-5) + opcode
     }
 
     private SBType(input: string): string {
         const mlist = this.handlerString(input).split(' ')
-        if (mlist.length !=4) {
-            this.syntax_error = true;
+        if (mlist.length != 4) {
+            this.syntax_error = true
             return ''
         }
         const opcode = this.OPCODE[mlist[0]]
@@ -563,19 +554,34 @@ export default class Assembler {
             imm = (1 << (13 + temp)).toString(2).slice(-13)
         }
 
-        const values = [imm[0] , imm.slice(2, 8) , rs2 ,rs1,this.FUNCT3[mlist[0]] ,imm.slice(8, 12) ,imm[1] ,opcode];
-        if (values.some(value => value === undefined)) 
-            this.syntax_error = true;
+        const values = [
+            imm[0],
+            imm.slice(2, 8),
+            rs2,
+            rs1,
+            this.FUNCT3[mlist[0]],
+            imm.slice(8, 12),
+            imm[1],
+            opcode,
+        ]
+        if (values.some((value) => value === undefined)) this.syntax_error = true
 
         return (
-            imm[0] + imm.slice(2, 8) + rs2 + rs1 + this.FUNCT3[mlist[0]] + imm.slice(8, 12) + imm[1] + opcode
+            imm[0] +
+            imm.slice(2, 8) +
+            rs2 +
+            rs1 +
+            this.FUNCT3[mlist[0]] +
+            imm.slice(8, 12) +
+            imm[1] +
+            opcode
         )
     }
 
     private UType(input: string): string {
         const mlist = this.handlerString(input).split(' ')
-        if (mlist.length !=3) {
-            this.syntax_error = true;
+        if (mlist.length != 3) {
+            this.syntax_error = true
             return ''
         }
         const opcode = this.OPCODE[mlist[0]]
@@ -595,13 +601,12 @@ export default class Assembler {
             imm = (1 << (20 + temp)).toString(2)
         }
 
-        const values = [imm , rd , opcode];
-        if (values.some(value => value === undefined)) 
-            this.syntax_error = true;
+        const values = [imm, rd, opcode]
+        if (values.some((value) => value === undefined)) this.syntax_error = true
         return imm + rd + opcode
     }
 
-    public assemblerFromIns(code: string){
+    public assemblerFromIns(code: string) {
         const string = code
         let result = ''
         const ins = string.split('\n')
@@ -648,7 +653,7 @@ export default class Assembler {
         this.Instructions = ins
 
         for (let i = pos + 1; i < ins.length; i++) {
-            ins[i] = this.handlerString(ins[i]).slice(0, ins[i].length-2)
+            ins[i] = this.handlerString(ins[i]).slice(0, ins[i].length - 2)
             // if (ins[i].length > 1 ) ins[i] = this.handlerString(ins[i]).slice(0, ins[i].length-2)
             const t = ins[i].split(' ')
             if (t.length < 2) {
@@ -675,13 +680,11 @@ export default class Assembler {
                 string = this.UJType(ins[i])
             }
 
-            const type = [ 'R', 'I', 'S', 'SB', 'U', 'UJ']
-            if (!type.includes(this.FMT[t[0]])) this.syntax_error= true
+            const type = ['R', 'I', 'S', 'SB', 'U', 'UJ']
+            if (!type.includes(this.FMT[t[0]])) this.syntax_error = true
             result += string + '\n'
         }
 
         this.binary_code = result.split('\n')
     }
 }
-
-

@@ -18,6 +18,7 @@ interface Funct7 {
 export default class Assembler {
     private address: { [key: string]: number } = {}
     public binary_code: string[] = []
+    public Instructions: string[] = []
     public syntax_error : boolean
     constructor () {
         this.binary_code = []
@@ -604,6 +605,7 @@ export default class Assembler {
         const string = code
         let result = ''
         const ins = string.split('\n')
+
         let PC = 0
         let pos = 0
         while (pos < ins.length - 1) {
@@ -642,6 +644,8 @@ export default class Assembler {
                 }
             }
         }
+
+        this.Instructions = ins
 
         for (let i = pos + 1; i < ins.length; i++) {
             ins[i] = this.handlerString(ins[i]).slice(0, ins[i].length-2)

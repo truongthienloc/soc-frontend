@@ -14,6 +14,7 @@ export default class RiscVProcessor {
     register: { [key: string]: string }
     Data_memory: { [key: string]: string }
     Instruction_memory: { [key: string]: string }
+    Assembly_code :  any
     Assembler: Assembler
     pc = 0
 
@@ -45,14 +46,19 @@ export default class RiscVProcessor {
     public setImem() {
         let pc_addr = 0
         let binary_code = this.Assembler.binary_code
-        let instruction_memory: { [key: string]: string } = {}
         for (let i of binary_code) {
             this.Instruction_memory[pc_addr.toString(2)] = i
             pc_addr += 4
         }
-        pc_addr = 0
-        //console.log ('check binaru code: ', binary_code)
-        //console.log ('check this.Instruction_memory: ', this.Instruction_memory)
+        let pc_addr1 = 0
+        // for (let i of this.Assembler.Instructions.slice(1, -1)) {
+        //     console.log(pc_addr1);
+        //     this.Assembly_code[pc_addr1] = this.Assembler.Instructions.slice(1, -1);
+        //     pc_addr1 += 4;
+        // }
+        this.Assembly_code= this.Assembler.Instructions.slice(1, -1);
+        console.log ('check assembly code: ',   this.Assembly_code)
+        console.log ('check Instruction_memory: ',  this.Instruction_memory)
         
     }
     constructor(name: string, source: string, active: boolean) {
@@ -97,6 +103,7 @@ export default class RiscVProcessor {
         this.Instruction_memory = {}
         this.pc = 0
         this.Assembler = new Assembler ()
+        this.Assembly_code = []
     }
 
     public reset(): void {

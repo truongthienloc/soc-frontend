@@ -203,7 +203,7 @@ export default class Agent extends TileLinkObject {
     }
 
     public setIsRunning(isRunning: boolean): void {
-        if (isRunning) {
+        if (isRunning && this.animTweens.length === 0) {
             const toPixel = Scene.toPixel
             const LINE_SIZE = 1.2
             const DURATION = 0.3

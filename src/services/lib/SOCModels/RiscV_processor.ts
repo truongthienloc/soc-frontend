@@ -140,7 +140,7 @@ export default class RiscVProcessor {
         this.Data_memory = {}
         this.Instruction_memory = {}
         this.pc = 0
-
+        this.Assembly_code = []
     }
 
     RunAll() {

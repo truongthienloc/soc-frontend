@@ -167,7 +167,7 @@ export default function SocPage({}: Props) {
 
     const handleAssembleClick = () => {
         // console.log('Assemble: ', socModelRef.current?.assemble(code));
-
+        
         if (!socModelRef.current?.assemble(code)) {
             toast.error('Syntax error')
         } else {

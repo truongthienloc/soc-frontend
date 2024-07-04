@@ -69,13 +69,19 @@ export default class Soc {
     }
 
     public assemble (code: string) {
+        this.logger?.clear()
         this.Processor.reset() 
         this.cycle = 0
         this.Processor.Assembler.syntax_error = false
         this.Processor.Assembler.assemblerFromIns(code)
         this.Processor.setImem()
+        this.view?.cpu.setIsRunning(false)
+        this.view?.mmu.setIsRunning(false)
+        this.view?.monitor.setIsRunning(false)
+        this.view?.keyboard.setIsRunning(false)
+        this.view?.memory.setIsRunning(false)
         this.println('Cycle ', this.cycle.toString(), ': System is setting up')
-        console.log('Cycle ', this.cycle.toString(),  ': System is setting up')
+        console.log ('Cycle ', this.cycle.toString(),  ': System is setting up')
         if (this.Processor.Assembler.syntax_error) {
             this.println('SYNTAX ERROR!!!')
             console.log('SYNTAX ERROR!!!')
@@ -87,21 +93,27 @@ export default class Soc {
     }
 
     public RunAll() {
-            let c = 0;
             if (this.Processor.Assembler.syntax_error) return
             while (this.Processor.pc < (Object.values(this.Processor.Instruction_memory).length - 1) * 4) {
                 this.Step();
-                c = c + 1;
-                if (c > 10) {
-                    break;
-                }
             }
+
     }
 
     public async Step() {
+        this.cycle += 1
+        if (this.Processor.pc >= (Object.values(this.Processor.Instruction_memory).length - 1) * 4) {
+            this.println('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+            console.log('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+            // this.view?.cpu.setIsRunning(false)
+            // this.view?.mmu.setIsRunning(false)
+            // this.view?.monitor.setIsRunning(false)
+            // this.view?.keyboard.setIsRunning(false)
+            // this.view?.memory.setIsRunning(false)
+            return
+        }
         this.println('Cycle ', this.cycle.toString(), ': CPU is processing')
         console.log('Cycle ', this.cycle.toString(),  ': CPU is processing')
-        this.cycle += 1
         if (this.Processor.Assembler.syntax_error) return
         const element = this.Processor.Instruction_memory[this.Processor.pc.toString(2)]
         this.view?.cpu.setIsRunning(true)
@@ -120,9 +132,7 @@ export default class Soc {
             //STORE
             this.view?.mmu.setIsRunning(true)
             if (dec('0' + address) < 399 && 0 <= dec('0' + address)) {
-                
                 this.MMU.setActive()
-                
                 this.println('Cycle ', this.cycle.toString(), ': MMU is running')
                 console.log('Cycle ', this.cycle.toString(), ': MMU is running')
 
@@ -155,7 +165,6 @@ export default class Soc {
                 )
 
                 this.println('Cycle ', this.cycle.toString(), ': CPU is sending PUT messeage to MEMORY')
-                
                 this.println('Cycle ', this.cycle.toString(), ': INTERCONNECT is receiving messeage from CPU')
                 console.log('Cycle ', this.cycle.toString(),  ': CPU is sending PUT messeage to MEMORY')
                 console.log('Cycle ', this.cycle.toString(),  ': INTERCONNECT is receiving messeage from CPU')
@@ -214,7 +223,7 @@ export default class Soc {
                     ': Virtual address: ',
                     BinToHex(address),
                     ' Physical address: ',
-                    BinToHex(this.MMU.Dmem(address)),
+                    BinToHex(this.MMU.OutMem(address)),
                 )
                 console.log(
                     'Cycle ',
@@ -222,7 +231,7 @@ export default class Soc {
                     ': Virtual address: ',
                     BinToHex(address),
                     ' Physical address: ',
-                    BinToHex(this.MMU.Dmem(address)),
+                    BinToHex(this.MMU.OutMem(address)),
                 )
 
                 address = this.MMU.OutMem(address)
@@ -262,7 +271,7 @@ export default class Soc {
 
                 this.Memory.Memory[this.MMU.InMem(ai2s)] = di2s
                 this.view?.monitor.setIsRunning(true)
-                this.monitor?.println(di2s)
+                this.monitor?.println(BinToHex(di2s))
 
                 this.cycle += 1
 
@@ -420,6 +429,8 @@ export default class Soc {
                 console.log('Cycle ', this.cycle.toString(), ': INTERCONNECT is sending messeage to MEMORY')
 
                 const doutChA = this.Bus.Port_out(2)
+
+                
                 const [, ai2s] = this.Memory.slaveMemory.receive(
                     this.cycle,
                     'Port_out[2]',

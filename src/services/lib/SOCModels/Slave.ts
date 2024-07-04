@@ -84,6 +84,6 @@ export default class Slave {
             // println(`Cycle ${cycle}: The data is written: ${BinToHex(ChannelA.data)}`);
         }
         console.log("BinToHex(ChannelA.address)", ChannelA.address)
-        return [ChannelA.data, BinToHex(ChannelA.address)]
+        return [ChannelA.data, ChannelA.address]
     }
 }

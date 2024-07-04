@@ -122,6 +122,11 @@ export default class Monitor {
         monitor.appendChild(currentLine)
     }
 
+    public clear() {
+        this.closeMonitorBehavior()
+        this.openMonitorBehavior()
+    }
+
     public destroy() {
         console.log('Monitor destroy')
 

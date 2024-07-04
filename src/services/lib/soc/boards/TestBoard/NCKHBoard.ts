@@ -1,13 +1,17 @@
 import Adapter from '../../components/Adapter/Adapter'
 import { CPU, Cache, DMA, Keyboard, MMU, Memory, Monitor } from '../../components/Agent'
-import { SingleMasterInterconnect } from '../../components/Interconnect'
-import { CPUModule, CacheModule, IOModule, MMUModule, MemoryModule } from '../../components/Module'
+import { Interconnect, SingleMasterInterconnect } from '../../components/Interconnect'
+import { CPUModule, CacheModule, IOModule, MMUModule, MemoryModule, Module } from '../../components/Module'
 import { Scene } from '../../components/Scene'
 
 export default class NCKHBoard {
     private X: number = 0
     private Y: number = 0
 
+    // public cpuModule: Module
+    // public memoryModule: Module
+    // public dmaModule: Module
+    // public 
     public monitorModule: IOModule
     public keyboardModule: IOModule
     public cpu: CPU
@@ -16,6 +20,7 @@ export default class NCKHBoard {
     public dma: DMA
     public monitor: Monitor
     public keyboard: Keyboard
+    public interconnect: Interconnect
 
     constructor(containerId: string) {
         Scene.CELL = 15
@@ -114,6 +119,7 @@ export default class NCKHBoard {
         this.dma = dma
         this.keyboard = keyboard
         this.monitor = monitor
+        this.interconnect = interconnect 
         // cpu1.setIsRunning(true)
         // setTimeout(() => cpu1.setIsRunning(false), 5000)
         // memory.setIsRunning(true)

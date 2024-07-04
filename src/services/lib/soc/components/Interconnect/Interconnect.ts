@@ -13,6 +13,10 @@ export default class Interconnect extends TileLinkObject {
     protected shape!: Konva.Group
     protected adapters: Map<string, Adapter> = new Map()
 
+    // animation
+    protected animLines: Konva.Line[] = []
+    protected animTweens: Konva.Tween[] = []
+
     constructor(
         layer: Konva.Layer,
         x: number,
@@ -120,5 +124,114 @@ export default class Interconnect extends TileLinkObject {
 
     public getAdapter(name: string) {
         return this.adapters.get(name)
+    }
+
+    public setIsRunning(isRunning: boolean): void {
+        if (isRunning && this.animTweens.length === 0) {
+            const toPixel = Scene.toPixel
+            const LINE_SIZE = 1.2
+            const DURATION = 0.3
+            const COLOR = Scene.ACTIVATE_COLOR
+            // this.tween.play()
+            const line1 = new Konva.Line({
+                x: 0,
+                y: 0,
+                points: [0, 0, toPixel(LINE_SIZE), 0],
+                stroke: COLOR,
+            })
+
+            const line2 = new Konva.Line({
+                x: toPixel(this.w),
+                y: 0,
+                points: [0, 0, 0, toPixel(LINE_SIZE)],
+                stroke: COLOR,
+            })
+
+            const line3 = new Konva.Line({
+                x: toPixel(this.w),
+                y: toPixel(this.h),
+                points: [0, 0, -toPixel(LINE_SIZE), 0],
+                stroke: COLOR,
+            })
+
+            const line4 = new Konva.Line({
+                x: 0,
+                y: toPixel(this.h),
+                points: [0, 0, 0, -toPixel(LINE_SIZE)],
+                stroke: COLOR,
+            })
+
+            const tweenLine1 = new Konva.Tween({
+                node: line1,
+                x: toPixel(this.w - LINE_SIZE),
+                y: 0,
+                duration: DURATION,
+                //easing: Konva.Easings.EaseInOut,
+                onFinish: () => {
+                    tweenLine1.reset()
+                    tweenLine1.play()
+                },
+            })
+
+            const tweenLine2 = new Konva.Tween({
+                node: line2,
+                x: toPixel(this.w),
+                y: toPixel(this.h - LINE_SIZE),
+                duration: DURATION,
+                //easing: Konva.Easings.EaseInOut,
+                onFinish: () => {
+                    tweenLine2.reset()
+                    tweenLine2.play()
+                },
+            })
+
+            const tweenLine3 = new Konva.Tween({
+                node: line3,
+                x: toPixel(LINE_SIZE),
+                y: toPixel(this.h),
+                duration: DURATION,
+                //easing: Konva.Easings.EaseInOut,
+                onFinish: () => {
+                    tweenLine3.reset()
+                    tweenLine3.play()
+                },
+            })
+
+            const tweenLine4 = new Konva.Tween({
+                node: line4,
+                x: 0,
+                y: toPixel(LINE_SIZE),
+                duration: DURATION,
+                //easing: Konva.Easings.EaseInOut,
+                onFinish: () => {
+                    tweenLine4.reset()
+                    tweenLine4.play()
+                },
+            })
+            tweenLine1.play()
+            tweenLine2.play()
+            tweenLine3.play()
+            tweenLine4.play()
+
+            this.shape.add(line1)
+            this.shape.add(line2)
+            this.shape.add(line3)
+            this.shape.add(line4)
+
+            this.animLines.push(line1)
+            this.animLines.push(line2)
+            this.animLines.push(line3)
+            this.animLines.push(line4)
+
+            this.animTweens.push(tweenLine1)
+            this.animTweens.push(tweenLine2)
+            this.animTweens.push(tweenLine3)
+            this.animTweens.push(tweenLine4)
+        } else if (!isRunning) {
+            this.animTweens.forEach((tween) => tween.destroy())
+            this.animLines.forEach((line) => line.destroy())
+            this.animTweens = []
+            this.animLines = []
+        }
     }
 }

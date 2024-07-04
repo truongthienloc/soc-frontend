@@ -141,11 +141,12 @@ export default function SocPage({}: Props) {
 
     const handleAssembleClick = () => {
         // console.log('Assemble: ', socModelRef.current?.assemble(code));
-
+        
         if (!socModelRef.current?.assemble(code)) {
             toast.error('Syntax error')
         }
         else {
+            console.log('Assemble abc: ', socModelRef.current?.Processor.Assembly_code);
             toast.success('Ready to run')
             setAllowRun(true)
             localStorage.setItem('soc_code', code)

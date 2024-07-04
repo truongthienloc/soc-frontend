@@ -82,6 +82,8 @@ export default class Soc {
         this.view?.memory.setIsRunning(false)
         this.println('Cycle ', this.cycle.toString(), ': System is setting up')
         console.log ('Cycle ', this.cycle.toString(),  ': System is setting up')
+        console.log('assembly code SOC', this.Processor.Assembly_code)
+        
         if (this.Processor.Assembler.syntax_error) {
             this.println('SYNTAX ERROR!!!')
             console.log('SYNTAX ERROR!!!')
@@ -102,6 +104,7 @@ export default class Soc {
 
     public async Step() {
         this.cycle += 1
+
         if (this.Processor.pc >= (Object.values(this.Processor.Instruction_memory).length - 1) * 4) {
             this.println('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
             console.log('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')

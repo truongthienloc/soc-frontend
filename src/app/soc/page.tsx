@@ -14,6 +14,7 @@ import { convertRegisters2TwinRegisters } from '~/helpers/converts/register.conv
 import Soc from '~/services/lib/SOCModels/SoC'
 import { GuideModal } from '~/components/GuideModal'
 import { toast } from 'react-toastify'
+import { DisplayStepCode } from '~/components/DisplayStepCode'
 
 type Props = {}
 
@@ -27,6 +28,10 @@ export default function SocPage({}: Props) {
     const [code, setCode] = useState('')
     const [isOpenGuideModal, setIsOpenGuideModal] = useState(false)
     const [allowRun, setAllowRun] = useState(false)
+
+    const [stepCode, setStepCode] = useState<string[]>([])
+    const [isStepping, setIsStepping] = useState(false)
+    const [pc, setPc] = useState<number | undefined>(undefined)
 
     const handleGuideModalClose = () => setIsOpenGuideModal(false)
 
@@ -99,6 +104,7 @@ export default function SocPage({}: Props) {
         logRef.current?.clear()
         socModelRef.current.RunAll()
         setShowCodeEditor(false)
+        setAllowRun(false)
         // setRegistersData(convertRegisters2TwinRegisters(socModelRef.current.getRegisters()))
     }
 
@@ -136,7 +142,27 @@ export default function SocPage({}: Props) {
 
     const handleStepClick = () => {
         // logRef.current?.clear()
-        socModelRef.current?.Step()
+        if (!socModelRef.current) {
+            return
+        }
+
+        if (pc === undefined) {
+            setIsStepping(true)
+            console.log('step code: ', socModelRef.current.Processor.Assembly_code);
+            
+            setStepCode(socModelRef.current.Processor.Assembly_code)
+            socModelRef.current.Step()
+            setPc(socModelRef.current.Processor.pc)
+            return
+        }
+
+        socModelRef.current.Step()
+        setPc(socModelRef.current.Processor.pc)
+        if (socModelRef.current.Processor.pc > stepCode.length * 4) {
+            setAllowRun(false)
+            setPc(undefined)
+            setIsStepping(false)
+        }
     }
 
     const handleAssembleClick = () => {
@@ -144,11 +170,12 @@ export default function SocPage({}: Props) {
 
         if (!socModelRef.current?.assemble(code)) {
             toast.error('Syntax error')
-        }
-        else {
+        } else {
             toast.success('Ready to run')
             setAllowRun(true)
             localStorage.setItem('soc_code', code)
+            console.log('step code: ', socModelRef.current.Processor.Assembly_code);
+            
         }
     }
 
@@ -177,12 +204,16 @@ export default function SocPage({}: Props) {
                                 </Button>
                             </div>
                             <div className="flex flex-col border border-black">
-                                <CodeEditor
-                                    value={code}
-                                    onChange={handleChangeCode}
-                                    disable={disableCodeEditor}
-                                    hidden={!showCodeEditor}
-                                />
+                                {isStepping ? (
+                                    <DisplayStepCode code={stepCode} pc={pc} />
+                                ) : (
+                                    <CodeEditor
+                                        value={code}
+                                        onChange={handleChangeCode}
+                                        disable={disableCodeEditor}
+                                        hidden={!showCodeEditor}
+                                    />
+                                )}
                             </div>
 
                             {/* <RegisterTable data={registersData} isShown={true} /> */}
@@ -207,7 +238,7 @@ export default function SocPage({}: Props) {
                             Run
                         </Button> */}
                         <Button className="h-fit" variant="outlined" onClick={handleAssembleClick}>
-                            Assemble
+                            Assemble & Restart
                         </Button>
                         <Button
                             className="h-fit"

@@ -303,7 +303,7 @@ export default class Agent extends TileLinkObject {
             this.animTweens.push(tweenLine2)
             this.animTweens.push(tweenLine3)
             this.animTweens.push(tweenLine4)
-        } else {
+        } else if (!isRunning) {
             this.animTweens.forEach((tween) => tween.destroy())
             this.animLines.forEach((line) => line.destroy())
             this.animTweens = []

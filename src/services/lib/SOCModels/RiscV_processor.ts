@@ -50,8 +50,9 @@ export default class RiscVProcessor {
             this.Instruction_memory[pc_addr.toString(2)] = i
             pc_addr += 4
         }
+        for (let i of this.Assembler.Instructions) 
+            if (i != '.text'&& i!= '') this.Assembly_code.push(i)
 
-        this.Assembly_code= this.Assembler.Instructions.slice(1, -1);
         console.log ('check assembly code: ',   this.Assembly_code)
         console.log ('check Instruction_memory: ',  this.Instruction_memory)
         

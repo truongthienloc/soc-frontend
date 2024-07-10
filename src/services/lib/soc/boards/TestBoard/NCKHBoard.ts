@@ -1,17 +1,24 @@
 import Adapter from '../../components/Adapter/Adapter'
 import { CPU, Cache, DMA, Keyboard, MMU, Memory, Monitor } from '../../components/Agent'
 import { Interconnect, SingleMasterInterconnect } from '../../components/Interconnect'
-import { CPUModule, CacheModule, IOModule, MMUModule, MemoryModule, Module } from '../../components/Module'
+import {
+    CPUModule,
+    CacheModule,
+    IOModule,
+    MMUModule,
+    MemoryModule,
+    Module,
+} from '../../components/Module'
 import { Scene } from '../../components/Scene'
 
 export default class NCKHBoard {
     private X: number = 0
     private Y: number = 0
 
-    // public cpuModule: Module
-    // public memoryModule: Module
-    // public dmaModule: Module
-    // public 
+    public cpuModule: Module
+    public memoryModule: Module
+    public dmaModule: Module
+    public mmuModule: Module
     public monitorModule: IOModule
     public keyboardModule: IOModule
     public cpu: CPU
@@ -111,15 +118,22 @@ export default class NCKHBoard {
         // mmuModule1.setActivated(false)
         // mmuModule2.setActivated(false)
 
+        this.cpuModule = cpuModule1
+        this.mmuModule = mmuModule1
+        this.memoryModule = memoryModule1
+        this.dmaModule = memoryModule2
         this.monitorModule = ioModule1
         this.keyboardModule = ioModule2
+
         this.cpu = cpu1
         this.mmu = mmu1
         this.memory = memory
         this.dma = dma
         this.keyboard = keyboard
         this.monitor = monitor
-        this.interconnect = interconnect 
+        this.interconnect = interconnect
+
+        // interconnect.setIsRunning(true)
         // cpu1.setIsRunning(true)
         // setTimeout(() => cpu1.setIsRunning(false), 5000)
         // memory.setIsRunning(true)

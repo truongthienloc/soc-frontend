@@ -137,7 +137,9 @@ export default function SocPage({}: Props) {
     }
 
     const handleGuideClick = () => {
-        setIsOpenGuideModal(true)
+        // setIsOpenGuideModal(true)
+        const x = window.innerWidth / 3;
+        window.open('/soc/guide', '', `width=500, height=500, left=${x}`)
     }
 
     const handleStepClick = () => {
@@ -230,7 +232,7 @@ export default function SocPage({}: Props) {
                             <p className="text-xl font-bold">Logs:</p>
                             <div
                                 id="logs"
-                                className="mt-2 h-full space-y-1 overflow-y-auto rounded-lg border border-black p-2 [&_pre]:whitespace-pre-wrap"
+                                className="mt-2 h-full space-y-1 overflow-y-auto rounded-lg border border-black p-2 [&_pre]:whitespace-pre-wrap text-sm"
                             ></div>
                         </div>
                     </div>
@@ -315,7 +317,7 @@ export default function SocPage({}: Props) {
                     </div>
                 </div>
             </div>
-            <GuideModal isOpen={isOpenGuideModal} onClose={handleGuideModalClose} />
+            {/* <GuideModal isOpen={isOpenGuideModal} onClose={handleGuideModalClose} /> */}
         </div>
     )
 }

@@ -22,8 +22,9 @@ export default function GuidePage({}: Props) {
             </div> */}
             <div className="max-h-[85dvh] space-y-4 overflow-auto px-4 py-4">
                 <h1 className="text-center text-4xl">Hướng dẫn</h1>
+                
                 <div className="">
-                    <p>Các lệnh hỗ trợ:</p>
+                    <p>CPU intructor:</p>
                     <ul className="list-disc px-4">
                         <li>addi</li>
                         <li>add</li>

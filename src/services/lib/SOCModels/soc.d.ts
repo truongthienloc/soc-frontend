@@ -11,4 +11,5 @@ export type Keyboard = {
 
 export type Monitor = {
     println: (...args: string[]) => void
+    clear: () => void
 }

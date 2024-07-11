@@ -133,41 +133,42 @@ export default class InterConnect {
     constructor(numPin: number, numPout: number, active: boolean, 
         memory_address: number, monitor_address: number, keyboard_address: number) {
         
+        this.active             = active
         this.memory_address     = memory_address
         this.monitor_address    = monitor_address
         this.keyboard_address   = keyboard_address
-        this.numPin = numPin
-        this.numPout = numPout
-        this.Pin = []
-        this.Pout = []
+        this.numPin             = numPin
+        this.numPout            = numPout
+        this.Pin                = []
+        this.Pout               = []
         for (let index = 0; index < numPin; index++) {
             this.Pin.push(createPort(true))
         }
         for (let index = 0; index < numPout; index++) {
             this.Pout.push(createPort(true))
         }
-        this.ChannelA_queue = []
-        this.ChannelD_queue = []
-        this.ChannelA = ''
-        this.ChannelD = ''
-        this.active   = active
+        this.ChannelA_queue     = []
+        this.ChannelD_queue     = []
+        this.ChannelA           = ''
+        this.ChannelD           = ''
+
     }
 
     Port_in_CA(data: string, index: number, cycle: number): void {
         if (this.active== true) {
-            this.Pin[index].data.push(data)
-            this.Pin[index].active = true
-            const port_name = `Port_in[${index}]`
-            this.ChannelA_queue.push(new ChannelA(port_name, cycle, data))
+            this.Pin[index].data.   push(data)
+            this.Pin[index].active  = true
+            const port_name         = `Port_in[${index}]`
+            this.ChannelA_queue.    push(new ChannelA(port_name, cycle, data))
         }
     }
 
     Port_in_CD(data: string, index: number, cycle: number): void {
         if (this.active== true) {
-            this.Pin[index].data.push(data)
-            this.Pin[index].active = true
-            const port_name = `Port_in[${index}]`
-            this.ChannelD_queue.push(new ChannelD(port_name, cycle, data))
+            this.Pin[index].data.   push(data)
+            this.Pin[index].active  = true
+            const port_name         = `Port_in[${index}]`
+            this.ChannelD_queue.    push(new ChannelD(port_name, cycle, data))
         }
     }
 

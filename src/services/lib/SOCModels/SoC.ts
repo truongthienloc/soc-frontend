@@ -13,7 +13,6 @@ export default class Soc {
     Bus: InterConnect
     MMU: MMU
     Memory: Memory
-    Interconnect: InterConnect
     DMA: DMA
 
     cycle: number
@@ -49,12 +48,11 @@ export default class Soc {
     }
 
     constructor(name: string) {
-        this.Processor = new RiscVProcessor('RiscV CPU', '00', true)
-        this.Bus = new InterConnect(4, 4)
-        this.Interconnect = new InterConnect(4, 4)
-        this.MMU = new MMU()
-        this.Memory = new Memory()
-        this.DMA = new DMA()
+        this.Processor = new RiscVProcessor('RiscV CPU', '00', false)
+        this.Bus = new InterConnect(4, 4, true)
+        this.MMU = new MMU(true)
+        this.Memory = new Memory(true)
+        this.DMA = new DMA(true)
         this.cycle = 0
         this.name = name
     }
@@ -99,7 +97,13 @@ export default class Soc {
     }
 
     public RunAll() {
-        if (this.Processor.Assembler.syntax_error) return
+        
+        if (this.Processor.active==false) {
+            console.log('CPU has not been actived')
+            this.println('CPU has not been actived')
+            return
+        }
+
         while (
             this.Processor.pc <
             (Object.values(this.Processor.Instruction_memory).length - 1) * 4
@@ -116,19 +120,21 @@ export default class Soc {
             (Object.values(this.Processor.Instruction_memory).length - 1) * 4
         ) {
             this.println('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
-            console.log('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
-            // this.view?.cpu.setIsRunning(false)
-            // this.view?.mmu.setIsRunning(false)
-            // this.view?.monitor.setIsRunning(false)
-            // this.view?.keyboard.setIsRunning(false)
-            // this.view?.memory.setIsRunning(false)
+            console.log ('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
             return
         }
+
         this.println('Cycle ', this.cycle.toString(), ': CPU is processing')
         console.log('Cycle ', this.cycle.toString(), ': CPU is processing')
         if (this.Processor.Assembler.syntax_error) return
         const element = this.Processor.Instruction_memory[this.Processor.pc.toString(2)]
         this.view?.cpu.setIsRunning(true)
+        
+        if (this.Processor.active==false) {
+            console.log('CPU has not been actived')
+            this.println('CPU has not been actived')
+            return
+        }
         let [message, data, address, rd] = this.Processor.run(element, this.Processor.pc)
 
         if (dec('0' + address) % 4 != 0) {
@@ -141,9 +147,26 @@ export default class Soc {
             //STORE
             this.println('Cycle ', this.cycle.toString(), ': CPU is sending PUT messeage to MEMORY')
             console.log('Cycle ', this.cycle.toString(), ': CPU is sending PUT messeage to MEMORY')
-
+            if ((this.MMU.active== false)||(this.Bus.active== false)){
+                if (this.MMU.active== false) {
+                    console.log('MMU has not been actived')
+                    this.println('MMU has not been actived')
+                }
+                if (this.Bus.active== false) {
+                    console.log('INTERCONNECT has not been actived')
+                    this.println('INTERCONNECT has not been actived')
+                    return
+                }
+            }  
+                
             this.view?.mmu.setIsRunning(true)
             if (dec('0' + address) < 399 && 0 <= dec('0' + address)) {
+                if (this.Memory.active== false) {
+                    console.log('MEMORY has not been actived')
+                    this.println('MEMORY has not been actived')
+                    return
+                }
+                
                 this.MMU.setActive()
                 this.println('Cycle ', this.cycle.toString(), ': MMU is running')
                 console.log('Cycle ', this.cycle.toString(), ': MMU is running')
@@ -379,6 +402,7 @@ export default class Soc {
                 this.println('Cycle ', this.cycle.toString(), ': DMA is GETTING DATA from MEMORY')
                 console.log('Cycle ', this.cycle.toString(), ': DMA is GETTING DATA from MEMORY')
                 let dma2monitor = this.Memory.Memory[this.MMU.InMem(ai2s)]
+                //if monitor.active== true 
                 this.monitor?.println(BinToHex(dma2monitor))
 
                 const doutChD = this.Memory.slaveMemory.send(
@@ -421,12 +445,27 @@ export default class Soc {
         }
 
         if (message == 'GET') {
+            if ((this.MMU.active== false)||(this.Bus.active== false)){
+                if (this.MMU.active== false) {
+                    console.log('MMU has not been actived')
+                    this.println('MMU has not been actived')
+                }
+                if (this.Bus.active== false) {
+                    console.log('INTERCONNECT has not been actived')
+                    this.println('INTERCONNECT has not been actived')
+                    return
+                }
+            }  
             this.view?.mmu.setIsRunning(true)
             this.println('Cycle ', this.cycle.toString(), ': CPU is sending GET messeage to MEMORY')
             console.log('Cycle ', this.cycle.toString(), ': CPU is sending GET messeage to MEMORY')
             if (dec('0' + address) < 399 && 0 <= dec('0' + address)) {
+                if (this.Memory.active== false) {
+                    console.log('MEMORY has not been actived')
+                    this.println('MEMORY has not been actived')
+                    return
+                }
                 address = this.MMU.Dmem(address)
-
                 this.println('Cycle ', this.cycle.toString(), ': MMU is running')
                 this.println(
                     'Cycle ',

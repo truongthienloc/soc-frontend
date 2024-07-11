@@ -117,6 +117,7 @@ class ChannelD {
 }
 
 export default class InterConnect {
+    active: boolean
     Pin: Port[]
     Pout: Port[]
     numPin: number
@@ -126,7 +127,7 @@ export default class InterConnect {
     ChannelA: string
     ChannelD: string
 
-    constructor(numPin: number, numPout: number) {
+    constructor(numPin: number, numPout: number, active: boolean) {
         this.numPin = numPin
         this.numPout = numPout
         this.Pin = []
@@ -141,80 +142,70 @@ export default class InterConnect {
         this.ChannelD_queue = []
         this.ChannelA = ''
         this.ChannelD = ''
+        this.active   = active
     }
 
     Port_in_CA(data: string, index: number, cycle: number): void {
-        this.Pin[index].data.push(data)
-        this.Pin[index].active = true
-        const port_name = `Port_in[${index}]`
-        this.ChannelA_queue.push(new ChannelA(port_name, cycle, data))
+        if (this.active== true) {
+            this.Pin[index].data.push(data)
+            this.Pin[index].active = true
+            const port_name = `Port_in[${index}]`
+            this.ChannelA_queue.push(new ChannelA(port_name, cycle, data))
+        }
     }
 
     Port_in_CD(data: string, index: number, cycle: number): void {
-        this.Pin[index].data.push(data)
-        this.Pin[index].active = true
-        const port_name = `Port_in[${index}]`
-        this.ChannelD_queue.push(new ChannelD(port_name, cycle, data))
+        if (this.active== true) {
+            this.Pin[index].data.push(data)
+            this.Pin[index].active = true
+            const port_name = `Port_in[${index}]`
+            this.ChannelD_queue.push(new ChannelD(port_name, cycle, data))
+        }
     }
 
     Port_out(index: number): any {
-        if (this.Pout[index].data.length === 0) {
-            return -1
+        if (this.active== true) {
+            if (this.Pout[index].data.length === 0) {
+                return -1
+            }
+            const data = this.Pout[index].data[0]
+            this.Pout[index].data.shift()
+            return data
         }
-        const data = this.Pout[index].data[0]
-        this.Pout[index].data.shift()
-        return data
+        
     }
 
     TransmitChannelA(): void {
-        for (const ChA of this.ChannelA_queue) {
-            console.log('cha adrr', dec(ChA.address))
-            if (dec('0' + ChA.address) < 399 && 0 <= dec('0' + ChA.address)) {
-                this.Pout[1].data.push(ChA)
+        if (this.active== true) {
+            for (const ChA of this.ChannelA_queue) {
+                console.log('cha adrr', dec(ChA.address))
+                if (dec('0' + ChA.address) < 399 && 0 <= dec('0' + ChA.address)) {
+                    this.Pout[1].data.push(ChA)
+                }
+                if (dec('0' + ChA.address) < 499 && 400 <= dec('0' + ChA.address)) {
+                    this.Pout[2].data.push(ChA)
+                }
+                if (dec('0' + ChA.address) < 599 && 500 <= dec('0' + ChA.address)) {
+                    this.Pout[3].data.push(ChA)
+                }
             }
-            if (dec('0' + ChA.address) < 499 && 400 <= dec('0' + ChA.address)) {
-                this.Pout[2].data.push(ChA)
-            }
-            if (dec('0' + ChA.address) < 599 && 500 <= dec('0' + ChA.address)) {
-                this.Pout[3].data.push(ChA)
-            }
-        }
-        this.ChannelA_queue = []
-    }
+            this.ChannelA_queue = []
+        } 
+}
 
     TransmitChannelD(): void {
         let count0 = 0
-
-        for (const ChD of this.ChannelD_queue) {
-            if (ChD.source === '00') {
-                //console.log('payload cd', ChD.payload)
-                this.Pout[0].data.push(ChD)
-                if (count0 === 0) ChD.Ready('Port_out[0]')
-                this.Pout[0].active = true
-                count0 += 1
+        if (this.active== true) {
+            for (const ChD of this.ChannelD_queue) {
+                if (ChD.source === '00') {
+                    //console.log('payload cd', ChD.payload)
+                    this.Pout[0].data.push(ChD)
+                    if (count0 === 0) ChD.Ready('Port_out[0]')
+                    this.Pout[0].active = true
+                    count0 += 1
+                }
             }
-
-            // if (ChD.source === '01') {
-            //     this.Pout[1].data.push(ChD);
-            //     if (count1 === 0) ChD.Ready('Port_out[1]');
-            //     this.Pout[1].active = true;
-            //     count1 += 1;
-            // }
-
-            // if (ChD.source === '10') {
-            //     this.Pout[2].data.push(ChD);
-            //     if (count2 === 0) ChD.Ready('Port_out[2]');
-            //     this.Pout[2].active = true;
-            //     count2 += 1;
-            // }
-
-            // if (ChD.source === '11') {
-            //     this.Pout[3].data.push(ChD);
-            //     if (count3 === 0) ChD.Ready('Port_out[3]');
-            //     this.Pout[3].active = true;
-            //     count3 += 1;
-            // }
+            this.ChannelD_queue = []
         }
-        this.ChannelD_queue = []
     }
 }

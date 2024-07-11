@@ -49,7 +49,7 @@ export default class Soc {
 
     constructor(name: string) {
         this.Processor = new RiscVProcessor('RiscV CPU', '00', false)
-        this.Bus = new InterConnect(4, 4, true)
+        this.Bus = new InterConnect(4, 4, true, 399, 499, 599)
         this.MMU = new MMU(true)
         this.Memory = new Memory(true)
         this.DMA = new DMA(true)

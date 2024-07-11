@@ -118,6 +118,9 @@ class ChannelD {
 
 export default class InterConnect {
     active: boolean
+    memory_address: number
+    monitor_address: number
+    keyboard_address: number
     Pin: Port[]
     Pout: Port[]
     numPin: number
@@ -127,7 +130,12 @@ export default class InterConnect {
     ChannelA: string
     ChannelD: string
 
-    constructor(numPin: number, numPout: number, active: boolean) {
+    constructor(numPin: number, numPout: number, active: boolean, 
+        memory_address: number, monitor_address: number, keyboard_address: number) {
+        
+        this.memory_address     = memory_address
+        this.monitor_address    = monitor_address
+        this.keyboard_address   = keyboard_address
         this.numPin = numPin
         this.numPout = numPout
         this.Pin = []
@@ -179,13 +187,13 @@ export default class InterConnect {
         if (this.active== true) {
             for (const ChA of this.ChannelA_queue) {
                 console.log('cha adrr', dec(ChA.address))
-                if (dec('0' + ChA.address) < 399 && 0 <= dec('0' + ChA.address)) {
+                if (dec('0' + ChA.address) < this.memory_address && 0 <= dec('0' + ChA.address)) {
                     this.Pout[1].data.push(ChA)
                 }
-                if (dec('0' + ChA.address) < 499 && 400 <= dec('0' + ChA.address)) {
+                if (dec('0' + ChA.address) < this.monitor_address && this.memory_address+1 <= dec('0' + ChA.address)) {
                     this.Pout[2].data.push(ChA)
                 }
-                if (dec('0' + ChA.address) < 599 && 500 <= dec('0' + ChA.address)) {
+                if (dec('0' + ChA.address) < this.keyboard_address && this.monitor_address+1 <= dec('0' + ChA.address)) {
                     this.Pout[3].data.push(ChA)
                 }
             }

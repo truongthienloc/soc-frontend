@@ -44,17 +44,17 @@ export default class RiscVProcessor {
     }
 
     public setImem() {
-        let pc_addr = 0
-        let binary_code = this.Assembler.binary_code
-        for (let i of binary_code) {
-            this.Instruction_memory[pc_addr.toString(2)] = i
-            pc_addr += 4
-        }
-        for (let i of this.Assembler.Instructions)
-            if (i != '.text' && i != '') this.Assembly_code.push(i)
-
-        console.log('check assembly code: ', this.Assembly_code)
-        console.log('check Instruction_memory: ', this.Instruction_memory)
+        if (this.active== true) {
+            let pc_addr = 0
+            let binary_code = this.Assembler.binary_code
+            for (let i of binary_code) {
+                this.Instruction_memory[pc_addr.toString(2)] = i
+                pc_addr += 4
+            }
+            for (let i of this.Assembler.Instructions)
+                if (i != '.text' && i != '') this.Assembly_code.push(i)
+        } 
+        
     }
     constructor(name: string, source: string, active: boolean) {
         this.name = name
@@ -145,16 +145,15 @@ export default class RiscVProcessor {
 
     RunAll() {
         this.pc = 0
-
-        while (this.pc < Object.values(this.Instruction_memory).length * 4) {
-            const element = this.Instruction_memory[this.pc.toString(2)]
-            this.run(element, this.pc)
+        if (this.active== true) {
+            while (this.pc < Object.values(this.Instruction_memory).length * 4) {
+                const element = this.Instruction_memory[this.pc.toString(2)]
+                this.run(element, this.pc)
+            }
         }
     }
 
     dataMemory(address: string, memRead: string, memWrite: string, writeData: string): string {
-        //console.log('memRead', memRead)
-        //console.log('check address', !(address in this.Data_memory))
         if (memRead[0] === '1') {
             if (!(address in this.Data_memory)) {
                 return '00000000000000000000000000000000'
@@ -610,124 +609,125 @@ export default class RiscVProcessor {
     }
 
     run(instruction: string, pc: number): [string, string, string, string, string] {
-        let signBit = 0
-        let readData = ''
-        console.log('Instruction check: ', instruction)
-        //console.log('Instruction memory check: ', this.Instruction_memory)
-        this.control(instruction.slice(25, 32), instruction.slice(17, 20))
-        let size = 'none'
-        if (instruction.slice(25, 32) === '0000011')
-            switch (instruction.slice(17, 20)) {
-                case '000':
-                    size = 'lb'
-                    break
-                case '001':
-                    size = 'lh'
-                    break
-                case '010':
-                    size = 'lw'
-                    break
-                case '100':
-                    size = 'lbu'
-                    break
-                case '101':
-                    size = 'lhu'
-                    break
-                default:
-                    break
+        if (this.active== true) {
+            let signBit = 0
+            let readData = ''
+            this.control(instruction.slice(25, 32), instruction.slice(17, 20))
+            let size = 'none'
+            if (instruction.slice(25, 32) === '0000011')
+                switch (instruction.slice(17, 20)) {
+                    case '000':
+                        size = 'lb'
+                        break
+                    case '001':
+                        size = 'lh'
+                        break
+                    case '010':
+                        size = 'lw'
+                        break
+                    case '100':
+                        size = 'lbu'
+                        break
+                    case '101':
+                        size = 'lhu'
+                        break
+                    default:
+                        break
+                }
+
+            if (instruction.slice(25, 32) === '0100011')
+                switch (instruction.slice(17, 20)) {
+                    case '000': //Load
+                        size = 'sb'
+                        break
+                    case '001': //Store
+                        size = 'sh'
+                        break
+                    case '010': //Load
+                        size = 'sw'
+                        break
+                    default:
+                        break
+                }
+            const readRegister1 = instruction.slice(12, 17)
+            const readRegister2 = instruction.slice(7, 12)
+            const writeRegister = instruction.slice(20, 25)
+            const readData1 = this.register[readRegister1]
+            const readData2 = this.register[readRegister2]
+
+            const imm = this.immGen(instruction)
+            //console.log('edas',(dec(imm)) )
+            this.aluControl(this.ALUOp, instruction.slice(17, 20), instruction.slice(1))
+
+            const ALUResult = this.ALU(readData1, mux(readData2, imm, this.ALUSrc), this.operation)
+            this.branchControl(this.jal, this.jalr, this.branch)
+
+            let message = 'None'
+            let data = '0'
+            let address = ''
+            if (instruction.slice(25, 32) === '0100011') {
+                // SW
+                message = 'PUT'
+                data = readData2
+                address = ALUResult
+            }
+            if (instruction.slice(25, 32) === '0000011') {
+                // LW
+                message = 'GET'
+                data = ''
+                address = ALUResult
             }
 
-        if (instruction.slice(25, 32) === '0100011')
-            switch (instruction.slice(17, 20)) {
-                case '000': //Load
-                    size = 'sb'
-                    break
-                case '001': //Store
-                    size = 'sh'
-                    break
-                case '010': //Load
-                    size = 'sw'
-                    break
-                default:
-                    break
+            readData = this.dataMemory(ALUResult, this.memRead, this.memWrite, readData2)
+
+            readData = this.dataGen(readData, this.unsigned)
+
+            // if (instruction.slice(25, 32) === '0100011') {
+            //     // SW
+            //     message = 'PUT'
+            //     data = readData2
+            //     address = readData
+            // }
+            // if (instruction.slice(25, 32) === '0000011') {
+            //     // LW
+            //     message = 'GET'
+            //     data = ''
+            //     address = readData
+            // }
+
+            let writeDataR = mux(
+                mux(
+                    mux(
+                        mux(ALUResult, readData, this.memToReg),
+                        pc.toString(2).padStart(32, '0'),
+                        this.jump,
+                    ),
+                    mux(
+                        '00000000000000000000000000000000',
+                        '00000000000000000000000000000001',
+                        signBit,
+                    ),
+                    this.slt,
+                ),
+                mux(
+                    (dec(imm) << 12).toString(2).padStart(32, '0') + pc.toString(2).padStart(32, '0'),
+                    (dec(imm) << 12).toString(2).padStart(32, '0'),
+                    this.auiOrLui,
+                ),
+                this.wb,
+            )
+            //console.log(writeDataR)
+            //console.log(this.slt)
+            writeDataR = writeDataR.padStart(32, '0')
+            if (this.regWrite === 1) {
+                this.register[writeRegister] = writeDataR
             }
-        const readRegister1 = instruction.slice(12, 17)
-        const readRegister2 = instruction.slice(7, 12)
-        const writeRegister = instruction.slice(20, 25)
-        const readData1 = this.register[readRegister1]
-        const readData2 = this.register[readRegister2]
 
-        const imm = this.immGen(instruction)
-        //console.log('edas',(dec(imm)) )
-        this.aluControl(this.ALUOp, instruction.slice(17, 20), instruction.slice(1))
-
-        const ALUResult = this.ALU(readData1, mux(readData2, imm, this.ALUSrc), this.operation)
-        this.branchControl(this.jal, this.jalr, this.branch)
-
-        let message = 'None'
-        let data = '0'
-        let address = ''
-        if (instruction.slice(25, 32) === '0100011') {
-            // SW
-            message = 'PUT'
-            data = readData2
-            address = ALUResult
-        }
-        if (instruction.slice(25, 32) === '0000011') {
-            // LW
-            message = 'GET'
-            data = ''
-            address = ALUResult
-        }
-
-        readData = this.dataMemory(ALUResult, this.memRead, this.memWrite, readData2)
-
-        readData = this.dataGen(readData, this.unsigned)
-
-        // if (instruction.slice(25, 32) === '0100011') {
-        //     // SW
-        //     message = 'PUT'
-        //     data = readData2
-        //     address = readData
-        // }
-        // if (instruction.slice(25, 32) === '0000011') {
-        //     // LW
-        //     message = 'GET'
-        //     data = ''
-        //     address = readData
-        // }
-
-        let writeDataR = mux(
-            mux(
-                mux(
-                    mux(ALUResult, readData, this.memToReg),
-                    pc.toString(2).padStart(32, '0'),
-                    this.jump,
-                ),
-                mux(
-                    '00000000000000000000000000000000',
-                    '00000000000000000000000000000001',
-                    signBit,
-                ),
-                this.slt,
-            ),
-            mux(
-                (dec(imm) << 12).toString(2).padStart(32, '0') + pc.toString(2).padStart(32, '0'),
-                (dec(imm) << 12).toString(2).padStart(32, '0'),
-                this.auiOrLui,
-            ),
-            this.wb,
-        )
-        //console.log(writeDataR)
-        //console.log(this.slt)
-        writeDataR = writeDataR.padStart(32, '0')
-        if (this.regWrite === 1) {
-            this.register[writeRegister] = writeDataR
-        }
-
-        this.register['00000'] = '00000000000000000000000000000000'
-        this.pc = mux(mux(pc + 4, (dec(imm) << 1) + pc, this.pcSrc1), ALUResult, this.pcSrc2)
-        console.log('next_pc', this.pc)
-        return [message, data, address, writeRegister, size]
+            this.register['00000'] = '00000000000000000000000000000000'
+            this.pc = mux(mux(pc + 4, (dec(imm) << 1) + pc, this.pcSrc1), ALUResult, this.pcSrc2)
+            console.log('next_pc', this.pc)
+            return [message, data, address, writeRegister, size]
+        } else return ['', '', '', '', '']
+        
     }
 }

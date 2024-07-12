@@ -3,6 +3,7 @@ import { TileLinkObject } from '../TileLinkObject'
 import { Scene } from '../Scene'
 import { SceneChildOptions } from '../../types/options'
 import Adapter from '../Adapter/Adapter'
+import EventEmitter from '../../../EventEmitter/EventEmitter'
 
 export type InterconnectOptions = {} & SceneChildOptions
 
@@ -12,10 +13,26 @@ export default class Interconnect extends TileLinkObject {
 
     protected shape!: Konva.Group
     protected adapters: Map<string, Adapter> = new Map()
+    protected switch!: Konva.Group
+
+    protected activated: boolean
+    private event = new EventEmitter()
+    public static EVENT = {
+        ACTIVATE: 'activate',
+        INACTIVATE: 'inactivate',
+    }
 
     // animation
     protected animLines: Konva.Line[] = []
     protected animTweens: Konva.Tween[] = []
+
+    public getEvent(): EventEmitter {
+        return this.event
+    }
+
+    public getActivated(): boolean {
+        return this.activated
+    }
 
     constructor(
         layer: Konva.Layer,
@@ -26,6 +43,7 @@ export default class Interconnect extends TileLinkObject {
         options: InterconnectOptions,
     ) {
         super()
+        this.activated = true
         this.layer = layer
         this.x = x
         this.y = y
@@ -36,6 +54,7 @@ export default class Interconnect extends TileLinkObject {
         this.initShape()
         this.initText()
         this.initAdapter()
+        this.initSwitch()
     }
 
     protected initShape(): void {
@@ -90,6 +109,52 @@ export default class Interconnect extends TileLinkObject {
         this.createAdapter('b002', 8.5, this.h)
         this.createAdapter('b003', 14.5, this.h)
         this.createAdapter('b004', 20.5, this.h)
+    }
+
+    protected initSwitch(): void {
+        const toPixel = Scene.toPixel
+        this.switch = new Konva.Group({})
+
+        const w = 1
+        const h = 1
+
+        const circle = new Konva.Circle({
+            radius: toPixel(w / 2),
+            stroke: Scene.BORDER_COLOR,
+            fill: this.activated ? Scene.ACTIVATE_COLOR : Scene.DEACTIVATE_COLOR,
+        })
+
+        circle.on('click', () => {
+            this.setActivated(!this.activated)
+        })
+
+        circle.on('mouseover', function () {
+            document.body.style.cursor = 'pointer'
+        })
+        circle.on('mouseout', function () {
+            document.body.style.cursor = 'default'
+        })
+
+        this.switch.add(circle)
+        this.shape.add(this.switch)
+    }
+
+    public setActivated(activated: boolean): void {
+        // if (activated && !this.agent) {
+        //     return
+        // }
+        this.activated = activated
+        if (activated) {
+            this.event.emit(Interconnect.EVENT.ACTIVATE)
+        } else {
+            this.event.emit(Interconnect.EVENT.INACTIVATE)
+        }
+        const circle = this.switch.children[0] as Konva.Circle
+        if (this.activated) {
+            circle.fill(Scene.ACTIVATE_COLOR)
+        } else {
+            circle.fill(Scene.DEACTIVATE_COLOR)
+        }
     }
 
     protected createAdapter(

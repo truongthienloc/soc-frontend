@@ -8,7 +8,6 @@ import CloseIcon from '@mui/icons-material/Close'
 type Props = {}
 
 export default function GuidePage({}: Props) {
-
     const handleClose = () => {
         window.close()
     }

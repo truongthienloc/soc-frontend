@@ -76,7 +76,7 @@ export default class Soc {
         if (this.view) {
             this.Processor.active   = this.view.cpuModule.getActivated()
             this.MMU.active         = this.view.mmuModule.getActivated()
-            // this.Bus.active         = this.view.
+            this.Bus.active         = this.view.interconnect.getActivated()
             this.DMA.active         = this.view.dmaModule.getActivated()
             this.Memory.active      = this.view.memoryModule.getActivated()
             this.active_keyboard    = this.view.keyboardModule.getActivated()
@@ -95,6 +95,7 @@ export default class Soc {
         this.view?.keyboard.                    setIsRunning(false)
         this.view?.memory.                      setIsRunning(false)
         this.view?.dma.                         setIsRunning(false)
+        this.view?.interconnect.                setIsRunning(false)
 
         
         this.println('Cycle ', this.cycle.toString(), ': System is setting up')
@@ -228,7 +229,7 @@ export default class Soc {
                     this.cycle.toString(),
                     ': INTERCONNECT is receiving messeage from CPU',
                 )
-
+                this.view?.interconnect.setIsRunning (this.Bus.active)
                 this.Bus.Port_in_CA(dm2i, 0, this.cycle)
                 this.Bus.TransmitChannelA()
                 this.cycle += 1
@@ -363,7 +364,7 @@ export default class Soc {
                     this.cycle.toString(),
                     ': INTERCONNECT is receiving messeage from CPU',
                 )
-
+                this.view?.interconnect.setIsRunning (this.Bus.active)
                 this.Bus.Port_in_CA(dm2i, 0, this.cycle)
                 this.Bus.TransmitChannelA()
                 this.cycle += 1
@@ -530,6 +531,7 @@ export default class Soc {
                     ': INTERCONNECT is receiving messeage from MMU',
                 )
 
+                this.view?.interconnect.setIsRunning (this.Bus.active)
                 this.Bus.Port_in_CA(dm2i, 0, this.cycle)
                 this.Bus.TransmitChannelA()
                 this.cycle += 1
@@ -672,6 +674,7 @@ export default class Soc {
                     ': INTERCONNECT is receiving messeage from MMU',
                 )
 
+                this.view?.interconnect.setIsRunning (this.Bus.active)
                 this.Bus.Port_in_CA(dm2i, 0, this.cycle)
                 this.Bus.TransmitChannelA()
                 this.cycle += 1

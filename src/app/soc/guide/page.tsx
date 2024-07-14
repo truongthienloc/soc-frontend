@@ -20,24 +20,28 @@ export default function GuidePage({}: Props) {
                 </Button>
             </div> */}
             <div className="max-h-[85dvh] space-y-4 overflow-auto px-4 py-4">
-                <h1 className="text-center text-4xl">Hướng dẫn</h1>
-
+                <h1 className="text-center text-4xl">Guidelines</h1>
+                
                 <div className="">
-                    <p>CPU intructor:</p>
+                    <p>INSTRUCTIONS SUPPORTED: </p>
                     <ul className="list-disc px-4">
-                        <li>addi</li>
-                        <li>add</li>
-                        <li>li</li>
+                        <li>ADD SUB SLLSLT SLTU XOR SRL SRA OR AND </li>
+                        <li>ADDI SLTI SLTIU XORI ORI ANDI SLLI SRLI SRAI</li>
+                        <li>SW SH SB</li>
+                        <li>LW LH LHU LB LBU</li>
+                        <li>BEQ BNE BLT BGE BLTU BGEU</li>
+                        <li>JAL LUI AUIPC</li>
+
                     </ul>
                 </div>
 
                 <div className="">
-                    <p>Cách sử dụng bàn phím/màn hình:</p>
-                    <p>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Fugit eveniet autem
-                        consequuntur amet eius eum consectetur nesciunt, incidunt aperiam, vel
-                        obcaecati ipsa quam corporis dicta provident magni aliquid quos mollitia?
-                    </p>
+                    <p>ADDRESS DECODING: </p>
+                    <ul className="list-disc px-4">
+                    <li>MEMORY:     0 - 399 </li>
+                    <li>KEYBOARD:   400 - 499 </li>
+                    <li>MONITOR:    500 - 599 </li>
+                    </ul>
                 </div>
             </div>
         </div>

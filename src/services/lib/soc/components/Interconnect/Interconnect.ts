@@ -70,7 +70,7 @@ export default class Interconnect extends TileLinkObject {
             y: 0,
             width: toPixel(w),
             height: toPixel(h),
-            fill: Scene.FILL_COLOR,
+            fill: '#4ade80',
             stroke: Scene.BORDER_COLOR,
         })
 
@@ -87,6 +87,8 @@ export default class Interconnect extends TileLinkObject {
             text: 'Interconnect',
             verticalAlign: 'middle',
             align: 'center',
+            fill: 'white',
+            fontVariant: 'bold',
         })
 
         this.shape.add(text)

@@ -1,7 +1,10 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
+/** import MUI */
 import Button from '@mui/material/Button'
+import Tabs from '@mui/material/Tabs'
+import Tab from '@mui/material/Tab'
 import RegisterTable from '~/components/RegisterTable/RegisterTable'
 import { cn } from '~/helpers/cn'
 import Logs from '~/services/lib/Logs/Logs'
@@ -26,16 +29,18 @@ export default function SocPage({}: Props) {
     const logRef = useRef<Logs>()
     const [showCodeEditor, setShowCodeEditor] = useState(false)
     const [disableCodeEditor, setDisableCodeEditor] = useState(false)
-    const [registersData, setRegistersData] = useState<TwinRegister[]>([])
+    // const [registersData, setRegistersData] = useState<TwinRegister[]>([])
     const [code, setCode] = useState('')
-    const [isOpenGuideModal, setIsOpenGuideModal] = useState(false)
+    // const [isOpenGuideModal, setIsOpenGuideModal] = useState(false)
     const [allowRun, setAllowRun] = useState(false)
 
     const [stepCode, setStepCode] = useState<string[]>([])
     const [isStepping, setIsStepping] = useState(false)
     const [pc, setPc] = useState<number | undefined>(undefined)
 
-    const handleGuideModalClose = () => setIsOpenGuideModal(false)
+    const [controlTabIndex, setControlTabIndex] = useState(0)
+
+    // const handleGuideModalClose = () => setIsOpenGuideModal(false)
 
     useEffect(() => {
         const socCode = localStorage.getItem('soc_code') ?? ''
@@ -259,9 +264,27 @@ export default function SocPage({}: Props) {
                     </div>
                 </div>
                 <div className="border-l-2 border-black px-2">
-                    <div className="monitor" id="monitor" tabIndex={0}></div>
-                    <Keyboard />
-                    <LedMatrix />
+                    {/* Tab Bar */}
+                    <Tabs
+                        value={controlTabIndex}
+                        onChange={(e, value) => setControlTabIndex(value)}
+                        aria-label="Control Tab Index"
+                        // variant='scrollable'
+                    >
+                        <Tab label="M & K" />
+                        <Tab label="Led Matrix" />
+                    </Tabs>
+
+                    {/* Tab index = 0 */}
+                    <div className={cn({ hidden: controlTabIndex !== 0 })}>
+                        <div className="monitor" id="monitor" tabIndex={0}></div>
+                        <Keyboard />
+                    </div>
+
+                    {/* Tab index = 1 */}
+                    <div className={cn({ hidden: controlTabIndex !== 1 })}>
+                        <LedMatrix />
+                    </div>
                 </div>
             </div>
             {/* <GuideModal isOpen={isOpenGuideModal} onClose={handleGuideModalClose} /> */}

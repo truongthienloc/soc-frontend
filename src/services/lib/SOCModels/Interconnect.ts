@@ -130,50 +130,54 @@ export default class InterConnect {
     ChannelA: string
     ChannelD: string
 
-    constructor(numPin: number, numPout: number, active: boolean, 
-        memory_address: number, monitor_address: number, keyboard_address: number) {
-        
-        this.active             = active
-        this.memory_address     = memory_address
-        this.monitor_address    = monitor_address
-        this.keyboard_address   = keyboard_address
-        this.numPin             = numPin
-        this.numPout            = numPout
-        this.Pin                = []
-        this.Pout               = []
+    constructor(
+        numPin: number,
+        numPout: number,
+        active: boolean,
+        memory_address: number,
+        monitor_address: number,
+        keyboard_address: number,
+    ) {
+        this.active = active
+        this.memory_address = memory_address
+        this.monitor_address = monitor_address
+        this.keyboard_address = keyboard_address
+        this.numPin = numPin
+        this.numPout = numPout
+        this.Pin = []
+        this.Pout = []
         for (let index = 0; index < numPin; index++) {
             this.Pin.push(createPort(true))
         }
         for (let index = 0; index < numPout; index++) {
             this.Pout.push(createPort(true))
         }
-        this.ChannelA_queue     = []
-        this.ChannelD_queue     = []
-        this.ChannelA           = ''
-        this.ChannelD           = ''
-
+        this.ChannelA_queue = []
+        this.ChannelD_queue = []
+        this.ChannelA = ''
+        this.ChannelD = ''
     }
 
     Port_in_CA(data: string, index: number, cycle: number): void {
-        if (this.active== true) {
-            this.Pin[index].data.   push(data)
-            this.Pin[index].active  = true
-            const port_name         = `Port_in[${index}]`
-            this.ChannelA_queue.    push(new ChannelA(port_name, cycle, data))
+        if (this.active == true) {
+            this.Pin[index].data.push(data)
+            this.Pin[index].active = true
+            const port_name = `Port_in[${index}]`
+            this.ChannelA_queue.push(new ChannelA(port_name, cycle, data))
         }
     }
 
     Port_in_CD(data: string, index: number, cycle: number): void {
-        if (this.active== true) {
-            this.Pin[index].data.   push(data)
-            this.Pin[index].active  = true
-            const port_name         = `Port_in[${index}]`
-            this.ChannelD_queue.    push(new ChannelD(port_name, cycle, data))
+        if (this.active == true) {
+            this.Pin[index].data.push(data)
+            this.Pin[index].active = true
+            const port_name = `Port_in[${index}]`
+            this.ChannelD_queue.push(new ChannelD(port_name, cycle, data))
         }
     }
 
     Port_out(index: number): any {
-        if (this.active== true) {
+        if (this.active == true) {
             if (this.Pout[index].data.length === 0) {
                 return -1
             }
@@ -181,30 +185,35 @@ export default class InterConnect {
             this.Pout[index].data.shift()
             return data
         }
-        
     }
 
     TransmitChannelA(): void {
-        if (this.active== true) {
+        if (this.active == true) {
             for (const ChA of this.ChannelA_queue) {
                 console.log('cha adrr', dec(ChA.address))
                 if (dec('0' + ChA.address) < this.memory_address && 0 <= dec('0' + ChA.address)) {
                     this.Pout[1].data.push(ChA)
                 }
-                if (dec('0' + ChA.address) < this.monitor_address && this.memory_address+1 <= dec('0' + ChA.address)) {
+                if (
+                    dec('0' + ChA.address) < this.monitor_address &&
+                    this.memory_address + 1 <= dec('0' + ChA.address)
+                ) {
                     this.Pout[2].data.push(ChA)
                 }
-                if (dec('0' + ChA.address) < this.keyboard_address && this.monitor_address+1 <= dec('0' + ChA.address)) {
+                if (
+                    dec('0' + ChA.address) < this.keyboard_address &&
+                    this.monitor_address + 1 <= dec('0' + ChA.address)
+                ) {
                     this.Pout[3].data.push(ChA)
                 }
             }
             this.ChannelA_queue = []
-        } 
-}
+        }
+    }
 
     TransmitChannelD(): void {
         let count0 = 0
-        if (this.active== true) {
+        if (this.active == true) {
             for (const ChD of this.ChannelD_queue) {
                 if (ChD.source === '00') {
                     //console.log('payload cd', ChD.payload)

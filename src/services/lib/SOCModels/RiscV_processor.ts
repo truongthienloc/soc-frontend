@@ -44,7 +44,7 @@ export default class RiscVProcessor {
     }
 
     public setImem() {
-        if (this.active== true) {
+        if (this.active == true) {
             let pc_addr = 0
             let binary_code = this.Assembler.binary_code
             for (let i of binary_code) {
@@ -53,8 +53,7 @@ export default class RiscVProcessor {
             }
             for (let i of this.Assembler.Instructions)
                 if (i != '.text' && i != '') this.Assembly_code.push(i)
-        } 
-        
+        }
     }
     constructor(name: string, source: string, active: boolean) {
         this.name = name
@@ -145,7 +144,7 @@ export default class RiscVProcessor {
 
     RunAll() {
         this.pc = 0
-        if (this.active== true) {
+        if (this.active == true) {
             while (this.pc < Object.values(this.Instruction_memory).length * 4) {
                 const element = this.Instruction_memory[this.pc.toString(2)]
                 this.run(element, this.pc)
@@ -609,7 +608,7 @@ export default class RiscVProcessor {
     }
 
     run(instruction: string, pc: number): [string, string, string, string, string] {
-        if (this.active== true) {
+        if (this.active == true) {
             let signBit = 0
             let readData = ''
             this.control(instruction.slice(25, 32), instruction.slice(17, 20))
@@ -710,7 +709,8 @@ export default class RiscVProcessor {
                     this.slt,
                 ),
                 mux(
-                    (dec(imm) << 12).toString(2).padStart(32, '0') + pc.toString(2).padStart(32, '0'),
+                    (dec(imm) << 12).toString(2).padStart(32, '0') +
+                        pc.toString(2).padStart(32, '0'),
                     (dec(imm) << 12).toString(2).padStart(32, '0'),
                     this.auiOrLui,
                 ),
@@ -728,6 +728,5 @@ export default class RiscVProcessor {
             console.log('next_pc', this.pc)
             return [message, data, address, writeRegister, size]
         } else return ['', '', '', '', '']
-        
     }
 }

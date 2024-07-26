@@ -18,7 +18,8 @@ export function dec(temp: string): number {
         }
     }
     if (temp[temp.length - 1] === '1') {
-        s -= 1 << 32
+        s = s- 4294967296 // 1<<32
+        
     }
     return s
 }

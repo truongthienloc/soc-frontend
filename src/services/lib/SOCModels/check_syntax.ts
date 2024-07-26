@@ -297,7 +297,7 @@ export default class Assembler {
         and: '0000000',
     }
 
-    private handlerString(input: string): string {
+    public handlerString(input: string): string {
         let string = input
         if (string.includes('//')) {
             string = string.split('//')[0]
@@ -305,7 +305,6 @@ export default class Assembler {
         if (string.includes('#')) {
             string = string.split('#')[0]
         }
-
         string = string
             .replace(/\(|\)|,/g, ' ')
             .trim()
@@ -497,8 +496,14 @@ export default class Assembler {
         }
         let imm = temp.toString(2).padStart(21, '0')
         if (temp < 0) {
-            imm = (1 << (21 + temp)).toString(2).slice(-21)
+            const absBinary = Math.abs(temp).toString(2);
+            const bits = absBinary.length;
+            let binary = (temp >>> 0).toString(2);
+
+            imm = ((1 << 21) + temp).toString(2).slice(-21)
         }
+        console.log('jal',temp)
+        console.log('jal',imm)
         imm = imm[0] + imm.slice(10, 20) + imm[9] + imm.slice(1, 9)
 
         const values = [imm, rd, opcode]
@@ -549,7 +554,9 @@ export default class Assembler {
                 temp = this.address[mlist[3]] - this.address[input]
             }
         }
+        
         let imm = temp.toString(2).padStart(13, '0')
+        console.log('imm', mlist[3] , input)
         if (temp < 0) {
             imm = (1 << (13 + temp)).toString(2).slice(-13)
         }
@@ -600,7 +607,7 @@ export default class Assembler {
         if (temp < 0) {
             imm = (1 << (20 + temp)).toString(2)
         }
-
+        
         const values = [imm, rd, opcode]
         if (values.some((value) => value === undefined)) this.syntax_error = true
         return imm + rd + opcode
@@ -631,20 +638,21 @@ export default class Assembler {
             if (li.length === 1) {
                 if (ins[i].charAt(ins[i].length - 1) !== ':') this.syntax_error = true
                 while (ins[i].includes(':')) {
-                    this.address[ins[i].split(':')[0]] = PC
+                    this.address[(ins[i].split(':')[0]).toString()] = PC
                     ins[i] = ins[i].split(':')[1]
                 }
             } else {
                 if (ins[i].includes(':')) {
                     const label = ins[i].split(':')[0].trim()
                     const instruction = ins[i].split(':')[1].trim()
-                    this.address[label] = PC
-                    this.address[instruction] = PC
+                    console.log('label', label)
+                    this.address[label.toString()] = PC
+                    this.address[instruction.toString()] = PC
                     ins[i] = instruction
                     PC += 4
                 } else {
-                    ins[i] += ' ' + i.toString()
-                    this.address[ins[i]] = PC
+                    //ins[i] += ' ' + i.toString()
+                    this.address[ins[i].toString()] = PC
                     PC += 4
                 }
             }
@@ -653,14 +661,16 @@ export default class Assembler {
         this.Instructions = ins
 
         for (let i = pos + 1; i < ins.length; i++) {
-            ins[i] = this.handlerString(ins[i]).slice(0, ins[i].length - 2)
+            console.log('truoc ins[i]', ins[i])
+            ins[i] = this.handlerString(ins[i])//.slice(0, ins[i].length - 2)
+            console.log('sau ins[i]', ins[i])
             // if (ins[i].length > 1 ) ins[i] = this.handlerString(ins[i]).slice(0, ins[i].length-2)
+            
             const t = ins[i].split(' ')
             if (t.length < 2) {
                 continue
             }
             let string = ''
-
             if (this.FMT[t[0]] === 'R') {
                 string = this.RType(ins[i])
             }
@@ -681,8 +691,7 @@ export default class Assembler {
             }
 
             const type = ['R', 'I', 'S', 'SB', 'U', 'UJ']
-            console.log('check ins[i]', ins[i])
-            console.log('check syntax', this.FMT[t[0]], ins[i].charAt(ins[i].length - 1))
+            console.log('address',this.address)
             if (!type.includes(this.FMT[t[0]]) && ins[i].charAt(ins[i].length - 1) !== ':')
                 this.syntax_error = true
             result += string + '\n'

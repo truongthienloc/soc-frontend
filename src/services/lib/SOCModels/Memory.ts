@@ -20,19 +20,32 @@ export default class Memory {
         this.Memory = {}
 
         for (let i = 0; i < LM_point; i+=4) 
-            this.Memory[i.toString(2).padStart(32,'0')] = '';
+            this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
         for (let i = LM_point; i < IO_point; i+=4) 
-            this.Memory[i.toString(2).padStart(32,'0')] = '';
-        this.Memory[IO_point.toString(2).padStart(32,'0')] = '';
+            this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
+        this.Memory[IO_point.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
         for (let i = IO_point + 4; i < Imem_point; i+=4) 
-            this.Memory[i.toString(2).padStart(32,'0')] = '';
+            this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
         for (let i = Imem_point; i < Dmem_point; i+=4) 
-            this.Memory[i.toString(2).padStart(32,'0')] = '';
+            this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
         for (let i = Dmem_point; i < Stack_point; i+=4) 
-            this.Memory[i.toString(2).padStart(32,'0')] = '';
+            this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
         
         this.active = active
         this.slaveMemory = new Slave('DataMemory', true)
+    }
+    public reset () {
+        for (let i = 0; i < this.LM_point; i+=4) 
+            this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0');
+        for (let i = this.LM_point; i < this.IO_point; i+=4) 
+            this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
+        this.Memory[this.IO_point.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
+        for (let i = this.IO_point + 4; i < this.Imem_point; i+=4) 
+            this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
+        for (let i = this.Imem_point; i < this.Dmem_point; i+=4) 
+            this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
+        for (let i = this.Dmem_point; i < this.Stack_point; i+=4) 
+            this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
     }
     public SetInstuctionMemory (Instruction_memory: { [key: string]: string}) {
         let count = this.IO_point + 1

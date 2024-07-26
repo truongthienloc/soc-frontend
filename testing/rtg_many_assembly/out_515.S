@@ -1,0 +1,25 @@
+.text
+
+#Immediate number create to check action of them 
+
+Main:
+		addi    x30 , x0 , 0	#i
+		addi    x20 , x0 , 1	#Result
+		addi    x19 , x0 , 2	#x
+		addi    x7 , x0 , 11	#n
+Loop:
+		bge     x30 , x7 , Result 
+		slli    x20 , x20 , 3 
+		addi    x30 , x30 , 1 
+		jal     x0 , Loop 
+Result:
+		addi    x20 , x20 , -1 
+		addi    x1 , x0 , 2047 
+		bne     x20 , x1 , Fail 
+
+Pass: 
+		addi    x1 , x0 , 084 
+		jal     x0 , End 
+Fail: 
+		addi    x1 , x0 , 070 
+End: 

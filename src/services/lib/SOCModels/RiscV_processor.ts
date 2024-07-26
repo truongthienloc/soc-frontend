@@ -1,11 +1,7 @@
-// TypeScript
 
 import { dec, handleRegister } from './sub_function'
 import { mux } from './sub_function'
 import Master from './Master'
-import { assemblerFromIns } from './assembler'
-import { Logger } from './soc.d'
-import Assembler from './check_syntax'
 
 export default class RiscVProcessor {
     name: string
@@ -14,8 +10,6 @@ export default class RiscVProcessor {
     register: { [key: string]: string }
     Data_memory: { [key: string]: string }
     Instruction_memory: { [key: string]: string }
-    // Assembly_code: any
-    // Assembler: Assembler
     pc = 0
 
     ALUOp: any
@@ -46,13 +40,10 @@ export default class RiscVProcessor {
     public setImem(binary_code: string[] = []) {
         if (this.active == true) {
             let pc_addr = 0
-            // let binary_code = this.Assembler.binary_code
             for (let i of binary_code) {
                 this.Instruction_memory[pc_addr.toString(2)] = i
                 pc_addr += 4
             }
-            // for (let i of this.Assembler.Instructions)
-            //     if (i != '.text' && i != '') this.Assembly_code.push(i)
         }
     }
     constructor(name: string, source: string, active: boolean) {
@@ -96,12 +87,9 @@ export default class RiscVProcessor {
         this.Data_memory = {}
         this.Instruction_memory = {}
         this.pc = 0
-        // this.Assembler = new Assembler()
-        // this.Assembly_code = []
     }
 
     public reset(): void {
-        //this.Assembly_code = []
         this.register = {
             '00000': '00000000000000000000000000000000',
             '00001': '00000000000000000000000000000000',
@@ -139,15 +127,17 @@ export default class RiscVProcessor {
         this.Data_memory = {}
         this.Instruction_memory = {}
         this.pc = 0
-        //this.Assembly_code = []
     }
 
     RunAll() {
         this.pc = 0
+        let count= 0
         if (this.active == true) {
             while (this.pc < Object.values(this.Instruction_memory).length * 4) {
                 const element = this.Instruction_memory[this.pc.toString(2)]
                 this.run(element, this.pc)
+                if (count > 40) break
+                count++
             }
         }
     }
@@ -189,9 +179,10 @@ export default class RiscVProcessor {
     ALU(operand1: any, operand2: any, operation: string): string {
         this.zero = 0
         let signBit = 0
-        let ALUResult: string | number = '0'
-
-        //console.log('operand: ', operand1, operand2, operation)
+        let ALUResult: any 
+        if (operation == 'z') { 
+            return '0'
+        }
 
         operand1 = dec(operand1)
         operand2 = dec(operand2)
@@ -237,15 +228,18 @@ export default class RiscVProcessor {
         }
 
         if (ALUResult === 0) this.zero = 1
-        if (dec(ALUResult.toString()) < 0) {
+        console.log('ALUResult: 1', ALUResult)
+        console.log('dec(ALUResult.toString()', ALUResult)
+        if (ALUResult< 0) {
             signBit = 1
             ALUResult = (1 << 32) + dec(ALUResult.toString())
         }
+        console.log('ALUResult: 2', ALUResult)
         ALUResult = ALUResult.toString(2)
-
+        
         if (ALUResult[0] === '-') ALUResult = ALUResult.slice(3).padStart(32, '1')
         if (ALUResult[0] === '0') ALUResult = ALUResult.slice(2).padStart(32, '0')
-
+        console.log('operand: ', operand1, operand2, dec('0'+ALUResult), operation, operation.slice(1))
         return ALUResult
     }
 
@@ -290,7 +284,7 @@ export default class RiscVProcessor {
                 instruction[0] +
                 instruction.slice(12, 20) +
                 instruction[11] +
-                instruction.slice(1, 13)
+                instruction.slice(1, 11)
         }
         if (['0110111', '0010111'].includes(instruction.slice(-7))) {
             // U-TYPE
@@ -611,6 +605,7 @@ export default class RiscVProcessor {
         if (this.active == true) {
             let signBit = 0
             let readData = ''
+            console.log('instructions', instruction,'pc',pc)
             this.control(instruction.slice(25, 32), instruction.slice(17, 20))
             let size = 'none'
             if (instruction.slice(25, 32) === '0000011')
@@ -681,19 +676,6 @@ export default class RiscVProcessor {
 
             readData = this.dataGen(readData, this.unsigned)
 
-            // if (instruction.slice(25, 32) === '0100011') {
-            //     // SW
-            //     message = 'PUT'
-            //     data = readData2
-            //     address = readData
-            // }
-            // if (instruction.slice(25, 32) === '0000011') {
-            //     // LW
-            //     message = 'GET'
-            //     data = ''
-            //     address = readData
-            // }
-
             let writeDataR = mux(
                 mux(
                     mux(
@@ -716,8 +698,6 @@ export default class RiscVProcessor {
                 ),
                 this.wb,
             )
-            //console.log(writeDataR)
-            //console.log(this.slt)
             writeDataR = writeDataR.padStart(32, '0')
             if (this.regWrite === 1) {
                 this.register[writeRegister] = writeDataR
@@ -725,7 +705,6 @@ export default class RiscVProcessor {
 
             this.register['00000'] = '00000000000000000000000000000000'
             this.pc = mux(mux(pc + 4, (dec(imm) << 1) + pc, this.pcSrc1), ALUResult, this.pcSrc2)
-            console.log('next_pc', this.pc)
             return [message, data, address, writeRegister, size]
         } else return ['', '', '', '', '']
     }

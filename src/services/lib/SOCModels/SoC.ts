@@ -112,6 +112,7 @@ export default class Soc {
         //****************SET INITIAL STATUS****************
         // SET INITIAL DATA
         this.Processor.reset()
+        this.Memory.reset()
         this.Processor.setImem(this.Assembler.binary_code)                 // LOAD INTUCTIONS INTO PROCESSOR
         this.Memory.SetInstuctionMemory(this.Processor.Instruction_memory) // LOAD INTUCTIONS INTO MAIN MEMORY
         for (let i of this.Assembler.Instructions)
@@ -128,6 +129,7 @@ export default class Soc {
         this.view?.memory.setIsRunning(false)
         this.view?.dma.setIsRunning(false)
         this.view?.interconnect.setIsRunning(false)
+        this.view?.ledMatrix.setIsRunning(false)
         // NOTIFY SYSTEM'S STATUS IS READY OR NOT
         if (this.Assembler.syntax_error) {
             this.println('SYNTAX ERROR!!!')
@@ -146,7 +148,6 @@ export default class Soc {
             this.println('CPU has not been actived!!!')
             return
         }
-
         while (
             this.Processor.pc <
             (Object.values(this.Processor.Instruction_memory).length - 1) * 4

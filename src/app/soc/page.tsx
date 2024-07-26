@@ -76,6 +76,7 @@ export default function SocPage({}: Props) {
                 socModel.setView(soc)
                 socModel.setKeyboard(keyboard)
                 socModel.setMonitor(monitor)
+                socModel.setLedMatrix(ledMatrix)
             }
 
             firstLoad()
@@ -151,7 +152,7 @@ export default function SocPage({}: Props) {
         // Start Stepping
         if (pc === undefined) {
             setIsStepping(true)
-            setStepCode(socModelRef.current.Processor.Assembly_code)
+            setStepCode(socModelRef.current.Assembly_code)
             setPc(socModelRef.current.Processor.pc)
             setShowCodeEditor(true)
             socModelRef.current.Step()
@@ -180,7 +181,7 @@ export default function SocPage({}: Props) {
             toast.success('Ready to run')
             setAllowRun(true)
             localStorage.setItem('soc_code', code)
-            console.log('step code: ', socModelRef.current.Processor.Assembly_code)
+            console.log('step code: ', socModelRef.current.Assembly_code)
         }
     }
 

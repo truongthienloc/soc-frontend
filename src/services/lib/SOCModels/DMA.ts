@@ -7,9 +7,13 @@ export default class DMA {
         this.slaveDMA = new Slave('DMA Slave', active)
     }
 
-    public setActive() {
-        this.active = true
-    }
+    public Monitor() {
 
-    public Direct_acces() {}
+    }
+    public Led_matrix() {
+
+    }
+    public Keyboard() {
+
+    }
 }

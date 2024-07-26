@@ -28,6 +28,8 @@ export default class NCKHBoard {
     public monitor: Monitor
     public keyboard: Keyboard
     public interconnect: Interconnect
+    public matrixModule: IOModule
+    public ledMatrix: LedMatrix
 
     constructor(containerId: string) {
         Scene.CELL = 15
@@ -146,8 +148,9 @@ export default class NCKHBoard {
         this.mmuModule = mmuModule1
         this.memoryModule = memoryModule1
         this.dmaModule = memoryModule2
-        this.monitorModule = ioModule1
+        this.monitorModule  = ioModule1
         this.keyboardModule = ioModule2
+        this.matrixModule   = ioModule3
 
         this.cpu = cpu1
         this.mmu = mmu1
@@ -156,6 +159,7 @@ export default class NCKHBoard {
         this.keyboard = keyboard
         this.monitor = monitor
         this.interconnect = interconnect
+        this.ledMatrix = ledMatrix
 
         // interconnect.setIsRunning(true)
         // cpu1.setIsRunning(true)

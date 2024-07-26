@@ -34,7 +34,6 @@ export default class Master {
         port: string,
         cycle: number,
         data: string,
-        println: (...args: string[]) => void,
     ): string {
         if (!this.active) {
             return ''
@@ -50,7 +49,7 @@ export default class Master {
 
         if (message === 'PUT') {
             this.count_put += 1
-            this.ir = `00000010${this.source}${address.padStart(32, '0')}110${data}`
+            //this.ir = `00000010${this.source}${address.padStart(32, '0')}110${data}`
             return `00000010${this.source}${address.padStart(32, '0')}110${data}`
         }
 

@@ -1,36 +1,30 @@
+import { Tune } from '@mui/icons-material'
 import { dec, BinToHex } from './convert'
 export default class MMU {
     active: boolean
+    physical_address: any
     constructor(active: boolean) {
         this.active = active
+        this.physical_address = 0
     }
 
-    public setActive() {
-        this.active = true
-    }
-
-    public Dmem(virtual_address: any) {
-        let physical_address
-        if (this.active == true) {
-            physical_address = virtual_address
-            return physical_address
+    public Run (logic_address: any, Imem_point: number, IO_point: number, Dmem_point: number) {
+        let message
+        console.log(Imem_point, IO_point, Dmem_point)
+        if (this.active == false) {
+            message= 'WARNING: MMU has not been actived!!!'
         }
-        return ''
-    }
-    public InMem(virtual_address: any) {
-        let physical_address
-        if (this.active == true) {
-            physical_address = virtual_address
-            return physical_address
+        // ABSOLUTE ADDRESS
+        if (dec ('0'+logic_address) >=0 && dec ('0'+logic_address) <=IO_point+4) {
+            this.physical_address= logic_address
+            message= 'MMU is passed!'
         }
-        return ''
-    }
-    public OutMem(virtual_address: any) {
-        let physical_address
-        if (this.active == true) {
-            physical_address = (dec('0' + virtual_address) + 100).toString(2)
-            return physical_address
+        // UNABSOLUTE ADDRESS
+        if (dec ('0'+logic_address) >IO_point+4 && dec ('0'+logic_address) <Dmem_point - (Imem_point-IO_point) 
+            && this.active == true) {
+            this.physical_address= (dec('0' + logic_address) + (Imem_point-IO_point)).toString(2)
+            message= 'MMU is running' 
         }
-        return ''
+        return [this.physical_address, message]
     }
 }

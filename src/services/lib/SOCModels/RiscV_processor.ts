@@ -14,8 +14,8 @@ export default class RiscVProcessor {
     register: { [key: string]: string }
     Data_memory: { [key: string]: string }
     Instruction_memory: { [key: string]: string }
-    Assembly_code: any
-    Assembler: Assembler
+    // Assembly_code: any
+    // Assembler: Assembler
     pc = 0
 
     ALUOp: any
@@ -43,16 +43,16 @@ export default class RiscVProcessor {
         return handleRegister(this.register)
     }
 
-    public setImem() {
+    public setImem(binary_code: string[] = []) {
         if (this.active == true) {
             let pc_addr = 0
-            let binary_code = this.Assembler.binary_code
+            // let binary_code = this.Assembler.binary_code
             for (let i of binary_code) {
                 this.Instruction_memory[pc_addr.toString(2)] = i
                 pc_addr += 4
             }
-            for (let i of this.Assembler.Instructions)
-                if (i != '.text' && i != '') this.Assembly_code.push(i)
+            // for (let i of this.Assembler.Instructions)
+            //     if (i != '.text' && i != '') this.Assembly_code.push(i)
         }
     }
     constructor(name: string, source: string, active: boolean) {
@@ -96,12 +96,12 @@ export default class RiscVProcessor {
         this.Data_memory = {}
         this.Instruction_memory = {}
         this.pc = 0
-        this.Assembler = new Assembler()
-        this.Assembly_code = []
+        // this.Assembler = new Assembler()
+        // this.Assembly_code = []
     }
 
     public reset(): void {
-        this.Assembly_code = []
+        //this.Assembly_code = []
         this.register = {
             '00000': '00000000000000000000000000000000',
             '00001': '00000000000000000000000000000000',
@@ -139,7 +139,7 @@ export default class RiscVProcessor {
         this.Data_memory = {}
         this.Instruction_memory = {}
         this.pc = 0
-        this.Assembly_code = []
+        //this.Assembly_code = []
     }
 
     RunAll() {
@@ -191,7 +191,7 @@ export default class RiscVProcessor {
         let signBit = 0
         let ALUResult: string | number = '0'
 
-        console.log('operand: ', operand1, operand2, operation)
+        //console.log('operand: ', operand1, operand2, operation)
 
         operand1 = dec(operand1)
         operand2 = dec(operand2)

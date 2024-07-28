@@ -46,24 +46,28 @@ async function writeFile(fileName: string, content: string): Promise<void> {
 }
 
 async function executeFile(fileName: string): Promise<void> {
+    if (fileName.split('.')[1].toLocaleUpperCase() !== 'S') {
+        return
+    }
     try {
-        if (fileName.split('.')[1].toLocaleUpperCase() !== 'S') {
-            return
-        }
 
         console.log('Execute file: ', fileName)
         const filePath = path.join(FOLDER_INPUT, fileName)
         const fileContent = await fs.promises.readFile(filePath, 'utf8')
-
+        
         const SOC = new Soc('super SoC')
-        SOC.Processor.active = true
-        SOC.assemble(fileContent)
-        SOC.Processor.RunAll()
-
-        const result = convertRegisters2String(SOC.Processor.register)
-
         const fileOutput = fileName.split('.')[0].concat('.txt')
-        await writeFile(fileOutput, result)
+
+        try {
+            SOC.Processor.active = true
+            SOC.assemble(fileContent)
+            SOC.Processor.RunAll()
+            
+            const result = convertRegisters2String(SOC.Processor.register)
+            await writeFile(fileOutput, result)
+        } catch (error) {
+            await writeFile(fileOutput, 'Execute Failed')
+        }
     } catch (error) {}
 }
 

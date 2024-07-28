@@ -60,6 +60,9 @@ async function executeFile(fileName: string): Promise<void> {
 
         try {
             SOC.Processor.active = true
+            SOC.Memory.active    = true
+            SOC.MMU.active = true
+            SOC.Bus.active = true
             SOC.assemble(fileContent)
             SOC.Processor.RunAll()
             

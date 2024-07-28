@@ -17,19 +17,21 @@ function convertRegisters2String(registers: { [key: string]: string }): string {
         const hex = parseInt(value, 2).toString(16).padStart(8, '0').toLocaleLowerCase()
         return {
             index: parseInt(key, 2),
-            value: `0x${hex}`
+            value: `0x${hex}`,
         } as RegisterListItem
     })
 
     const sortedList = registerList.sort((a, b) => a.index - b.index)
-    
-    let result = 'Register Expected Results\n';
-    result += sortedList.map((item) => {
-        return `## expect[${item.index}] = ${item.value}`
-    }).join('\n')
+
+    let result = 'Register Expected Results\n'
+    result += sortedList
+        .map((item) => {
+            return `## expect[${item.index}] = ${item.value}`
+        })
+        .join('\n')
 
     // console.log('result: ', result);
-    
+
     return result
 }
 

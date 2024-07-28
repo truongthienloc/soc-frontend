@@ -148,9 +148,9 @@ export default class NCKHBoard {
         this.mmuModule = mmuModule1
         this.memoryModule = memoryModule1
         this.dmaModule = memoryModule2
-        this.monitorModule  = ioModule1
+        this.monitorModule = ioModule1
         this.keyboardModule = ioModule2
-        this.matrixModule   = ioModule3
+        this.matrixModule = ioModule3
 
         this.cpu = cpu1
         this.mmu = mmu1

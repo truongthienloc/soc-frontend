@@ -10,6 +10,8 @@ type RegisterListItem = {
     value: string
 }
 
+let statistic: string[] = []
+
 function convertRegisters2String(registers: { [key: string]: string }): string {
     // console.log('registers: ', registers)
     const entries = Object.entries(registers)
@@ -50,26 +52,27 @@ async function executeFile(fileName: string): Promise<void> {
         return
     }
     try {
-
         console.log('Execute file: ', fileName)
         const filePath = path.join(FOLDER_INPUT, fileName)
         const fileContent = await fs.promises.readFile(filePath, 'utf8')
-        
+
         const SOC = new Soc('super SoC')
         const fileOutput = fileName.split('.')[0].concat('.txt')
 
         try {
             SOC.Processor.active = true
-            SOC.Memory.active    = true
+            SOC.Memory.active = true
             SOC.MMU.active = true
             SOC.Bus.active = true
             SOC.assemble(fileContent)
             SOC.Processor.RunAll()
-            
+
             const result = convertRegisters2String(SOC.Processor.register)
             await writeFile(fileOutput, result)
+            statistic.push(`File ${fileName}: Execute Successfully`)
         } catch (error) {
             await writeFile(fileOutput, 'Execute Failed')
+            statistic.push(`File ${fileName}: Execute Failed`)
         }
     } catch (error) {}
 }
@@ -78,11 +81,17 @@ async function readAllFiles() {
     try {
         const files = await fs.promises.readdir(FOLDER_INPUT)
 
-        // executeFile(files[0])
+        statistic = []
 
-        files.forEach(async (file) => {
-            executeFile(file)
-        })
+        console.time('Execute in')
+        await Promise.all(
+            files.map(async (file) => {
+                return executeFile(file)
+            }),
+        )
+        console.timeEnd('Execute in')
+
+        writeFile('statistic.final.txt', statistic.join('\n'))
     } catch (err) {
         console.error(err)
     }

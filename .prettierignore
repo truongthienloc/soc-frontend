@@ -1,2 +1,3 @@
 #
-/src/services/lib/SOCModels/
+src/services/lib/SOCModels/*
+!src/services/lib/SOCModels/testing/

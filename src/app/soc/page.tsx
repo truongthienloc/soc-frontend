@@ -205,14 +205,23 @@ export default function SocPage({}: Props) {
     const decDmem_point = parseInt(dMemPoint, 16)
     const decStack_point = parseInt(stackPoint, 16)
 
-    socModelRef.current?.Memory.setMemory(
-      decLM_point,
-      decIO_point,
-      decImem_point,
-      decDmem_point,
-      decStack_point,
-    )
-    if (!socModelRef.current?.assemble(code)) {
+    // socModelRef.current?.Memory.setMemory(
+    //   decLM_point,
+    //   decIO_point,
+    //   decImem_point,
+    //   decDmem_point,
+    //   decStack_point,
+    // )
+    if (
+      !socModelRef.current?.assemble(
+        code,
+        decLM_point,
+        decIO_point,
+        decImem_point,
+        decDmem_point,
+        decStack_point,
+      )
+    ) {
       toast.error('Syntax error')
     } else {
       toast.success('Ready to run')
@@ -233,21 +242,13 @@ export default function SocPage({}: Props) {
   return (
     <div className="container h-dvh">
       <div className="grid h-full grid-cols-[2fr_1fr]">
-        <div className="grid grid-rows-[9fr_1fr]">
+        <div className="grid grid-rows-[10fr_2fr]">
           <div className="grid grid-cols-2 gap-2">
             {/* CODE EDITOR SECTION */}
             <div className={cn({ hidden: showSimulatorType !== 'CODE_EDITOR' })}>
               <div className="flex flex-row gap-2 py-1">
                 <Button onClick={() => setShowSimulatorType('SOC')}>Back</Button>
-                <Button
-                  className="ml-auto"
-                  variant="outlined"
-                  color="error"
-                  onClick={handleGuideClick}
-                >
-                  Guide
-                </Button>
-                <Button variant="outlined" color="secondary" onClick={handleImportClick}>
+                <Button className='ml-auto' variant="outlined" color="secondary" onClick={handleImportClick}>
                   Import
                 </Button>
               </div>
@@ -345,29 +346,34 @@ export default function SocPage({}: Props) {
               ></div>
             </div>
           </div>
-          <div className="flex flex-row gap-2">
-            {/* <Button className="h-fit" variant="outlined" onClick={() => {}}>
-                            Run
-                        </Button> */}
-            <Button className="h-fit" variant="outlined" onClick={handleAssembleClick}>
-              Assemble & Restart
-            </Button>
-            <Button
-              className="h-fit"
-              variant="outlined"
-              disabled={!allowRun}
-              onClick={handleRunAllClick}
-            >
-              Run All
-            </Button>
-            <Button
-              className="h-fit"
-              variant="outlined"
-              onClick={handleStepClick}
-              disabled={!allowRun}
-            >
-              Step
-            </Button>
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-row flex-wrap gap-2">
+              <Button className="h-fit" variant="outlined" onClick={handleAssembleClick}>
+                Assemble & Restart
+              </Button>
+              <Button
+                className="h-fit"
+                variant="outlined"
+                disabled={!allowRun}
+                onClick={handleRunAllClick}
+              >
+                Run All
+              </Button>
+              <Button
+                className="h-fit"
+                variant="outlined"
+                onClick={handleStepClick}
+                disabled={!allowRun}
+              >
+                Step
+              </Button>
+              
+            </div>
+            <div className="">
+              <Button className="h-fit" variant="outlined" color="error" onClick={handleGuideClick}>
+                  Guide
+                </Button>
+            </div>
           </div>
         </div>
         <div className="border-l-2 border-black px-2">

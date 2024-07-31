@@ -130,7 +130,6 @@ export default function SocPage({}: Props) {
     socModelRef.current.RunAll()
     setShowSimulatorType('SOC')
     setAllowRun(false)
-    const dec = parseInt(lmPoint, 16)
     // setRegistersData(convertRegisters2TwinRegisters(socModelRef.current.getRegisters()))
   }
 
@@ -199,6 +198,20 @@ export default function SocPage({}: Props) {
     // console.log('Assemble: ', socModelRef.current?.assemble(code));
     setIsStepping(false)
     setPc(undefined)
+
+    const decLM_point = parseInt(lmPoint, 16)
+    const decIO_point = parseInt(ioPoint, 16)
+    const decImem_point = parseInt(iMemPoint, 16)
+    const decDmem_point = parseInt(dMemPoint, 16)
+    const decStack_point = parseInt(stackPoint, 16)
+
+    socModelRef.current?.Memory.setMemory(
+      decLM_point,
+      decIO_point,
+      decImem_point,
+      decDmem_point,
+      decStack_point,
+    )
     if (!socModelRef.current?.assemble(code)) {
       toast.error('Syntax error')
     } else {
@@ -307,7 +320,7 @@ export default function SocPage({}: Props) {
                 <TextField
                   label="Stack_point"
                   value={stackPoint}
-                  onChange={(e) => handleChangeMemoryMap(setLmPoint, e.target.value)}
+                  onChange={(e) => handleChangeMemoryMap(setStackPoint, e.target.value)}
                   InputProps={{
                     startAdornment: <InputAdornment position="start">0x</InputAdornment>,
                   }}

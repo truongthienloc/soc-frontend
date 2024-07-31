@@ -9,8 +9,7 @@ export default class Memory {
     Dmem_point: number
     Stack_point: number
     slaveMemory: Slave
-    constructor(active: boolean, LM_point: number, IO_point: number, 
-        Imem_point: number, Dmem_point: number, Stack_point: number) {
+    constructor(active: boolean) {
         this.LM_point    = 0
         this.IO_point    = 0
         this.Imem_point  = 0
@@ -19,17 +18,17 @@ export default class Memory {
         
         this.Memory = {}
 
-        for (let i = 0; i < LM_point; i+=4) 
-            this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
-        for (let i = LM_point; i < IO_point; i+=4) 
-            this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
-        this.Memory[IO_point.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
-        for (let i = IO_point + 4; i < Imem_point; i+=4) 
-            this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
-        for (let i = Imem_point; i < Dmem_point; i+=4) 
-            this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
-        for (let i = Dmem_point; i < Stack_point; i+=4) 
-            this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
+        // for (let i = 0; i < LM_point; i+=4) 
+        //     this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
+        // for (let i = LM_point; i < IO_point; i+=4) 
+        //     this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
+        // this.Memory[IO_point.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
+        // for (let i = IO_point + 4; i < Imem_point; i+=4) 
+        //     this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
+        // for (let i = Imem_point; i < Dmem_point; i+=4) 
+        //     this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
+        // for (let i = Dmem_point; i < Stack_point; i+=4) 
+        //     this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
         
         this.active = active
         this.slaveMemory = new Slave('DataMemory', true)

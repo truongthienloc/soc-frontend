@@ -63,7 +63,7 @@ export default class Soc {
         this.Processor = new RiscVProcessor('RiscV CPU', '01', false)
         this.Bus = new InterConnect(6, 6, false)
         this.MMU = new MMU(false)
-        this.Memory = new Memory(false, 32*4, 40*4, 88*4, 600*4, 768*4)
+        this.Memory = new Memory(false)
         this.DMA = new DMA(false)
         this.Assembler = new Assembler()
         this.Assembly_code = []
@@ -157,6 +157,8 @@ export default class Soc {
     }
 
     public async Step() {
+        console.log("Memory: ", this.Memory.Memory);
+        
 //---------------------------------------------------------------------------------------------------------\\
         // ****************CHECK CONDITION TO RUN SYSTEM ****************
         // CHECK PROCESSOR IS ACTIVED

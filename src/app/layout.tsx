@@ -11,21 +11,21 @@ import 'react-toastify/dist/ReactToastify.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-    title: 'System On Chip',
-    description: '',
+  title: 'System On Chip',
+  description: '',
 }
 
 export default function RootLayout({
-    children,
+  children,
 }: Readonly<{
-    children: React.ReactNode
+  children: React.ReactNode
 }>) {
-    return (
-        <html lang="en">
-            <body className={inter.className}>
-                {children}
-                <ToastContainer />
-            </body>
-        </html>
-    )
+  return (
+    <html lang="en">
+      <body className={inter.className}>
+        {children}
+        <ToastContainer />
+      </body>
+    </html>
+  )
 }

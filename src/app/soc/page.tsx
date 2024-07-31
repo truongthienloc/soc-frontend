@@ -130,6 +130,7 @@ export default function SocPage({}: Props) {
     socModelRef.current.RunAll()
     setShowSimulatorType('SOC')
     setAllowRun(false)
+    const dec = parseInt(lmPoint, 16)
     // setRegistersData(convertRegisters2TwinRegisters(socModelRef.current.getRegisters()))
   }
 
@@ -206,6 +207,14 @@ export default function SocPage({}: Props) {
       localStorage.setItem('soc_code', code)
       console.log('step code: ', socModelRef.current.Assembly_code)
     }
+  }
+
+  const handleResetDefault = () => {
+    setLmPoint('')
+    setIOPoint('')
+    setIMemPoint('')
+    setDMemPoint('')
+    setStackPoint('')
   }
 
   return (
@@ -304,7 +313,12 @@ export default function SocPage({}: Props) {
                   }}
                   disabled={isStepping}
                 />
-                <Button variant="contained" color="error" disabled={isStepping}>
+                <Button
+                  variant="contained"
+                  color="error"
+                  disabled={isStepping}
+                  onClick={handleResetDefault}
+                >
                   Reset Default
                 </Button>
               </div>

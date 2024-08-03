@@ -58,7 +58,7 @@ function CodeEditor({ value = '', onChange, disable = false, hidden }: CodeEdito
     code.setOption('readOnly', disable)
 
     code.setValue(value)
-    code.setSize(400, 400)
+    code.setSize("100%", 400)
 
     // console.log('container size: ', containerRef.current.clientWidth, containerRef.current.clientHeight);
 

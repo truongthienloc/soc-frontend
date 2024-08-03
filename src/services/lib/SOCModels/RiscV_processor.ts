@@ -84,6 +84,19 @@ export default class RiscVProcessor {
             '11110': '00000000000000000000000000000000',
             '11111': '00000000000000000000000000000000',
         }
+        this.jal = 0
+        this.jalr = 0
+        this.branch = '000'
+        this.auiOrLui = 0
+        this.wb = 0
+        this.memToReg = 0
+        this.unsigned = 0
+        this.memRead = '000'
+        this.memWrite = '000'
+        this.ALUSrc = 0
+        this.regWrite = 0
+        this.ALUOp = 'z'
+        this.slt = 0
         this.Data_memory = {}
         this.Instruction_memory = {}
         this.pc = 0
@@ -129,14 +142,17 @@ export default class RiscVProcessor {
         this.pc = 0
     }
 
-    RunAll() {
+    RunAll(fileName: string ) {
         this.pc = 0
         let count= 0
         if (this.active == true) {
-            while (this.pc < Object.values(this.Instruction_memory).length * 4) {
+            while (this.pc < Object.values(this.Instruction_memory).length * 4 - 4) {
                 const element = this.Instruction_memory[this.pc.toString(2)]
                 this.run(element, this.pc)
-                if (count > 40) break
+                if (count > 300) {
+                    console.log(fileName, 'problem!!!!')
+                    break
+                }
                 count++
             }
         }
@@ -178,7 +194,7 @@ export default class RiscVProcessor {
 
     ALU(operand1: any, operand2: any, operation: string): string {
         this.zero = 0
-        let signBit = 0
+        this.signBit = 0
         let ALUResult: any 
         if (operation == 'z') { 
             return '0'
@@ -196,7 +212,7 @@ export default class RiscVProcessor {
             operand2 = Math.abs(operand2)
         }
         const signOperand1 = operand1 < 0 ? 1 : 0
-
+        // console.log(' operation',operation.slice(1))
         switch (operation.slice(1)) {
             case '000':
                 ALUResult = operand1 & operand2
@@ -228,18 +244,22 @@ export default class RiscVProcessor {
         }
 
         if (ALUResult === 0) this.zero = 1
-        console.log('ALUResult: 1', ALUResult)
-        console.log('dec(ALUResult.toString()', ALUResult)
+
+
+
         if (ALUResult< 0) {
-            signBit = 1
-            ALUResult = (1 << 32) + dec(ALUResult.toString())
-        }
-        console.log('ALUResult: 2', ALUResult)
+            this.signBit = 1
+            ALUResult = (4294967296) + ALUResult
+        } 
+
+
         ALUResult = ALUResult.toString(2)
+
         
         if (ALUResult[0] === '-') ALUResult = ALUResult.slice(3).padStart(32, '1')
         if (ALUResult[0] === '0') ALUResult = ALUResult.slice(2).padStart(32, '0')
-        console.log('operand: ', operand1, operand2, dec('0'+ALUResult), operation, operation.slice(1))
+        //console.log('operand: ', operand1, operand2, dec('0'+ALUResult), operation, operation.slice(1))
+
         return ALUResult
     }
 
@@ -276,7 +296,7 @@ export default class RiscVProcessor {
                 instruction[0] +
                 instruction[24] +
                 instruction.slice(1, 7) +
-                instruction.slice(20, 25)
+                instruction.slice(20, 24)
         }
         if (instruction.slice(-7) === '1101111') {
             // J-TYPE
@@ -290,11 +310,13 @@ export default class RiscVProcessor {
             // U-TYPE
             this.imm = instruction.slice(0, 20)
         }
+        // console.log('imm', this.imm)
         if (['0110111', '0010111'].includes(instruction.slice(-7))) {
             return this.imm.padStart(32, '0')
         } else {
             return this.imm.padStart(32, this.imm[0])
         }
+        
     }
 
     control(opcode: string, funct3: string): void {
@@ -475,7 +497,7 @@ export default class RiscVProcessor {
                         this.operation = funct7 === '0' ? '0011' : '0100'
                         break
                     case '001':
-                        this.operation = '0105'
+                        this.operation = '0101'
                         break
                     case '010':
                         this.operation = '0100'
@@ -503,7 +525,7 @@ export default class RiscVProcessor {
                         this.operation = '0011' // ADDI
                         break
                     case '001':
-                        this.operation = '0105' // SLLI
+                        this.operation = '0101' // SLLI
                         break
                     case '010':
                         this.operation = '0100' // SLTI
@@ -605,7 +627,7 @@ export default class RiscVProcessor {
         if (this.active == true) {
             let signBit = 0
             let readData = ''
-            console.log('instructions', instruction,'pc',pc)
+            // console.log('instructions', instruction,'pc',pc)
             this.control(instruction.slice(25, 32), instruction.slice(17, 20))
             let size = 'none'
             if (instruction.slice(25, 32) === '0000011')
@@ -648,12 +670,14 @@ export default class RiscVProcessor {
             const writeRegister = instruction.slice(20, 25)
             const readData1 = this.register[readRegister1]
             const readData2 = this.register[readRegister2]
-
+            // console.log('readRegister1 readRegister2 writeRegister', readRegister1, readRegister2, writeRegister)
+            
             const imm = this.immGen(instruction)
-            //console.log('edas',(dec(imm)) )
-            this.aluControl(this.ALUOp, instruction.slice(17, 20), instruction.slice(1))
+            
+            this.aluControl(this.ALUOp, instruction.slice(17, 20), instruction.slice(1,2))
 
             const ALUResult = this.ALU(readData1, mux(readData2, imm, this.ALUSrc), this.operation)
+
             this.branchControl(this.jal, this.jalr, this.branch)
 
             let message = 'None'
@@ -686,7 +710,7 @@ export default class RiscVProcessor {
                     mux(
                         '00000000000000000000000000000000',
                         '00000000000000000000000000000001',
-                        signBit,
+                        this.signBit,
                     ),
                     this.slt,
                 ),
@@ -698,12 +722,18 @@ export default class RiscVProcessor {
                 ),
                 this.wb,
             )
+            // if (this.pc== 4) {
+            //     this.active = false
+            //     console.log('ALUResult: ', ALUResult)
+            //     console.log('writeDataR: ', writeDataR)
+            // }
             writeDataR = writeDataR.padStart(32, '0')
             if (this.regWrite === 1) {
                 this.register[writeRegister] = writeDataR
             }
 
             this.register['00000'] = '00000000000000000000000000000000'
+            //.log(pc + 4, (dec(imm) << 1) , this.pcSrc1)
             this.pc = mux(mux(pc + 4, (dec(imm) << 1) + pc, this.pcSrc1), ALUResult, this.pcSrc2)
             return [message, data, address, writeRegister, size]
         } else return ['', '', '', '', '']

@@ -380,7 +380,7 @@ export default class Assembler {
 
     private RType(input: string): string {
         const mlist = this.handlerString(input).split(' ')
-        if (mlist.length != 4) {
+        if (mlist.length != 5) {
             this.syntax_error = true
             return ''
         }
@@ -400,11 +400,7 @@ export default class Assembler {
 
     private IType(input: string): string {
         const mlist = this.handlerString(input).split(' ')
-        if (mlist.length != 4) {
-            this.syntax_error = true
-            return ''
-        }
-        if (mlist.length < 4) {
+        if (mlist.length != 5) {
             this.syntax_error = true
             return ''
         }
@@ -417,7 +413,7 @@ export default class Assembler {
             }
             let imm = parseInt(mlist[2]).toString(2).padStart(12, '0')
             if (parseInt(mlist[2]) < 0) {
-                imm = (1 << (12 + parseInt(mlist[2]))).toString(2).slice(-12)
+                imm = ((1 << 12) + parseInt(mlist[2])).toString(2).slice(-12)
             }
             const rs1 = this.register[mlist[3]]
 
@@ -466,7 +462,7 @@ export default class Assembler {
         }
         let imm = parseInt(mlist[3]).toString(2).padStart(12, '0')
         if (parseInt(mlist[3]) < 0) {
-            imm = (1 << (12 + parseInt(mlist[3]))).toString(2).slice(-12)
+            imm = ((1 << 12) + parseInt(mlist[3])).toString(2).slice(-12)
         }
         const rs1 = this.register[mlist[2]]
 
@@ -478,7 +474,7 @@ export default class Assembler {
 
     private UJType(input: string): string {
         const mlist = this.handlerString(input).split(' ')
-        if (mlist.length != 3) {
+        if (mlist.length != 4) {
             this.syntax_error = true
             return ''
         }
@@ -502,8 +498,6 @@ export default class Assembler {
 
             imm = ((1 << 21) + temp).toString(2).slice(-21)
         }
-        console.log('jal',temp)
-        console.log('jal',imm)
         imm = imm[0] + imm.slice(10, 20) + imm[9] + imm.slice(1, 9)
 
         const values = [imm, rd, opcode]
@@ -516,7 +510,7 @@ export default class Assembler {
         const mlist = this.handlerString(input).split(' ')
         const opcode = this.OPCODE[mlist[0]]
         const rs2 = this.register[mlist[1]]
-        if (mlist.length != 4) {
+        if (mlist.length != 5) {
             this.syntax_error = true
             return ''
         }
@@ -537,7 +531,7 @@ export default class Assembler {
 
     private SBType(input: string): string {
         const mlist = this.handlerString(input).split(' ')
-        if (mlist.length != 4) {
+        if (mlist.length != 5) {
             this.syntax_error = true
             return ''
         }
@@ -556,9 +550,9 @@ export default class Assembler {
         }
         
         let imm = temp.toString(2).padStart(13, '0')
-        console.log('imm', mlist[3] , input)
+        console.log('')
         if (temp < 0) {
-            imm = (1 << (13 + temp)).toString(2).slice(-13)
+            imm = ((1 << 13) + temp).toString(2).slice(-13)
         }
 
         const values = [
@@ -587,7 +581,7 @@ export default class Assembler {
 
     private UType(input: string): string {
         const mlist = this.handlerString(input).split(' ')
-        if (mlist.length != 3) {
+        if (mlist.length != 4) {
             this.syntax_error = true
             return ''
         }
@@ -605,7 +599,7 @@ export default class Assembler {
         }
         let imm = temp.toString(2).padStart(20, '0')
         if (temp < 0) {
-            imm = (1 << (20 + temp)).toString(2)
+            imm = ((1 << 20) + temp).toString(2)
         }
         
         const values = [imm, rd, opcode]
@@ -645,13 +639,12 @@ export default class Assembler {
                 if (ins[i].includes(':')) {
                     const label = ins[i].split(':')[0].trim()
                     const instruction = ins[i].split(':')[1].trim()
-                    console.log('label', label)
                     this.address[label.toString()] = PC
                     this.address[instruction.toString()] = PC
                     ins[i] = instruction
                     PC += 4
                 } else {
-                    //ins[i] += ' ' + i.toString()
+                    ins[i] += ' ' + i.toString()
                     this.address[ins[i].toString()] = PC
                     PC += 4
                 }
@@ -661,9 +654,7 @@ export default class Assembler {
         this.Instructions = ins
 
         for (let i = pos + 1; i < ins.length; i++) {
-            console.log('truoc ins[i]', ins[i])
             ins[i] = this.handlerString(ins[i])//.slice(0, ins[i].length - 2)
-            console.log('sau ins[i]', ins[i])
             // if (ins[i].length > 1 ) ins[i] = this.handlerString(ins[i]).slice(0, ins[i].length-2)
             
             const t = ins[i].split(' ')
@@ -691,12 +682,11 @@ export default class Assembler {
             }
 
             const type = ['R', 'I', 'S', 'SB', 'U', 'UJ']
-            console.log('address',this.address)
             if (!type.includes(this.FMT[t[0]]) && ins[i].charAt(ins[i].length - 1) !== ':')
                 this.syntax_error = true
             result += string + '\n'
         }
-
+        console.log('Address: ', this.address)
         this.binary_code = result.split('\n')
     }
 }

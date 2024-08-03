@@ -158,6 +158,8 @@ export default class Soc {
     }
 
     public async Step() {
+        console.log('Memory: ', this.Memory.Memory);
+        
 //---------------------------------------------------------------------------------------------------------\\
         // ****************CHECK CONDITION TO RUN SYSTEM ****************
         // CHECK PROCESSOR IS ACTIVED

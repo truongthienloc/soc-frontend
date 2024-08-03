@@ -57,6 +57,7 @@ export default class Soc {
             return
         }
         this.logger.println(...args)
+        //console.log(...args)
     }
 
     constructor(name: string) {
@@ -149,6 +150,7 @@ export default class Soc {
             this.println('CPU has not been actived!!!')
             return
         }
+
         while (
             this.Processor.pc <
             (Object.values(this.Processor.Instruction_memory).length - 1) * 4
@@ -158,7 +160,7 @@ export default class Soc {
     }
 
     public async Step() {
-        console.log('Memory: ', this.Memory.Memory);
+        //console.log('Memory: ', this.Memory.Memory);
         
 //---------------------------------------------------------------------------------------------------------\\
         // ****************CHECK CONDITION TO RUN SYSTEM ****************

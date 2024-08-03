@@ -50,7 +50,7 @@ export function handleRegister(register: { [key: string]: string }): Register[] 
         const value = dec(register[i])
         count = dec('0' + i)
         const hexValue =
-            '0x' + (value < 0 ? (1 << 32) + value : value).toString(16).padStart(8, '0')
+            '0x' + (value < 0 ? (4294967296) + value : value).toString(16).padStart(8, '0')
         const registerName = `x${count} (${re[count]})`.padEnd(count < 10 ? 10 : 9, ' ')
 
         registers.push({ name: registerName, value: hexValue })

@@ -248,7 +248,12 @@ export default function SocPage({}: Props) {
             <div className={cn({ hidden: showSimulatorType !== 'CODE_EDITOR' })}>
               <div className="flex flex-row gap-2 py-1">
                 <Button onClick={() => setShowSimulatorType('SOC')}>Back</Button>
-                <Button className='ml-auto' variant="outlined" color="secondary" onClick={handleImportClick}>
+                <Button
+                  className="ml-auto"
+                  variant="outlined"
+                  color="secondary"
+                  onClick={handleImportClick}
+                >
                   Import
                 </Button>
               </div>
@@ -367,12 +372,11 @@ export default function SocPage({}: Props) {
               >
                 Step
               </Button>
-              
             </div>
             <div className="">
               <Button className="h-fit" variant="outlined" color="error" onClick={handleGuideClick}>
-                  Guide
-                </Button>
+                Guide
+              </Button>
             </div>
           </div>
         </div>
@@ -395,7 +399,7 @@ export default function SocPage({}: Props) {
           </div>
 
           {/* Tab index = 1 */}
-          <div className={cn({ hidden: controlTabIndex !== 1 })}>
+          <div className={cn('flex h-full', { hidden: controlTabIndex !== 1 })}>
             <LedMatrix />
           </div>
         </div>

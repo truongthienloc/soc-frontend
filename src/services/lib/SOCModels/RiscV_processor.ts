@@ -149,11 +149,11 @@ export default class RiscVProcessor {
             while (this.pc < Object.values(this.Instruction_memory).length * 4 - 4) {
                 const element = this.Instruction_memory[this.pc.toString(2)]
                 this.run(element, this.pc)
-                if (count > 300) {
-                    console.log(fileName, 'problem!!!!')
-                    break
-                }
-                count++
+                // if (count > 300) {
+                //     console.log(fileName, 'problem!!!!')
+                //     break
+                // }
+                // count++
             }
         }
     }

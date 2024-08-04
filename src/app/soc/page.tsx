@@ -5,8 +5,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import Button from '@mui/material/Button'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
-import TextField from '@mui/material/TextField'
-import InputAdornment from '@mui/material/InputAdornment'
 import { cn } from '~/helpers/cn'
 import Logs from '~/services/lib/Logs/Logs'
 // import { Agent, NCKHBoard } from '~/services/lib/soc'
@@ -24,6 +22,8 @@ import { Keyboard } from '~/components/Keyboard'
 import { LedMatrix } from '~/components/LedMatrix'
 import { isValidHexString } from '~/helpers/validates/hex.validate'
 import { SimulatorType } from '~/types/simulator'
+import Link from 'next/link'
+import { MemoryMap } from '~/components/MemoryMap'
 
 type Props = {}
 
@@ -241,117 +241,74 @@ export default function SocPage({}: Props) {
 
   return (
     <div className="container h-dvh">
-      <div className="grid h-full grid-cols-[2fr_1fr]">
-        <div className="grid grid-rows-[10fr_2fr]">
-          <div className="grid grid-cols-2 gap-2">
-            {/* CODE EDITOR SECTION */}
-            <div className={cn({ hidden: showSimulatorType !== 'CODE_EDITOR' })}>
-              <div className="flex flex-row gap-2 py-1">
-                <Button onClick={() => setShowSimulatorType('SOC')}>Back</Button>
-                <Button
-                  className="ml-auto"
-                  variant="outlined"
-                  color="secondary"
-                  onClick={handleImportClick}
-                >
-                  Import
-                </Button>
-              </div>
-              <div className="flex flex-col border border-black">
-                {isStepping ? (
-                  <DisplayStepCode code={stepCode} pc={pc} />
-                ) : (
-                  <CodeEditor
-                    value={code}
-                    onChange={handleChangeCode}
-                    disable={disableCodeEditor}
-                    hidden={showSimulatorType !== 'CODE_EDITOR'}
-                  />
-                )}
-              </div>
-
-              {/* <RegisterTable data={registersData} isShown={true} /> */}
-            </div>
-
-            {/* SOC SECTION */}
-            <div
-              id="simulation"
-              className={cn('flex h-full items-center justify-center', {
-                hidden: showSimulatorType !== 'SOC',
-              })}
-            ></div>
-
-            {/* MEMORY MAP SECTION */}
-            <div className={cn({ hidden: showSimulatorType !== 'MEMORY' })}>
-              <div className="flex flex-row gap-2 py-1">
-                <Button onClick={() => setShowSimulatorType('SOC')}>Back</Button>
-              </div>
-              <div className="grid grid-cols-[auto_auto] gap-2">
-                <TextField
-                  label="LM_point"
-                  value={lmPoint}
-                  onChange={(e) => handleChangeMemoryMap(setLmPoint, e.target.value)}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">0x</InputAdornment>,
-                  }}
-                  disabled={isStepping}
-                />
-                <TextField
-                  label="IO_point"
-                  value={ioPoint}
-                  onChange={(e) => handleChangeMemoryMap(setIOPoint, e.target.value)}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">0x</InputAdornment>,
-                  }}
-                  disabled={isStepping}
-                />
-                <TextField
-                  label="Imem_point"
-                  value={iMemPoint}
-                  onChange={(e) => handleChangeMemoryMap(setIMemPoint, e.target.value)}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">0x</InputAdornment>,
-                  }}
-                  disabled={isStepping}
-                />
-                <TextField
-                  label="Dmem_point"
-                  value={dMemPoint}
-                  onChange={(e) => handleChangeMemoryMap(setDMemPoint, e.target.value)}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">0x</InputAdornment>,
-                  }}
-                  disabled={isStepping}
-                />
-                <TextField
-                  label="Stack_point"
-                  value={stackPoint}
-                  onChange={(e) => handleChangeMemoryMap(setStackPoint, e.target.value)}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">0x</InputAdornment>,
-                  }}
-                  disabled={isStepping}
-                />
-                <Button
-                  variant="contained"
-                  color="error"
-                  disabled={isStepping}
-                  onClick={handleResetDefault}
-                >
-                  Reset Default
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex max-h-[90dvh] flex-col pr-1">
-              <p className="text-xl font-bold">Logs:</p>
-              <div
-                id="logs"
-                className="mt-2 h-full space-y-1 overflow-y-auto rounded-lg border border-black p-2 text-sm [&_pre]:whitespace-pre-wrap"
-              ></div>
-            </div>
+      <div className="grid h-full grid-cols-3 gap-1">
+        {/* CODE EDITOR SECTION */}
+        <div className={cn({ hidden: showSimulatorType !== 'CODE_EDITOR' })}>
+          <h2 className="text-xl font-bold">Code Editor:</h2>
+          <div className="flex flex-row gap-2 py-1">
+            <Button onClick={() => setShowSimulatorType('SOC')}>Back</Button>
+            <Button
+              className="ml-auto"
+              variant="outlined"
+              color="secondary"
+              onClick={handleImportClick}
+            >
+              Import
+            </Button>
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col border border-black">
+            {isStepping ? (
+              <DisplayStepCode code={stepCode} pc={pc} />
+            ) : (
+              <CodeEditor
+                value={code}
+                onChange={handleChangeCode}
+                disable={disableCodeEditor}
+                hidden={showSimulatorType !== 'CODE_EDITOR'}
+              />
+            )}
+          </div>
+
+          {/* <RegisterTable data={registersData} isShown={true} /> */}
+        </div>
+
+        {/* SOC SECTION */}
+        <div
+          id="simulation"
+          className={cn('flex h-full items-center justify-center', {
+            hidden: showSimulatorType !== 'SOC',
+          })}
+        ></div>
+
+        {/* MEMORY MAP SECTION */}
+        <div className={cn({ hidden: showSimulatorType !== 'MEMORY' })}>
+          <h2 className="text-xl font-bold">Memory Map:</h2>
+          <div className="flex flex-row gap-2 py-1">
+            <Button onClick={() => setShowSimulatorType('SOC')}>Back</Button>
+          </div>
+          <MemoryMap
+            lmPoint={lmPoint}
+            ioPoint={ioPoint}
+            iMemPoint={iMemPoint}
+            dMemPoint={dMemPoint}
+            stackPoint={stackPoint}
+            onChangeLmPoint={(e) => handleChangeMemoryMap(setLmPoint, e)}
+            onChangeIOPoint={(e) => handleChangeMemoryMap(setIOPoint, e)}
+            onChangeIMemPoint={(e) => handleChangeMemoryMap(setIMemPoint, e)}
+            onChangeDMemPoint={(e) => handleChangeMemoryMap(setDMemPoint, e)}
+            onChangeStackPoint={(e) => handleChangeMemoryMap(setStackPoint, e)}
+            onResetDefault={handleResetDefault}
+            disabled={isStepping}
+          />
+        </div>
+
+        <div className="flex h-dvh flex-col border-x-2 border-black px-1">
+          <h2 className="text-xl font-bold">Logs:</h2>
+          <div
+            id="logs"
+            className="my-2 h-full space-y-1 overflow-y-auto rounded-lg border border-black p-2 text-sm [&_pre]:whitespace-pre-wrap"
+          ></div>
+          <div className="flex flex-col gap-2 py-1">
             <div className="flex flex-row flex-wrap gap-2">
               <Button className="h-fit" variant="outlined" onClick={handleAssembleClick}>
                 Assemble & Restart
@@ -373,14 +330,26 @@ export default function SocPage({}: Props) {
                 Step
               </Button>
             </div>
-            <div className="">
+            <div className="flex gap-2">
               <Button className="h-fit" variant="outlined" color="error" onClick={handleGuideClick}>
                 Guide
               </Button>
+              <Link href={'https://google.com'}>
+                <Button
+                  className="h-fit"
+                  variant="outlined"
+                  color="success"
+                  onClick={handleGuideClick}
+                >
+                  Feedback
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
-        <div className="border-l-2 border-black px-2">
+
+        <div className="flex flex-col px-2">
+          <h2 className="text-xl font-bold">Peripheral:</h2>
           {/* Tab Bar */}
           <Tabs
             value={controlTabIndex}
@@ -399,7 +368,11 @@ export default function SocPage({}: Props) {
           </div>
 
           {/* Tab index = 1 */}
-          <div className={cn('flex h-full', { hidden: controlTabIndex !== 1 })}>
+          <div
+            className={cn('flex flex-1 items-center justify-center', {
+              hidden: controlTabIndex !== 1,
+            })}
+          >
             <LedMatrix />
           </div>
         </div>

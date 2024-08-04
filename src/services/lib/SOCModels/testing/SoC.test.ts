@@ -64,7 +64,7 @@ async function executeFile(fileName: string): Promise<void> {
             SOC.Memory.active = true
             SOC.MMU.active = true
             SOC.Bus.active = true
-            SOC.assemble(fileContent,0,0,0,0,0)
+            SOC.assemble(fileContent, 0, 0, 0, 0, 0)
             SOC.Processor.RunAll(fileName)
 
             const result = convertRegisters2String(SOC.Processor.register)

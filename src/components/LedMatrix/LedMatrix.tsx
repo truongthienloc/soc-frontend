@@ -11,7 +11,7 @@ export default function LedMatrix({ rowCount = 96, colCount = 96 }: Props) {
 
   return (
     <div
-      className="led-matrix m-auto grid grid-cols-[repeat(var(--col-count),_0.25rem)] justify-center gap-[1px]"
+      className="led-matrix grid grid-cols-[repeat(var(--col-count),_0.25rem)] justify-center gap-[1px]"
       style={{ '--col-count': colCount } as React.CSSProperties}
     >
       {Array.from(Array(colCount).keys()).map((row) =>

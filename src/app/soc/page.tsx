@@ -388,7 +388,7 @@ export default function SocPage({}: Props) {
             aria-label="Control Tab Index"
             // variant='scrollable'
           >
-            <Tab label="M & K" />
+            <Tab label="Monitor & Keyboard" />
             <Tab label="Led Matrix" />
           </Tabs>
 

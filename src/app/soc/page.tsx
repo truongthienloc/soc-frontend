@@ -3,8 +3,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 /** import MUI */
 import Button from '@mui/material/Button'
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
 import { cn } from '~/helpers/cn'
 import Logs from '~/services/lib/Logs/Logs'
 // import { Agent, NCKHBoard } from '~/services/lib/soc'
@@ -24,6 +22,8 @@ import { isValidHexString } from '~/helpers/validates/hex.validate'
 import { SimulatorType } from '~/types/simulator'
 import Link from 'next/link'
 import { MemoryMap } from '~/components/MemoryMap'
+import { TabContext, Tabs, Tab, TabPanel } from '~/components/Tabs'
+import { MemoryTable } from '~/components/MemoryTable'
 
 type Props = {}
 
@@ -244,9 +244,9 @@ export default function SocPage({}: Props) {
       <div className="grid h-full grid-cols-3 gap-1">
         {/* CODE EDITOR SECTION */}
         <div className={cn({ hidden: showSimulatorType !== 'CODE_EDITOR' })}>
-          <h2 className="text-xl font-bold">Code Editor:</h2>
+          <Button onClick={() => setShowSimulatorType('SOC')}>Back</Button>
           <div className="flex flex-row gap-2 py-1">
-            <Button onClick={() => setShowSimulatorType('SOC')}>Back</Button>
+            <h2 className="text-xl font-bold">Code Editor:</h2>
             <Button
               className="ml-auto"
               variant="outlined"
@@ -282,10 +282,10 @@ export default function SocPage({}: Props) {
 
         {/* MEMORY MAP SECTION */}
         <div className={cn({ hidden: showSimulatorType !== 'MEMORY' })}>
-          <h2 className="text-xl font-bold">Memory Map:</h2>
           <div className="flex flex-row gap-2 py-1">
             <Button onClick={() => setShowSimulatorType('SOC')}>Back</Button>
           </div>
+          <h2 className="mb-4 text-xl font-bold">Memory Map:</h2>
           <MemoryMap
             lmPoint={lmPoint}
             ioPoint={ioPoint}
@@ -303,11 +303,25 @@ export default function SocPage({}: Props) {
         </div>
 
         <div className="flex h-dvh flex-col border-x-2 border-black px-1">
-          <h2 className="text-xl font-bold">Logs:</h2>
-          <div
-            id="logs"
-            className="my-2 h-full space-y-1 overflow-y-auto rounded-lg border border-black p-2 text-sm [&_pre]:whitespace-pre-wrap"
-          ></div>
+          <TabContext>
+            <Tabs>
+              <Tab label="Logs" />
+              <Tab label="Memory" />
+            </Tabs>
+            {/* Tab index = 0 */}
+            <TabPanel index={0} className='flex-1 flex'>
+              {/* <h2 className="text-xl font-bold">Logs:</h2> */}
+              <div
+                id="logs"
+                className="flex-1 my-2 space-y-1 overflow-y-auto rounded-lg border border-black p-2 text-sm [&_pre]:whitespace-pre-wrap"
+              ></div>
+            </TabPanel>
+            {/* Tab index = 1 */}
+            <TabPanel index={1} className="flex-1 pt-10">
+              <MemoryTable />
+            </TabPanel>
+          </TabContext>
+
           <div className="flex flex-col gap-2 py-1">
             <div className="flex flex-row flex-wrap gap-2">
               <Button className="h-fit" variant="outlined" onClick={handleAssembleClick}>
@@ -331,16 +345,16 @@ export default function SocPage({}: Props) {
               </Button>
             </div>
             <div className="flex gap-2">
-              <Button className="h-fit" variant="outlined" color="error" onClick={handleGuideClick}>
+              <Button
+                className="h-fit"
+                variant="outlined"
+                color="success"
+                onClick={handleGuideClick}
+              >
                 Guide
               </Button>
-              <Link href={'https://google.com'}>
-                <Button
-                  className="h-fit"
-                  variant="outlined"
-                  color="success"
-                  onClick={handleGuideClick}
-                >
+              <Link href={'https://forms.gle/n9Qd9mrpHgKtRPir9'} target="_blank">
+                <Button className="h-fit" variant="outlined" color="error">
                   Feedback
                 </Button>
               </Link>
@@ -351,30 +365,21 @@ export default function SocPage({}: Props) {
         <div className="flex flex-col px-2">
           <h2 className="text-xl font-bold">Peripheral:</h2>
           {/* Tab Bar */}
-          <Tabs
-            value={controlTabIndex}
-            onChange={(e, value) => setControlTabIndex(value)}
-            aria-label="Control Tab Index"
-            // variant='scrollable'
-          >
-            <Tab label="M & K" />
-            <Tab label="Led Matrix" />
-          </Tabs>
-
-          {/* Tab index = 0 */}
-          <div className={cn({ hidden: controlTabIndex !== 0 })}>
-            <div className="monitor" id="monitor" tabIndex={0}></div>
-            <Keyboard />
-          </div>
-
-          {/* Tab index = 1 */}
-          <div
-            className={cn('flex flex-1 items-center justify-center', {
-              hidden: controlTabIndex !== 1,
-            })}
-          >
-            <LedMatrix />
-          </div>
+          <TabContext>
+            <Tabs>
+              <Tab label="M & K" />
+              <Tab label="Led Matrix" />
+            </Tabs>
+            {/* Tab index = 0 */}
+            <TabPanel index={0}>
+              <div className="monitor" id="monitor" tabIndex={0}></div>
+              <Keyboard />
+            </TabPanel>
+            {/* Tab index = 1 */}
+            <TabPanel index={1} className="flex flex-1 items-center justify-center">
+              <LedMatrix />
+            </TabPanel>
+          </TabContext>
         </div>
       </div>
       {/* <GuideModal isOpen={isOpenGuideModal} onClose={handleGuideModalClose} /> */}

@@ -1,12 +1,13 @@
 import React, { createContext, useState } from 'react'
 
 type TabContextProps = {
-  index: number 
+  index: number
   changeIndex: (index: number) => void
 }
 
 export const tabContext = createContext<TabContextProps>({
-  index: 0, changeIndex() {}
+  index: 0,
+  changeIndex() {},
 })
 
 type Props = {

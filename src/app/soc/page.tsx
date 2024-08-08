@@ -24,6 +24,7 @@ import Link from 'next/link'
 import { MemoryMap } from '~/components/MemoryMap'
 import { TabContext, Tabs, Tab, TabPanel } from '~/components/Tabs'
 import { MemoryTable } from '~/components/MemoryTable'
+import { Register } from '~/types/register'
 
 type Props = {}
 
@@ -49,6 +50,8 @@ export default function SocPage({}: Props) {
   const [iMemPoint, setIMemPoint] = useState('')
   const [dMemPoint, setDMemPoint] = useState('')
   const [stackPoint, setStackPoint] = useState('')
+  /** Memory Data */
+  const [memoryData, setMemoryData] = useState<Register[]>([])
 
   useEffect(() => {
     const socCode = localStorage.getItem('soc_code') ?? ''
@@ -118,6 +121,19 @@ export default function SocPage({}: Props) {
     }
   }
 
+  const handleChangeMemoryData = (address: string, data: string) => {
+    const findMemory = memoryData.find((value) => value.name === address)
+    if (!findMemory) {
+      memoryData.push({
+        name: address,
+        value: data,
+      })
+    } else {
+      findMemory.value = data
+    }
+    setMemoryData([...memoryData])
+  }
+
   const handleRunAllClick = () => {
     // console.log('running')
     if (!socModelRef.current) {
@@ -162,7 +178,6 @@ export default function SocPage({}: Props) {
   }
 
   const handleGuideClick = () => {
-    // setIsOpenGuideModal(true)
     const x = window.innerWidth / 3
     window.open('/soc/guide', 'soc__guide', `width=500, height=500, left=${x}`)
   }
@@ -247,14 +262,6 @@ export default function SocPage({}: Props) {
           <Button onClick={() => setShowSimulatorType('SOC')}>Back</Button>
           <div className="flex flex-row gap-2 py-1">
             <h2 className="text-xl font-bold">Code Editor:</h2>
-            <Button
-              className="ml-auto"
-              variant="outlined"
-              color="secondary"
-              onClick={handleImportClick}
-            >
-              Import
-            </Button>
           </div>
           <div className="flex flex-col border border-black">
             {isStepping ? (
@@ -309,16 +316,16 @@ export default function SocPage({}: Props) {
               <Tab label="Memory" />
             </Tabs>
             {/* Tab index = 0 */}
-            <TabPanel index={0} className='flex-1 flex'>
+            <TabPanel index={0} className="flex flex-1">
               {/* <h2 className="text-xl font-bold">Logs:</h2> */}
               <div
                 id="logs"
-                className="flex-1 my-2 space-y-1 overflow-y-auto rounded-lg border border-black p-2 text-sm [&_pre]:whitespace-pre-wrap"
+                className="my-2 flex-1 space-y-1 overflow-y-auto rounded-lg border border-black p-2 text-sm [&_pre]:whitespace-pre-wrap"
               ></div>
             </TabPanel>
             {/* Tab index = 1 */}
             <TabPanel index={1} className="flex-1 pt-10">
-              <MemoryTable />
+              <MemoryTable data={memoryData} onChangeData={handleChangeMemoryData} />
             </TabPanel>
           </TabContext>
 
@@ -345,6 +352,9 @@ export default function SocPage({}: Props) {
               </Button>
             </div>
             <div className="flex gap-2">
+              <Button className="" variant="outlined" color="secondary" onClick={handleImportClick}>
+                Import
+              </Button>
               <Button
                 className="h-fit"
                 variant="outlined"

@@ -3,8 +3,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 /** import MUI */
 import Button from '@mui/material/Button'
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
 import { cn } from '~/helpers/cn'
 import Logs from '~/services/lib/Logs/Logs'
 // import { Agent, NCKHBoard } from '~/services/lib/soc'
@@ -24,6 +22,9 @@ import { isValidHexString } from '~/helpers/validates/hex.validate'
 import { SimulatorType } from '~/types/simulator'
 import Link from 'next/link'
 import { MemoryMap } from '~/components/MemoryMap'
+import { TabContext, Tabs, Tab, TabPanel } from '~/components/Tabs'
+import { MemoryTable } from '~/components/MemoryTable'
+import { Register } from '~/types/register'
 
 type Props = {}
 
@@ -49,6 +50,8 @@ export default function SocPage({}: Props) {
   const [iMemPoint, setIMemPoint] = useState('')
   const [dMemPoint, setDMemPoint] = useState('')
   const [stackPoint, setStackPoint] = useState('')
+  /** Memory Data */
+  const [memoryData, setMemoryData] = useState<Register[]>([])
 
   useEffect(() => {
     const socCode = localStorage.getItem('soc_code') ?? ''
@@ -118,6 +121,19 @@ export default function SocPage({}: Props) {
     }
   }
 
+  const handleChangeMemoryData = (address: string, data: string) => {
+    const findMemory = memoryData.find((value) => value.name === address)
+    if (!findMemory) {
+      memoryData.push({
+        name: address,
+        value: data,
+      })
+    } else {
+      findMemory.value = data
+    }
+    setMemoryData([...memoryData])
+  }
+
   const handleRunAllClick = () => {
     // console.log('running')
     if (!socModelRef.current) {
@@ -162,7 +178,6 @@ export default function SocPage({}: Props) {
   }
 
   const handleGuideClick = () => {
-    // setIsOpenGuideModal(true)
     const x = window.innerWidth / 3
     window.open('/soc/guide', 'soc__guide', `width=500, height=500, left=${x}`)
   }
@@ -244,17 +259,9 @@ export default function SocPage({}: Props) {
       <div className="grid h-full grid-cols-3 gap-1">
         {/* CODE EDITOR SECTION */}
         <div className={cn({ hidden: showSimulatorType !== 'CODE_EDITOR' })}>
-          <h2 className="text-xl font-bold">Code Editor:</h2>
+          <Button onClick={() => setShowSimulatorType('SOC')}>Back</Button>
           <div className="flex flex-row gap-2 py-1">
-            <Button onClick={() => setShowSimulatorType('SOC')}>Back</Button>
-            <Button
-              className="ml-auto"
-              variant="outlined"
-              color="secondary"
-              onClick={handleImportClick}
-            >
-              Import
-            </Button>
+            <h2 className="text-xl font-bold">Code Editor:</h2>
           </div>
           <div className="flex flex-col border border-black">
             {isStepping ? (
@@ -282,10 +289,10 @@ export default function SocPage({}: Props) {
 
         {/* MEMORY MAP SECTION */}
         <div className={cn({ hidden: showSimulatorType !== 'MEMORY' })}>
-          <h2 className="text-xl font-bold">Memory Map:</h2>
           <div className="flex flex-row gap-2 py-1">
             <Button onClick={() => setShowSimulatorType('SOC')}>Back</Button>
           </div>
+          <h2 className="mb-4 text-xl font-bold">Memory Map:</h2>
           <MemoryMap
             lmPoint={lmPoint}
             ioPoint={ioPoint}
@@ -303,11 +310,25 @@ export default function SocPage({}: Props) {
         </div>
 
         <div className="flex h-dvh flex-col border-x-2 border-black px-1">
-          <h2 className="text-xl font-bold">Logs:</h2>
-          <div
-            id="logs"
-            className="my-2 h-full space-y-1 overflow-y-auto rounded-lg border border-black p-2 text-sm [&_pre]:whitespace-pre-wrap"
-          ></div>
+          <TabContext>
+            <Tabs>
+              <Tab label="Logs" />
+              <Tab label="Memory" />
+            </Tabs>
+            {/* Tab index = 0 */}
+            <TabPanel index={0} className="flex flex-1">
+              {/* <h2 className="text-xl font-bold">Logs:</h2> */}
+              <div
+                id="logs"
+                className="my-2 flex-1 space-y-1 overflow-y-auto rounded-lg border border-black p-2 text-sm [&_pre]:whitespace-pre-wrap"
+              ></div>
+            </TabPanel>
+            {/* Tab index = 1 */}
+            <TabPanel index={1} className="flex-1 pt-10">
+              <MemoryTable data={memoryData} onChangeData={handleChangeMemoryData} />
+            </TabPanel>
+          </TabContext>
+
           <div className="flex flex-col gap-2 py-1">
             <div className="flex flex-row flex-wrap gap-2">
               <Button className="h-fit" variant="outlined" onClick={handleAssembleClick}>
@@ -331,16 +352,19 @@ export default function SocPage({}: Props) {
               </Button>
             </div>
             <div className="flex gap-2">
-              <Button className="h-fit" variant="outlined" color="error" onClick={handleGuideClick}>
+              <Button className="" variant="outlined" color="secondary" onClick={handleImportClick}>
+                Import
+              </Button>
+              <Button
+                className="h-fit"
+                variant="outlined"
+                color="success"
+                onClick={handleGuideClick}
+              >
                 Guide
               </Button>
-              <Link href={'https://google.com'}>
-                <Button
-                  className="h-fit"
-                  variant="outlined"
-                  color="success"
-                  onClick={handleGuideClick}
-                >
+              <Link href={'https://forms.gle/n9Qd9mrpHgKtRPir9'} target="_blank">
+                <Button className="h-fit" variant="outlined" color="error">
                   Feedback
                 </Button>
               </Link>
@@ -351,6 +375,7 @@ export default function SocPage({}: Props) {
         <div className="flex flex-col px-2">
           <h2 className="text-xl font-bold">Peripheral:</h2>
           {/* Tab Bar */}
+<<<<<<< HEAD
           <Tabs
             value={controlTabIndex}
             onChange={(e, value) => setControlTabIndex(value)}
@@ -375,6 +400,23 @@ export default function SocPage({}: Props) {
           >
             <LedMatrix />
           </div>
+=======
+          <TabContext>
+            <Tabs>
+              <Tab label="M & K" />
+              <Tab label="Led Matrix" />
+            </Tabs>
+            {/* Tab index = 0 */}
+            <TabPanel index={0}>
+              <div className="monitor" id="monitor" tabIndex={0}></div>
+              <Keyboard />
+            </TabPanel>
+            {/* Tab index = 1 */}
+            <TabPanel index={1} className="flex flex-1 items-center justify-center">
+              <LedMatrix />
+            </TabPanel>
+          </TabContext>
+>>>>>>> c187823f9bb95c77f91a2b07834534a48eab4abc
         </div>
       </div>
       {/* <GuideModal isOpen={isOpenGuideModal} onClose={handleGuideModalClose} /> */}

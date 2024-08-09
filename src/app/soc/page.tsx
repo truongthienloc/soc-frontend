@@ -375,32 +375,7 @@ export default function SocPage({}: Props) {
         <div className="flex flex-col px-2">
           <h2 className="text-xl font-bold">Peripheral:</h2>
           {/* Tab Bar */}
-<<<<<<< HEAD
-          <Tabs
-            value={controlTabIndex}
-            onChange={(e, value) => setControlTabIndex(value)}
-            aria-label="Control Tab Index"
-            // variant='scrollable'
-          >
-            <Tab label="Monitor & Keyboard" />
-            <Tab label="Led Matrix" />
-          </Tabs>
 
-          {/* Tab index = 0 */}
-          <div className={cn({ hidden: controlTabIndex !== 0 })}>
-            <div className="monitor" id="monitor" tabIndex={0}></div>
-            <Keyboard />
-          </div>
-
-          {/* Tab index = 1 */}
-          <div
-            className={cn('flex flex-1 items-center justify-center', {
-              hidden: controlTabIndex !== 1,
-            })}
-          >
-            <LedMatrix />
-          </div>
-=======
           <TabContext>
             <Tabs>
               <Tab label="M & K" />
@@ -416,7 +391,6 @@ export default function SocPage({}: Props) {
               <LedMatrix />
             </TabPanel>
           </TabContext>
->>>>>>> c187823f9bb95c77f91a2b07834534a48eab4abc
         </div>
       </div>
       {/* <GuideModal isOpen={isOpenGuideModal} onClose={handleGuideModalClose} /> */}

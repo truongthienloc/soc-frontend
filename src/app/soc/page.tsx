@@ -223,7 +223,7 @@ export default function SocPage({}: Props) {
     // socModelRef.current?.Memory.setMemory(
     //   decLM_point,
     //   decIO_point,
-    //   decImem_point,
+    //   decImem_point,p
     //   decDmem_point,
     //   decStack_point,
     // )
@@ -373,7 +373,7 @@ export default function SocPage({}: Props) {
         </div>
 
         <div className="flex flex-col px-2">
-          <h2 className="text-xl font-bold">Peripheral:</h2>
+          <h2 className="text-xl font-bold">Peripherals:</h2>
           {/* Tab Bar */}
 
           <TabContext>

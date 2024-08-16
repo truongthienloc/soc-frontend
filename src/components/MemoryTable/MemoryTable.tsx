@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { createRangeDmemData } from '~/helpers/generates/dMemRange.generate'
+import { createRangeDmemData, LENGTH_OF_DMEM } from '~/helpers/generates/dMemRange.generate'
 import { Register } from '~/types/register'
 import { styled } from '@mui/material/styles'
 import OutlinedInput from '@mui/material/OutlinedInput'
@@ -53,8 +53,9 @@ export default function MemoryTable({ data, onChangeData }: DisplayDataTableProp
 
   useEffect(() => {
     // calculate start address
+    const BASE = LENGTH_OF_DMEM * 4
     const dec = parseInt(start, 16)
-    const startDec = Math.floor(dec / 40) * 40
+    const startDec = Math.floor(dec / BASE) * BASE
     const startHex = startDec.toString(16)
 
     const dMemData = createRangeDmemData(data || [], startHex)

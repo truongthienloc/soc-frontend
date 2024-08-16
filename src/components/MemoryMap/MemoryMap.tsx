@@ -2,8 +2,10 @@ import React from 'react'
 import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
 import Button from '@mui/material/Button'
+import { cn } from '~/helpers/cn'
 
 type Props = {
+  className?: string
   lmPoint: string
   onChangeLmPoint: (value: string) => void
   ioPoint: string
@@ -19,6 +21,7 @@ type Props = {
 }
 
 export default function MemoryMap({
+  className,
   lmPoint,
   onChangeLmPoint,
   ioPoint,
@@ -33,7 +36,7 @@ export default function MemoryMap({
   disabled = false,
 }: Props) {
   return (
-    <div className="grid grid-cols-[auto_auto] gap-2">
+    <div className={cn('grid grid-cols-[auto_auto] gap-2', className)}>
       <TextField
         label="LM_point"
         value={lmPoint}

@@ -8,6 +8,7 @@ import { NCKHBoard } from '../soc/boards'
 import DMA from './DMA'
 import Assembler from './check_syntax'
 import LedMatrix from '../control/LedMatrix'
+import { Register } from '~/types/register'
 
 export default class Soc {
     name: string
@@ -90,8 +91,11 @@ export default class Soc {
         })
     }
 
-    public assemble(code: string, LM_point: number, IO_point: number, 
-        Imem_point: number, Dmem_point: number, Stack_point: number) {
+    public assemble(code: string, 
+                    LM_point: number, IO_point: number, Imem_point: number, 
+                    Dmem_point: number, Stack_point: number , 
+                    Mem_tb: Register[] 
+                ) {
         this.println('Cycle ', this.cycle.toString(), ': System is setting up')
         console.log('Cycle ', this.cycle.toString(), ': System is setting up')
         
@@ -114,7 +118,8 @@ export default class Soc {
         //****************SET INITIAL STATUS****************
         // SET INITIAL DATA
         this.Processor.reset()
-        this.Memory.reset(LM_point, IO_point, Imem_point, Dmem_point, Stack_point)
+        this.Memory.reset( LM_point, IO_point, Imem_point, Dmem_point, Stack_point,
+                            Mem_tb  )
         this.Processor.setImem(this.Assembler.binary_code)                 // LOAD INTUCTIONS INTO PROCESSOR
         this.Memory.SetInstuctionMemory(this.Processor.Instruction_memory) // LOAD INTUCTIONS INTO MAIN MEMORY
         for (let i of this.Assembler.Instructions)
@@ -157,6 +162,8 @@ export default class Soc {
         ) {
             this.Step()
         }
+
+        console.log('hehehehehe',this.Memory.Memory)
     }
 
     public async Step() {

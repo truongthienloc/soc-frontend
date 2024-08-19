@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
+import { hexToBinary } from '~/helpers/converts/Hextobin'
 /** import MUI */
 import Button from '@mui/material/Button'
 import { cn } from '~/helpers/cn'
@@ -30,6 +31,12 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 
 type Props = {}
 
+const LMPOINT       = '0'
+const IOPOINT       = '180'
+const IMEMPOINT     = '1C0'
+const DMEMPOINT     = '11C0'
+const STACMEMPOINT  = '2DC0'
+
 export default function SocPage({}: Props) {
   const isStart = useRef(true)
   const socModelRef = useRef<Soc>()
@@ -47,11 +54,11 @@ export default function SocPage({}: Props) {
   const [controlTabIndex, setControlTabIndex] = useState(0)
 
   /** Memory Map state */
-  const [lmPoint, setLmPoint] = useState('')
-  const [ioPoint, setIOPoint] = useState('')
-  const [iMemPoint, setIMemPoint] = useState('')
-  const [dMemPoint, setDMemPoint] = useState('')
-  const [stackPoint, setStackPoint] = useState('')
+  const [lmPoint, setLmPoint] = useState(LMPOINT)
+  const [ioPoint, setIOPoint] = useState(IOPOINT)
+  const [iMemPoint, setIMemPoint] = useState(IMEMPOINT)
+  const [dMemPoint, setDMemPoint] = useState(DMEMPOINT)
+  const [stackPoint, setStackPoint] = useState(STACMEMPOINT)
   /** Memory Data */
   const [memoryData, setMemoryData] = useState<Register[]>([])
 
@@ -237,6 +244,10 @@ export default function SocPage({}: Props) {
         decImem_point,
         decDmem_point,
         decStack_point,
+        memoryData.map(
+          mem => ({name: hexToBinary(mem.name), 
+                  value: hexToBinary(mem.value)})
+        )
       )
     ) {
       toast.error('Syntax error')
@@ -249,11 +260,11 @@ export default function SocPage({}: Props) {
   }
 
   const handleResetDefault = () => {
-    setLmPoint('')
-    setIOPoint('')
-    setIMemPoint('')
-    setDMemPoint('')
-    setStackPoint('')
+    setLmPoint(LMPOINT)
+    setIOPoint(IOPOINT)
+    setIMemPoint(IMEMPOINT)
+    setDMemPoint(DMEMPOINT)
+    setStackPoint(STACMEMPOINT)
   }
 
   return (
@@ -352,7 +363,6 @@ export default function SocPage({}: Props) {
         </div>
 
         <div className="flex flex-col px-2">
-          <h2 className="text-xl font-bold">Peripherals:</h2>
           <h2 className="text-xl font-bold">Peripherals:</h2>
           {/* Tab Bar */}
 

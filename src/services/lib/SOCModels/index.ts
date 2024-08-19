@@ -13,7 +13,8 @@ SOC.assemble(data,
     96 * 4, //  I/O point
     (96 + 16) * 4, // I-Mem point
     (96 + 16 + 1024) *4, // D-Mem point  
-    ((96 + 16 + 1024) + 256 + 256 + 256 + 256 + 256 + 256 + 256)*4 //Stack point
+    ((96 + 16 + 1024) + 256 + 256 + 256 + 256 + 256 + 256 + 256)*4, //Stack point
+    []
 )
 SOC.RunAll()
 //console.log(SOC.Processor.getRegisters())

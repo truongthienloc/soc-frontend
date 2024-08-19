@@ -23,7 +23,9 @@ export default class Memory {
         this.slaveMemory = new Slave('DataMemory', true)
     }
     public reset( LM_point: number, IO_point: number, 
-    Imem_point: number, Dmem_point: number, Stack_point: number){
+    Imem_point: number, Dmem_point: number, Stack_point: number, 
+    Mem_tb: Register[]
+    ){
             
             this.LM_point    = LM_point
             this.IO_point    = IO_point
@@ -51,6 +53,11 @@ export default class Memory {
             // MEMORY AREA OF STACK
             for (let i = Stack_point; i < 100; i+=4) 
                 this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
+
+            // CONFIG MEMORY
+            for (const element of Mem_tb) 
+                this.Memory[element.name] = element.value
+            
             
     }
     public GetMemory(): { [key: string]: string } {

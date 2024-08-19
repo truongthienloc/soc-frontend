@@ -1,6 +1,6 @@
 import { Register } from '~/types/register'
 
-const LENGTH_OF_DMEM = 10
+export const LENGTH_OF_DMEM = 8
 
 export function convertBinary2Hex(binary: string): string {
     // Validate if the input is a valid binary string

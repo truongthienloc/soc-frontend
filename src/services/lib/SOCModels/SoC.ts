@@ -220,7 +220,7 @@ export default class Soc {
         this.view?.mmu.setIsRunning(this.MMU.active)
         console.log('logical_address', logical_address)
         const [physical_address, MMU_message] = this.MMU.Run(logical_address, 
-            this.Memory.Imem_point ,this.Memory.IO_point, this.Memory.Dmem_point)
+                                                             this.Memory.IO_point)
         console.log(MMU_message)
         this.println(MMU_message)
         this.println(

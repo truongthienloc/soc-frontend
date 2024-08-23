@@ -31,11 +31,11 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 
 type Props = {}
 
-const LMPOINT       = '0'
-const IOPOINT       = '180'
-const IMEMPOINT     = '1C0'
-const DMEMPOINT     = '11C0'
-const STACMEMPOINT  = '2DC0'
+const LMPOINT = '0'
+const IOPOINT = '180'
+const IMEMPOINT = '1C0'
+const DMEMPOINT = '11C0'
+const STACMEMPOINT = '2DC0'
 
 export default function SocPage({}: Props) {
   const isStart = useRef(true)
@@ -229,13 +229,6 @@ export default function SocPage({}: Props) {
     const decDmem_point = parseInt(dMemPoint, 16)
     const decStack_point = parseInt(stackPoint, 16)
 
-    // socModelRef.current?.Memory.setMemory(
-    //   decLM_point,
-    //   decIO_point,
-    //   decImem_point,p
-    //   decDmem_point,
-    //   decStack_point,
-    // )
     if (
       !socModelRef.current?.assemble(
         code,
@@ -244,10 +237,7 @@ export default function SocPage({}: Props) {
         decImem_point,
         decDmem_point,
         decStack_point,
-        memoryData.map(
-          mem => ({name: hexToBinary(mem.name), 
-                  value: hexToBinary(mem.value)})
-        )
+        memoryData.map((mem) => ({ name: hexToBinary(mem.name), value: hexToBinary(mem.value) })),
       )
     ) {
       toast.error('Syntax error')
@@ -255,7 +245,6 @@ export default function SocPage({}: Props) {
       toast.success('Ready to run')
       setAllowRun(true)
       localStorage.setItem('soc_code', code)
-      console.log('step code: ', socModelRef.current.Assembly_code)
     }
   }
 

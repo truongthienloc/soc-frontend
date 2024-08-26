@@ -6,16 +6,15 @@ export default function GuidePage({}: Props) {
   return (
     <div className="container">
       <div className="max-h-[85dvh] space-y-4 overflow-auto px-4 py-4 text-justify">
-        <h1 className="text-center text-4xl">Guidelines</h1>
-        <h2 className="text-center text-2xl">OVERVIEW</h2>
+        <h2 className= "text-center text-2xl text-[#006EAF] font-bold">OVERVIEW</h2>
 
         <p className="indent-8">
           The SOC SIMULATOR is a tool that simulates the behavior of a System on Chip (SoC) designed
-          and developed by a group of authors. The purpose of the SOC is to support beginners who
+          and developed by a group of authors: <strong>Trương Thiên Lộc & Nguyễn Gia Bảo Ngọc</strong>. The purpose of the SOC is to support beginners who
           are starting to explore SoC design.
         </p>
 
-        <h2 className="text-center text-2xl">CONTROL BUTTON</h2>
+        <h2 className="text-center text-2xl text-[#006EAF] font-bold">CONTROL BUTTON</h2>
 
         <div>
           <p className="indent-8">
@@ -49,7 +48,7 @@ export default function GuidePage({}: Props) {
           </ul>
         </div>
 
-        <h2 className="text-center text-2xl">INSTRUCTIONS SUPPORTED</h2>
+        <h2 className="text-center text-2xl text-[#006EAF] font-bold">INSTRUCTIONS SUPPORTED</h2>
 
         <div className="space-y-4">
           <p className="indent-8">
@@ -79,7 +78,7 @@ export default function GuidePage({}: Props) {
               SUB: The SUB instruction performs an arithmetic subtraction between two source
               registers Rs1 and Rs2, and writes the result into the destination register Rd.
             </li>
-            <img src="/images/guide/r-type/sub-instruction.png" alt="sub instruction" />
+            <img src="/images/guide/r-type/sub-instruction.png" alt="SUB instruction" />
 
             <li>
               SLL: The SLL perform logical left shifts on the value in register Rs1 by the shift

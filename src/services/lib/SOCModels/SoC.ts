@@ -9,6 +9,9 @@ import DMA from './DMA'
 import Assembler from './check_syntax'
 import LedMatrix from '../control/LedMatrix'
 import { Register } from '~/types/register'
+import { eventNames } from 'process'
+import EventEmitter from '../EventEmitter/EventEmitter'
+
 
 export default class Soc {
     name: string
@@ -21,6 +24,8 @@ export default class Soc {
     Assembler: Assembler
 
     cycle: number
+    public static SOCEVENT = {DONE_ALL: 'DONE ALL'}
+    event = new EventEmitter ()
 
     disabled: boolean = false
     
@@ -163,7 +168,7 @@ export default class Soc {
             this.Step()
         }
 
-        console.log('hehehehehe',this.Memory.Memory)
+       this.event.emit(Soc.SOCEVENT.DONE_ALL)
     }
 
     public async Step() {

@@ -67,6 +67,7 @@ export default function SocPage({}: Props) {
     setCode(socCode)
 
     if (isStart.current) {
+
       isStart.current = false
       // setTimeout(() => setShowCodeEditor(false), 1000)
 
@@ -95,6 +96,7 @@ export default function SocPage({}: Props) {
         memory.getEvent().on(Agent.Event.CLICK, handleMemoryClick)
 
         const socModel = new Soc('abc')
+        socModel.event.on(Soc.SOCEVENT.DONE_ALL, () => {console.log ('OK')})
         socModelRef.current = socModel
         logRef.current = logs
         socModel.setLogger(logs)

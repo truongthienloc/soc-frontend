@@ -38,10 +38,17 @@ const InputAddress = styled(OutlinedInput)`
 interface DisplayDataTableProps {
   data?: Register[]
   onChangeData?: (address: string, value: string) => void
+  onResetData?: () => void
+  disabled?: boolean
   // prev?: Register[]
 }
 
-export default function MemoryTable({ data, onChangeData }: DisplayDataTableProps) {
+export default function MemoryTable({
+  data,
+  onChangeData,
+  onResetData,
+  disabled,
+}: DisplayDataTableProps) {
   const [input, setInput] = useState('0x00000000')
   const [start, setStart] = useState(input)
   const [displayedData, setDisplayedData] = useState(createRangeDmemData(data || [], start))
@@ -99,6 +106,10 @@ export default function MemoryTable({ data, onChangeData }: DisplayDataTableProp
           {/* <SearchIcon /> */}
           Go
         </Button>
+        {/* Button to reset memory table */}
+        <Button variant="contained" onClick={onResetData} disabled={!!modifiedName}>
+          Reset
+        </Button>
       </div>
       <TableContainer component={Paper}>
         <Table sx={styles.table} stickyHeader>
@@ -148,6 +159,7 @@ export default function MemoryTable({ data, onChangeData }: DisplayDataTableProp
                             variant="outlined"
                             color="warning"
                             onClick={() => handleEditClick(value.name, value.value)}
+                            disabled={disabled}
                           >
                             <EditIcon />
                           </Button>

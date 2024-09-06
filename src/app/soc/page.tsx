@@ -28,6 +28,7 @@ import { MemoryTable } from '~/components/MemoryTable'
 import { Register } from '~/types/register'
 
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
+import { convertMemoryCoreToRegisterType } from '~/helpers/converts/memory.convert'
 
 type Props = {}
 
@@ -67,7 +68,6 @@ export default function SocPage({}: Props) {
     setCode(socCode)
 
     if (isStart.current) {
-
       isStart.current = false
       // setTimeout(() => setShowCodeEditor(false), 1000)
 
@@ -96,7 +96,6 @@ export default function SocPage({}: Props) {
         memory.getEvent().on(Agent.Event.CLICK, handleMemoryClick)
 
         const socModel = new Soc('abc')
-        socModel.event.on(Soc.SOCEVENT.DONE_ALL, () => {console.log ('OK')})
         socModelRef.current = socModel
         logRef.current = logs
         socModel.setLogger(logs)
@@ -143,6 +142,7 @@ export default function SocPage({}: Props) {
       findMemory.value = data
     }
     setMemoryData([...memoryData])
+    setAllowRun(false)
   }
 
   const handleRunAllClick = () => {
@@ -154,6 +154,15 @@ export default function SocPage({}: Props) {
     // socModelRef.current.setImen(code)
     // setTimeout(() => socModelRef.current?.Run(code), 1000)
     logRef.current?.clear()
+    socModelRef.current.event.once(Soc.SOCEVENT.DONE_ALL, () => {
+      if (!socModelRef.current) {
+        return
+      }
+
+      const newMemorTable = convertMemoryCoreToRegisterType(socModelRef.current.Memory.Memory)
+
+      setMemoryData(newMemorTable)
+    })
     socModelRef.current.RunAll()
     setShowSimulatorType('SOC')
     setAllowRun(false)
@@ -221,7 +230,6 @@ export default function SocPage({}: Props) {
   }
 
   const handleAssembleClick = () => {
-    // console.log('Assemble: ', socModelRef.current?.assemble(code));
     setIsStepping(false)
     setPc(undefined)
 
@@ -256,6 +264,11 @@ export default function SocPage({}: Props) {
     setIMemPoint(IMEMPOINT)
     setDMemPoint(DMEMPOINT)
     setStackPoint(STACMEMPOINT)
+  }
+
+  const handleResetMemoryTable = () => {
+    setMemoryData([])
+    setAllowRun(false)
   }
 
   return (
@@ -316,7 +329,12 @@ export default function SocPage({}: Props) {
             onResetDefault={handleResetDefault}
             disabled={isStepping}
           />
-          <MemoryTable data={memoryData} onChangeData={handleChangeMemoryData} />
+          <MemoryTable
+            data={memoryData}
+            onChangeData={handleChangeMemoryData}
+            onResetData={handleResetMemoryTable}
+            disabled={isStepping}
+          />
         </div>
 
         <div className="flex h-dvh flex-col border-x-2 border-black px-1">

@@ -17,7 +17,7 @@ export default class CPU extends Agent {
         super(layer, x, y, 5, 5, {
             ...options,
             color: '#4f46e5',
-            text: 'CPU',
+            text: 'Processor',
             textColor: 'white',
         })
     }

@@ -282,7 +282,7 @@ export default function SocPage({}: Props) {
               <ArrowForwardIcon />
             </Button>
           </div>
-          <div className="flex flex-col border border-black">
+          <div className="flex flex-col border border-black h-[calc(100dvh-69px)]">
             {isStepping ? (
               <DisplayStepCode code={stepCode} pc={pc} />
             ) : (
@@ -300,11 +300,23 @@ export default function SocPage({}: Props) {
 
         {/* SOC SECTION */}
         <div
-          id="simulation"
-          className={cn('flex h-full items-center justify-center', {
+          className={cn('flex h-full flex-col items-center', {
             hidden: showSimulatorType !== 'SOC',
           })}
-        ></div>
+        >
+          <div className="flex flex-col items-center mt-8">
+            <p className="text-center text-xl font-semibold">
+              UNIVERSITY OF INFORMATION TECHNOLOGY
+            </p>
+            <img className="h-32 w-32" src="/images/logo/LogoUIT.png" alt="UIT's Logo" />
+          </div>
+          <div className="flex flex-col items-center">
+            <p className="font-semibold">SOC - Simulator</p>
+            <p className="text-sm">AUTHORS: Nguyễn Gia Bảo Ngọc & Thương Thiên Lộc</p>
+          </div>
+          <div id="simulation"></div>
+          
+        </div>
 
         {/* MEMORY MAP SECTION */}
         <div className={cn({ hidden: showSimulatorType !== 'MEMORY' })}>
@@ -393,15 +405,19 @@ export default function SocPage({}: Props) {
         </div>
       </div>
       {/* Button group place on bottom-left */}
-      <div className="absolute bottom-4 right-4 flex gap-2">
-        <Button className="h-fit" variant="outlined" color="success" onClick={handleGuideClick}>
-          Guide
-        </Button>
-        <Link href={'https://forms.gle/n9Qd9mrpHgKtRPir9'} target="_blank">
-          <Button className="h-fit" variant="outlined" color="error">
-            Feedback
+      <div className="absolute bottom-4 right-4 space-y-1">
+        <p className="text-sm font-semibold">Click on 'GUIDE' if this is your first time here.</p>
+        <div className="flex justify-end gap-2">
+          <Button className="h-fit" variant="outlined" color="success" onClick={handleGuideClick}>
+            Guide
+            <div className="absolute h-5 w-5 animate-ping rounded-full bg-gray-500 opacity-75"></div>
           </Button>
-        </Link>
+          <Link href={'https://forms.gle/n9Qd9mrpHgKtRPir9'} target="_blank">
+            <Button className="h-fit" variant="outlined" color="error">
+              Feedback
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   )

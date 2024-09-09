@@ -1,0 +1,5 @@
+export const LMPOINT = '0'
+export const IOPOINT = '180'
+export const IMEMPOINT = '1C0'
+export const DMEMPOINT = '11C0'
+export const STACMEMPOINT = '2DC0'

@@ -22,15 +22,10 @@ import { Register } from '~/types/register'
 import { SimulatorType } from '~/types/simulator'
 
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
-import {
-  DMEMPOINT,
-  IMEMPOINT,
-  IOPOINT,
-  LMPOINT,
-  STACMEMPOINT,
-} from '~/configs/memoryPoint.constant'
+import { DMEMPOINT, IMEMPOINT, IOPOINT, LMPOINT, STACKPOINT } from '~/configs/memoryPoint.constant'
 import { convertMemoryCoreToRegisterType } from '~/helpers/converts/memory.convert'
 import { useResizable } from 'react-resizable-layout'
+import useMemoryMap from '~/hooks/memory/useMemoryMap'
 
 type Props = {}
 
@@ -73,11 +68,8 @@ export default function SocPage({}: Props) {
   const [controlTabIndex, setControlTabIndex] = useState(0)
 
   /** Memory Map state */
-  const [lmPoint, setLmPoint] = useState(LMPOINT)
-  const [ioPoint, setIOPoint] = useState(IOPOINT)
-  const [iMemPoint, setIMemPoint] = useState(IMEMPOINT)
-  const [dMemPoint, setDMemPoint] = useState(DMEMPOINT)
-  const [stackPoint, setStackPoint] = useState(STACMEMPOINT)
+  const memoryMap = useMemoryMap()
+
   /** Memory Data */
   const [memoryData, setMemoryData] = useState<Register[]>([])
 
@@ -137,16 +129,6 @@ export default function SocPage({}: Props) {
     setAllowRun(false)
   }
 
-  const handleChangeMemoryMap = (
-    setMemoryMap: React.Dispatch<React.SetStateAction<string>>,
-    value: string,
-  ) => {
-    if (isValidHexString(value)) {
-      setMemoryMap(value)
-      setAllowRun(false)
-    }
-  }
-
   const handleChangeMemoryData = (address: string, data: string) => {
     const findMemory = memoryData.find((value) => value.name === address)
     if (!findMemory) {
@@ -190,7 +172,7 @@ export default function SocPage({}: Props) {
     input.type = 'file'
     input.accept = '.s,.S'
 
-    input.addEventListener('change', async (e) => {
+    input.addEventListener('change', async () => {
       const files = input.files
       // console.log('files:', files)
 
@@ -249,6 +231,8 @@ export default function SocPage({}: Props) {
     setIsStepping(false)
     setPc(undefined)
 
+    const { lmPoint, ioPoint, iMemPoint, dMemPoint, stackPoint } = memoryMap
+
     const decLM_point = parseInt(lmPoint, 16)
     const decIO_point = parseInt(ioPoint, 16)
     const decImem_point = parseInt(iMemPoint, 16)
@@ -274,14 +258,6 @@ export default function SocPage({}: Props) {
     }
   }
 
-  const handleResetDefault = () => {
-    setLmPoint(LMPOINT)
-    setIOPoint(IOPOINT)
-    setIMemPoint(IMEMPOINT)
-    setDMemPoint(DMEMPOINT)
-    setStackPoint(STACMEMPOINT)
-  }
-
   const handleResetMemoryTable = () => {
     setMemoryData([])
     setAllowRun(false)
@@ -292,7 +268,7 @@ export default function SocPage({}: Props) {
       <div className="grid h-full grid-cols-[auto_auto_1fr_auto_auto] gap-1">
         {/* Section 1 */}
         <div
-          className={cn('overflow-y-auto transition', {
+          className={cn('overflow-y-auto px-1 pb-1 transition', {
             'blur-sm': isDragging1,
           })}
           style={{ width: position1 }}
@@ -345,21 +321,7 @@ export default function SocPage({}: Props) {
                   <ArrowForwardIcon />
                 </Button>
               </div>
-              <MemoryMap
-                className="mb-4"
-                lmPoint={lmPoint}
-                ioPoint={ioPoint}
-                iMemPoint={iMemPoint}
-                dMemPoint={dMemPoint}
-                stackPoint={stackPoint}
-                onChangeLmPoint={(e) => handleChangeMemoryMap(setLmPoint, e)}
-                onChangeIOPoint={(e) => handleChangeMemoryMap(setIOPoint, e)}
-                onChangeIMemPoint={(e) => handleChangeMemoryMap(setIMemPoint, e)}
-                onChangeDMemPoint={(e) => handleChangeMemoryMap(setDMemPoint, e)}
-                onChangeStackPoint={(e) => handleChangeMemoryMap(setStackPoint, e)}
-                onResetDefault={handleResetDefault}
-                disabled={isStepping}
-              />
+              <MemoryMap className="mb-4" memoryMap={memoryMap} disabled={isStepping} />
               <MemoryTable
                 data={memoryData}
                 onChangeData={handleChangeMemoryData}

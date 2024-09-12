@@ -3,38 +3,61 @@ import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
 import Button from '@mui/material/Button'
 import { cn } from '~/helpers/cn'
+import { MemoryMapHookReturn } from '~/hooks/memory/useMemoryMap'
+import { toast } from 'react-toastify'
 
 type Props = {
   className?: string
-  lmPoint: string
-  onChangeLmPoint: (value: string) => void
-  ioPoint: string
-  onChangeIOPoint: (value: string) => void
-  iMemPoint: string
-  onChangeIMemPoint: (value: string) => void
-  dMemPoint: string
-  onChangeDMemPoint: (value: string) => void
-  stackPoint: string
-  onChangeStackPoint: (value: string) => void
-  onResetDefault: () => void
+  memoryMap: MemoryMapHookReturn
   disabled?: boolean
 }
 
-export default function MemoryMap({
-  className,
-  lmPoint,
-  onChangeLmPoint,
-  ioPoint,
-  onChangeIOPoint,
-  iMemPoint,
-  onChangeIMemPoint,
-  dMemPoint,
-  onChangeDMemPoint,
-  stackPoint,
-  onChangeStackPoint,
-  onResetDefault,
-  disabled = false,
-}: Props) {
+export default function MemoryMap({ className, memoryMap, disabled = false }: Props) {
+  const {
+    lmPoint,
+    ioPoint,
+    iMemPoint,
+    dMemPoint,
+    stackPoint,
+    isModified,
+    setLmPoint,
+    setIOPoint,
+    setIMemPoint,
+    setDMemPoint,
+    setStackPoint,
+    reset,
+    save,
+  } = memoryMap
+
+  const onChangeLmPoint = (value: string) => {
+    setLmPoint(value)
+  }
+
+  const onChangeIOPoint = (value: string) => {
+    setIOPoint(value)
+  }
+
+  const onChangeIMemPoint = (value: string) => {
+    setIMemPoint(value)
+  }
+
+  const onChangeDMemPoint = (value: string) => {
+    setDMemPoint(value)
+  }
+
+  const onChangeStackPoint = (value: string) => {
+    setStackPoint(value)
+  }
+
+  const onResetDefault = () => {
+    reset()
+  }
+
+  const handleSave = () => {
+    save()
+    toast.success('Save memory point successfully')
+  }
+
   return (
     <div className={cn('grid grid-cols-[auto_auto] gap-2', className)}>
       <TextField
@@ -82,9 +105,19 @@ export default function MemoryMap({
         }}
         disabled={disabled}
       />
-      <Button variant="contained" color="error" disabled={disabled} onClick={onResetDefault}>
-        Reset Default
-      </Button>
+      <div className="grid grid-cols-2 gap-2">
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={disabled || !isModified}
+          onClick={handleSave}
+        >
+          Save
+        </Button>
+        <Button variant="contained" color="error" disabled={disabled} onClick={onResetDefault}>
+          Reset
+        </Button>
+      </div>
     </div>
   )
 }

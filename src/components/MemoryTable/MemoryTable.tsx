@@ -1,20 +1,30 @@
+import DoneIcon from '@mui/icons-material/Done'
+import EditIcon from '@mui/icons-material/Edit'
+import Button from '@mui/material/Button'
+import Input from '@mui/material/Input'
+import OutlinedInput from '@mui/material/OutlinedInput'
+import Paper from '@mui/material/Paper'
+import Tab from '@mui/material/Tab'
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import TableHead from '@mui/material/TableHead'
+import TableRow from '@mui/material/TableRow'
+import Tabs from '@mui/material/Tabs'
+import type { SxProps, Theme } from '@mui/material/styles'
+import { styled } from '@mui/material/styles'
 import { useEffect, useState } from 'react'
 import { createRangeDmemData, LENGTH_OF_DMEM } from '~/helpers/generates/dMemRange.generate'
 import { Register } from '~/types/register'
-import { styled } from '@mui/material/styles'
-import OutlinedInput from '@mui/material/OutlinedInput'
-import Input from '@mui/material/Input'
-import Button from '@mui/material/Button'
-import TableContainer from '@mui/material/TableContainer'
-import Paper from '@mui/material/Paper'
-import Table from '@mui/material/Table'
-import TableHead from '@mui/material/TableHead'
-import TableBody from '@mui/material/TableBody'
-import TableRow from '@mui/material/TableRow'
-import TableCell from '@mui/material/TableCell'
-import type { SxProps, Theme } from '@mui/material/styles'
-import EditIcon from '@mui/icons-material/Edit'
-import DoneIcon from '@mui/icons-material/Done'
+import {
+  DMEMPOINT,
+  IMEMPOINT,
+  IOPOINT,
+  LMPOINT,
+  STACKPOINT,
+  MEMORY_SECTION,
+} from '~/configs/memoryPoint.constant'
 
 const styles: { [key: string]: SxProps<Theme> } = {
   table: {
@@ -52,6 +62,7 @@ export default function MemoryTable({
   const [input, setInput] = useState('0x00000000')
   const [start, setStart] = useState(input)
   const [displayedData, setDisplayedData] = useState(createRangeDmemData(data || [], start))
+  const [tabIndex, setTabIndex] = useState(0)
   const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value)
   }
@@ -93,9 +104,22 @@ export default function MemoryTable({
   console.log('displayedData: ', displayedData)
 
   return (
-    <>
+    <div className="flex flex-col">
+      <Tabs
+        value={tabIndex}
+        onChange={(_, value) => setTabIndex(value)}
+        aria-label="Memory Table Tabs"
+        variant="scrollable"
+      >
+        <Tab label="ALL" />
+        <Tab label="LM" />
+        <Tab label="IO" />
+        <Tab label="IMEM" />
+        <Tab label="DMEM" />
+        <Tab label="STACK" />
+      </Tabs>
       <div className="mb-3 mt-1 flex flex-row justify-center gap-2">
-        <p className="flex items-center font-bold">Memory Address</p>
+        <p className="flex items-center font-bold">{MEMORY_SECTION[tabIndex].name}</p>
         <InputAddress placeholder="0x00000000" value={input} onChange={handleChangeInput} />
         <Button
           sx={{ gap: '0.25rem' }}
@@ -107,7 +131,7 @@ export default function MemoryTable({
           Go
         </Button>
         {/* Button to reset memory table */}
-        <Button variant="contained" onClick={onResetData} disabled={!!modifiedName}>
+        <Button variant="contained" color="error" onClick={onResetData} disabled={!!modifiedName}>
           Reset
         </Button>
       </div>
@@ -172,6 +196,6 @@ export default function MemoryTable({
           </TableBody>
         </Table>
       </TableContainer>
-    </>
+    </div>
   )
 }

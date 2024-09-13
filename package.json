@@ -9,7 +9,7 @@
     "lint": "next lint",
     "format": "prettier --config .prettierrc --write src/**/*.{js,ts,jsx,tsx,css,scss,json}",
     "test:model": "tsx src/services/lib/SOCModels/testing/SoC.test.ts",
-    "test" : "tsx src/services/lib/SOCModels/index.ts"
+    "test": "tsx src/services/lib/SOCModels/index.ts"
   },
   "dependencies": {
     "@emotion/react": "11.11.4",
@@ -22,6 +22,7 @@
     "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18",
+    "react-resizable-layout": "0.7.2",
     "react-toastify": "10.0.5",
     "short-uuid": "5.2.0",
     "tailwind-merge": "2.3.0",

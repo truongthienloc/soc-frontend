@@ -25,6 +25,7 @@ import {
   STACKPOINT,
   MEMORY_SECTION,
 } from '~/configs/memoryPoint.constant'
+import { MemoryMapHookReturn } from '~/hooks/memory/useMemoryMap'
 
 const styles: { [key: string]: SxProps<Theme> } = {
   table: {
@@ -50,6 +51,8 @@ interface DisplayDataTableProps {
   onChangeData?: (address: string, value: string) => void
   onResetData?: () => void
   disabled?: boolean
+  memoryMap?: MemoryMapHookReturn
+  onImportClick?: () => void
   // prev?: Register[]
 }
 
@@ -58,6 +61,8 @@ export default function MemoryTable({
   onChangeData,
   onResetData,
   disabled,
+  memoryMap,
+  onImportClick,
 }: DisplayDataTableProps) {
   const [input, setInput] = useState('0x00000000')
   const [start, setStart] = useState(input)
@@ -70,16 +75,40 @@ export default function MemoryTable({
   const [modifiedValue, setModifiedValue] = useState<string>()
 
   useEffect(() => {
-    // calculate start address
     const BASE = LENGTH_OF_DMEM * 4
-    const dec = parseInt(start, 16)
-    const startDec = Math.floor(dec / BASE) * BASE
-    const startHex = startDec.toString(16)
+    let dec = parseInt(start, 16)
 
-    const dMemData = createRangeDmemData(data || [], startHex)
+    function calculateMemoryRange(minPoint: string, maxPoint: string) {
+      const minDec = parseInt(minPoint, 16)
+      const maxDec = parseInt(maxPoint, 16) - 1
+      dec = Math.max(Math.min(dec, maxDec), minDec)
+      const startDec = Math.floor((dec - minDec) / BASE) * BASE + minDec
+      const startHex = startDec.toString(16)
+      const endHex = maxDec.toString(16)
+      return { startHex, endHex }
+    }
 
+    let range: { startHex: string; endHex?: string }
+
+    if (tabIndex === 0 || !memoryMap) {
+      const startDec = Math.floor(dec / BASE) * BASE
+      range = { startHex: startDec.toString(16) }
+    } else {
+      const memoryRanges = [
+        { min: memoryMap.lmPoint, max: memoryMap.ioPoint },
+        { min: memoryMap.ioPoint, max: memoryMap.iMemPoint },
+        { min: memoryMap.iMemPoint, max: memoryMap.dMemPoint },
+        { min: memoryMap.dMemPoint, max: memoryMap.stackPoint },
+        { min: memoryMap.stackPoint, max: undefined },
+      ]
+
+      const { min, max } = memoryRanges[tabIndex - 1]
+      range = calculateMemoryRange(min, max || 'ffffffff')
+    }
+
+    const dMemData = createRangeDmemData(data || [], range.startHex, range.endHex)
     setDisplayedData(dMemData)
-  }, [start, data])
+  }, [start, data, memoryMap?.savedPoints, tabIndex])
 
   const handleButtonClick = () => {
     if (input.startsWith('0x')) {
@@ -100,8 +129,6 @@ export default function MemoryTable({
     setModifiedName(undefined)
     setModifiedValue(undefined)
   }
-
-  console.log('displayedData: ', displayedData)
 
   return (
     <div className="flex flex-col">
@@ -134,6 +161,16 @@ export default function MemoryTable({
         <Button variant="contained" color="error" onClick={onResetData} disabled={!!modifiedName}>
           Reset
         </Button>
+        {tabIndex === 0 && (
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={onImportClick}
+            disabled={!!modifiedName}
+          >
+            Import
+          </Button>
+        )}
       </div>
       <TableContainer component={Paper}>
         <Table sx={styles.table} stickyHeader>

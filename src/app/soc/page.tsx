@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { hexToBinary } from '~/helpers/converts/Hextobin'
 /** import MUI */
 import Button from '@mui/material/Button'
@@ -14,7 +14,6 @@ import { MemoryMap } from '~/components/MemoryMap'
 import { MemoryTable } from '~/components/MemoryTable'
 import { Tab, TabContext, TabPanel, Tabs } from '~/components/Tabs'
 import { cn } from '~/helpers/cn'
-import { isValidHexString } from '~/helpers/validates/hex.validate'
 import Logs from '~/services/lib/Logs/Logs'
 import Soc from '~/services/lib/SOCModels/SoC'
 import '~/styles/soc.scss'
@@ -22,9 +21,8 @@ import { Register } from '~/types/register'
 import { SimulatorType } from '~/types/simulator'
 
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
-import { DMEMPOINT, IMEMPOINT, IOPOINT, LMPOINT, STACKPOINT } from '~/configs/memoryPoint.constant'
-import { convertMemoryCoreToRegisterType } from '~/helpers/converts/memory.convert'
 import { useResizable } from 'react-resizable-layout'
+import { convertMemoryCoreToRegisterType } from '~/helpers/converts/memory.convert'
 import useMemoryMap from '~/hooks/memory/useMemoryMap'
 
 type Props = {}
@@ -65,10 +63,9 @@ export default function SocPage({}: Props) {
   const [isStepping, setIsStepping] = useState(false)
   const [pc, setPc] = useState<number | undefined>(undefined)
 
-  const [controlTabIndex, setControlTabIndex] = useState(0)
-
   /** Memory Map state */
   const memoryMap = useMemoryMap()
+  const { savedPoints } = memoryMap
 
   /** Memory Data */
   const [memoryData, setMemoryData] = useState<Register[]>([])
@@ -124,6 +121,10 @@ export default function SocPage({}: Props) {
     }
   }, [setPosition1, setPosition2])
 
+  useEffect(() => {
+    setAllowRun(false)
+  }, [savedPoints])
+
   const handleChangeCode = (code: string) => {
     setCode(code)
     setAllowRun(false)
@@ -174,8 +175,6 @@ export default function SocPage({}: Props) {
 
     input.addEventListener('change', async () => {
       const files = input.files
-      // console.log('files:', files)
-
       if (files?.length && files.length > 0) {
         const file = files.item(0)
         if (!file || file.type === 'image/*') {
@@ -263,6 +262,33 @@ export default function SocPage({}: Props) {
     setAllowRun(false)
   }
 
+  const handleMemoryTableImport = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.mem,.MEM'
+
+    input.addEventListener('change', async () => {
+      const files = input.files
+      if (files?.length && files.length > 0) {
+        const file = files.item(0)
+        if (!file || file.type === 'image/*') {
+          return
+        }
+        const text = await file.text()
+        if (!socModelRef.current) {
+          return
+        }
+        socModelRef.current.Memory.setMemoryFromString(text)
+        setMemoryData(convertMemoryCoreToRegisterType(socModelRef.current.Memory.Memory))
+        setAllowRun(false)
+        toast.success('Import memory table successfully')
+      }
+      input.remove()
+    })
+
+    input.click()
+  }
+
   return (
     <div className="h-dvh">
       <div className="grid h-full grid-cols-[auto_auto_1fr_auto_auto] gap-1">
@@ -327,6 +353,8 @@ export default function SocPage({}: Props) {
                 onChangeData={handleChangeMemoryData}
                 onResetData={handleResetMemoryTable}
                 disabled={isStepping}
+                memoryMap={memoryMap}
+                onImportClick={handleMemoryTableImport}
               />
             </div>
           </div>

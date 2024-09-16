@@ -15,17 +15,11 @@ import Tabs from '@mui/material/Tabs'
 import type { SxProps, Theme } from '@mui/material/styles'
 import { styled } from '@mui/material/styles'
 import { useEffect, useState } from 'react'
+import { MEMORY_SECTION } from '~/configs/memoryPoint.constant'
 import { createRangeDmemData, LENGTH_OF_DMEM } from '~/helpers/generates/dMemRange.generate'
-import { Register } from '~/types/register'
-import {
-  DMEMPOINT,
-  IMEMPOINT,
-  IOPOINT,
-  LMPOINT,
-  STACKPOINT,
-  MEMORY_SECTION,
-} from '~/configs/memoryPoint.constant'
 import { MemoryMapHookReturn } from '~/hooks/memory/useMemoryMap'
+import { Register } from '~/types/register'
+import FunctionButton from './FunctionButton'
 
 const styles: { [key: string]: SxProps<Theme> } = {
   table: {
@@ -53,6 +47,7 @@ interface DisplayDataTableProps {
   disabled?: boolean
   memoryMap?: MemoryMapHookReturn
   onImportClick?: () => void
+  onExportClick?: () => void
   // prev?: Register[]
 }
 
@@ -63,6 +58,7 @@ export default function MemoryTable({
   disabled,
   memoryMap,
   onImportClick,
+  onExportClick,
 }: DisplayDataTableProps) {
   const [input, setInput] = useState('0x00000000')
   const [start, setStart] = useState(input)
@@ -162,14 +158,11 @@ export default function MemoryTable({
           Reset
         </Button>
         {tabIndex === 0 && (
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={onImportClick}
-            disabled={!!modifiedName}
-          >
-            Import
-          </Button>
+          <FunctionButton
+            onImportClick={onImportClick}
+            onExportClick={onExportClick}
+            disabled={disabled}
+          />
         )}
       </div>
       <TableContainer component={Paper}>

@@ -22,7 +22,10 @@ import { SimulatorType } from '~/types/simulator'
 
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import { useResizable } from 'react-resizable-layout'
-import { convertMemoryCoreToRegisterType } from '~/helpers/converts/memory.convert'
+import {
+  convertMemoryCoreToRegisterType,
+  convertMemoryTableToText,
+} from '~/helpers/converts/memory.convert'
 import useMemoryMap from '~/hooks/memory/useMemoryMap'
 
 type Props = {}
@@ -289,6 +292,19 @@ export default function SocPage({}: Props) {
     input.click()
   }
 
+  const handleMemoryTableExport = () => {
+    const text = convertMemoryTableToText(memoryData)
+    const blob = new Blob([text], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'memory.mem'
+    // document.body.appendChild(link)
+    link.click()
+    // document.body.removeChild(link)
+    link.remove()
+  }
+
   return (
     <div className="h-dvh">
       <div className="grid h-full grid-cols-[auto_auto_1fr_auto_auto] gap-1">
@@ -355,6 +371,7 @@ export default function SocPage({}: Props) {
                 disabled={isStepping}
                 memoryMap={memoryMap}
                 onImportClick={handleMemoryTableImport}
+                onExportClick={handleMemoryTableExport}
               />
             </div>
           </div>

@@ -306,16 +306,16 @@ export default function SocPage({}: Props) {
   }
 
   return (
-    <div className="h-dvh">
-      <div className="grid h-full grid-cols-[auto_auto_1fr_auto_auto] gap-1">
+    <div className="sm:h-dvh">
+      <div className="grid h-full grid-cols-[auto_auto_1fr_auto_auto] gap-1 max-sm:grid-cols-1">
         {/* Section 1 */}
         <div
-          className={cn('overflow-y-auto px-1 pb-1 transition', {
+          className={cn('overflow-y-auto px-1 pb-1 transition max-sm:w-[100dvw_!important]', {
             'blur-sm': isDragging1,
           })}
           style={{ width: position1 }}
         >
-          <div className="min-w-[395px]">
+          <div className="sm:min-w-[395px]">
             {/* CODE EDITOR SECTION */}
             <div className={cn({ hidden: showSimulatorType !== 'CODE_EDITOR' })}>
               <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
@@ -420,12 +420,12 @@ export default function SocPage({}: Props) {
 
         {/* Section 3 */}
         <div
-          className={cn('overflow-y-auto transition', {
+          className={cn('overflow-y-auto transition max-sm:w-[100dvw_!important]', {
             'blur-sm': isDragging2,
           })}
           style={{ width: position2 }}
         >
-          <div className="flex min-w-[460px] flex-col px-2">
+          <div className="flex flex-col sm:min-w-[460px] sm:px-2">
             <h2 className="text-xl font-bold">Peripherals:</h2>
             {/* Tab Bar */}
             <TabContext>
@@ -434,12 +434,18 @@ export default function SocPage({}: Props) {
                 <Tab label="Led Matrix" />
               </Tabs>
               {/* Tab index = 0 */}
-              <TabPanel index={0}>
+              <TabPanel
+                index={0}
+                className="min-w-[460px] max-sm:-ml-14 max-sm:-mt-14 max-sm:mb-14 max-sm:scale-75"
+              >
                 <div className="monitor" id="monitor" tabIndex={0}></div>
                 <Keyboard />
               </TabPanel>
               {/* Tab index = 1 */}
-              <TabPanel index={1} className="flex flex-1 items-center justify-center">
+              <TabPanel
+                index={1}
+                className="flex flex-1 items-center justify-center pt-8 max-sm:mb-20 max-sm:w-dvw max-sm:overflow-auto max-sm:px-1"
+              >
                 <LedMatrix />
               </TabPanel>
             </TabContext>
@@ -449,7 +455,7 @@ export default function SocPage({}: Props) {
       </div>
 
       {/* Button group place on bottom-left */}
-      <div className="absolute bottom-4 right-4 space-y-1">
+      <div className="fixed bottom-4 right-4 space-y-1">
         <p className="bg-white text-sm font-semibold">
           Click on &#39;GUIDE&#39; if this is your first time here.
         </p>

@@ -59,7 +59,7 @@ export default function MemoryMap({ className, memoryMap, disabled = false }: Pr
   }
 
   return (
-    <div className={cn('grid grid-cols-[auto_auto] gap-2', className)}>
+    <div className={cn('grid grid-cols-2 gap-2', className)}>
       <TextField
         label="LM_point"
         value={lmPoint}
@@ -105,8 +105,9 @@ export default function MemoryMap({ className, memoryMap, disabled = false }: Pr
         }}
         disabled={disabled}
       />
-      <div className="grid grid-cols-2 gap-2">
+      <div className="flex justify-center gap-2">
         <Button
+          className="h-fit w-fit px-3 py-2"
           variant="contained"
           color="primary"
           disabled={disabled || !isModified}
@@ -114,7 +115,13 @@ export default function MemoryMap({ className, memoryMap, disabled = false }: Pr
         >
           Save
         </Button>
-        <Button variant="contained" color="error" disabled={disabled} onClick={onResetDefault}>
+        <Button
+          className="h-fit w-fit px-3 py-2"
+          variant="contained"
+          color="error"
+          disabled={disabled}
+          onClick={onResetDefault}
+        >
           Reset
         </Button>
       </div>

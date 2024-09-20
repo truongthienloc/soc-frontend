@@ -24,7 +24,7 @@ import FunctionButton from './FunctionButton'
 const styles: { [key: string]: SxProps<Theme> } = {
   table: {
     minWidth: 350,
-    maxWidth: 650,
+    // maxWidth: 650,
     '& .MuiTableCell-root': {
       // height: '2.5rem',
       padding: '0.15rem',
@@ -127,12 +127,15 @@ export default function MemoryTable({
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col items-center">
       <Tabs
         value={tabIndex}
         onChange={(_, value) => setTabIndex(value)}
         aria-label="Memory Table Tabs"
         variant="scrollable"
+        scrollButtons
+        allowScrollButtonsMobile
+        className="max-sm:w-screen"
       >
         <Tab label="ALL" />
         <Tab label="LM" />
@@ -141,29 +144,33 @@ export default function MemoryTable({
         <Tab label="DMEM" />
         <Tab label="STACK" />
       </Tabs>
-      <div className="mb-3 mt-1 flex flex-row justify-center gap-2">
-        <p className="flex items-center font-bold">{MEMORY_SECTION[tabIndex].name}</p>
-        <InputAddress placeholder="0x00000000" value={input} onChange={handleChangeInput} />
-        <Button
-          sx={{ gap: '0.25rem' }}
-          variant="contained"
-          onClick={handleButtonClick}
-          disabled={!!modifiedName}
-        >
-          {/* <SearchIcon /> */}
-          Go
-        </Button>
-        {/* Button to reset memory table */}
-        <Button variant="contained" color="error" onClick={onResetData} disabled={!!modifiedName}>
-          Reset
-        </Button>
-        {tabIndex === 0 && (
-          <FunctionButton
-            onImportClick={onImportClick}
-            onExportClick={onExportClick}
-            disabled={disabled}
-          />
-        )}
+      <div className="mb-3 mt-1 flex justify-center gap-2 max-sm:flex-col">
+        <div className="flex gap-2">
+          <p className="flex items-center font-bold">{MEMORY_SECTION[tabIndex].name}</p>
+          <InputAddress placeholder="0x00000000" value={input} onChange={handleChangeInput} />
+        </div>
+        <div className="flex gap-2">
+          <Button
+            sx={{ gap: '0.25rem' }}
+            variant="contained"
+            onClick={handleButtonClick}
+            disabled={!!modifiedName}
+          >
+            {/* <SearchIcon /> */}
+            Go
+          </Button>
+          {/* Button to reset memory table */}
+          <Button variant="contained" color="error" onClick={onResetData} disabled={!!modifiedName}>
+            Reset
+          </Button>
+          {tabIndex === 0 && (
+            <FunctionButton
+              onImportClick={onImportClick}
+              onExportClick={onExportClick}
+              disabled={disabled}
+            />
+          )}
+        </div>
       </div>
       <TableContainer component={Paper}>
         <Table sx={styles.table} stickyHeader>
@@ -197,7 +204,7 @@ export default function MemoryTable({
                             onChange={(e) => setModifiedValue(e.target.value)}
                           />
                           <Button
-                            className="ml-auto bg-white"
+                            className="ml-auto h-fit w-fit min-w-0 bg-white px-2"
                             variant="outlined"
                             color="success"
                             onClick={handleDoneClick}
@@ -209,7 +216,7 @@ export default function MemoryTable({
                         <>
                           <span>{value.value}</span>
                           <Button
-                            className="ml-auto bg-white"
+                            className="ml-auto h-fit w-fit min-w-0 bg-white px-2"
                             variant="outlined"
                             color="warning"
                             onClick={() => handleEditClick(value.name, value.value)}

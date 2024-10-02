@@ -127,6 +127,15 @@ export default class Soc {
                             Mem_tb  )
         this.Processor.setImem(this.Assembler.binary_code)                 // LOAD INTUCTIONS INTO PROCESSOR
         this.Memory.SetInstuctionMemory(this.Processor.Instruction_memory) // LOAD INTUCTIONS INTO MAIN MEMORY
+        this.MMU.SetTLB([0, (0*4095) + (96 + 16 + 1024) *4, 1, 1],
+                        [1, (1*4095) + (96 + 16 + 1024) *4, 1, 2],
+                        [2, (2*4095) + (96 + 16 + 1024) *4, 1, 3],
+                        [3, (3*4095) + (96 + 16 + 1024) *4, 1, 4],
+                        [4, (4*4095) + (96 + 16 + 1024) *4, 1, 5],
+                        [5, (5*4095) + (96 + 16 + 1024) *4, 1, 6],
+                        [6, (6*4095) + (96 + 16 + 1024) *4, 1, 7],
+                        [244 , (244*4095) + (96 + 16 + 1024) *4, 1, 8],
+                )
         for (let i of this.Assembler.Instructions)
             if (i != '.text' && i != '') this.Assembly_code.push(i)
         //SET INITIAL ANIMATION'STATUS
@@ -203,7 +212,9 @@ export default class Soc {
         
         const element = this.Processor.Instruction_memory[this.Processor.pc.toString(2)]
         this.view?.cpu.setIsRunning(this.Processor.active)
+        // CPU RUN
         let [CPU_message, CPU_data, logical_address, rd] = this.Processor.run(element, this.Processor.pc)
+        
         if (CPU_message!= 'PUT' && CPU_message != 'GET') return // CHECK message is PUT or GET
         // ****************IF message is PUT OR GET****************
         // CHECK ADDRESS
@@ -231,10 +242,23 @@ export default class Soc {
         // RUN MMU
         this.view?.mmu.setIsRunning(this.MMU.active)
         console.log('logical_address', logical_address)
-        const [physical_address, MMU_message] = this.MMU.Run(logical_address, 
-                                                             this.Memory.IO_point)
+        let [physical_address, MMU_message] = this.MMU.Run(logical_address)
         console.log(MMU_message)
         this.println(MMU_message)
+
+        if (MMU_message == 'WARNING TLB: Address is missed') {
+            // MISSED
+            // CALCULATE physical_address
+            // this.Memory.IOpoint
+            const VPN = dec ('0'+logical_address.slice(0,24))
+            const PPN = dec ('0'+this.Memory.Memory[physical_address])
+            this.MMU.pageReplace([VPN, PPN, 1, this.cycle])
+            let [nphysical_address, MMU_message] = this.MMU.Run(logical_address)
+            console.log(MMU_message)
+            this.println(MMU_message)
+            physical_address = nphysical_address
+        } 
+        
         this.println(
             'Cycle ',
             this.cycle.toString(),

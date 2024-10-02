@@ -27,7 +27,6 @@ export default class Memory {
     Imem_point: number, Dmem_point: number, Stack_point: number, 
     Mem_tb: Register[]
     ){
-            
             this.LM_point    = LM_point
             this.IO_point    = IO_point
             this.Imem_point  = Imem_point
@@ -54,13 +53,46 @@ export default class Memory {
             // MEMORY AREA OF STACK
             for (let i = Stack_point; i < 100; i+=4) 
                 this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
-
             // CONFIG MEMORY
             for (const element of Mem_tb) 
-                this.Memory[element.name] = element.value
-            
-            
+                this.Memory[element.name] = element.value   
     }
+
+    public setPageNumber () {
+        let count = 0
+        for (let i = this.Stack_point ; i < (this.Stack_point + 0xffffff)*4; i+=4) {
+            this.Memory[i.toString(2).padStart(32,'0')] = (count*4095).toString(2).padStart(32,'0') + this.Dmem_point
+            count ++ 
+        }
+        
+    }
+
+    public getPageNumber () {
+        let count = 0
+        for (let i = this.Stack_point ; i < (this.Stack_point + 0xffffff)*4; i+=4) 
+        console.log (this.Memory[i.toString(2).padStart(32,'0')])
+    }
+
+    public getLedMatrix () {
+        for (let i = this.LM_point; i < this.IO_point; i+=4) 
+            console.log(this.Memory[i.toString(2).padStart(32,'0')])
+    }
+
+    public getIO () {
+        for (let i = this.IO_point; i < this.Imem_point; i+=4) 
+            console.log(this.Memory[i.toString(2).padStart(32,'0')])
+    }
+
+    public getImem () {
+        for (let i = this.Imem_point; i < this.Dmem_point; i+=4) 
+            console.log(this.Memory[i.toString(2).padStart(32,'0')])
+    }
+
+    public getDmem () {
+        for (let i = this.Dmem_point; i < this.Stack_point; i+=4) 
+            console.log(this.Memory[i.toString(2).padStart(32,'0')])
+    }
+
     public GetMemory(): { [key: string]: string } {
         // Chuyển object sang mảng các cặp [key, value]
         const entries = Object.entries(this.Memory);
@@ -80,8 +112,9 @@ export default class Memory {
     
         return sortedObj;
     }
+    
     public SetInstuctionMemory (Instruction_memory: { [key: string]: string}) {
-        console.log(Instruction_memory)
+        console.log('Instruction Mem',Instruction_memory)
         let count = this.Imem_point + 4
         for (const key in Instruction_memory) {
             if (Instruction_memory.hasOwnProperty(key) && (Instruction_memory[key]!= '')) {
@@ -90,6 +123,7 @@ export default class Memory {
             }
         }
     }
+
     public setMemoryFromString(input: string): { beforeColon: string; afterColon: string }[] {
         // Split the input into sections using regex that considers new lines and colons
         const sections = input.split(/\n(?=0x)/).map(section => section.trim());

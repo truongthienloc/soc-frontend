@@ -687,13 +687,13 @@ export default class RiscVProcessor {
                 // SW
                 message = 'PUT'
                 data = readData2
-                address = ALUResult.slice(0,11)
+                address = ALUResult.padStart(32,'0')
             }
             if (instruction.slice(25, 32) === '0000011') {
                 // LW
                 message = 'GET'
                 data = ''
-                address = ALUResult.slice(0,11)
+                address = ALUResult.padStart(32,'0')
             }
 
             readData = this.dataMemory(ALUResult, this.memRead, this.memWrite, readData2)

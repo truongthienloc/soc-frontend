@@ -30,6 +30,7 @@ import {
 import useMemoryMap from '~/hooks/memory/useMemoryMap'
 import useTLB from '~/hooks/tlb/useTLB'
 import { TLBTable } from '~/components/TLBTable'
+import { tlb2Array, tlbEntries2TLB } from '~/helpers/converts/tlb.convert'
 
 type Props = {}
 
@@ -253,6 +254,8 @@ export default function SocPage({}: Props) {
     const decDmem_point = parseInt(dMemPoint, 16)
     const decStack_point = parseInt(stackPoint, 16)
 
+    const tlbEntries = tlbEntries2TLB(tlb2Array(tlb.tlbData))
+    
     if (
       !socModelRef.current?.assemble(
         code,
@@ -262,6 +265,7 @@ export default function SocPage({}: Props) {
         decDmem_point,
         decStack_point,
         memoryData.map((mem) => ({ name: hexToBinary(mem.name), value: hexToBinary(mem.value) })),
+        tlbEntries,
       )
     ) {
       toast.error('Syntax error')

@@ -24,7 +24,7 @@ export default function useTLB() {
         })),
     )
 
-    const [pointer, setPointer] = useState(''.padStart(8, '0'));
+    const [pointer, setPointer] = useState(''.padStart(8, '0'))
 
     /**
      * Handles a change in the TLB data. If the key is 'editable', then the value is a boolean

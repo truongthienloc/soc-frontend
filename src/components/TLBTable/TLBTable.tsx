@@ -52,8 +52,8 @@ export default function TLBTable({ tlb }: Props) {
             <TableRow>
               <TableCell align="center">Page Number</TableCell>
               <TableCell align="center">Physical Address</TableCell>
-              <TableCell align="center">Shamtime</TableCell>
               <TableCell align="center">Valid</TableCell>
+              <TableCell align="center">Shamtime</TableCell>
               <TableCell></TableCell>
             </TableRow>
           </TableHead>
@@ -70,6 +70,7 @@ export default function TLBTable({ tlb }: Props) {
                         pageNumber: e.target.value,
                       })
                     }
+                    startAdornment="0x"
                     disabled={editingIndex !== index}
                   />
                 </TableCell>
@@ -90,11 +91,12 @@ export default function TLBTable({ tlb }: Props) {
                 </TableCell>
                 <TableCell>
                   <Input
-                    value={editingIndex === index ? editingTLB?.timestamp : row.timestamp}
+                    className="w-10 px-1 text-center"
+                    value={editingIndex === index ? editingTLB?.valid : row.valid}
                     onChange={(e) =>
                       setEditingTLB({
                         ...editingTLB!,
-                        timestamp: e.target.value,
+                        valid: e.target.value,
                       })
                     }
                     startAdornment="0x"
@@ -103,14 +105,14 @@ export default function TLBTable({ tlb }: Props) {
                 </TableCell>
                 <TableCell>
                   <Input
-                    className="w-10 px-2 text-center"
-                    value={editingIndex === index ? editingTLB?.valid : row.valid}
+                    value={editingIndex === index ? editingTLB?.timestamp : row.timestamp}
                     onChange={(e) =>
                       setEditingTLB({
                         ...editingTLB!,
-                        valid: e.target.value,
+                        timestamp: e.target.value,
                       })
                     }
+                    startAdornment="0x"
                     disabled={editingIndex !== index}
                   />
                 </TableCell>

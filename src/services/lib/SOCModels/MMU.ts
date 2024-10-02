@@ -41,6 +41,8 @@ export default class MMU {
             }
         if (minIndex !== -1) this.TLB [minIndex] = Replacement_page; // Replace with new row values
     }
+
+    /** pageNumber, physicalAddress, timestamp, valid */
     public SetTLB ( P0: [number, number, number, number], 
                     P1: [number, number, number, number], 
                     P2: [number, number, number, number], 

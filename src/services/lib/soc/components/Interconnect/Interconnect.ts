@@ -70,7 +70,7 @@ export default class Interconnect extends TileLinkObject {
             y: 0,
             width: toPixel(w),
             height: toPixel(h),
-            fill: '#4ade80',
+            fill: '#2d99dd',
             stroke: Scene.BORDER_COLOR,
         })
 

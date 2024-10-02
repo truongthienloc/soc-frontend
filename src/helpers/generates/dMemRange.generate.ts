@@ -17,12 +17,16 @@ export function convertBinary2Hex(binary: string): string {
     return hexValue
 }
 
-export function createRangeDmemData(data: Register[], start: string): Register[] {
+export function createRangeDmemData(data: Register[], start: string, end?: string): Register[] {
     const startDec = parseInt(start, 16)
     const res = []
     for (let i = 0; i < LENGTH_OF_DMEM; i++) {
         const addressDec = startDec + 4 * i
         const addressHex = '0x' + addressDec.toString(16).padStart(8, '0')
+
+        if (end && parseInt(end, 16) < addressDec) {
+            break
+        }
 
         const DMemData = data.find((value) => value.name === addressHex)
         let value = '0x00000000'

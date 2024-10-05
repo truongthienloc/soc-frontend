@@ -411,6 +411,7 @@ export default class Assembler {
             if (mlist[2].startsWith('0x')) {
                 mlist[2] = this.convertHexToDec(mlist[2]).toString()
             }
+
             let imm = parseInt(mlist[2]).toString(2).padStart(12, '0')
             if (parseInt(mlist[2]) < 0) {
                 imm = ((1 << 12) + parseInt(mlist[2])).toString(2).slice(-12)
@@ -419,7 +420,6 @@ export default class Assembler {
 
             const values = [imm, rs1, funct3, rd, opcode]
             if (values.some((value) => value === undefined)) this.syntax_error = true
-
             return imm + rs1 + funct3 + rd + opcode
         }
 
@@ -661,6 +661,7 @@ export default class Assembler {
             if (t.length < 2) {
                 continue
             }
+
             let string = ''
             if (this.FMT[t[0]] === 'R') {
                 string = this.RType(ins[i])

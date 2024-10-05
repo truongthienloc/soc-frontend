@@ -32,7 +32,7 @@ export default class Memory {
             this.Imem_point  = Imem_point
             this.Dmem_point  = Dmem_point
             this.Stack_point = Stack_point
-
+            
             // MEMORY AREA OF LED MATRIX
             for (let i = LM_point; i < IO_point; i+=4) 
                 this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
@@ -45,7 +45,6 @@ export default class Memory {
             // MEMORY AREA OF I-MEM
             for (let i = Imem_point + 4; i < Dmem_point; i+=4) 
                 this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
-            
             // MEMORY AREA OF D-MEM
             for (let i = Dmem_point; i < Stack_point; i+=4) 
                 this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
@@ -60,15 +59,15 @@ export default class Memory {
 
     public setPageNumber () {
         let count = 0
-        for (let i = this.Stack_point ; i < (this.Stack_point + 0xffffff)*4; i+=4) {
-            this.Memory[i.toString(2).padStart(32,'0')] = (count*4095).toString(2).padStart(32,'0') + this.Dmem_point
+        //console.log(this.Stack_point, (this.Stack_point + 100)*4)
+        for (let i = this.Stack_point ; i < (this.Stack_point + 140); i+=4) {
+            this.Memory[i.toString(2).padStart(32,'0')] = (count*4095+ this.Dmem_point).toString(2).padStart(32,'0') 
             count ++ 
         }
         
     }
 
     public getPageNumber () {
-        let count = 0
         for (let i = this.Stack_point ; i < (this.Stack_point + 0xffffff)*4; i+=4) 
         console.log (this.Memory[i.toString(2).padStart(32,'0')])
     }

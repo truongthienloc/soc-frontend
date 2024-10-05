@@ -629,6 +629,7 @@ export default class RiscVProcessor {
             let readData = ''
             // console.log('instructions', instruction,'pc',pc)
             this.control(instruction.slice(25, 32), instruction.slice(17, 20))
+
             let size = 'none'
             if (instruction.slice(25, 32) === '0000011')
                 switch (instruction.slice(17, 20)) {
@@ -683,6 +684,7 @@ export default class RiscVProcessor {
             let message = 'None'
             let data = '0'
             let address = ''
+            
             if (instruction.slice(25, 32) === '0100011') {
                 // SW
                 message = 'PUT'

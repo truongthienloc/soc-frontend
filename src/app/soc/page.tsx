@@ -21,12 +21,16 @@ import { Register } from '~/types/register'
 import { SimulatorType } from '~/types/simulator'
 
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
+import CloseIcon from '@mui/icons-material/Close'
 import { useResizable } from 'react-resizable-layout'
 import {
   convertMemoryCoreToRegisterType,
   convertMemoryTableToText,
 } from '~/helpers/converts/memory.convert'
 import useMemoryMap from '~/hooks/memory/useMemoryMap'
+import useTLB from '~/hooks/tlb/useTLB'
+import { TLBTable } from '~/components/TLBTable'
+import { tlb2Array, tlbEntries2TLB } from '~/helpers/converts/tlb.convert'
 
 type Props = {}
 
@@ -73,6 +77,9 @@ export default function SocPage({}: Props) {
   /** Memory Data */
   const [memoryData, setMemoryData] = useState<Register[]>([])
 
+  /** TLB Data */
+  const tlb = useTLB()
+
   useEffect(() => {
     const socCode = localStorage.getItem('soc_code') ?? ''
     setCode(socCode)
@@ -100,10 +107,16 @@ export default function SocPage({}: Props) {
           setShowSimulatorType('MEMORY')
         }
 
+        const handleMMUClick = () => {
+          setShowSimulatorType('MMU')
+        }
+
         const cpu = soc.cpu
         const memory = soc.memory
+        const mmu = soc.mmu
         cpu.getEvent().on(Agent.Event.CLICK, handleCPUClick)
         memory.getEvent().on(Agent.Event.CLICK, handleMemoryClick)
+        mmu.getEvent().on(Agent.Event.CLICK, handleMMUClick)
 
         const socModel = new Soc('abc')
         socModelRef.current = socModel
@@ -241,6 +254,8 @@ export default function SocPage({}: Props) {
     const decDmem_point = parseInt(dMemPoint, 16)
     const decStack_point = parseInt(stackPoint, 16)
 
+    const tlbEntries = tlbEntries2TLB(tlb2Array(tlb.tlbData))
+    
     if (
       !socModelRef.current?.assemble(
         code,
@@ -250,6 +265,7 @@ export default function SocPage({}: Props) {
         decDmem_point,
         decStack_point,
         memoryData.map((mem) => ({ name: hexToBinary(mem.name), value: hexToBinary(mem.value) })),
+        tlbEntries,
       )
     ) {
       toast.error('Syntax error')
@@ -321,7 +337,7 @@ export default function SocPage({}: Props) {
               <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
                 <h2 className="text-xl font-bold">Code Editor:</h2>
                 <Button onClick={() => setShowSimulatorType('SOC')}>
-                  <ArrowForwardIcon />
+                  <CloseIcon />
                 </Button>
               </div>
               <div className="flex h-[calc(100dvh-69px)] flex-col border border-black">
@@ -360,7 +376,7 @@ export default function SocPage({}: Props) {
               <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
                 <h2 className="text-xl font-bold">Memory Map:</h2>
                 <Button onClick={() => setShowSimulatorType('SOC')}>
-                  <ArrowForwardIcon />
+                  <CloseIcon />
                 </Button>
               </div>
               <MemoryMap className="mb-4" memoryMap={memoryMap} disabled={isStepping} />
@@ -373,6 +389,21 @@ export default function SocPage({}: Props) {
                 onImportClick={handleMemoryTableImport}
                 onExportClick={handleMemoryTableExport}
               />
+            </div>
+
+            {/* MMU SECTION */}
+            <div
+              className={cn('flex h-full flex-col', {
+                hidden: showSimulatorType !== 'MMU',
+              })}
+            >
+              <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
+                <h2 className="text-xl font-bold">TLB:</h2>
+                <Button onClick={() => setShowSimulatorType('SOC')}>
+                  <CloseIcon />
+                </Button>
+              </div>
+              <TLBTable tlb={tlb} />
             </div>
           </div>
         </div>

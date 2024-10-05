@@ -12,6 +12,7 @@ import { Register } from '~/types/register'
 import { eventNames } from 'process'
 import EventEmitter from '../EventEmitter/EventEmitter'
 
+import type { TLB } from './soc.d'
 
 export default class Soc {
     name: string
@@ -99,7 +100,7 @@ export default class Soc {
     public assemble(code: string, 
                     LM_point: number, IO_point: number, Imem_point: number, 
                     Dmem_point: number, Stack_point: number , 
-                    Mem_tb: Register[] 
+                    Mem_tb: Register[], TLB: TLB
                 ) {
         this.println('Cycle ', this.cycle.toString(), ': System is setting up')
         console.log('Cycle ', this.cycle.toString(), ': System is setting up')
@@ -127,14 +128,14 @@ export default class Soc {
                             Mem_tb  )
         this.Processor.setImem(this.Assembler.binary_code)                 // LOAD INTUCTIONS INTO PROCESSOR
         this.Memory.SetInstuctionMemory(this.Processor.Instruction_memory) // LOAD INTUCTIONS INTO MAIN MEMORY
-        this.MMU.SetTLB([0, (0*4095) + (96 + 16 + 1024) *4, 1, 1],
-                        [1, (1*4095) + (96 + 16 + 1024) *4, 1, 2],
-                        [2, (2*4095) + (96 + 16 + 1024) *4, 1, 3],
-                        [3, (3*4095) + (96 + 16 + 1024) *4, 1, 4],
-                        [4, (4*4095) + (96 + 16 + 1024) *4, 1, 5],
-                        [5, (5*4095) + (96 + 16 + 1024) *4, 1, 6],
-                        [6, (6*4095) + (96 + 16 + 1024) *4, 1, 7],
-                        [244 , (244*4095) + (96 + 16 + 1024) *4, 1, 8],
+        this.MMU.SetTLB(TLB.p0,
+                        TLB.p1,
+                        TLB.p2,
+                        TLB.p3,
+                        TLB.p4,
+                        TLB.p5,
+                        TLB.p6,
+                        TLB.p7,
                 )
         for (let i of this.Assembler.Instructions)
             if (i != '.text' && i != '') this.Assembly_code.push(i)

@@ -4,13 +4,13 @@ import { TLBEntry } from '~/hooks/tlb/useTLB'
 type TLBEntries = [number, number, number, number]
 
 type TLB = {
-    p0: TLBEntries,
-    p1: TLBEntries,
-    p2: TLBEntries,
-    p3: TLBEntries,
-    p4: TLBEntries,
-    p5: TLBEntries,
-    p6: TLBEntries,
+    p0: TLBEntries
+    p1: TLBEntries
+    p2: TLBEntries
+    p3: TLBEntries
+    p4: TLBEntries
+    p5: TLBEntries
+    p6: TLBEntries
     p7: TLBEntries
 }
 

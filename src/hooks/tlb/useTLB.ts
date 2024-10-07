@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import short from 'short-uuid'
 
 export type TLBEntry = {
@@ -7,20 +7,19 @@ export type TLBEntry = {
     physicalAddress: string
     timestamp: string
     valid: string
-    editable: boolean
 }
 
 export type UseTLBReturn = ReturnType<typeof useTLB>
 
-export default function useTLB() {
+export default function useTLB(_length?: number) {
+    const [length, setLength] = useState(_length ?? 8)
     const [tlbData, setTlbData] = useState<TLBEntry[]>(
-        Array.from({ length: 8 }).map((_, i) => ({
+        Array.from({ length: length }).map((_, i) => ({
             id: short.generate(),
-            pageNumber: i.toString(),
+            pageNumber: '0',
             physicalAddress: '0'.padStart(8, '0'),
             timestamp: '0'.padStart(8, '0'),
             valid: '0',
-            editable: false,
         })),
     )
 
@@ -36,10 +35,7 @@ export default function useTLB() {
      */
     const handleTLBDataChange = (index: number, key: keyof TLBEntry, value: string | boolean) => {
         const newTlbData = [...tlbData]
-        if (key === 'editable') {
-            newTlbData[index][key] = !!value
-            return
-        }
+
         newTlbData[index][key] = value.toString()
         setTlbData(newTlbData)
     }
@@ -50,7 +46,27 @@ export default function useTLB() {
         setTlbData(newTlbData)
     }
 
+    useEffect(() => {
+        if (length < tlbData.length) {
+            setTlbData(tlbData.slice(0, length))
+        } else if (length > tlbData.length) {
+            setTlbData(
+                tlbData.concat(
+                    Array.from({ length: length - tlbData.length }).map(() => ({
+                        id: short.generate(),
+                        pageNumber: '0',
+                        physicalAddress: '0'.padStart(8, '0'),
+                        timestamp: '0'.padStart(8, '0'),
+                        valid: '0',
+                    })),
+                ),
+            )
+        }
+    }, [length])
+
     return {
+        length,
+        setLength,
         tlbData,
         handleTLBDataChange,
         setTLBEntry,

@@ -255,7 +255,7 @@ export default function SocPage({}: Props) {
     const decStack_point = parseInt(stackPoint, 16)
 
     const tlbEntries = tlbEntries2TLB(tlb2Array(tlb.tlbData))
-    
+
     if (
       !socModelRef.current?.assemble(
         code,

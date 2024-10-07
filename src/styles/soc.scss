@@ -94,6 +94,22 @@
     grid-template-rows: 2fr 1fr;
 }
 
+.led-matrix__led:hover {
+    &::before {
+        content: attr(id);
+        position: absolute;
+        top: 8px;
+        right: 0;
+        transform: translateX(-25%);
+        width: max-content;
+        height: fit-content;
+        padding: 4px 8px;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        font-size: 0.8rem;
+    }
+}
+
 // #logs {
 //     background-color: #000;
 //     color: white;

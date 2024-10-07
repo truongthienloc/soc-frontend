@@ -9,7 +9,7 @@ export default class MMU {
     constructor(active: boolean) {
         this.active = active;
         this.physical_address = 0;  // Initialize with a number
-        this.pageNumberPointer = 0xffffff * 4095
+        this.pageNumberPointer = 0xffffff
         this.TLB = [
             [0, 0, 0],
             [0, 0, 0],
@@ -66,6 +66,7 @@ export default class MMU {
         let message
         const page_num        = dec ('0'+logic_address.slice(0,24))
         const offset          = dec ('0'+logic_address.slice(24))
+        console.log('MMU: Page Number: ', page_num)
 
         // ABSOLUTE ADDRESS
         if (dec ('0'+logic_address) >=0 && dec ('0'+logic_address) <= (96 + 16 + 1024)) {
@@ -106,7 +107,7 @@ export default class MMU {
             }
             else {
                 message = "TLB: PPN is missed."
-                this.physical_address = page_num + this.pageNumberPointer
+                this.physical_address = page_num*4 + this.pageNumberPointer
             }
         }
 

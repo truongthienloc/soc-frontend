@@ -579,7 +579,7 @@ export function assemblerFromIns(code: string): string[] {
             continue
         }
         let string = ''
-
+        console.log ('FMT[t[0]]', FMT[t[0]] )
         if (FMT[t[0]] === 'R') {
             string = RType(ins[i])
         }

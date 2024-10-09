@@ -100,7 +100,7 @@ export default class Soc {
     public assemble(code: string, 
                     LM_point: number, IO_point: number, Imem_point: number, 
                     Dmem_point: number, Stack_point: number , 
-                    Mem_tb: Register[], TLB: TLBEntries[]
+                    Mem_tb: Register[], TLB: TLBEntries[], TLB_pointer: number
                 ) {
         this.println('Cycle ', this.cycle.toString(), ': System is setting up')
         console.log('Cycle ', this.cycle.toString(), ': System is setting up')
@@ -133,7 +133,7 @@ export default class Soc {
         this.Memory.SetInstuctionMemory(this.Processor.Instruction_memory) // LOAD INTUCTIONS INTO MAIN MEMORY
         this.Memory.setPageNumber()
         
-        this.MMU.SetTLB(TLB)
+        this.MMU.SetTLB(TLB, TLB_pointer)
         for (let i of this.Assembler.Instructions)
             if (i != '.text' && i != '') this.Assembly_code.push(i)
         //SET INITIAL ANIMATION'STATUS
@@ -158,6 +158,9 @@ export default class Soc {
             this.println('SYSTEM IS READY TO RUN')
             console.log('SYSTEM IS READY TO RUN')
         }
+
+        console.log("MMU: ", this.MMU);
+        
         return !this.Assembler.syntax_error
     }
 

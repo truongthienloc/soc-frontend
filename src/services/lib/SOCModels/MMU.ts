@@ -28,8 +28,9 @@ export default class MMU {
         if (minIndex !== -1) this.TLB[minIndex] = Replacement_page;  // Replace with new row values
     }
 
-    public SetTLB(P: [number, number, number, number][]) {
+    public SetTLB(P: [number, number, number, number][], pointer: number) {
         this.TLB = P;
+        this.pageNumberPointer = pointer
     }
 
     public Run(logic_address: string): [string, string] {

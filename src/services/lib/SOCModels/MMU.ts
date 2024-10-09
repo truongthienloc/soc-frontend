@@ -43,23 +43,9 @@ export default class MMU {
     }
 
     /** pageNumber, physicalAddress, timestamp, valid */
-    public SetTLB ( P0: [number, number, number, number], 
-                    P1: [number, number, number, number], 
-                    P2: [number, number, number, number], 
-                    P3: [number, number, number, number], 
-                    P4: [number, number, number, number],  
-                    P5: [number, number, number, number], 
-                    P6: [number, number, number, number], 
-                    P7: [number, number, number, number], 
+    public SetTLB (P: [number, number, number, number][],
     ) {
-        this.TLB [0] = P0
-        this.TLB [1] = P1
-        this.TLB [2] = P2
-        this.TLB [3] = P3
-        this.TLB [4] = P4
-        this.TLB [5] = P5
-        this.TLB [6] = P6
-        this.TLB [7] = P7
+        this.TLB = P
     }
 
     public Run (logic_address: any) {

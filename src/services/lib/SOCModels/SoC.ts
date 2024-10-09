@@ -12,7 +12,7 @@ import { Register } from '~/types/register'
 import { eventNames } from 'process'
 import EventEmitter from '../EventEmitter/EventEmitter'
 
-import type { TLB } from './soc.d'
+import type { TLB, TLBEntries } from './soc.d'
 
 export default class Soc {
     name: string
@@ -100,7 +100,7 @@ export default class Soc {
     public assemble(code: string, 
                     LM_point: number, IO_point: number, Imem_point: number, 
                     Dmem_point: number, Stack_point: number , 
-                    Mem_tb: Register[], TLB: TLB
+                    Mem_tb: Register[], TLB: TLBEntries[]
                 ) {
         this.println('Cycle ', this.cycle.toString(), ': System is setting up')
         console.log('Cycle ', this.cycle.toString(), ': System is setting up')
@@ -133,15 +133,7 @@ export default class Soc {
         this.Memory.SetInstuctionMemory(this.Processor.Instruction_memory) // LOAD INTUCTIONS INTO MAIN MEMORY
         this.Memory.setPageNumber()
         
-        this.MMU.SetTLB(TLB.p0,
-                        TLB.p1,
-                        TLB.p2,
-                        TLB.p3,
-                        TLB.p4,
-                        TLB.p5,
-                        TLB.p6,
-                        TLB.p7,
-                )
+        this.MMU.SetTLB(TLB)
         for (let i of this.Assembler.Instructions)
             if (i != '.text' && i != '') this.Assembly_code.push(i)
         //SET INITIAL ANIMATION'STATUS

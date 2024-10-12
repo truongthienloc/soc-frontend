@@ -258,10 +258,10 @@ export default class Soc {
 
             console.log('Cycle ', this.cycle.toString()+' : '+ 
             'MMU want to GET data at adress '+
-            BinToHex((VPN*4 + this.MMU.pageNumberPointer).toString(2).padStart(32,'0'))+' from Memory')
+            BinToHex((VPN*4 + this.MMU.pageNumberPointer).toString(2).padStart(32,'0'))+' from MEMORY')
             this.println('Cycle ', this.cycle.toString()+' : '+ 
             'MMU want to GET data at adress '+
-            BinToHex((VPN*4 + this.MMU.pageNumberPointer).toString(2).padStart(32,'0'))+' from Memory')
+            BinToHex((VPN*4 + this.MMU.pageNumberPointer).toString(2).padStart(32,'0'))+' from MEMORY')
             
             const MMU2Memory = this.MMU.master.send('GET', 
             (VPN*4 + this.MMU.pageNumberPointer).toString(2).padStart(32,'0'),
@@ -300,7 +300,7 @@ export default class Soc {
 
             this.cycle+=1
             let [nphysical_address, MMU_message] = this.MMU.Run(logical_address)
-            this.println('Cycle ', this.cycle.toString()+' : '+ MMU_message)
+            console.log ('Cycle ', this.cycle.toString()+' : '+ MMU_message)
             this.println('Cycle ', this.cycle.toString()+' : '+ MMU_message)
             // console.log(MMU_message)
             // this.println(MMU_message)

@@ -68,8 +68,8 @@ export default class Memory {
     }
 
     public getPageNumber () {
-        for (let i = this.Stack_point ; i < (this.Stack_point + 0xffffff)*4; i+=4) 
-        console.log (this.Memory[i.toString(2).padStart(32,'0')])
+        for (let i = this.Stack_point ; i < (this.Stack_point + 140); i+=4) 
+        console.log (i.toString(2).padStart(32,'0') , dec (this.Memory[i.toString(2).padStart(32,'0')]))
     }
 
     public getLedMatrix () {

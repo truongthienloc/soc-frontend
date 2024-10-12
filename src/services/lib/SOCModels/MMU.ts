@@ -1,7 +1,8 @@
 import { dec, BinToHex } from './convert'  // Cleaned up unnecessary imports
-
+import Master from './Master'
 export default class MMU {
     active: boolean;
+    master: Master;
     physical_address: number;  // Explicitly typed as number
     TLB: [number, number, number, number][];  // Define TLB as 2D array of tuples with 4 numbers
     pageNumberPointer: number;
@@ -10,6 +11,7 @@ export default class MMU {
 
     constructor(active: boolean) {
         this.active = active;
+        this.master = new Master('MMU', true, '0')
         this.physical_address = 0;  // Initialized with a number
         this.pageNumberPointer = 0xffffff;
         this.TLB = new Array(8).fill([0, 0, 0, 0]);  // Initialized as 8 rows of [0, 0, 0, 0]
@@ -36,8 +38,8 @@ export default class MMU {
     public Run(logic_address: string): [string, string] {
         let message: string;
         const page_num = dec('0' + logic_address.slice(0, 24));  // Slice first 24 bits for page number
-        const offset = dec('0' + logic_address.slice(24));  // Slice the rest for the offset
-        console.log('MMU: Page Number:', page_num);
+        const offset   = dec('0' + logic_address.slice(24));  // Slice the rest for the offset
+        // console.log('MMU: Page Number:', page_num);
 
         // Check if logic_address is within base memory range
         if (dec('0' + logic_address) >= 0 && dec('0' + logic_address) <= MMU.BASE_ADDRESS) {

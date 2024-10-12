@@ -243,24 +243,67 @@ export default class Soc {
         // RUN MMU
         this.view?.mmu.setIsRunning(this.MMU.active)
         let [physical_address, MMU_message] = this.MMU.Run(logical_address)
-        console.log('Cycle ', this.cycle.toString() +': '+ MMU_message)
-        this.println('Cycle ', this.cycle.toString()+': '+ MMU_message)
-        console.log(this.MMU.TLB)
+        console.log ('Cycle ', this.cycle.toString() +' : '+ MMU_message)
+        this.println ('Cycle ', this.cycle.toString()+' : '+ MMU_message)
+
+        //console.log(this.MMU.TLB)
 
         if (MMU_message == 'TLB: PPN is missed.') {
             // MISSED
             // CALCULATE physical_address
             // this.Memory.IOpoint
             this.cycle+=1
-            console.log('Cycle ', this.cycle.toString()+': ' + 'TLB: Page Number is replaced')
+            
             const VPN = dec ('0'+logical_address.slice(0,24))
-            const PPN = dec ('0'+this.Memory.Memory[physical_address])
+
+            console.log('Cycle ', this.cycle.toString()+' : '+ 
+            'MMU want to GET data at adress '+
+            BinToHex((VPN*4 + this.MMU.pageNumberPointer).toString(2).padStart(32,'0'))+' from Memory')
+            this.println('Cycle ', this.cycle.toString()+' : '+ 
+            'MMU want to GET data at adress '+
+            BinToHex((VPN*4 + this.MMU.pageNumberPointer).toString(2).padStart(32,'0'))+' from Memory')
+            
+            const MMU2Memory = this.MMU.master.send('GET', 
+            (VPN*4 + this.MMU.pageNumberPointer).toString(2).padStart(32,'0'),
+            '0', this.cycle, '0')
+            console.log  ('Cycle ', this.cycle.toString()+' : '+'MMU is sending message GET to MEMORY')
+            this.println ('Cycle ', this.cycle.toString()+' : '+'MMU is sending message GET to MEMORY')
+
+            this.cycle = this.cycle + 1
+            const [, ai2s]  = this.Memory.slaveMemory.receive (MMU2Memory)
+            console.log  ('Cycle ', this.cycle.toString()+' : '+'MEMORY is receiving messeage from MMU')
+            this.println ('Cycle ', this.cycle.toString()+' : '+'MEMORY is receiving messeage from MMU')
+
+            this.cycle = this.cycle + 1
+            const dfm2mmu   = this.Memory.slaveMemory.send('AccessAckData', this.Memory.Memory[ai2s])
+            console.log  ('Cycle ', this.cycle.toString()+' : '+'MEMORY is sending messeage to MMU')
+            this.println ('Cycle ', this.cycle.toString()+' : '+'MEMORY is sending messeage to MMU')
+
+            this.cycle = this.cycle + 1
+            const ammurfm   = this.MMU.master.receive ('MEMORY', 
+                this.cycle, 
+                'bn',
+                {opcode: '001', payload: ''+this.Memory.Memory[ai2s]},
+            )
+            console.log  ('Cycle ', this.cycle.toString()+' : '+'MMU is receiving messeage from MEMORY')
+            this.println ('Cycle ', this.cycle.toString()+' : '+'MMU is receiving messeage from MEMORY')
+            //console.log('ammurfm',)
+
+            // console.log ('MMU2Memory', MMU2Memory)
+            // console.log ('ai2s ',ai2s)
+            // console.log ('di2s ',this.Memory.Memory[ai2s])
+            this.cycle+=1
+            const PPN = dec ('0'+ammurfm)
             this.MMU.pageReplace([VPN, PPN, 1, this.cycle])
-            console.log(this.MMU.TLB)
+            console.log ('Cycle ', this.cycle.toString()+' : ' + 'TLB: Page Number is replaced')
+            this.println('Cycle ', this.cycle.toString()+' : ' + 'TLB: Page Number is replaced')
+
             this.cycle+=1
             let [nphysical_address, MMU_message] = this.MMU.Run(logical_address)
-            console.log(MMU_message)
-            this.println(MMU_message)
+            this.println('Cycle ', this.cycle.toString()+' : '+ MMU_message)
+            this.println('Cycle ', this.cycle.toString()+' : '+ MMU_message)
+            // console.log(MMU_message)
+            // this.println(MMU_message)
             physical_address = nphysical_address
         } 
         

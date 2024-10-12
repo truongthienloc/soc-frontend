@@ -48,6 +48,6 @@ export default class Slave {
         //     // println(`Cycle ${cycle}: The data is written: ${BinToHex(ChannelA.data)}`);
         // }
         // //console.log('BinToHex(ChannelA.address)', ChannelA.address)
-        return [ChannelA.slice(-32), ChannelA.slice(10,42)]
+        return [ChannelA.slice(-32), ChannelA.slice(9,41)]
     }
 }

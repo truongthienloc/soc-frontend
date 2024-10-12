@@ -61,7 +61,6 @@ export default class Master {
         cycle: number,
         port: string,
         channelD: { opcode: string; payload: string },
-        println: (...args: string[]) => void,
     ): string | undefined {
         if (!this.active) {
             return ' '
@@ -71,7 +70,7 @@ export default class Master {
         // println(`Cycle ${cycle}: Master ${this.name} has received data from Slave ${SlaveName}`);
 
         if (channelD.opcode === '000') {
-            return
+            return ' '
         }
 
         if (channelD.opcode === '001') {

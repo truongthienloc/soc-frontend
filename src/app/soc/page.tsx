@@ -378,7 +378,7 @@ export default function SocPage({}: Props) {
               </div>
               <div className="flex flex-col items-center">
                 <p className="font-semibold">SOC - Simulator</p>
-                <p className="text-sm">AUTHORS: Nguyễn Gia Bảo Ngọc & Thương Thiên Lộc</p>
+                <p className="text-sm">AUTHORS: <a target='_blank' href='https://www.linkedin.com/in/ngbn111723/'>Nguyễn Gia Bảo Ngọc</a> & <a target='_blank' href='https://www.linkedin.com/in/truongthienloc/'>Thương Thiên Lộc</a></p>
               </div>
               <div id="simulation"></div>
             </div>
@@ -512,7 +512,7 @@ export default function SocPage({}: Props) {
             <div className="absolute h-5 w-5 animate-ping rounded-full bg-gray-500 opacity-75"></div>
           </Button>
           <Link href={'https://forms.gle/n9Qd9mrpHgKtRPir9'} target="_blank">
-            <Button className="h-fit bg-white" variant="outlined" color="error">
+            <Button className="h-fit bg-white" variant="outlined" color="secondary">
               Feedback
             </Button>
           </Link>

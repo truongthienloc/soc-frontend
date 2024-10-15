@@ -38,6 +38,7 @@ export default function TLBTable({ tlb }: Props) {
   const [editingLength, setEditingLength] = useState(length.toString())
   const [editingTLB, setEditingTLB] = useState<TLBEntry | null>(null)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [editingPointer, setEditingPointer] = useState<string | null>(null)
 
   const handleSave = () => {
     if (editingIndex !== null) {
@@ -55,6 +56,11 @@ export default function TLBTable({ tlb }: Props) {
     }
     setLength(parseInt(editingLength))
     setEditingIndex(null)
+  }
+
+  const handlePointerSave = () => {
+    setPointer(editingPointer!)
+    setEditingPointer(null)
   }
 
   return (
@@ -185,16 +191,34 @@ export default function TLBTable({ tlb }: Props) {
 
       <div className="flex flex-row items-center gap-1">
         <TextField
-          value={pointer}
-          onChange={(e) => setPointer(e.target.value)}
+          value={editingPointer ? editingPointer : pointer}
+          onChange={(e) => setEditingPointer(e.target.value)}
           label="Page Number Pointer"
           InputProps={{
             startAdornment: '0x',
           }}
+          disabled={!editingPointer}
         />
-        <Button variant="contained" className="h-fit w-fit min-w-0 px-2" onClick={handleReset}>
+        {editingPointer ? (
+          <Button
+            variant="contained"
+            className="h-fit w-fit min-w-0 px-2"
+            onClick={handlePointerSave}
+          >
+            <SaveIcon />
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            className="h-fit w-fit min-w-0 px-2"
+            onClick={() => setEditingPointer(pointer)}
+          >
+            <EditIcon />
+          </Button>
+        )}
+        {/* <Button variant="contained" className="h-fit w-fit min-w-0 px-2" onClick={handleReset}>
           <RestartAltIcon />
-        </Button>
+        </Button> */}
       </div>
     </div>
   )

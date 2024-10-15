@@ -25,7 +25,7 @@ export default class Soc {
     Assembler: Assembler
 
     cycle: number
-    public static SOCEVENT = {DONE_ALL: 'DONE ALL'}
+    public static SOCEVENT = {DONE_ALL: 'DONE ALL', STEP_END: 'STEP END'}
     event = new EventEmitter ()
 
     disabled: boolean = false

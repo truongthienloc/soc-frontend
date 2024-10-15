@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import short from 'short-uuid'
 
 export type TLBEntry = {
@@ -25,26 +25,21 @@ export default function useTLB(_length?: number) {
 
     const [pointer, setPointer] = useState(''.padStart(8, '0'))
 
-    /**
-     * Handles a change in the TLB data. If the key is 'editable', then the value is a boolean
-     * indicating whether the row is editable or not. If the key is any other field, then the value
-     * is a string representing the value of the field. The function updates the state accordingly.
-     * @param index The index of the row in the TLB data.
-     * @param key The key of the field that is being changed.
-     * @param value The new value of the field.
-     */
-    const handleTLBDataChange = (index: number, key: keyof TLBEntry, value: string | boolean) => {
-        const newTlbData = [...tlbData]
+    const setTLBEntry = useCallback(
+        (index: number, value: TLBEntry) => {
+            const newTlbData = [...tlbData]
+            newTlbData[index] = value
+            setTlbData(newTlbData)
+        },
+        [tlbData],
+    )
 
-        newTlbData[index][key] = value.toString()
-        setTlbData(newTlbData)
-    }
-
-    const setTLBEntry = (index: number, value: TLBEntry) => {
-        const newTlbData = [...tlbData]
-        newTlbData[index] = value
-        setTlbData(newTlbData)
-    }
+    const setTLBEntries = useCallback(
+        (newTlbData: TLBEntry[]) => {
+            setTlbData(newTlbData)
+        },
+        [tlbData],
+    )
 
     useEffect(() => {
         if (length < tlbData.length) {
@@ -68,8 +63,8 @@ export default function useTLB(_length?: number) {
         length,
         setLength,
         tlbData,
-        handleTLBDataChange,
         setTLBEntry,
+        setTLBEntries,
         pointer,
         setPointer,
     }

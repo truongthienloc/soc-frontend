@@ -30,7 +30,7 @@ import {
 import useMemoryMap from '~/hooks/memory/useMemoryMap'
 import useTLB from '~/hooks/tlb/useTLB'
 import { TLBTable } from '~/components/TLBTable'
-import { tlb2Array, tlbEntries2TLB } from '~/helpers/converts/tlb.convert'
+import { array2TLB, tlb2Array, tlbEntries2TLB } from '~/helpers/converts/tlb.convert'
 
 type Props = {}
 
@@ -79,6 +79,7 @@ export default function SocPage({}: Props) {
 
   /** TLB Data */
   const tlb = useTLB()
+  const { tlbData, pointer} = tlb
 
   useEffect(() => {
     const socCode = localStorage.getItem('soc_code') ?? ''
@@ -139,7 +140,7 @@ export default function SocPage({}: Props) {
 
   useEffect(() => {
     setAllowRun(false)
-  }, [savedPoints])
+  }, [savedPoints, tlbData, pointer])
 
   const handleChangeCode = (code: string) => {
     setCode(code)
@@ -161,22 +162,20 @@ export default function SocPage({}: Props) {
   }
 
   const handleRunAllClick = () => {
-    // console.log('running')
     if (!socModelRef.current) {
       return
     }
 
-    // socModelRef.current.setImen(code)
-    // setTimeout(() => socModelRef.current?.Run(code), 1000)
     logRef.current?.clear()
     socModelRef.current.event.once(Soc.SOCEVENT.DONE_ALL, () => {
       if (!socModelRef.current) {
         return
       }
 
-      const newMemorTable = convertMemoryCoreToRegisterType(socModelRef.current.Memory.Memory)
-
-      setMemoryData(newMemorTable)
+      const newMemoryTable = convertMemoryCoreToRegisterType(socModelRef.current.Memory.Memory)
+      const newTLB = array2TLB(socModelRef.current.MMU.TLB)
+      setMemoryData(newMemoryTable)
+      tlb.setTLBEntries(newTLB)
     })
     socModelRef.current.RunAll()
     setShowSimulatorType('SOC')
@@ -239,7 +238,18 @@ export default function SocPage({}: Props) {
     }
 
     setPc(socModelRef.current.Processor.pc)
+    socModelRef.current.event.once(Soc.SOCEVENT.STEP_END, () => {
+      if (!socModelRef.current) {
+        return
+      }
+
+      const newMemoryTable = convertMemoryCoreToRegisterType(socModelRef.current.Memory.Memory)
+      const newTLB = array2TLB(socModelRef.current.MMU.TLB)
+      setMemoryData(newMemoryTable)
+      tlb.setTLBEntries(newTLB)
+    })
     socModelRef.current.Step()
+    
   }
 
   const handleAssembleClick = () => {

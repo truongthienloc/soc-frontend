@@ -1,4 +1,4 @@
-import short from 'short-uuid';
+import short from 'short-uuid'
 import { TLBEntry } from '~/hooks/tlb/useTLB'
 
 /** pageNumber, physicalAddress, timestamp, valid */

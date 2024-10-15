@@ -31,9 +31,10 @@ const styles: { [key: string]: SxProps<Theme> } = {
 
 type Props = {
   tlb: UseTLBReturn
+  disabled?: boolean
 }
 
-export default function TLBTable({ tlb }: Props) {
+export default function TLBTable({ tlb, disabled = false }: Props) {
   const { tlbData, pointer, setTLBEntry, setPointer, length, setLength } = tlb
   const [editingLength, setEditingLength] = useState(length.toString())
   const [editingTLB, setEditingTLB] = useState<TLBEntry | null>(null)
@@ -77,6 +78,7 @@ export default function TLBTable({ tlb }: Props) {
             variant="contained"
             className="h-fit w-fit min-w-0 px-2"
             onClick={() => setEditingIndex(-1)}
+            disabled={disabled}
           >
             <EditIcon />
           </Button>
@@ -170,6 +172,7 @@ export default function TLBTable({ tlb }: Props) {
                         setEditingTLB({ ...row })
                         setEditingIndex(index)
                       }}
+                      disabled={disabled}
                     >
                       <EditIcon />
                     </Button>
@@ -212,6 +215,7 @@ export default function TLBTable({ tlb }: Props) {
             variant="contained"
             className="h-fit w-fit min-w-0 px-2"
             onClick={() => setEditingPointer(pointer)}
+            disabled={disabled}
           >
             <EditIcon />
           </Button>

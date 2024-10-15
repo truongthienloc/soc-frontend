@@ -79,7 +79,7 @@ export default function SocPage({}: Props) {
 
   /** TLB Data */
   const tlb = useTLB()
-  const { tlbData, pointer} = tlb
+  const { tlbData, pointer } = tlb
 
   useEffect(() => {
     const socCode = localStorage.getItem('soc_code') ?? ''
@@ -249,7 +249,6 @@ export default function SocPage({}: Props) {
       tlb.setTLBEntries(newTLB)
     })
     socModelRef.current.Step()
-    
   }
 
   const handleAssembleClick = () => {
@@ -378,7 +377,16 @@ export default function SocPage({}: Props) {
               </div>
               <div className="flex flex-col items-center">
                 <p className="font-semibold">SOC - Simulator</p>
-                <p className="text-sm">AUTHORS: <a target='_blank' href='https://www.linkedin.com/in/ngbn111723/'>Nguyễn Gia Bảo Ngọc</a> & <a target='_blank' href='https://www.linkedin.com/in/truongthienloc/'>Thương Thiên Lộc</a></p>
+                <p className="text-sm">
+                  AUTHORS:{' '}
+                  <a target="_blank" href="https://www.linkedin.com/in/ngbn111723/">
+                    Nguyễn Gia Bảo Ngọc
+                  </a>{' '}
+                  &{' '}
+                  <a target="_blank" href="https://www.linkedin.com/in/truongthienloc/">
+                    Thương Thiên Lộc
+                  </a>
+                </p>
               </div>
               <div id="simulation"></div>
             </div>

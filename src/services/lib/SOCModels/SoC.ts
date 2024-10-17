@@ -182,6 +182,11 @@ export default class Soc {
        this.event.emit(Soc.SOCEVENT.DONE_ALL)
     }
 
+    public async stepWithEvent() {
+        await this.Step()
+        this.event.emit(Soc.SOCEVENT.STEP_END)
+    }
+
     public async Step() {
         //console.log('Memory: ', this.Memory.Memory);
         
@@ -305,6 +310,8 @@ export default class Soc {
             // console.log(MMU_message)
             // this.println(MMU_message)
             physical_address = nphysical_address
+
+            // console.log('TLB: ', this.MMU.TLB);
         } 
         
         this.println(

@@ -139,8 +139,11 @@ export default function SocPage({}: Props) {
   }, [setPosition1, setPosition2])
 
   useEffect(() => {
+    if (isStepping) {
+      return
+    }
     setAllowRun(false)
-  }, [savedPoints, tlbData, pointer])
+  }, [savedPoints, tlbData, pointer, isStepping])
 
   const handleChangeCode = (code: string) => {
     setCode(code)
@@ -225,7 +228,17 @@ export default function SocPage({}: Props) {
       setStepCode(socModelRef.current.Assembly_code)
       setPc(socModelRef.current.Processor.pc)
       setShowSimulatorType('CODE_EDITOR')
-      socModelRef.current.Step()
+      socModelRef.current.event.once(Soc.SOCEVENT.STEP_END, () => {
+        if (!socModelRef.current) {
+          return
+        }
+  
+        const newMemoryTable = convertMemoryCoreToRegisterType(socModelRef.current.Memory.Memory)
+        const newTLB = array2TLB(socModelRef.current.MMU.TLB)
+        setMemoryData(newMemoryTable)
+        tlb.setTLBEntries(newTLB)
+      })
+      socModelRef.current.stepWithEvent()
       return
     }
 
@@ -248,7 +261,7 @@ export default function SocPage({}: Props) {
       setMemoryData(newMemoryTable)
       tlb.setTLBEntries(newTLB)
     })
-    socModelRef.current.Step()
+    socModelRef.current.stepWithEvent()
   }
 
   const handleAssembleClick = () => {
@@ -422,7 +435,7 @@ export default function SocPage({}: Props) {
                   <CloseIcon />
                 </Button>
               </div>
-              <TLBTable tlb={tlb} />
+              <TLBTable tlb={tlb} disabled={isStepping} />
             </div>
           </div>
         </div>

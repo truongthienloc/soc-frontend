@@ -31,13 +31,15 @@ const styles: { [key: string]: SxProps<Theme> } = {
 
 type Props = {
   tlb: UseTLBReturn
+  disabled?: boolean
 }
 
-export default function TLBTable({ tlb }: Props) {
+export default function TLBTable({ tlb, disabled = false }: Props) {
   const { tlbData, pointer, setTLBEntry, setPointer, length, setLength } = tlb
   const [editingLength, setEditingLength] = useState(length.toString())
   const [editingTLB, setEditingTLB] = useState<TLBEntry | null>(null)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [editingPointer, setEditingPointer] = useState<string | null>(null)
 
   const handleSave = () => {
     if (editingIndex !== null) {
@@ -57,6 +59,11 @@ export default function TLBTable({ tlb }: Props) {
     setEditingIndex(null)
   }
 
+  const handlePointerSave = () => {
+    setPointer(editingPointer!)
+    setEditingPointer(null)
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-row items-center gap-1">
@@ -71,6 +78,7 @@ export default function TLBTable({ tlb }: Props) {
             variant="contained"
             className="h-fit w-fit min-w-0 px-2"
             onClick={() => setEditingIndex(-1)}
+            disabled={disabled}
           >
             <EditIcon />
           </Button>
@@ -164,6 +172,7 @@ export default function TLBTable({ tlb }: Props) {
                         setEditingTLB({ ...row })
                         setEditingIndex(index)
                       }}
+                      disabled={disabled}
                     >
                       <EditIcon />
                     </Button>
@@ -185,16 +194,35 @@ export default function TLBTable({ tlb }: Props) {
 
       <div className="flex flex-row items-center gap-1">
         <TextField
-          value={pointer}
-          onChange={(e) => setPointer(e.target.value)}
+          value={editingPointer ? editingPointer : pointer}
+          onChange={(e) => setEditingPointer(e.target.value)}
           label="Page Number Pointer"
           InputProps={{
             startAdornment: '0x',
           }}
+          disabled={!editingPointer}
         />
-        <Button variant="contained" className="h-fit w-fit min-w-0 px-2" onClick={handleReset}>
+        {editingPointer ? (
+          <Button
+            variant="contained"
+            className="h-fit w-fit min-w-0 px-2"
+            onClick={handlePointerSave}
+          >
+            <SaveIcon />
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            className="h-fit w-fit min-w-0 px-2"
+            onClick={() => setEditingPointer(pointer)}
+            disabled={disabled}
+          >
+            <EditIcon />
+          </Button>
+        )}
+        {/* <Button variant="contained" className="h-fit w-fit min-w-0 px-2" onClick={handleReset}>
           <RestartAltIcon />
-        </Button>
+        </Button> */}
       </div>
     </div>
   )

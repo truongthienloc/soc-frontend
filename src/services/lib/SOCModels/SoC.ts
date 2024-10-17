@@ -304,6 +304,7 @@ export default class Soc {
             this.println('Cycle ', this.cycle.toString()+' : '+ MMU_message)
             // console.log(MMU_message)
             // this.println(MMU_message)
+            console.log(this.MMU.TLB)
             physical_address = nphysical_address
         } 
         

@@ -299,6 +299,7 @@ export default class Soc {
             // console.log ('di2s ',this.Memory.Memory[ai2s])
             this.cycle+=1
             const PPN = dec ('0'+ammurfm)
+            
             this.MMU.pageReplace([VPN, PPN, 1, this.cycle])
             console.log ('Cycle ', this.cycle.toString()+' : ' + 'TLB: Page Number is replaced')
             this.println('Cycle ', this.cycle.toString()+' : ' + 'TLB: Page Number is replaced')

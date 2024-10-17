@@ -232,7 +232,7 @@ export default function SocPage({}: Props) {
         if (!socModelRef.current) {
           return
         }
-  
+
         const newMemoryTable = convertMemoryCoreToRegisterType(socModelRef.current.Memory.Memory)
         const newTLB = array2TLB(socModelRef.current.MMU.TLB)
         setMemoryData(newMemoryTable)

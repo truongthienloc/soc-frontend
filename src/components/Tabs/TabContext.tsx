@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react'
+import React, { createContext, useCallback, useState } from 'react'
 
 type TabContextProps = {
   index: number
@@ -12,14 +12,21 @@ export const tabContext = createContext<TabContextProps>({
 
 type Props = {
   children?: React.ReactNode
+  index?: number
+  setIndex?: (index: number) => void
 }
 
-export default function TabProvider({ children }: Props) {
-  const [index, setIndex] = useState(0)
+export default function TabProvider({ children, index, setIndex }: Props) {
+  const [_index, _setIndex] = useState(0)
 
-  const changeIndex = (index: number) => {
-    setIndex(index)
-  }
+  const changeIndex = useCallback((index: number) => {
+    _setIndex(index)
+    setIndex?.(index)
+  }, [])
 
-  return <tabContext.Provider value={{ index, changeIndex }}>{children}</tabContext.Provider>
+  return (
+    <tabContext.Provider value={{ index: index ?? _index, changeIndex }}>
+      {children}
+    </tabContext.Provider>
+  )
 }

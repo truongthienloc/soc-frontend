@@ -27,8 +27,8 @@ export function tlb2Array(tlb: TLBEntry[]): TLBEntries[] {
         array.push([
             parseInt(entry.pageNumber, 16),
             parseInt(entry.physicalAddress, 16),
-            parseInt(entry.valid, 16),
-            parseInt(entry.timestamp, 16),
+            parseInt(entry.valid),
+            parseInt(entry.timestamp),
         ])
     }
     return array
@@ -40,7 +40,7 @@ export function array2TLB(array: TLBEntries[]): TLBEntry[] {
         tlb.push({
             id: short.generate(),
             pageNumber: entry[0].toString(16),
-            physicalAddress: entry[1].toString(16),
+            physicalAddress: entry[1].toString(16).padStart(8, '0'),
             valid: entry[2].toString(16),
             timestamp: entry[3].toString(16),
         })

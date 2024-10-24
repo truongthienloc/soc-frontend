@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { startTransition, useEffect, useRef, useState } from 'react'
 import { hexToBinary } from '~/helpers/converts/Hextobin'
 /** import MUI */
 import Button from '@mui/material/Button'
@@ -20,7 +20,6 @@ import '~/styles/soc.scss'
 import { Register } from '~/types/register'
 import { SimulatorType } from '~/types/simulator'
 
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import CloseIcon from '@mui/icons-material/Close'
 import { useResizable } from 'react-resizable-layout'
 import {
@@ -142,12 +141,16 @@ export default function SocPage({}: Props) {
     if (isStepping) {
       return
     }
-    setAllowRun(false)
+    startTransition(() => {
+      setAllowRun(false)
+    })
   }, [savedPoints, tlbData, pointer, isStepping])
 
   const handleChangeCode = (code: string) => {
     setCode(code)
-    setAllowRun(false)
+    startTransition(() => {
+      setAllowRun(false)
+    })
   }
 
   const handleChangeMemoryData = (address: string, data: string) => {
@@ -518,11 +521,11 @@ export default function SocPage({}: Props) {
       </div>
 
       {/* Button group place on bottom-left */}
-      <div className="fixed bottom-4 right-4 space-y-1">
+      <div className="fixed bottom-4 left-4 space-y-1">
         <p className="bg-white text-sm font-semibold">
           Click on &#39;GUIDE&#39; if this is your first time here.
         </p>
-        <div className="flex justify-end gap-2">
+        <div className="flex gap-2">
           <Button
             className="h-fit bg-white"
             variant="outlined"

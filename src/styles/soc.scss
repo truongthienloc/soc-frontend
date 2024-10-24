@@ -96,7 +96,7 @@
 
 .led-matrix__led:hover {
     &::before {
-        content: attr(id);
+        content: attr(data-coordinates);
         position: absolute;
         top: 8px;
         right: 0;

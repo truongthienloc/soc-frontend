@@ -28,8 +28,8 @@ const defaultTLBData = defaultDecTLBData.map(([pageNumber, physicalAddress, time
     id: short.generate(),
     pageNumber: pageNumber.toString(16),
     physicalAddress: physicalAddress.toString(16).padStart(8, '0'),
-    timestamp: timestamp.toString(16).padStart(8, '0'),
-    valid: valid.toString(16),
+    timestamp: timestamp.toString(),
+    valid: valid.toString(),
 }))
 
 export default function useTLB(_length?: number) {

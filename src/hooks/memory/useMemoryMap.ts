@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { startTransition, useEffect, useState } from 'react'
 import { DMEMPOINT, IMEMPOINT, IOPOINT, LMPOINT, STACKPOINT } from '~/configs/memoryPoint.constant'
 
 export type MemoryMapHookReturn = ReturnType<typeof useMemoryMap>
@@ -47,13 +47,15 @@ export default function useMemoryMap() {
     }
 
     useEffect(() => {
-        setIsModified(
-            lmPoint !== savedPoints.lmPoint ||
-                ioPoint !== savedPoints.ioPoint ||
-                iMemPoint !== savedPoints.iMemPoint ||
-                dMemPoint !== savedPoints.dMemPoint ||
-                stackPoint !== savedPoints.stackPoint,
-        )
+        startTransition(() => {
+            setIsModified(
+                lmPoint !== savedPoints.lmPoint ||
+                    ioPoint !== savedPoints.ioPoint ||
+                    iMemPoint !== savedPoints.iMemPoint ||
+                    dMemPoint !== savedPoints.dMemPoint ||
+                    stackPoint !== savedPoints.stackPoint,
+            )
+        })
     }, [lmPoint, ioPoint, iMemPoint, dMemPoint, stackPoint, savedPoints])
 
     return {

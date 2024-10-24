@@ -20,6 +20,7 @@ export default function LedMatrix({ rowCount = 96, colCount = 96 }: Props) {
             key={`${row}-${col}`}
             className="led-matrix__led h-1 w-1"
             id={`led-${row}-${col}`}
+            data-coordinates={`(${row}, ${col})`}
             style={{ backgroundColor: 'gray' }}
           ></div>
         )),

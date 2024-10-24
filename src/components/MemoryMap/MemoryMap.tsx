@@ -61,7 +61,7 @@ export default function MemoryMap({ className, memoryMap, disabled = false }: Pr
   return (
     <div className={cn('grid grid-cols-2 gap-2', className)}>
       <TextField
-        label="LM_point"
+        label="LED_base_address"
         value={lmPoint}
         onChange={(e) => onChangeLmPoint(e.target.value)}
         InputProps={{
@@ -70,7 +70,7 @@ export default function MemoryMap({ className, memoryMap, disabled = false }: Pr
         disabled={disabled}
       />
       <TextField
-        label="IO_point"
+        label="I/O_base_address"
         value={ioPoint}
         onChange={(e) => onChangeIOPoint(e.target.value)}
         InputProps={{
@@ -79,7 +79,7 @@ export default function MemoryMap({ className, memoryMap, disabled = false }: Pr
         disabled={disabled}
       />
       <TextField
-        label="Imem_point"
+        label="I-Mem_base_address"
         value={iMemPoint}
         onChange={(e) => onChangeIMemPoint(e.target.value)}
         InputProps={{
@@ -88,7 +88,7 @@ export default function MemoryMap({ className, memoryMap, disabled = false }: Pr
         disabled={disabled}
       />
       <TextField
-        label="Dmem_point"
+        label="D-Mem_base_address"
         value={dMemPoint}
         onChange={(e) => onChangeDMemPoint(e.target.value)}
         InputProps={{
@@ -97,7 +97,7 @@ export default function MemoryMap({ className, memoryMap, disabled = false }: Pr
         disabled={disabled}
       />
       <TextField
-        label="Stack_point"
+        label="Stack_base_address"
         value={stackPoint}
         onChange={(e) => onChangeStackPoint(e.target.value)}
         InputProps={{

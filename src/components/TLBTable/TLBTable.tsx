@@ -100,7 +100,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
               <TableCell align="center">Page Number</TableCell>
               <TableCell align="center">Physical Address</TableCell>
               <TableCell align="center">Valid</TableCell>
-              <TableCell align="center">Shamtime</TableCell>
+              <TableCell align="center">Timestamp</TableCell>
               <TableCell></TableCell>
             </TableRow>
           </TableHead>
@@ -146,7 +146,6 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                         valid: e.target.value,
                       })
                     }
-                    startAdornment="0x"
                     disabled={editingIndex !== index}
                   />
                 </TableCell>
@@ -159,7 +158,6 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                         timestamp: e.target.value,
                       })
                     }
-                    startAdornment="0x"
                     disabled={editingIndex !== index}
                   />
                 </TableCell>

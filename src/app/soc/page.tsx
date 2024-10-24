@@ -80,6 +80,9 @@ export default function SocPage({}: Props) {
   const tlb = useTLB()
   const { tlbData, pointer } = tlb
 
+  /** Peripherals */
+  const [tabIndex, setTabIndex] = useState(0)
+
   useEffect(() => {
     const socCode = localStorage.getItem('soc_code') ?? ''
     setCode(socCode)
@@ -111,12 +114,30 @@ export default function SocPage({}: Props) {
           setShowSimulatorType('MMU')
         }
 
-        const cpu = soc.cpu
-        const memory = soc.memory
-        const mmu = soc.mmu
+        const handleIOClick = () => {
+          setShowSimulatorType('PERIPHERALS')
+          setTabIndex(0)
+        }
+
+        const handleLedMatrixClick = () => {
+          setShowSimulatorType('PERIPHERALS')
+          setTabIndex(1)
+        }
+
+        const {
+          cpu,
+          memory,
+          mmu,
+          monitor: viewMonitor,
+          keyboard: viewKeyboard,
+          ledMatrix: viewLedMatrix,
+        } = soc
         cpu.getEvent().on(Agent.Event.CLICK, handleCPUClick)
         memory.getEvent().on(Agent.Event.CLICK, handleMemoryClick)
         mmu.getEvent().on(Agent.Event.CLICK, handleMMUClick)
+        viewMonitor.getEvent().on(Agent.Event.CLICK, handleIOClick)
+        viewKeyboard.getEvent().on(Agent.Event.CLICK, handleIOClick)
+        viewLedMatrix.getEvent().on(Agent.Event.CLICK, handleLedMatrixClick)
 
         const socModel = new Soc('abc')
         socModelRef.current = socModel
@@ -184,7 +205,7 @@ export default function SocPage({}: Props) {
       tlb.setTLBEntries(newTLB)
     })
     socModelRef.current.RunAll()
-    setShowSimulatorType('SOC')
+    // setShowSimulatorType('SOC')
     setAllowRun(false)
     // setRegistersData(convertRegisters2TwinRegisters(socModelRef.current.getRegisters()))
   }
@@ -347,6 +368,22 @@ export default function SocPage({}: Props) {
     link.remove()
   }
 
+  const handleExportLogs = () => {
+    if (!logRef.current) {
+      return
+    }
+
+    const blob = new Blob([logRef.current.getText()], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'log.txt'
+    // document.body.appendChild(link)
+    link.click()
+    // document.body.removeChild(link)
+    link.remove()
+  }
+
   return (
     <div className="sm:h-dvh">
       <div className="grid h-full grid-cols-[auto_auto_1fr_auto_auto] gap-1 max-sm:grid-cols-1">
@@ -358,33 +395,8 @@ export default function SocPage({}: Props) {
           style={{ width: position1 }}
         >
           <div className="sm:min-w-[395px]">
-            {/* CODE EDITOR SECTION */}
-            <div className={cn({ hidden: showSimulatorType !== 'CODE_EDITOR' })}>
-              <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
-                <h2 className="text-xl font-bold">Code Editor:</h2>
-                <Button onClick={() => setShowSimulatorType('SOC')}>
-                  <CloseIcon />
-                </Button>
-              </div>
-              <div className="flex h-[calc(100dvh-69px)] flex-col border border-black">
-                {isStepping ? (
-                  <DisplayStepCode code={stepCode} pc={pc} />
-                ) : (
-                  <CodeEditor
-                    value={code}
-                    onChange={handleChangeCode}
-                    disable={disableCodeEditor}
-                    hidden={showSimulatorType !== 'CODE_EDITOR'}
-                  />
-                )}
-              </div>
-            </div>
             {/* SOC SECTION */}
-            <div
-              className={cn('flex h-full flex-col items-center', {
-                hidden: showSimulatorType !== 'SOC',
-              })}
-            >
+            <div className={cn('flex h-full flex-col items-center')}>
               <div className="mt-8 flex flex-col items-center">
                 <p className="text-center text-xl font-semibold">
                   UNIVERSITY OF INFORMATION TECHNOLOGY
@@ -405,40 +417,6 @@ export default function SocPage({}: Props) {
                 </p>
               </div>
               <div id="simulation"></div>
-            </div>
-            {/* MEMORY MAP SECTION */}
-            <div className={cn({ hidden: showSimulatorType !== 'MEMORY' })}>
-              <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
-                <h2 className="text-xl font-bold">Memory Map:</h2>
-                <Button onClick={() => setShowSimulatorType('SOC')}>
-                  <CloseIcon />
-                </Button>
-              </div>
-              <MemoryMap className="mb-4" memoryMap={memoryMap} disabled={isStepping} />
-              <MemoryTable
-                data={memoryData}
-                onChangeData={handleChangeMemoryData}
-                onResetData={handleResetMemoryTable}
-                disabled={isStepping}
-                memoryMap={memoryMap}
-                onImportClick={handleMemoryTableImport}
-                onExportClick={handleMemoryTableExport}
-              />
-            </div>
-
-            {/* MMU SECTION */}
-            <div
-              className={cn('flex h-full flex-col', {
-                hidden: showSimulatorType !== 'MMU',
-              })}
-            >
-              <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
-                <h2 className="text-xl font-bold">TLB:</h2>
-                <Button onClick={() => setShowSimulatorType('SOC')}>
-                  <CloseIcon />
-                </Button>
-              </div>
-              <TLBTable tlb={tlb} disabled={isStepping} />
             </div>
           </div>
         </div>
@@ -470,8 +448,8 @@ export default function SocPage({}: Props) {
               >
                 Step
               </Button>
-              <Button className="" variant="outlined" color="secondary" onClick={handleImportClick}>
-                Import
+              <Button className="" variant="outlined" color="secondary" onClick={handleExportLogs}>
+                Export
               </Button>
             </div>
           </div>
@@ -491,10 +469,82 @@ export default function SocPage({}: Props) {
           })}
           style={{ width: position2 }}
         >
-          <div className="flex flex-col sm:min-w-[460px] sm:px-2">
+          {/* CODE EDITOR SECTION */}
+          <div className={cn({ hidden: showSimulatorType !== 'CODE_EDITOR' })}>
+            <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-bold">Code Editor:</h2>
+                <Button
+                  className=""
+                  variant="outlined"
+                  color="secondary"
+                  onClick={handleImportClick}
+                >
+                  Import
+                </Button>
+              </div>
+              <Button onClick={() => setShowSimulatorType('SOC')}>
+                <CloseIcon />
+              </Button>
+            </div>
+            <div className="flex h-[calc(100dvh-69px)] flex-col border border-black">
+              {isStepping ? (
+                <DisplayStepCode code={stepCode} pc={pc} />
+              ) : (
+                <CodeEditor
+                  value={code}
+                  onChange={handleChangeCode}
+                  disable={disableCodeEditor}
+                  hidden={showSimulatorType !== 'CODE_EDITOR'}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* MEMORY MAP SECTION */}
+          <div className={cn({ hidden: showSimulatorType !== 'MEMORY' })}>
+            <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
+              <h2 className="text-xl font-bold">Memory Map:</h2>
+              <Button onClick={() => setShowSimulatorType('SOC')}>
+                <CloseIcon />
+              </Button>
+            </div>
+            <MemoryMap className="mb-4" memoryMap={memoryMap} disabled={isStepping} />
+            <MemoryTable
+              data={memoryData}
+              onChangeData={handleChangeMemoryData}
+              onResetData={handleResetMemoryTable}
+              disabled={isStepping}
+              memoryMap={memoryMap}
+              onImportClick={handleMemoryTableImport}
+              onExportClick={handleMemoryTableExport}
+            />
+          </div>
+
+          {/* MMU SECTION */}
+          <div
+            className={cn('flex h-full flex-col', {
+              hidden: showSimulatorType !== 'MMU',
+            })}
+          >
+            <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
+              <h2 className="text-xl font-bold">TLB:</h2>
+              <Button onClick={() => setShowSimulatorType('SOC')}>
+                <CloseIcon />
+              </Button>
+            </div>
+            <TLBTable tlb={tlb} disabled={isStepping} />
+          </div>
+
+          {/* Peripherals Section */}
+          <div
+            className={cn('flex flex-col sm:min-w-[460px] sm:px-2', {
+              hidden: showSimulatorType !== 'PERIPHERALS',
+            })}
+          >
             <h2 className="text-xl font-bold">Peripherals:</h2>
             {/* Tab Bar */}
-            <TabContext>
+            <TabContext index={tabIndex} setIndex={setTabIndex}>
               <Tabs>
                 <Tab label="M & K" />
                 <Tab label="Led Matrix" />

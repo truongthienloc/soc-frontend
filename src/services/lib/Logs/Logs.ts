@@ -38,4 +38,13 @@ export default class Logs {
         this.container.replaceChildren()
         this.currentLine = undefined
     }
+
+    public getText(): string {
+        return this.container
+            .querySelectorAll('pre')
+            .values()
+            .map((value) => value.textContent)
+            .toArray()
+            .join('\n')
+    }
 }

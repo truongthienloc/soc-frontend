@@ -158,7 +158,10 @@ export default class RiscVProcessor {
         }
     }
 
-    dataMemory(address: string, memRead: string, memWrite: string, writeData: string): string {
+    dataMemory(address: string, memRead: string, memWrite: string, writeData: string) {
+        if (dec('0' + address) % 4 != 0) {
+            return '00000000000000000000000000000000'
+        }
         if (memRead[0] === '1') {
             if (!(address in this.Data_memory)) {
                 return '00000000000000000000000000000000'

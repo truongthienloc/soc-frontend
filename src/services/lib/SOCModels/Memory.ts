@@ -50,7 +50,7 @@ export default class Memory {
                 this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
             
             // MEMORY AREA OF STACK
-            for (let i = Stack_point; i < 100; i+=4) 
+            for (let i = Stack_point; i < Stack_point + 32 * 4; i+=4) 
                 this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
             // CONFIG MEMORY
             for (const element of Mem_tb) 
@@ -60,16 +60,16 @@ export default class Memory {
     public setPageNumber () {
         let count = 0
         //console.log(this.Stack_point, (this.Stack_point + 100)*4)
-        for (let i = this.Stack_point ; i < (this.Stack_point + 140); i+=4) {
-            this.Memory[i.toString(2).padStart(32,'0')] = (count*4095+ this.Dmem_point).toString(2).padStart(32,'0') 
+        for (let i = this.Stack_point + 32 * 4 ; i < (this.Stack_point + 32 * 4 + 16 *4); i+=4) {
+            this.Memory[i.toString(2).padStart(32,'0')] = (count*1023+ this.Dmem_point).toString(2).padStart(32,'0') 
             count ++ 
         }
         
     }
 
     public getPageNumber () {
-        for (let i = this.Stack_point ; i < (this.Stack_point + 140); i+=4) 
-        console.log (i.toString(2).padStart(32,'0') , dec (this.Memory[i.toString(2).padStart(32,'0')]))
+        for (let i = this.Stack_point + 32 * 4 ; i < (this.Stack_point + 32 * 4 + 16 *4); i+=4)
+        console.log (i, dec (this.Memory[i.toString(2).padStart(32,'0')]))
     }
 
     public getLedMatrix () {

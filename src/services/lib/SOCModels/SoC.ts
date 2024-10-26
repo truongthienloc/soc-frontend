@@ -259,13 +259,13 @@ export default class Soc {
             // this.Memory.IOpoint
             this.cycle+=1
             
-            const VPN = dec ('0'+logical_address.slice(0,24))
+            const VPN = dec('0' + logical_address.slice(18).slice(0, 4));
 
             console.log('Cycle ', this.cycle.toString()+' : '+ 
-            'MMU want to GET data at adress '+
+            'MMU want to GET data at address '+
             BinToHex((VPN*4 + this.MMU.pageNumberPointer).toString(2).padStart(32,'0'))+' from MEMORY')
             this.println('Cycle ', this.cycle.toString()+' : '+ 
-            'MMU want to GET data at adress '+
+            'MMU want to GET data at address '+
             BinToHex((VPN*4 + this.MMU.pageNumberPointer).toString(2).padStart(32,'0'))+' from MEMORY')
             
             const MMU2Memory = this.MMU.master.send('GET', 
@@ -276,13 +276,13 @@ export default class Soc {
 
             this.cycle = this.cycle + 1
             const [, ai2s]  = this.Memory.slaveMemory.receive (MMU2Memory)
-            console.log  ('Cycle ', this.cycle.toString()+' : '+'MEMORY is receiving messeage from MMU')
-            this.println ('Cycle ', this.cycle.toString()+' : '+'MEMORY is receiving messeage from MMU')
+            console.log  ('Cycle ', this.cycle.toString()+' : '+'MEMORY is receiving message from MMU')
+            this.println ('Cycle ', this.cycle.toString()+' : '+'MEMORY is receiving message from MMU')
 
             this.cycle = this.cycle + 1
             const dfm2mmu   = this.Memory.slaveMemory.send('AccessAckData', this.Memory.Memory[ai2s])
-            console.log  ('Cycle ', this.cycle.toString()+' : '+'MEMORY is sending messeage to MMU')
-            this.println ('Cycle ', this.cycle.toString()+' : '+'MEMORY is sending messeage to MMU')
+            console.log  ('Cycle ', this.cycle.toString()+' : '+'MEMORY is sending message to MMU')
+            this.println ('Cycle ', this.cycle.toString()+' : '+'MEMORY is sending message to MMU')
 
             this.cycle = this.cycle + 1
             const ammurfm   = this.MMU.master.receive ('MEMORY', 
@@ -290,8 +290,8 @@ export default class Soc {
                 'bn',
                 {opcode: '001', payload: ''+this.Memory.Memory[ai2s]},
             )
-            console.log  ('Cycle ', this.cycle.toString()+' : '+'MMU is receiving messeage from MEMORY')
-            this.println ('Cycle ', this.cycle.toString()+' : '+'MMU is receiving messeage from MEMORY')
+            console.log  ('Cycle ', this.cycle.toString()+' : '+'MMU is receiving message from MEMORY')
+            this.println ('Cycle ', this.cycle.toString()+' : '+'MMU is receiving message from MEMORY')
             //console.log('ammurfm',)
 
             // console.log ('MMU2Memory', MMU2Memory)
@@ -299,7 +299,7 @@ export default class Soc {
             // console.log ('di2s ',this.Memory.Memory[ai2s])
             this.cycle+=1
             const PPN = dec ('0'+ammurfm)
-            
+            console.log(VPN)
             this.MMU.pageReplace([VPN, PPN, 1, this.cycle])
             console.log ('Cycle ', this.cycle.toString()+' : ' + 'TLB: Page Number is replaced')
             this.println('Cycle ', this.cycle.toString()+' : ' + 'TLB: Page Number is replaced')

@@ -42,7 +42,7 @@ export default function SocPage({}: Props) {
   } = useResizable({
     axis: 'x',
     min: 50,
-    initial: 455,
+    initial: 410,
     // initial: window ? window.innerWidth / 3 - 10 : 455,
   })
   const {
@@ -148,7 +148,7 @@ export default function SocPage({}: Props) {
         socModel.setMonitor(monitor)
         socModel.setLedMatrix(ledMatrix)
 
-        setPosition1(window.innerWidth / 3 - 10)
+        setPosition1(410)
         setPosition2(window.innerWidth / 3 - 10)
       }
 
@@ -249,7 +249,12 @@ export default function SocPage({}: Props) {
     // Start Stepping
     if (pc === undefined) {
       setIsStepping(true)
-      setStepCode(socModelRef.current.Assembly_code)
+      setStepCode(
+        socModelRef.current.Assembly_code.map((value: string) => {
+          const split = value.split(' ')
+          return split.slice(0, split.length - 1).join(' ')
+        }),
+      )
       setPc(socModelRef.current.Processor.pc)
       setShowSimulatorType('CODE_EDITOR')
       socModelRef.current.event.once(Soc.SOCEVENT.STEP_END, () => {
@@ -398,7 +403,7 @@ export default function SocPage({}: Props) {
             {/* SOC SECTION */}
             <div className={cn('flex h-full flex-col items-center')}>
               <div className="mt-8 flex flex-col items-center">
-                <p className="text-center text-xl font-semibold">
+                <p className="text-nowrap text-center text-lg font-semibold">
                   UNIVERSITY OF INFORMATION TECHNOLOGY
                 </p>
                 <img className="h-32 w-32" src="/images/logo/LogoUIT.png" alt="UIT's Logo" />
@@ -429,25 +434,6 @@ export default function SocPage({}: Props) {
           <h2 className="text-xl font-bold">Logs:</h2>
           <div className="flex flex-col gap-2 py-1">
             <div className="flex flex-row flex-wrap gap-2">
-              <Button className="h-fit" variant="outlined" onClick={handleAssembleClick}>
-                Assemble & Restart
-              </Button>
-              <Button
-                className="h-fit"
-                variant="outlined"
-                disabled={!allowRun}
-                onClick={handleRunAllClick}
-              >
-                Run All
-              </Button>
-              <Button
-                className="h-fit"
-                variant="outlined"
-                onClick={handleStepClick}
-                disabled={!allowRun}
-              >
-                Step
-              </Button>
               <Button className="" variant="outlined" color="secondary" onClick={handleExportLogs}>
                 Export
               </Button>
@@ -590,6 +576,27 @@ export default function SocPage({}: Props) {
               Feedback
             </Button>
           </Link>
+        </div>
+        <div className="flex flex-row flex-wrap gap-2">
+          <Button className="h-fit" variant="outlined" onClick={handleAssembleClick}>
+            Assemble & Restart
+          </Button>
+          <Button
+            className="h-fit"
+            variant="outlined"
+            disabled={!allowRun}
+            onClick={handleRunAllClick}
+          >
+            Run All
+          </Button>
+          <Button
+            className="h-fit"
+            variant="outlined"
+            onClick={handleStepClick}
+            disabled={!allowRun}
+          >
+            Step
+          </Button>
         </div>
       </div>
     </div>

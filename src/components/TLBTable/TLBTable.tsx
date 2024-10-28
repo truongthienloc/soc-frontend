@@ -97,8 +97,8 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
         <Table sx={styles.table}>
           <TableHead>
             <TableRow>
-              <TableCell align="center">Page Number</TableCell>
-              <TableCell align="center">Physical Address</TableCell>
+              <TableCell align="center">VPN</TableCell>
+              <TableCell align="center">PPN</TableCell>
               <TableCell align="center">Valid</TableCell>
               <TableCell align="center">Timestamp</TableCell>
               <TableCell></TableCell>

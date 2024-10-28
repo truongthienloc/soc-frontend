@@ -2,7 +2,7 @@ export const LMPOINT = '0'
 export const IOPOINT = '180'
 export const IMEMPOINT = '1C0'
 export const DMEMPOINT = '11C0'
-export const STACKPOINT = '2DC0'
+export const STACKPOINT = '111C0'
 
 export const MEMORY_SECTION = [
     {

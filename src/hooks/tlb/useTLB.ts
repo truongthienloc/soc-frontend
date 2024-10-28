@@ -12,16 +12,14 @@ export type TLBEntry = {
 export type UseTLBReturn = ReturnType<typeof useTLB>
 
 const defaultDecTLBData = [
-    [0, 4544, 1, 0],
-    [1, 8639, 1, 1],
-    [2, 12734, 1, 1],
-    [3, 16829, 1, 1],
-    [4, 20924, 1, 1],
-    [5, 25019, 1, 1],
-    [6, 29114, 1, 1],
-    [244, 1003724, 1, 1],
-    [245, 1003724, 1, 1],
-    [246, 1003724, 1, 1],
+    [0, 4544, 0, 0],
+    [1, 5567, 0, 0],
+    [2, 6590, 0, 0],
+    [3, 7613, 0, 0],
+    [4, 8636, 0, 0],
+    [5, 9659, 0, 0],
+    [6, 10682, 0, 0],
+    [7, 11705, 0, 0],
 ]
 
 const defaultTLBData = defaultDecTLBData.map(([pageNumber, physicalAddress, timestamp, valid]) => ({
@@ -36,7 +34,7 @@ export default function useTLB(_length?: number) {
     const [length, setLength] = useState(_length ?? 8)
     const [tlbData, setTlbData] = useState<TLBEntry[]>(defaultTLBData)
 
-    const [pointer, setPointer] = useState('ffffff')
+    const [pointer, setPointer] = useState('11240')
 
     const setTLBEntry = useCallback(
         (index: number, value: TLBEntry) => {

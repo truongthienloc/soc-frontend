@@ -334,8 +334,8 @@ export default class Soc {
         )
         // IF MESSAGE IS PUT (STORE): 
         if (CPU_message == 'PUT') {
-            this.println('Cycle ', this.cycle.toString(), ': CPU is sending PUT messeage to MEMORY')
-            console.log('Cycle ', this.cycle.toString(), ': CPU is sending PUT messeage to MEMORY')
+            this.println('Cycle ', this.cycle.toString(), ': CPU is sending PUT message to MEMORY')
+            console.log('Cycle ', this.cycle.toString(), ': CPU is sending PUT message to MEMORY')
             // PROCESSOT is sending PUT
             const dm2i = this.Processor.master.send(
                 CPU_message,
@@ -348,12 +348,12 @@ export default class Soc {
             this.println(
                 'Cycle ',
                 this.cycle.toString(),
-                ': INTERCONNECT is receiving messeage from CPU',
+                ': INTERCONNECT is receiving message from CPU',
             )
             console.log(
                 'Cycle ',
                 this.cycle.toString(),
-                ': INTERCONNECT is receiving messeage from CPU',
+                ': INTERCONNECT is receiving message from CPU',
             )
             //INTERCONNCET RUN
            
@@ -399,12 +399,12 @@ export default class Soc {
             this.println(
                 'Cycle ',
                 this.cycle.toString(),
-                ': MEMORY is sending ACCESS_ACK messeage to CPU',
+                ': MEMORY is sending ACCESS_ACK message to CPU',
             )
             console.log(
                 'Cycle ',
                 this.cycle.toString(),
-                ': MEMORY is sending ACCESS_ACK messeage to CPU',
+                ': MEMORY is sending ACCESS_ACK message to CPU',
             )
 
             const doutChD = this.Memory.slaveMemory.send('AccessAck','',)
@@ -412,12 +412,12 @@ export default class Soc {
             this.println(
                 'Cycle ',
                 this.cycle.toString(),
-                ': INTERCONNECT is receiving messeage from MEMORY',
+                ': INTERCONNECT is receiving message from MEMORY',
             )
             console.log(
                 'Cycle ',
                 this.cycle.toString(),
-                ': INTERCONNECT is receiving messeage from MEMORY',
+                ': INTERCONNECT is receiving message from MEMORY',
             )
 
             this.Bus.Port_in(doutChD, 0)
@@ -429,22 +429,22 @@ export default class Soc {
             this.println(
                 'Cycle ',
                 this.cycle.toString(),
-                ': INTERCONNECT is sending messeage to CPU',
+                ': INTERCONNECT is sending message to CPU',
             )
             console.log(
                 'Cycle ',
                 this.cycle.toString(),
-                ': INTERCONNECT is sending messeage to CPU',
+                ': INTERCONNECT is sending message to CPU',
             )
             this.println(
                 'Cycle ',
                 this.cycle.toString(),
-                ': CPU is receiving ACCESS_ACK messeage from INTERCONNECT',
+                ': CPU is receiving ACCESS_ACK message from INTERCONNECT',
             )
             console.log(
                 'Cycle ',
                 this.cycle.toString(),
-                ': CPU is receiving ACCESS_ACK messeage from INTERCONNECT',
+                ': CPU is receiving ACCESS_ACK message from INTERCONNECT',
             )
             const monitor_address = this.Memory.IO_point.toString(2).padStart(32,'0')
             // console.log('monitor_address', this.Memory.Memory[monitor_address].padStart(32,'0'))
@@ -462,8 +462,8 @@ export default class Soc {
 
     // IF MESSAGE IS GET (LOAD): 
     if (CPU_message == 'GET') {
-        this.println('Cycle ', this.cycle.toString(), ': CPU is sending GET messeage to MEMORY')
-        console.log('Cycle ', this.cycle.toString(), ': CPU is sending GET messeage to MEMORY')
+        this.println('Cycle ', this.cycle.toString(), ': CPU is sending GET message to MEMORY')
+        console.log('Cycle ', this.cycle.toString(), ': CPU is sending GET message to MEMORY')
         // PROCESSOT is sending GET
         const dm2i = this.Processor.master.send(
             CPU_message,
@@ -476,12 +476,12 @@ export default class Soc {
         this.println(
             'Cycle ',
             this.cycle.toString(),
-            ': INTERCONNECT is receiving messeage from CPU',
+            ': INTERCONNECT is receiving message from CPU',
         )
         console.log(
             'Cycle ',
             this.cycle.toString(),
-            ': INTERCONNECT is receiving messeage from CPU',
+            ': INTERCONNECT is receiving message from CPU',
         )
         //INTERCONNCET RUN
         
@@ -535,12 +535,12 @@ export default class Soc {
         this.println(
             'Cycle ',
             this.cycle.toString(),
-            ': MEMORY is sending ACCESS_ACK messeage to CPU',
+            ': MEMORY is sending ACCESS_ACK message to CPU',
         )
         console.log(
             'Cycle ',
             this.cycle.toString(),
-            ': MEMORY is sending ACCESS_ACK messeage to CPU',
+            ': MEMORY is sending ACCESS_ACK message to CPU',
         )
 
         const doutChD = this.Memory.slaveMemory.send('AccessAckData',di2s)
@@ -548,12 +548,12 @@ export default class Soc {
         this.println(
             'Cycle ',
             this.cycle.toString(),
-            ': INTERCONNECT is receiving messeage from MEMORY',
+            ': INTERCONNECT is receiving message from MEMORY',
         )
         console.log(
             'Cycle ',
             this.cycle.toString(),
-            ': INTERCONNECT is receiving messeage from MEMORY',
+            ': INTERCONNECT is receiving message from MEMORY',
         )
 
         this.Bus.Port_in(doutChD, 1)
@@ -564,22 +564,22 @@ export default class Soc {
         this.println(
             'Cycle ',
             this.cycle.toString(),
-            ': INTERCONNECT is sending messeage to CPU',
+            ': INTERCONNECT is sending message to CPU',
         )
         console.log(
             'Cycle ',
             this.cycle.toString(),
-            ': INTERCONNECT is sending messeage to CPU',
+            ': INTERCONNECT is sending message to CPU',
         )
         this.println(
             'Cycle ',
             this.cycle.toString(),
-            ': CPU is receiving ACCESS_ACK DATA messeage from INTERCONNECT',
+            ': CPU is receiving ACCESS_ACK DATA message from INTERCONNECT',
         )
         console.log(
             'Cycle ',
             this.cycle.toString(),
-            ': CPU is receiving ACCESS_ACK DATA messeage from INTERCONNECT',
+            ': CPU is receiving ACCESS_ACK DATA message from INTERCONNECT',
         )
 
         const di2m = this.Bus.Port_out(0)

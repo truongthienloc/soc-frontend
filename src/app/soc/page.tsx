@@ -30,6 +30,7 @@ import useMemoryMap from '~/hooks/memory/useMemoryMap'
 import useTLB from '~/hooks/tlb/useTLB'
 import { TLBTable } from '~/components/TLBTable'
 import { array2TLB, tlb2Array, tlbEntries2TLB } from '~/helpers/converts/tlb.convert'
+import Draggable from 'react-draggable'
 
 type Props = {}
 
@@ -45,21 +46,22 @@ export default function SocPage({}: Props) {
     initial: 410,
     // initial: window ? window.innerWidth / 3 - 10 : 455,
   })
-  const {
-    position: position2,
-    separatorProps: separatorProps2,
-    isDragging: isDragging2,
-    setPosition: setPosition2,
-  } = useResizable({
-    axis: 'x',
-    min: 50,
-    initial: 500,
-    // initial: window ? window.innerWidth / 3 - 10 : 500,
-    reverse: true,
-  })
+  // const {
+  //   position: position2,
+  //   separatorProps: separatorProps2,
+  //   isDragging: isDragging2,
+  //   setPosition: setPosition2,
+  // } = useResizable({
+  //   axis: 'x',
+  //   min: 50,
+  //   initial: 500,
+  //   // initial: window ? window.innerWidth / 3 - 10 : 500,
+  //   reverse: true,
+  // })
   const isStart = useRef(true)
   const socModelRef = useRef<Soc>()
   const logRef = useRef<Logs>()
+  const [isOpenLogsModal, setIsOpenLogsModal] = useState(false)
   const [showSimulatorType, setShowSimulatorType] = useState<SimulatorType>('SOC')
   const [disableCodeEditor, setDisableCodeEditor] = useState(false)
   const [code, setCode] = useState('')
@@ -149,14 +151,14 @@ export default function SocPage({}: Props) {
         socModel.setLedMatrix(ledMatrix)
 
         setPosition1(410)
-        setPosition2(window.innerWidth / 3 - 10)
+        // setPosition2(window.innerWidth / 3 - 10)
       }
 
       firstLoad()
 
       return () => {}
     }
-  }, [setPosition1, setPosition2])
+  }, [setPosition1])
 
   useEffect(() => {
     if (isStepping) {
@@ -234,6 +236,16 @@ export default function SocPage({}: Props) {
     })
 
     input.click()
+  }
+
+  const handleExportCodeClick = () => {
+    const blob = new Blob([code], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'code.s'
+    link.click()
+    link.remove()
   }
 
   const handleGuideClick = () => {
@@ -391,11 +403,11 @@ export default function SocPage({}: Props) {
 
   return (
     <div className="sm:h-dvh">
-      <div className="grid h-full grid-cols-[auto_auto_1fr_auto_auto] gap-1 max-sm:grid-cols-1">
+      <div className="grid h-full grid-cols-[auto_auto_1fr] gap-1 max-sm:grid-cols-1">
         {/* Section 1 */}
         <div
           className={cn('overflow-y-auto px-1 pb-1 transition max-sm:w-[100dvw_!important]', {
-            'blur-sm': isDragging1,
+            // 'blur-sm': isDragging1,
           })}
           style={{ width: position1 }}
         >
@@ -429,31 +441,15 @@ export default function SocPage({}: Props) {
 
         <div className="h-full w-1 cursor-col-resize bg-gray-400" {...separatorProps1}></div>
 
-        {/* Section 2 */}
-        <div className="flex h-dvh flex-col px-1">
-          <h2 className="text-xl font-bold">Logs:</h2>
-          <div className="flex flex-col gap-2 py-1">
-            <div className="flex flex-row flex-wrap gap-2">
-              <Button className="" variant="outlined" color="secondary" onClick={handleExportLogs}>
-                Export
-              </Button>
-            </div>
-          </div>
-          <div
-            id="logs"
-            className="my-2 flex-1 space-y-1 overflow-y-auto rounded-lg border border-black p-2 text-sm [&_pre]:whitespace-pre-wrap"
-          ></div>
-        </div>
-        {/* End Section 2 */}
-
-        <div className="h-full w-1 cursor-col-resize bg-gray-400" {...separatorProps2}></div>
+        {/* <div className="h-full w-1 cursor-col-resize bg-gray-400" {...separatorProps2}></div> */}
 
         {/* Section 3 */}
         <div
           className={cn('overflow-y-auto transition max-sm:w-[100dvw_!important]', {
-            'blur-sm': isDragging2,
+            // 'blur-sm': isDragging2,
+            'blur-sm': isDragging1,
           })}
-          style={{ width: position2 }}
+          // style={{ width: position2 }}
         >
           {/* CODE EDITOR SECTION */}
           <div className={cn({ hidden: showSimulatorType !== 'CODE_EDITOR' })}>
@@ -467,6 +463,14 @@ export default function SocPage({}: Props) {
                   onClick={handleImportClick}
                 >
                   Import
+                </Button>
+                <Button
+                  className=""
+                  variant="outlined"
+                  color="secondary"
+                  onClick={handleExportCodeClick}
+                >
+                  Export
                 </Button>
               </div>
               <Button onClick={() => setShowSimulatorType('SOC')}>
@@ -556,6 +560,37 @@ export default function SocPage({}: Props) {
         {/* End Section 3 */}
       </div>
 
+      {/* Section 2 */}
+
+      <Draggable handle=".drag" bounds="body">
+        <div
+          className={cn(
+            'animation-fade-in absolute top-0 z-10 flex h-[500px] w-[500px] flex-col rounded-lg bg-white p-2 shadow-2xl',
+            {
+              hidden: !isOpenLogsModal,
+            },
+          )}
+        >
+          <div className="drag relative flex justify-center">
+            <div className="h-[20px] w-2/3 rounded-lg bg-blue-400/50"></div>
+          </div>
+          <div className="flex flex-col gap-2 py-2">
+            <div className="flex flex-row flex-wrap gap-2">
+              <h2 className="text-xl font-bold">Logs:</h2>
+              <Button className="" variant="outlined" color="secondary" onClick={handleExportLogs}>
+                Export
+              </Button>
+            </div>
+          </div>
+          <div
+            id="logs"
+            className="my-2 flex-1 space-y-1 overflow-y-auto rounded-lg border border-black p-2 text-sm [&_pre]:whitespace-pre-wrap"
+          ></div>
+        </div>
+      </Draggable>
+
+      {/* End Section 2 */}
+
       {/* Button group place on bottom-left */}
       <div className="fixed bottom-4 left-4 space-y-1">
         <p className="bg-white text-sm font-semibold">
@@ -576,6 +611,14 @@ export default function SocPage({}: Props) {
               Feedback
             </Button>
           </Link>
+          <Button
+            className="h-fit bg-white"
+            variant="outlined"
+            color="primary"
+            onClick={() => setIsOpenLogsModal(!isOpenLogsModal)}
+          >
+            Logs
+          </Button>
         </div>
         <div className="flex flex-row flex-wrap gap-2">
           <Button className="h-fit" variant="outlined" onClick={handleAssembleClick}>

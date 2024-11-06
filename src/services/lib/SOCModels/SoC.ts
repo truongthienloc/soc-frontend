@@ -76,9 +76,9 @@ export default class Soc {
         this.Assembler = new Assembler()
         this.Assembly_code = []
         this.Led_matrix = []
-        for (let i = 0; i < 32; i++) {
+        for (let i = 0; i < 96; i++) {
             let row: boolean[] = [];
-            for (let j = 0; j < 32; j++) row.push(false);
+            for (let j = 0; j < 96; j++) row.push(false);
             this.Led_matrix.push(row);
         }
         this.cycle = 0
@@ -132,7 +132,7 @@ export default class Soc {
         this.Processor.setImem(this.Assembler.binary_code)                 // LOAD INTUCTIONS INTO PROCESSOR
         this.Memory.SetInstuctionMemory(this.Processor.Instruction_memory) // LOAD INTUCTIONS INTO MAIN MEMORY
         this.Memory.setPageNumber()
-        
+        this.DMA.config(LM_point, Imem_point)
         this.MMU.SetTLB(TLB, TLB_pointer)
         for (let i of this.Assembler.Instructions)
             if (i != '.text' && i != '') this.Assembly_code.push(i)
@@ -390,7 +390,7 @@ export default class Soc {
                 ': MEMORY is receiving message from INTERCONNECT',
             )
             const [di2s, ai2s] = this.Memory.slaveMemory.receive(doutChA)
-            //console.log ('data and address', di2s, ai2s)
+            console.log ('data and address', di2s, ai2s)
             this.Memory.Memory[ai2s] = di2s
             // MEMORY RESPONSE
            
@@ -587,22 +587,34 @@ export default class Soc {
         if (di2m !== 'undefined' && di2m !== undefined) this.Processor.register[rd] = (di2m.slice(-34)).slice(0,32)
         }
         // LED MATRIX OPERATE
+        const DMA_buffer = this.DMA.ScanData()
+        let addr_buffer = 0 
+
         if (this.view) 
             this.view?.ledMatrix.setIsRunning(this.view.matrixModule.getActivated())
-        for (let i = 0; i < 32; i++) {
-            for (let j = 0; j < 32; j++) {
-                if (this.Memory.Memory[(i*4).toString(2).padStart(32,'0')].padStart(32,'0')[j]==='0') 
+        for (let i = 0; i < 96; i++) {
+            let lineOfLed = this.Memory.Memory[DMA_buffer[addr_buffer]] + this.Memory.Memory[DMA_buffer[addr_buffer + 1]] + this.Memory.Memory[DMA_buffer[addr_buffer + 2]]
+            for (let j = 0; j < 96; j++) {
+                if (lineOfLed[j] == '0' || lineOfLed[j] == undefined) 
                     this.Led_matrix[i][j]= false
-                if (this.Memory.Memory[(i*4).toString(2).padStart(32,'0')].padStart(32,'0')[j]==='1') 
-                    this.Led_matrix[i][j]= true;
-            }
+                if (lineOfLed[j] == '1')
+                    this.Led_matrix[i][j]= true
+                }
         }
-        for (let i = 0; i < 32; i++) {
-            for (let j = 0; j < 32; j++) {
-                if (this.Led_matrix[i][j]==true) this.LedMatrix?.turnOn(i, j)
-                if (this.Led_matrix[i][j]==false) this.LedMatrix?.turnOff(i, j)
-            }
-        }
+        // for (let i = 0; i < 32; i++) {
+        //     for (let j = 0; j < 32; j++) {
+        //         if (this.Memory.Memory[(i*4).toString(2).padStart(32,'0')].padStart(32,'0')[j]==='0') 
+        //             this.Led_matrix[i][j]= false
+        //         if (this.Memory.Memory[(i*4).toString(2).padStart(32,'0')].padStart(32,'0')[j]==='1') 
+        //             this.Led_matrix[i][j]= true;
+        //     }
+        // }
+        // for (let i = 0; i < 32; i++) {
+        //     for (let j = 0; j < 32; j++) {
+        //         if (this.Led_matrix[i][j]==true) this.LedMatrix?.turnOn(i, j)
+        //         if (this.Led_matrix[i][j]==false) this.LedMatrix?.turnOff(i, j)
+        //     }
+        // }
     }
 }
 

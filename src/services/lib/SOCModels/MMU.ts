@@ -43,7 +43,7 @@ export default class MMU {
 
         // Check if logic_address is within base memory range
         if (dec('0' + logic_address) >= 0 && dec('0' + logic_address)*4 <= MMU.BASE_ADDRESS) {
-            this.physical_address = +logic_address;  // Casting logic_address to number
+            this.physical_address = dec('0' + logic_address);  // Casting logic_address to number
             message = 'MMU is passed!';
         } else {
             const check_pagenum = this.TLB.map(

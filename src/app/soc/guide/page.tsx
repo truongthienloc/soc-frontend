@@ -23,7 +23,7 @@ export default function GuidePage({}: Props) {
             The SOC SIMULATOR is a tool that simulates the behavior of a System on Chip (SoC)
             designed and developed by a group of authors:{' '}
             <strong>Trương Thiên Lộc & Nguyễn Gia Bảo Ngọc</strong>. The purpose of the SOC is to
-            support beginners who are starting to explore SoC design.
+            support beginners who are starting to explore SoC Design.
           </p>
         </TabPanel>
 
@@ -35,8 +35,8 @@ export default function GuidePage({}: Props) {
 
           <div>
             <p className="indent-8">
-              We have six control buttons: IMPORT, ASSEMBLE, RUN ALL, STEP, FEED BACK and GUIDELINE
-              with particular functions.
+              We have six control buttons: IMPORT, ASSEMBLE, RUN ALL, STEP, FEEDBACK and GUIDE with
+              particular functions.
             </p>
             <ul className="list-disc pl-8">
               <li>
@@ -49,7 +49,7 @@ export default function GuidePage({}: Props) {
                 “config” button to ensure the system is ready to run.
               </li>
               <li>
-                <strong>RUN </strong>ALL: Executes the SoC with all instructions implemented in the
+                <strong>RUN ALL:</strong> Executes the SoC with all instructions implemented in the
                 same session.
               </li>
               <li>
@@ -61,7 +61,7 @@ export default function GuidePage({}: Props) {
                 encounter any issues.
               </li>
               <li>
-                <strong>GUIDELINES:</strong> Opens the GUIDELINES page.
+                <strong>GUIDE:</strong> Opens the GUIDE page.
               </li>
             </ul>
           </div>

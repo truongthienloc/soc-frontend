@@ -31,6 +31,8 @@ import useTLB from '~/hooks/tlb/useTLB'
 import { TLBTable } from '~/components/TLBTable'
 import { array2TLB, tlb2Array, tlbEntries2TLB } from '~/helpers/converts/tlb.convert'
 import Draggable from 'react-draggable'
+import PageTable from '~/components/TLBTable/PageTable'
+import { Datapath } from '~/components/Datapath'
 
 type Props = {}
 
@@ -453,42 +455,62 @@ export default function SocPage({}: Props) {
         >
           {/* CODE EDITOR SECTION */}
           <div className={cn({ hidden: showSimulatorType !== 'CODE_EDITOR' })}>
-            <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
-              <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold">Code Editor:</h2>
-                <Button
-                  className=""
-                  variant="outlined"
-                  color="secondary"
-                  onClick={handleImportClick}
-                >
-                  Import
-                </Button>
-                <Button
-                  className=""
-                  variant="outlined"
-                  color="secondary"
-                  onClick={handleExportCodeClick}
-                >
-                  Export
-                </Button>
-              </div>
-              <Button onClick={() => setShowSimulatorType('SOC')}>
-                <CloseIcon />
-              </Button>
-            </div>
-            <div className="flex h-[calc(100dvh-69px)] flex-col border border-black">
-              {isStepping ? (
-                <DisplayStepCode code={stepCode} pc={pc} />
-              ) : (
-                <CodeEditor
-                  value={code}
-                  onChange={handleChangeCode}
-                  disable={disableCodeEditor}
-                  hidden={showSimulatorType !== 'CODE_EDITOR'}
-                />
-              )}
-            </div>
+            <TabContext index={tabIndex} setIndex={setTabIndex}>
+              <Tabs>
+                <Tab label="Code Editor" />
+                <Tab label="Datapath" />
+              </Tabs>
+              {/* Tab index = 0 */}
+              <TabPanel
+                index={0}
+                className="min-w-[460px] pt-4 max-sm:-ml-14 max-sm:-mt-14 max-sm:mb-14 max-sm:scale-75"
+              >
+                <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-bold">Code Editor:</h2>
+                    <Button
+                      className=""
+                      variant="outlined"
+                      color="secondary"
+                      onClick={handleImportClick}
+                    >
+                      Import
+                    </Button>
+                    <Button
+                      className=""
+                      variant="outlined"
+                      color="secondary"
+                      onClick={handleExportCodeClick}
+                    >
+                      Export
+                    </Button>
+                  </div>
+                  <Button onClick={() => setShowSimulatorType('SOC')}>
+                    <CloseIcon />
+                  </Button>
+                </div>
+                <div className="flex h-[calc(100dvh-69px)] flex-col border border-black">
+                  {isStepping ? (
+                    <DisplayStepCode code={stepCode} pc={pc} />
+                  ) : (
+                    <CodeEditor
+                      value={code}
+                      onChange={handleChangeCode}
+                      disable={disableCodeEditor}
+                      hidden={showSimulatorType !== 'CODE_EDITOR'}
+                    />
+                  )}
+                </div>
+              </TabPanel>
+              {/* Tab index = 1 */}
+              <TabPanel
+                index={1}
+                className="flex flex-1 flex-col gap-4 pt-8 max-sm:mb-20 max-sm:w-dvw max-sm:overflow-auto max-sm:px-1"
+              >
+                <h2 className="text-xl font-bold">Datapath:</h2>
+                <Datapath />
+              </TabPanel>
+            </TabContext>
           </div>
 
           {/* MEMORY MAP SECTION */}
@@ -518,12 +540,15 @@ export default function SocPage({}: Props) {
             })}
           >
             <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
-              <h2 className="text-xl font-bold">TLB:</h2>
+              <h2 className="text-xl font-bold text-red-500">MMU View:</h2>
               <Button onClick={() => setShowSimulatorType('SOC')}>
                 <CloseIcon />
               </Button>
             </div>
-            <TLBTable tlb={tlb} disabled={isStepping} />
+            <div className="grid grid-cols-2 gap-4">
+              <TLBTable tlb={tlb} disabled={isStepping} />
+              <PageTable />
+            </div>
           </div>
 
           {/* Peripherals Section */}
@@ -617,7 +642,7 @@ export default function SocPage({}: Props) {
             color="primary"
             onClick={() => setIsOpenLogsModal(!isOpenLogsModal)}
           >
-            Logs
+            Status
           </Button>
         </div>
         <div className="flex flex-row flex-wrap gap-2">

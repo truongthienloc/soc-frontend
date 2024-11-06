@@ -66,6 +66,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
 
   return (
     <div className="flex flex-col gap-8">
+      <h2 className="text-xl font-bold">TLB:</h2>
       <div className="flex flex-row items-center gap-1">
         <TextField
           value={editingLength}

@@ -6,7 +6,7 @@ import { hexToBinary } from '~/helpers/converts/Hextobin'
 import Button from '@mui/material/Button'
 import Link from 'next/link'
 import { toast } from 'react-toastify'
-import { CodeEditor } from '~/components/CodeEditor'
+import { CodeEditor, Disassembly } from '~/components/CodeEditor'
 import { DisplayStepCode } from '~/components/DisplayStepCode'
 import { Keyboard } from '~/components/Keyboard'
 import { LedMatrix } from '~/components/LedMatrix'
@@ -33,6 +33,7 @@ import { array2TLB, tlb2Array, tlbEntries2TLB } from '~/helpers/converts/tlb.con
 import Draggable from 'react-draggable'
 import PageTable from '~/components/TLBTable/PageTable'
 import { Datapath } from '~/components/Datapath'
+import RegisterTable from '~/components/RegisterTable/RegisterTable'
 
 type Props = {}
 
@@ -64,8 +65,8 @@ export default function SocPage({}: Props) {
   const socModelRef = useRef<Soc>()
   const logRef = useRef<Logs>()
   const [isOpenLogsModal, setIsOpenLogsModal] = useState(false)
-  const [showSimulatorType, setShowSimulatorType] = useState<SimulatorType>('SOC')
-  const [disableCodeEditor, setDisableCodeEditor] = useState(false)
+  const [showSimulatorType, setShowSimulatorType] = useState<SimulatorType>('CODE_EDITOR')
+  const [disableCodeEditor, setDisableCodeEditor] = useState(true)
   const [code, setCode] = useState('')
   const [allowRun, setAllowRun] = useState(false)
 
@@ -84,12 +85,24 @@ export default function SocPage({}: Props) {
   const tlb = useTLB()
   const { tlbData, pointer } = tlb
 
+  /** Page table */
+  const [pageTable, setPageTable] = useState<Register[]>([])
+
   /** Peripherals */
   const [tabIndex, setTabIndex] = useState(0)
 
+  /** Register Table */
+  const [registers, setRegisters] = useState<Register[]>([])
+
   useEffect(() => {
     const socCode = localStorage.getItem('soc_code') ?? ''
-    setCode(socCode)
+    setTimeout(() => {
+      setCode(socCode)
+      setTimeout(() => {
+        setDisableCodeEditor(false)
+      }, 250)
+    }, 1000)
+    // setDisableCodeEditor(false)
 
     if (isStart.current) {
       isStart.current = false
@@ -153,6 +166,7 @@ export default function SocPage({}: Props) {
         socModel.setLedMatrix(ledMatrix)
 
         setPosition1(410)
+        setRegisters(socModel.Processor.getRegisters())
         // setPosition2(window.innerWidth / 3 - 10)
       }
 
@@ -207,6 +221,8 @@ export default function SocPage({}: Props) {
       const newTLB = array2TLB(socModelRef.current.MMU.TLB)
       setMemoryData(newMemoryTable)
       tlb.setTLBEntries(newTLB)
+      setRegisters(socModelRef.current.Processor.getRegisters())
+      setPageTable(socModelRef.current.Memory.getPageNumber())
     })
     socModelRef.current.RunAll()
     // setShowSimulatorType('SOC')
@@ -280,6 +296,8 @@ export default function SocPage({}: Props) {
         const newTLB = array2TLB(socModelRef.current.MMU.TLB)
         setMemoryData(newMemoryTable)
         tlb.setTLBEntries(newTLB)
+        setRegisters(socModelRef.current.Processor.getRegisters())
+        setPageTable(socModelRef.current.Memory.getPageNumber())
       })
       socModelRef.current.stepWithEvent()
       return
@@ -303,6 +321,8 @@ export default function SocPage({}: Props) {
       const newTLB = array2TLB(socModelRef.current.MMU.TLB)
       setMemoryData(newMemoryTable)
       tlb.setTLBEntries(newTLB)
+      setRegisters(socModelRef.current.Processor.getRegisters())
+      setPageTable(socModelRef.current.Memory.getPageNumber())
     })
     socModelRef.current.stepWithEvent()
   }
@@ -454,11 +474,16 @@ export default function SocPage({}: Props) {
           // style={{ width: position2 }}
         >
           {/* CODE EDITOR SECTION */}
-          <div className={cn({ hidden: showSimulatorType !== 'CODE_EDITOR' })}>
+          <div
+            className={cn('flex min-h-dvh flex-col', {
+              hidden: showSimulatorType !== 'CODE_EDITOR',
+            })}
+          >
             <TabContext index={tabIndex} setIndex={setTabIndex}>
               <Tabs>
-                <Tab label="Code Editor" />
-                <Tab label="Datapath" />
+                <Tab label="Coding View" />
+                <Tab label="Schematic View" />
+                <Tab label="Disassembly" />
               </Tabs>
               {/* Tab index = 0 */}
               <TabPanel
@@ -489,17 +514,20 @@ export default function SocPage({}: Props) {
                     <CloseIcon />
                   </Button>
                 </div>
-                <div className="flex h-[calc(100dvh-69px)] flex-col border border-black">
-                  {isStepping ? (
-                    <DisplayStepCode code={stepCode} pc={pc} />
-                  ) : (
-                    <CodeEditor
-                      value={code}
-                      onChange={handleChangeCode}
-                      disable={disableCodeEditor}
-                      hidden={showSimulatorType !== 'CODE_EDITOR'}
-                    />
-                  )}
+                <div className="grid grid-cols-[4fr_6fr]">
+                  <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
+                    {isStepping ? (
+                      <DisplayStepCode code={stepCode} pc={pc} />
+                    ) : (
+                      <CodeEditor
+                        value={code}
+                        onChange={handleChangeCode}
+                        disable={disableCodeEditor}
+                        hidden={showSimulatorType !== 'CODE_EDITOR'}
+                      />
+                    )}
+                  </div>
+                  <RegisterTable isShown data={registers} />
                 </div>
               </TabPanel>
               {/* Tab index = 1 */}
@@ -508,7 +536,15 @@ export default function SocPage({}: Props) {
                 className="flex flex-1 flex-col gap-4 pt-8 max-sm:mb-20 max-sm:w-dvw max-sm:overflow-auto max-sm:px-1"
               >
                 <h2 className="text-xl font-bold">Datapath:</h2>
-                <Datapath />
+                <div className="flex justify-center">
+                  <Datapath />
+                </div>
+              </TabPanel>
+              <TabPanel
+                index={2}
+                className="flex flex-1 flex-col gap-4 pt-8 max-sm:mb-20 max-sm:w-dvw max-sm:overflow-auto max-sm:px-1"
+              >
+                <Disassembly />
               </TabPanel>
             </TabContext>
           </div>
@@ -547,7 +583,7 @@ export default function SocPage({}: Props) {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <TLBTable tlb={tlb} disabled={isStepping} />
-              <PageTable />
+              <PageTable data={pageTable} />
             </div>
           </div>
 

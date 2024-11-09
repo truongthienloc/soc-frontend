@@ -26,10 +26,10 @@ SOC.DMA.config(0, (96 * 3 + 16)*4)
 SOC.assemble(
     code, 
     0 * 4, //   LM point
-    96 * 3 * 4, //  I/O point
-   (96 * 3 + 16) * 4, // I-Mem point
-   (96 * 3+ 16 + 1024) *4, // D-Mem point  
-   (96 * 3 + 16 + 1024 + 1024*16) *4, //Stack point
+    96 * 3 * 4, //  I/O point //0x480
+   (96 * 3 + 16) * 4, // I-Mem point // 4C0
+   (96 * 3+ 16 + 1024) *4, // D-Mem point  // 14C0
+   (96 * 3 + 16 + 1024 + 1024*16) *4, //Stack point // 114c0
    //4095*0xffffff, //Stack point
    [],
     [

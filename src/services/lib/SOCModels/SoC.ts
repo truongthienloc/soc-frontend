@@ -1,5 +1,6 @@
 import RiscVProcessor from './RiscV_processor'
 import InterConnect from './Interconnect'
+import disAssembly from './Disassembly'
 import MMU from './MMU'
 import { dec, stringToAsciiAndBinary, BinToHex } from './convert'
 import Memory from './Memory'
@@ -13,6 +14,7 @@ import { eventNames } from 'process'
 import EventEmitter from '../EventEmitter/EventEmitter'
 
 import type { TLB, TLBEntries } from './soc.d'
+import { Disassembly } from '~/components/CodeEditor'
 
 export default class Soc {
     name: string
@@ -23,6 +25,7 @@ export default class Soc {
     DMA: DMA
     Led_matrix: boolean[][]
     Assembler: Assembler
+    Disassembly : disAssembly
 
     cycle: number
     public static SOCEVENT = {DONE_ALL: 'DONE ALL', STEP_END: 'STEP END'}
@@ -76,6 +79,7 @@ export default class Soc {
         this.Assembler = new Assembler()
         this.Assembly_code = []
         this.Led_matrix = []
+        this.Disassembly = new disAssembly ('')
         for (let i = 0; i < 96; i++) {
             let row: boolean[] = [];
             for (let j = 0; j < 96; j++) row.push(false);
@@ -589,7 +593,6 @@ export default class Soc {
         // LED MATRIX OPERATE
         const DMA_buffer = this.DMA.ScanData()
         let addr_buffer = 0 
-
         if (this.view) 
             this.view?.ledMatrix.setIsRunning(this.view.matrixModule.getActivated())
         for (let i = 0; i < 96; i++) {

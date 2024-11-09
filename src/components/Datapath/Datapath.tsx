@@ -40,7 +40,12 @@ function Datapath({ data, step }: DatapathProps) {
     datapathRef.current.loadInstruction(data)
   }, [data])
 
-  return <div className="flex h-full w-full flex-col overflow-y-auto text-lg" id="datapath"></div>
+  return (
+    <div
+      className="flex h-full w-full max-w-[900px] flex-col overflow-y-auto text-lg"
+      id="datapath"
+    ></div>
+  )
 }
 
 export default Datapath

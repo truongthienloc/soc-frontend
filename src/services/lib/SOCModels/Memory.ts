@@ -67,9 +67,17 @@ export default class Memory {
         
     }
 
-    public getPageNumber () {
-        for (let i = this.Stack_point + 32 * 4 ; i < (this.Stack_point + 32 * 4 + 16 *4); i+=4)
-        console.log (i, dec (this.Memory[i.toString(2).padStart(32,'0')]))
+    public getPageNumber (): Register[] {
+        const result: Register[] = []
+        for (let i = this.Stack_point + 32 * 4 ; i < (this.Stack_point + 32 * 4 + 16 *4); i+=4) {
+            result.push({
+                name: '0x' +  i.toString(16).padStart(8,'0'), 
+                value: '0x' + dec('0' + this.Memory[i.toString(2).padStart(32,'0')]).toString(16).padStart(8,'0')
+            })
+        }
+
+        return result
+        // console.log i, dec (this.Memory[i.toString(2).padStart(32,'0')]))
     }
 
     public getLedMatrix () {

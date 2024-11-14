@@ -15,6 +15,7 @@ import type { SxProps, Theme } from '@mui/material/styles'
 import { useState } from 'react'
 import { TLBEntry, UseTLBReturn } from '~/hooks/tlb/useTLB'
 import { toast } from 'react-toastify'
+import { cn } from '~/helpers/cn'
 
 const styles: { [key: string]: SxProps<Theme> } = {
   table: {
@@ -67,11 +68,43 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
   return (
     <div className="flex flex-col gap-8">
       <h2 className="text-xl font-bold">TLB:</h2>
-      <div className="flex flex-row items-center gap-1">
+      <div className="flex w-[263px] flex-row items-center gap-1">
+        <TextField
+          value={editingPointer ? editingPointer : pointer}
+          onChange={(e) => setEditingPointer(e.target.value)}
+          label="Page Number Pointer"
+          InputProps={{
+            startAdornment: '0x',
+          }}
+          disabled={!editingPointer}
+        />
+        {editingPointer ? (
+          <Button
+            variant="contained"
+            className="h-fit w-fit min-w-0 px-2"
+            onClick={handlePointerSave}
+          >
+            <SaveIcon />
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            className="h-fit w-fit min-w-0 px-2"
+            onClick={() => setEditingPointer(pointer)}
+            disabled={disabled}
+          >
+            <EditIcon />
+          </Button>
+        )}
+        {/* <Button variant="contained" className="h-fit w-fit min-w-0 px-2" onClick={handleReset}>
+          <RestartAltIcon />
+        </Button> */}
+      </div>
+      <div className="flex w-[263px] flex-row items-center gap-1">
         <TextField
           value={editingLength}
           onChange={(e) => setEditingLength(e.target.value)}
-          label="Number of TLB row"
+          label="Number of TLB entries"
           disabled={editingIndex !== -1}
         />
         {editingIndex !== -1 ? (
@@ -110,7 +143,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
               <TableRow key={index}>
                 <TableCell>
                   <Input
-                    className="px-2"
+                    className={cn('px-2', {})}
                     value={editingIndex === index ? editingTLB?.pageNumber : row.pageNumber}
                     onChange={(e) =>
                       setEditingTLB({
@@ -133,13 +166,14 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                         physicalAddress: e.target.value,
                       })
                     }
+                    className={cn({})}
                     startAdornment="0x"
                     disabled={editingIndex !== index}
                   />
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-center">
                   <Input
-                    className="w-10 px-1 text-center"
+                    className={cn('w-10 px-1 [&>input]:inline-block [&>input]:text-center', {})}
                     value={editingIndex === index ? editingTLB?.valid : row.valid}
                     onChange={(e) =>
                       setEditingTLB({
@@ -159,6 +193,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                         timestamp: e.target.value,
                       })
                     }
+                    className={cn({})}
                     disabled={editingIndex !== index}
                   />
                 </TableCell>
@@ -190,39 +225,6 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
           </TableBody>
         </Table>
       </TableContainer>
-
-      <div className="flex flex-row items-center gap-1">
-        <TextField
-          value={editingPointer ? editingPointer : pointer}
-          onChange={(e) => setEditingPointer(e.target.value)}
-          label="Page Number Pointer"
-          InputProps={{
-            startAdornment: '0x',
-          }}
-          disabled={!editingPointer}
-        />
-        {editingPointer ? (
-          <Button
-            variant="contained"
-            className="h-fit w-fit min-w-0 px-2"
-            onClick={handlePointerSave}
-          >
-            <SaveIcon />
-          </Button>
-        ) : (
-          <Button
-            variant="contained"
-            className="h-fit w-fit min-w-0 px-2"
-            onClick={() => setEditingPointer(pointer)}
-            disabled={disabled}
-          >
-            <EditIcon />
-          </Button>
-        )}
-        {/* <Button variant="contained" className="h-fit w-fit min-w-0 px-2" onClick={handleReset}>
-          <RestartAltIcon />
-        </Button> */}
-      </div>
     </div>
   )
 }

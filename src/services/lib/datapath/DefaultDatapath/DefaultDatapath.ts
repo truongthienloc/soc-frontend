@@ -63,7 +63,7 @@ export default class DefaultDatapath {
 
         this.createLinks()
 
-        this.scene.useGridMode()
+        // this.scene.useGridMode()
         this.scene.render(0)
 
         // const port = this.iMem.getPort('output-Instruction')

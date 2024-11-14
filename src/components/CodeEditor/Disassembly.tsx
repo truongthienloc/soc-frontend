@@ -66,7 +66,7 @@ function DisassemblyPage() {
             ></textarea>
           </div>
         </div>
-        <div className="flex h-full flex-1 flex-col">
+        <div className="flex flex-1 flex-col">
           <div className="flex flex-row gap-4 p-4">
             <h2 className="text-left text-xl">Your code:</h2>
             <Button

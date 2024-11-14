@@ -492,7 +492,7 @@ export default function SocPage({}: Props) {
               >
                 <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
                   <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-bold">Code Editor:</h2>
+                    {/* <h2 className="text-xl font-bold">Code Editor:</h2> */}
                     <Button
                       className=""
                       variant="outlined"
@@ -535,7 +535,7 @@ export default function SocPage({}: Props) {
                 index={1}
                 className="flex flex-1 flex-col gap-4 pt-8 max-sm:mb-20 max-sm:w-dvw max-sm:overflow-auto max-sm:px-1"
               >
-                <h2 className="text-xl font-bold">Datapath:</h2>
+                {/* <h2 className="text-xl font-bold">Datapath:</h2> */}
                 <div className="flex justify-center">
                   <Datapath />
                 </div>
@@ -597,7 +597,7 @@ export default function SocPage({}: Props) {
             {/* Tab Bar */}
             <TabContext index={tabIndex} setIndex={setTabIndex}>
               <Tabs>
-                <Tab label="M & K" />
+                <Tab label="Monitor & Keyboard" />
                 <Tab label="Led Matrix" />
               </Tabs>
               {/* Tab index = 0 */}

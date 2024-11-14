@@ -12,6 +12,7 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Tabs from '@mui/material/Tabs'
+import Tooltip from '@mui/material/Tooltip'
 import type { SxProps, Theme } from '@mui/material/styles'
 import { styled } from '@mui/material/styles'
 import { useEffect, useState } from 'react'
@@ -138,7 +139,7 @@ export default function MemoryTable({
         className="max-sm:w-screen"
       >
         <Tab label="ALL" />
-        <Tab label="LM" />
+        <Tab label="LED" />
         <Tab label="IO" />
         <Tab label="IMEM" />
         <Tab label="DMEM" />
@@ -150,19 +151,28 @@ export default function MemoryTable({
           <InputAddress placeholder="0x00000000" value={input} onChange={handleChangeInput} />
         </div>
         <div className="flex gap-2">
-          <Button
-            sx={{ gap: '0.25rem' }}
-            variant="contained"
-            onClick={handleButtonClick}
-            disabled={!!modifiedName}
-          >
-            {/* <SearchIcon /> */}
-            Go
-          </Button>
+          <Tooltip title="Move to the section containing the address">
+            <Button
+              sx={{ gap: '0.25rem' }}
+              variant="contained"
+              onClick={handleButtonClick}
+              disabled={!!modifiedName}
+            >
+              {/* <SearchIcon /> */}
+              Go
+            </Button>
+          </Tooltip>
           {/* Button to reset memory table */}
-          <Button variant="contained" color="error" onClick={onResetData} disabled={!!modifiedName}>
-            Reset
-          </Button>
+          <Tooltip title="Reset memory table to zero data">
+            <Button
+              variant="contained"
+              color="error"
+              onClick={onResetData}
+              disabled={!!modifiedName}
+            >
+              Init Zero
+            </Button>
+          </Tooltip>
           {tabIndex === 0 && (
             <FunctionButton
               onImportClick={onImportClick}
@@ -176,11 +186,11 @@ export default function MemoryTable({
         <Table sx={styles.table} stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell align="center" className="max-w-1">
+              <TableCell align="center" className="max-w-1 font-bold">
                 Memory Address
               </TableCell>
               {/* <TableCell align="center">Dec</TableCell> */}
-              <TableCell align="center" className="max-w-2">
+              <TableCell align="center" className="max-w-2 font-bold">
                 Hex
               </TableCell>
             </TableRow>

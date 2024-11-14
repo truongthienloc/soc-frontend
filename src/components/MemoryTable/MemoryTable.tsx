@@ -151,7 +151,7 @@ export default function MemoryTable({
           <InputAddress placeholder="0x00000000" value={input} onChange={handleChangeInput} />
         </div>
         <div className="flex gap-2">
-          <Tooltip title="Move to the section containing the address">
+          <Tooltip title="Move to the segment containing the address">
             <Button
               sx={{ gap: '0.25rem' }}
               variant="contained"

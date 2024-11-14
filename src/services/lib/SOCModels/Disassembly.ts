@@ -177,6 +177,7 @@ export default class DisAssembly {
 
     public setBinaryCode(binaryCode: string) {
         this.binaryCode = binaryCode;
+        return this
     }
 
     process(): string[] {

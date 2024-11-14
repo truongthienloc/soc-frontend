@@ -63,6 +63,7 @@ export default function SocPage({}: Props) {
   // })
   const isStart = useRef(true)
   const socModelRef = useRef<Soc>()
+  const [socModel, setSocModel] = useState<Soc>()
   const logRef = useRef<Logs>()
   const [isOpenLogsModal, setIsOpenLogsModal] = useState(false)
   const [showSimulatorType, setShowSimulatorType] = useState<SimulatorType>('CODE_EDITOR')
@@ -168,6 +169,8 @@ export default function SocPage({}: Props) {
         setPosition1(410)
         setRegisters(socModel.Processor.getRegisters())
         // setPosition2(window.innerWidth / 3 - 10)
+
+        setSocModel(socModel)
       }
 
       firstLoad()
@@ -544,7 +547,7 @@ export default function SocPage({}: Props) {
                 index={2}
                 className="flex flex-1 flex-col gap-4 pt-8 max-sm:mb-20 max-sm:w-dvw max-sm:overflow-auto max-sm:px-1"
               >
-                <Disassembly />
+                <Disassembly socModel={socModel} />
               </TabPanel>
             </TabContext>
           </div>
@@ -576,8 +579,8 @@ export default function SocPage({}: Props) {
             })}
           >
             <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
-              <h2 className="text-xl font-bold text-red-500">MMU View:</h2>
-              <Button onClick={() => setShowSimulatorType('SOC')}>
+              {/* <h2 className="text-xl font-bold text-red-500">MMU View:</h2> */}
+              <Button className="ml-auto" onClick={() => setShowSimulatorType('SOC')}>
                 <CloseIcon />
               </Button>
             </div>
@@ -603,7 +606,7 @@ export default function SocPage({}: Props) {
               {/* Tab index = 0 */}
               <TabPanel
                 index={0}
-                className="min-w-[460px] max-sm:-ml-14 max-sm:-mt-14 max-sm:mb-14 max-sm:scale-75"
+                className="mt-8 min-w-[460px] max-sm:-ml-14 max-sm:-mt-14 max-sm:mb-14 max-sm:scale-75"
               >
                 <div className="monitor" id="monitor" tabIndex={0}></div>
                 <Keyboard />

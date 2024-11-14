@@ -193,7 +193,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                         timestamp: e.target.value,
                       })
                     }
-                    className={cn({})}
+                    className={cn('[&>input]:inline-block [&>input]:text-center')}
                     disabled={editingIndex !== index}
                   />
                 </TableCell>

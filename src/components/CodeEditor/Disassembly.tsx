@@ -1,10 +1,20 @@
+'use client'
+import { Roboto } from 'next/font/google'
 import { ChangeEvent, useState } from 'react'
 import { Button } from '@mui/material'
 import Link from 'next/link'
 import CodeEditor from './CodeEditor'
 import { toast } from 'react-toastify'
+import Soc from '~/services/lib/SOCModels/SoC'
+import { cn } from '~/helpers/cn'
 
-function DisassemblyPage() {
+const roboto = Roboto({ weight: '400', subsets: ['latin'] })
+
+type Props = {
+  socModel?: Soc
+}
+
+function DisassemblyPage({ socModel }: Props) {
   const [code, setCode] = useState('')
   const [result, setResult] = useState('')
   const handleChangeCode = (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -25,20 +35,15 @@ function DisassemblyPage() {
     // setCode(inputValue)
   }
 
-  // const handleDisassembleClick = async () => {
-  // 	try {
-  // 		const data = await toast.promise(codeAPI.disassemble(code), {
-  // 			pending: 'Đang chuyển đổi code',
-  // 			success: 'Chuyển đổi thành công',
-  // 			error: 'Chuyển đổi thất bại',
-  // 		})
-
-  // 		console.log('data: ', data)
-  // 		setResult(data.join('\n'))
-  // 	} catch (error) {
-  // 		// toast.error('Chuyển đổi thất bại')
-  // 	}
-  // }
+  const handleDisassembleClick = async () => {
+    if (!socModel) return
+    try {
+      const data = socModel?.Disassembly.setBinaryCode(code).process()
+      setResult(data.map((value) => value.split('\t')[1]).join('\n'))
+    } catch (error) {
+      // toast.error('Chuyển đổi thất bại')
+    }
+  }
 
   const handleCopyClick = () => {
     navigator.clipboard.writeText(result)
@@ -50,17 +55,13 @@ function DisassemblyPage() {
         <div className="flex min-w-[300px] flex-1 flex-col">
           <div className="flex flex-row justify-between p-4">
             <h2 className="text-left text-xl">Input your binary machine code here:</h2>
-            <Button
-              className="h-fit"
-              variant="outlined"
-              // onClick={handleDisassembleClick}
-            >
+            <Button className="h-fit" variant="outlined" onClick={handleDisassembleClick}>
               Disassemble
             </Button>
           </div>
           <div className="flex h-full flex-col border border-black">
             <textarea
-              className="flex-1 resize-none p-4"
+              className={cn('flex-1 resize-none p-4', roboto.className)}
               value={code}
               onChange={handleChangeCode}
             ></textarea>
@@ -77,7 +78,7 @@ function DisassemblyPage() {
               Copy
             </Button>
           </div>
-          <div className="flex flex-col border border-black">
+          <div className="flex h-full flex-col border border-black">
             <CodeEditor value={result} disable={true} />
           </div>
         </div>

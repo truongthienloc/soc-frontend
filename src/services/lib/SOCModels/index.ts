@@ -5,9 +5,22 @@ import *as fs from 'fs'
 // const data              = fs.readFileSync(fp, "utf-8")
 // const code              = ".text\n addi x1, x0, 2047\n lw x1,1024(x0)\n"
 // const code              = ".text\n addi x1, x0, 2048\n slli x1, x1, 2\n addi x2, x0, 1\n sw x2, 0(x1)\n lw x3, 0(x1)"
+// const code              = `
+// .text 
+// addi x3, x0, 80
+// addi x4, x0, 0x480
+// sw   x3, 0(x4)
+// loop:
+// addi x2, x0, 0xFFF
+// sw x2, 0(x1)
+// addi x1, x1, 4
+// beq x1, x3, exit
+// jal x0, loop
+// exit:
+// `
 const code              = `
 .text 
-addi x3, x0, 0xFFF
+addi x3, x0, 80
 addi x4, x0, 0x480
 sw   x3, 0(x4)
 `
@@ -76,8 +89,8 @@ SOC.assemble(
 SOC.RunAll()
 
 // //console.log(SOC.Memory.getLedMatrix())
-console.log(SOC.Memory.IO_point)
-console.log(SOC.Memory.getIO())
+// console.log(SOC.Memory.IO_point)
+// console.log(SOC.Memory.getIO())
 // console.log(SOC.Led_matrix)
 
 // console.log(SOC.Processor.getRegisters())

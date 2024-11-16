@@ -451,7 +451,7 @@ export default class Soc {
                 ': CPU is receiving ACCESS_ACK message from INTERCONNECT',
             )
             const monitor_address = this.Memory.IO_point.toString(2).padStart(32,'0')
-            // console.log('monitor_address', this.Memory.Memory[monitor_address].padStart(32,'0'))
+            console.log('monitor: ', BinToHex(this.Memory.Memory[monitor_address]))
             // console.log('IO_point',this.Memory.IO_point)
             if (this.active_monitor == true) {
                 this.monitor?.println(BinToHex(this.Memory.Memory[monitor_address]))

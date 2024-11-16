@@ -6,7 +6,7 @@ export default class MMU {
     physical_address: number;  // Explicitly typed as number
     TLB: [number, number, number, number][];  // Define TLB as 2D array of tuples with 4 numbers
     pageNumberPointer: number;
-    static readonly BASE_ADDRESS = 4 * (96 + 16 + 1024);  // Replace magic numbers with constants
+    static readonly BASE_ADDRESS = (96 * 3 + 16) * 4;  // Replace magic numbers with constants
     static readonly PAGE_SIZE = 256;
 
     constructor(active: boolean) {
@@ -39,10 +39,10 @@ export default class MMU {
         let message: string;
         const page_num = dec('0' + logic_address.slice(18).slice(0, 4));  // Slice first 24 bits for page number
         const offset   = dec('0' + logic_address.slice(18).slice(4));  // Slice the rest for the offset
-        console.log('MMU: Page Number:', page_num, logic_address.slice(12));
-
+        // console.log('MMU: Page Number:', page_num, logic_address.slice(12));
+        // console.log('dec(0 + logic_address)*4', dec('0' + logic_address)*4)
         // Check if logic_address is within base memory range
-        if (dec('0' + logic_address) >= 0 && dec('0' + logic_address)*4 <= MMU.BASE_ADDRESS) {
+        if (dec('0' + logic_address) >= 0 && dec('0' + logic_address) <= MMU.BASE_ADDRESS) {
             this.physical_address = dec('0' + logic_address);  // Casting logic_address to number
             message = 'MMU is passed!';
         } else {

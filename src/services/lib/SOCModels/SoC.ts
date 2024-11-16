@@ -592,11 +592,13 @@ export default class Soc {
         }
         // LED MATRIX OPERATE
         const DMA_buffer = this.DMA.ScanData()
-        let addr_buffer = 0 
+        console.log("DMA_buffer", DMA_buffer)
+        let addr_buffer  = 0 
         if (this.view) 
             this.view?.ledMatrix.setIsRunning(this.view.matrixModule.getActivated())
         for (let i = 0; i < 96; i++) {
             let lineOfLed = this.Memory.Memory[DMA_buffer[addr_buffer]] + this.Memory.Memory[DMA_buffer[addr_buffer + 1]] + this.Memory.Memory[DMA_buffer[addr_buffer + 2]]
+            addr_buffer = addr_buffer + 3
             for (let j = 0; j < 96; j++) {
                 if (lineOfLed[j] == '0' || lineOfLed[j] == undefined) 
                     this.Led_matrix[i][j]= false
@@ -604,6 +606,8 @@ export default class Soc {
                     this.Led_matrix[i][j]= true
                 }
         }
+        //console.log(this.Memory.Memory['00000000000000000000000000010100'])
+        //console.log('00000000000000000000000000010100' === DMA_buffer[5])
         // for (let i = 0; i < 32; i++) {
         //     for (let j = 0; j < 32; j++) {
         //         if (this.Memory.Memory[(i*4).toString(2).padStart(32,'0')].padStart(32,'0')[j]==='0') 

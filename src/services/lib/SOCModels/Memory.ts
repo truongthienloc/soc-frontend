@@ -82,7 +82,7 @@ export default class Memory {
 
     public getLedMatrix () {
         for (let i = this.LM_point; i < this.IO_point; i+=4) 
-            console.log(this.Memory[i.toString(2).padStart(32,'0')])
+            console.log(i.toString(2).padStart(32,'0'), this.Memory[i.toString(2).padStart(32,'0')])
     }
 
     public getIO () {

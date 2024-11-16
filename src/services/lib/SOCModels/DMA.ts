@@ -25,7 +25,7 @@ export default class DMA {
 
     public ScanData() {
         let addr = this.Start_addr;
-        let trans_buffer: any[] = []; 
+        let trans_buffer: string[] = []; 
 
         while (addr < this.End_addr) {
             trans_buffer.push(this.masterDMA.send('GET', addr.toString(2), '_', 0, '_').slice(10, 42));

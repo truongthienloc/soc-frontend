@@ -431,7 +431,7 @@ export default function SocPage({}: Props) {
       <div className="grid h-full grid-cols-[auto_auto_1fr] gap-1 max-sm:grid-cols-1">
         {/* Section 1 */}
         <div
-          className={cn('overflow-y-auto px-1 pb-1 transition max-sm:w-[100dvw_!important]', {
+          className={cn('px-1 pb-1 transition max-sm:w-[100dvw_!important]', {
             // 'blur-sm': isDragging1,
           })}
           style={{ width: position1 }}
@@ -662,7 +662,7 @@ export default function SocPage({}: Props) {
         </p>
         <div className="flex gap-2">
           <Button
-            className="h-fit bg-white"
+            className="h-fit bg-white capitalize"
             variant="outlined"
             color="success"
             onClick={handleGuideClick}
@@ -671,12 +671,12 @@ export default function SocPage({}: Props) {
             <div className="absolute h-5 w-5 animate-ping rounded-full bg-gray-500 opacity-75"></div>
           </Button>
           <Link href={'https://forms.gle/n9Qd9mrpHgKtRPir9'} target="_blank">
-            <Button className="h-fit bg-white" variant="outlined" color="secondary">
+            <Button className="h-fit bg-white capitalize" variant="outlined" color="secondary">
               Feedback
             </Button>
           </Link>
           <Button
-            className="h-fit bg-white"
+            className="h-fit bg-white capitalize"
             variant="outlined"
             color="primary"
             onClick={() => setIsOpenLogsModal(!isOpenLogsModal)}
@@ -685,19 +685,19 @@ export default function SocPage({}: Props) {
           </Button>
         </div>
         <div className="flex flex-row flex-wrap gap-2">
-          <Button className="h-fit" variant="outlined" onClick={handleAssembleClick}>
+          <Button className="h-fit capitalize" variant="outlined" onClick={handleAssembleClick}>
             Assemble & Restart
           </Button>
           <Button
-            className="h-fit"
+            className="h-fit normal-case"
             variant="outlined"
             disabled={!allowRun}
             onClick={handleRunAllClick}
           >
-            Run All
+            Run all
           </Button>
           <Button
-            className="h-fit"
+            className="h-fit capitalize"
             variant="outlined"
             onClick={handleStepClick}
             disabled={!allowRun}

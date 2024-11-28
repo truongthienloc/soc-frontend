@@ -34,6 +34,7 @@ import Draggable from 'react-draggable'
 import PageTable from '~/components/TLBTable/PageTable'
 import { Datapath } from '~/components/Datapath'
 import RegisterTable from '~/components/RegisterTable/RegisterTable'
+import { DMATable } from '~/components/DMATable'
 
 type Props = {}
 
@@ -123,6 +124,7 @@ export default function SocPage({}: Props) {
 
         const handleCPUClick = () => {
           setShowSimulatorType('CODE_EDITOR')
+          setTabIndex(0)
         }
         const handleMemoryClick = () => {
           setShowSimulatorType('MEMORY')
@@ -142,10 +144,15 @@ export default function SocPage({}: Props) {
           setTabIndex(1)
         }
 
+        const handleDMAClick = () => {
+          setShowSimulatorType('DMA')
+        }
+
         const {
           cpu,
           memory,
           mmu,
+          dma,
           monitor: viewMonitor,
           keyboard: viewKeyboard,
           ledMatrix: viewLedMatrix,
@@ -153,6 +160,7 @@ export default function SocPage({}: Props) {
         cpu.getEvent().on(Agent.Event.CLICK, handleCPUClick)
         memory.getEvent().on(Agent.Event.CLICK, handleMemoryClick)
         mmu.getEvent().on(Agent.Event.CLICK, handleMMUClick)
+        dma.getEvent().on(Agent.Event.CLICK, handleDMAClick)
         viewMonitor.getEvent().on(Agent.Event.CLICK, handleIOClick)
         viewKeyboard.getEvent().on(Agent.Event.CLICK, handleIOClick)
         viewLedMatrix.getEvent().on(Agent.Event.CLICK, handleLedMatrixClick)
@@ -588,6 +596,22 @@ export default function SocPage({}: Props) {
               <TLBTable tlb={tlb} disabled={isStepping} />
               <PageTable data={pageTable} />
             </div>
+          </div>
+
+          {/* DMA SECTION */}
+          <div
+            className={cn('flex h-full flex-col', {
+              hidden: showSimulatorType !== 'DMA',
+            })}
+          >
+            <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
+              {/* <h2 className="text-xl font-bold text-red-500">MMU View:</h2> */}
+              <Button className="ml-auto" onClick={() => setShowSimulatorType('SOC')}>
+                <CloseIcon />
+              </Button>
+            </div>
+
+            <DMATable />
           </div>
 
           {/* Peripherals Section */}

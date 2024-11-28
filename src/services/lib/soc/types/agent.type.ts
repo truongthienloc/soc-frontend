@@ -1,1 +1,1 @@
-export type AgentType = 'CPU' | 'Memory' | 'Disk' | 'MMU' | 'Cache' | 'Input' | 'Output'
+export type AgentType = 'CPU' | 'Memory' | 'Disk' | 'MMU' | 'Cache' | 'Input' | 'Output' | 'OS'

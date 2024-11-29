@@ -16,7 +16,7 @@ export default class Memory extends Agent {
         // super(layer, x, y, 10, 5, options)
         super(layer, x, y, 5, 5, {
             ...options,
-            color: '#0d9488',
+            color: '#3399ff',
             text: 'Memory Allocator',
             textColor: 'white',
         })

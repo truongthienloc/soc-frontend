@@ -14,6 +14,6 @@ export default class OSModule extends Module {
         h: number = 5,
         options: Options,
     ) {
-        super(layer, x, y, w, h, { ...options, color: '#decb0280' })
+        super(layer, x, y, w, h, { ...options, color: '#3399ff80' })
     }
 }

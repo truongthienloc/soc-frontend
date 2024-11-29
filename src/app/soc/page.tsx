@@ -628,18 +628,38 @@ export default function SocPage({}: Props) {
                 <Tab label="Led Matrix" />
               </Tabs>
               {/* Tab index = 0 */}
-              <TabPanel
-                index={0}
-                className="mt-8 min-w-[460px] max-sm:-ml-14 max-sm:-mt-14 max-sm:mb-14 max-sm:scale-75"
-              >
-                <div className="monitor" id="monitor" tabIndex={0}></div>
-                <Keyboard />
+              <TabPanel index={0} className="grid grid-cols-[4fr_6fr]">
+                <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
+                  {isStepping ? (
+                    <DisplayStepCode code={stepCode} pc={pc} />
+                  ) : (
+                    <CodeEditor
+                      value={code}
+                      onChange={handleChangeCode}
+                      disable={disableCodeEditor}
+                      hidden={showSimulatorType !== 'PERIPHERALS' || tabIndex != 0}
+                    />
+                  )}
+                </div>
+                <div className="mt-8 min-w-[460px] max-sm:-ml-14 max-sm:-mt-14 max-sm:mb-14 max-sm:scale-75">
+                  <div className="monitor" id="monitor" tabIndex={0}></div>
+                  <Keyboard />
+                </div>
               </TabPanel>
               {/* Tab index = 1 */}
-              <TabPanel
-                index={1}
-                className="flex flex-1 items-center justify-center pt-8 max-sm:mb-20 max-sm:w-dvw max-sm:overflow-auto max-sm:px-1"
-              >
+              <TabPanel index={1} className="grid grid-cols-[4fr_6fr]">
+                <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
+                  {isStepping ? (
+                    <DisplayStepCode code={stepCode} pc={pc} />
+                  ) : (
+                    <CodeEditor
+                      value={code}
+                      onChange={handleChangeCode}
+                      disable={disableCodeEditor}
+                      hidden={showSimulatorType !== 'PERIPHERALS' || tabIndex != 1}
+                    />
+                  )}
+                </div>
                 <LedMatrix />
               </TabPanel>
             </TabContext>

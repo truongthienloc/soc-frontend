@@ -592,7 +592,7 @@ export default class Soc {
         }
         // LED MATRIX OPERATE
         const DMA_buffer = this.DMA.ScanData()
-        console.log("DMA_buffer", DMA_buffer)
+        //console.log("DMA_buffer", DMA_buffer)
         let addr_buffer  = 0 
         if (this.view) 
             this.view?.ledMatrix.setIsRunning(this.view.matrixModule.getActivated())

@@ -87,6 +87,7 @@ SOC.assemble(
     70208,
 )
 SOC.RunAll()
+console.log(SOC.Processor.lineColor)
 
 // //console.log(SOC.Memory.getLedMatrix())
 // console.log(SOC.Memory.IO_point)

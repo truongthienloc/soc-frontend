@@ -1,8 +1,8 @@
 export const LMPOINT = '0'
-export const IOPOINT = '180'
-export const IMEMPOINT = '1C0'
-export const DMEMPOINT = '11C0'
-export const STACKPOINT = '111C0'
+export const IOPOINT = '480'
+export const IMEMPOINT = '4C0'
+export const DMEMPOINT = '14C0'
+export const STACKPOINT = '114C0'
 
 export const MEMORY_SECTION = [
     {

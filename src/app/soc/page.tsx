@@ -34,6 +34,7 @@ import Draggable from 'react-draggable'
 import PageTable from '~/components/TLBTable/PageTable'
 import { Datapath } from '~/components/Datapath'
 import RegisterTable from '~/components/RegisterTable/RegisterTable'
+import { DMATable } from '~/components/DMATable'
 
 type Props = {}
 
@@ -123,6 +124,7 @@ export default function SocPage({}: Props) {
 
         const handleCPUClick = () => {
           setShowSimulatorType('CODE_EDITOR')
+          setTabIndex(0)
         }
         const handleMemoryClick = () => {
           setShowSimulatorType('MEMORY')
@@ -142,10 +144,15 @@ export default function SocPage({}: Props) {
           setTabIndex(1)
         }
 
+        const handleDMAClick = () => {
+          setShowSimulatorType('DMA')
+        }
+
         const {
           cpu,
           memory,
           mmu,
+          dma,
           monitor: viewMonitor,
           keyboard: viewKeyboard,
           ledMatrix: viewLedMatrix,
@@ -153,6 +160,7 @@ export default function SocPage({}: Props) {
         cpu.getEvent().on(Agent.Event.CLICK, handleCPUClick)
         memory.getEvent().on(Agent.Event.CLICK, handleMemoryClick)
         mmu.getEvent().on(Agent.Event.CLICK, handleMMUClick)
+        dma.getEvent().on(Agent.Event.CLICK, handleDMAClick)
         viewMonitor.getEvent().on(Agent.Event.CLICK, handleIOClick)
         viewKeyboard.getEvent().on(Agent.Event.CLICK, handleIOClick)
         viewLedMatrix.getEvent().on(Agent.Event.CLICK, handleLedMatrixClick)
@@ -431,7 +439,7 @@ export default function SocPage({}: Props) {
       <div className="grid h-full grid-cols-[auto_auto_1fr] gap-1 max-sm:grid-cols-1">
         {/* Section 1 */}
         <div
-          className={cn('overflow-y-auto px-1 pb-1 transition max-sm:w-[100dvw_!important]', {
+          className={cn('px-1 pb-1 transition max-sm:w-[100dvw_!important]', {
             // 'blur-sm': isDragging1,
           })}
           style={{ width: position1 }}
@@ -590,6 +598,22 @@ export default function SocPage({}: Props) {
             </div>
           </div>
 
+          {/* DMA SECTION */}
+          <div
+            className={cn('flex h-full flex-col', {
+              hidden: showSimulatorType !== 'DMA',
+            })}
+          >
+            <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
+              {/* <h2 className="text-xl font-bold text-red-500">MMU View:</h2> */}
+              <Button className="ml-auto" onClick={() => setShowSimulatorType('SOC')}>
+                <CloseIcon />
+              </Button>
+            </div>
+
+            <DMATable />
+          </div>
+
           {/* Peripherals Section */}
           <div
             className={cn('flex flex-col sm:min-w-[460px] sm:px-2', {
@@ -604,18 +628,38 @@ export default function SocPage({}: Props) {
                 <Tab label="Led Matrix" />
               </Tabs>
               {/* Tab index = 0 */}
-              <TabPanel
-                index={0}
-                className="mt-8 min-w-[460px] max-sm:-ml-14 max-sm:-mt-14 max-sm:mb-14 max-sm:scale-75"
-              >
-                <div className="monitor" id="monitor" tabIndex={0}></div>
-                <Keyboard />
+              <TabPanel index={0} className="grid grid-cols-[4fr_6fr]">
+                <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
+                  {isStepping ? (
+                    <DisplayStepCode code={stepCode} pc={pc} />
+                  ) : (
+                    <CodeEditor
+                      value={code}
+                      onChange={handleChangeCode}
+                      disable={disableCodeEditor}
+                      hidden={showSimulatorType !== 'PERIPHERALS' || tabIndex != 0}
+                    />
+                  )}
+                </div>
+                <div className="mt-8 min-w-[460px] max-sm:-ml-14 max-sm:-mt-14 max-sm:mb-14 max-sm:scale-75">
+                  <div className="monitor" id="monitor" tabIndex={0}></div>
+                  <Keyboard />
+                </div>
               </TabPanel>
               {/* Tab index = 1 */}
-              <TabPanel
-                index={1}
-                className="flex flex-1 items-center justify-center pt-8 max-sm:mb-20 max-sm:w-dvw max-sm:overflow-auto max-sm:px-1"
-              >
+              <TabPanel index={1} className="grid grid-cols-[4fr_6fr]">
+                <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
+                  {isStepping ? (
+                    <DisplayStepCode code={stepCode} pc={pc} />
+                  ) : (
+                    <CodeEditor
+                      value={code}
+                      onChange={handleChangeCode}
+                      disable={disableCodeEditor}
+                      hidden={showSimulatorType !== 'PERIPHERALS' || tabIndex != 1}
+                    />
+                  )}
+                </div>
                 <LedMatrix />
               </TabPanel>
             </TabContext>
@@ -662,7 +706,7 @@ export default function SocPage({}: Props) {
         </p>
         <div className="flex gap-2">
           <Button
-            className="h-fit bg-white"
+            className="h-fit bg-white capitalize"
             variant="outlined"
             color="success"
             onClick={handleGuideClick}
@@ -671,12 +715,12 @@ export default function SocPage({}: Props) {
             <div className="absolute h-5 w-5 animate-ping rounded-full bg-gray-500 opacity-75"></div>
           </Button>
           <Link href={'https://forms.gle/n9Qd9mrpHgKtRPir9'} target="_blank">
-            <Button className="h-fit bg-white" variant="outlined" color="secondary">
+            <Button className="h-fit bg-white capitalize" variant="outlined" color="secondary">
               Feedback
             </Button>
           </Link>
           <Button
-            className="h-fit bg-white"
+            className="h-fit bg-white capitalize"
             variant="outlined"
             color="primary"
             onClick={() => setIsOpenLogsModal(!isOpenLogsModal)}
@@ -685,19 +729,19 @@ export default function SocPage({}: Props) {
           </Button>
         </div>
         <div className="flex flex-row flex-wrap gap-2">
-          <Button className="h-fit" variant="outlined" onClick={handleAssembleClick}>
+          <Button className="h-fit capitalize" variant="outlined" onClick={handleAssembleClick}>
             Assemble & Restart
           </Button>
           <Button
-            className="h-fit"
+            className="h-fit normal-case"
             variant="outlined"
             disabled={!allowRun}
             onClick={handleRunAllClick}
           >
-            Run All
+            Run all
           </Button>
           <Button
-            className="h-fit"
+            className="h-fit capitalize"
             variant="outlined"
             onClick={handleStepClick}
             disabled={!allowRun}

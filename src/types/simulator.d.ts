@@ -1,1 +1,1 @@
-export type SimulatorType = 'SOC' | 'CODE_EDITOR' | 'MEMORY' | 'MMU' | 'PERIPHERALS'
+export type SimulatorType = 'SOC' | 'CODE_EDITOR' | 'MEMORY' | 'MMU' | 'PERIPHERALS' | 'DMA'

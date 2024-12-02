@@ -606,6 +606,18 @@ export default class Soc {
                     this.Led_matrix[i][j]= true
                 }
         }
+
+        this.LedMatrix?.clear()
+        for (let i = 0; i < 96; i++) {
+            for (let j = 0; j < 96; j++) {
+                if (this.Led_matrix[i][j]) {
+                    this.LedMatrix?.turnOn(i, j)
+                }
+                else {
+                    this.LedMatrix?.turnOff(i, j)
+                }
+            }
+        }
         //console.log(this.Memory.Memory['00000000000000000000000000010100'])
         //console.log('00000000000000000000000000010100' === DMA_buffer[5])
         // for (let i = 0; i < 32; i++) {

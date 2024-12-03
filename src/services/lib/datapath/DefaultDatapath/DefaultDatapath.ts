@@ -204,16 +204,16 @@ export default class DefaultDatapath {
         outConJal.name = 'jal'
         outConJalr.name = 'jalr'
         outConBranch.name = 'branch'
-        outConAuipcOrLui.name = 'AuiOrLui'
+        outConAuipcOrLui.name = 'auiOrLui'
         outConWb.name = 'wb'
         outConSlt.name = 'slt'
-        outConMemtoRegister.name = 'MemtoRegister'
+        outConMemtoRegister.name = 'memToReg'
         outConALUOp.name = 'ALUOp'
-        outConUnsigned.name = 'Unsigned'
-        outConMemRead.name = 'MemRead'
-        outConMemWrite.name = 'MemWrite'
+        outConUnsigned.name = 'unsigned'
+        outConMemRead.name = 'memRead'
+        outConMemWrite.name = 'memWrite'
         outConALUSrc.name = 'ALUSrc'
-        outConRegWrite.name = 'RegWrite'
+        outConRegWrite.name = 'regWrite'
 
         // ImmGen
         const inImmGen = this.immGen.getPort('input')
@@ -243,7 +243,7 @@ export default class DefaultDatapath {
 
         outALUResult.name = '5'
         outALUZero.name = 'zero'
-        outALUSignBit.name = 'sign-bit'
+        outALUSignBit.name = 'signBit'
 
         // Dmem
         const inDMem1 = this.dMem.getPort('input-Address')
@@ -321,8 +321,8 @@ export default class DefaultDatapath {
         const outBraPcSrc2 = this.branch.getPort('output-PcSrc2')
         const outBraJump = this.branch.getPort('output-Jump')
 
-        outBraPcSrc1.name = 'pcsrc1'
-        outBraPcSrc2.name = 'pcsrc2'
+        outBraPcSrc1.name = 'pcSrc1'
+        outBraPcSrc2.name = 'pcSrc2'
         outBraJump.name = 'jump'
 
         // ShiftLeft 12

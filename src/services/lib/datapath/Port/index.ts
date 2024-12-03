@@ -80,7 +80,7 @@ export default class Port implements IGraphObject {
             } else {
                 newData.color = Scene.NULL_COLOR
             }
-            // console.log('Color: ', newData.color);
+            // console.log('Color: ', this.name, newData.color);
         }
         const outputs = this.outputs.entries()
         for (const [, output] of outputs) {

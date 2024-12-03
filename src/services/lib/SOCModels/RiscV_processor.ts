@@ -63,25 +63,45 @@ export default class RiscVProcessor {
         'brown'   : '994C00',
         }
         this.lineColor = {
-        '0'       : 'orange', 
-        '1'       : 'red'   , 
-        '2'       : 'yellow', 
-        '3'       : ''      , 
-        '4'       : 'green' , 
-        '5'       : 'pink'  , 
-        '6'       : ''      , 
-        '7'       : 'green' , 
-        '8'       : 'blue'  ,
-        '9'       : ''      , 
-        '10'      : ''      , 
-        '11'      : ''      , 
-        '12'      : ''      , 
-        '13'      : 'brown' , 
-        '14'      : 'purple', 
-        '15'      : ''      , 
-        '16'      : ''      , 
-        '17'      : ''
-        };
+        '0'         : 'orange', 
+        '1'         : 'red'   , 
+        '2'         : 'yellow', 
+        '3'         : ''      , 
+        '4'         : 'green' , 
+        '5'         : 'pink'  , 
+        '6'         : ''      , 
+        '7'         : 'green' , 
+        '8'         : 'blue'  ,
+        '9'         : ''      , 
+        '10'        : ''      , 
+        '11'        : ''      , 
+        '12'        : ''      , 
+        '13'        : 'brown' , 
+        '14'        : 'purple', 
+        '15'        : ''      , 
+        '16'        : ''      , 
+        '17'        : ''      ,
+        'ALUOp'     : ''      ,
+        'zero'      : ''      ,
+        'ALUSrc'    : ''      ,   
+        'operation' : ''      ,   
+        'jal'       : ''      ,   
+        'jalr'      : ''      ,   
+        'branch'    : ''      ,   
+        'memRead'   : ''      ,   
+        'memWrite'  : ''      ,   
+        'unsigned'  : ''      ,   
+        'memToReg'  : ''      ,   
+        'jump'      : ''      ,   
+        'regWrite'  : ''      ,   
+        'pcSrc1'    : ''      ,   
+        'pcSrc2'    : ''      ,   
+        'signBit'   : ''      ,   
+        'slt'       : ''      ,   
+        'auiOrLui'  : ''      ,   
+        'wb'        : ''      ,   
+        'imm'       : ''      ,   
+        };  
         this.register = {
         '00000': '00000000000000000000000000000000',
         '00001': '00000000000000000000000000000000',
@@ -783,6 +803,26 @@ export default class RiscVProcessor {
             this.lineColor['15'] = mux(this.lineColor['11'], this.lineColor['12'], this.slt);
             this.lineColor['16'] = mux(this.lineColor['7'], this.lineColor['1'], this.auiOrLui);
             this.lineColor['17'] = mux(this.lineColor['15'], this.lineColor['16'], this.wb);
+            this.lineColor['ALUOp'   ]  = this.ALUOp.toString()   
+            this.lineColor['zero'    ]  = this.zero.toString()      
+            this.lineColor['ALUSrc'  ]  = this.ALUSrc.toString()      
+            this.lineColor['operation'] = this.operation.toString()  
+            this.lineColor['jal'     ]  = this.jal.toString()         
+            this.lineColor['jalr'    ]  = this.jalr.toString()        
+            this.lineColor['branch'  ]  = this.branch.toString()       
+            this.lineColor['memRead' ]  = this.memRead.toString()      
+            this.lineColor['memWrite']  = this.memWrite.toString()     
+            this.lineColor['unsigned']  = this.unsigned.toString()     
+            this.lineColor['memToReg']  = this.memToReg.toString()     
+            this.lineColor['jump'    ]  = this.jump.toString()         
+            this.lineColor['regWrite']  = this.regWrite.toString()    
+            this.lineColor['pcSrc1'  ]  = this.pcSrc1.toString()       
+            this.lineColor['pcSrc2'  ]  = this.pcSrc2.toString()      
+            this.lineColor['signBit' ]  = this.signBit.toString()     
+            this.lineColor['slt'     ]  = this.slt.toString()          
+            this.lineColor['auiOrLui']  = this.auiOrLui.toString()     
+            this.lineColor['wb'      ]  = this.wb.toString()           
+            this.lineColor['imm'     ]  = this.imm.toString()         
             return [message, data, address, writeRegister, size]
         } else return ['', '', '', '', '']
     }

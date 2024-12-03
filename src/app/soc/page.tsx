@@ -76,7 +76,7 @@ export default function SocPage({}: Props) {
   const [stepCode, setStepCode] = useState<string[]>([])
   const [isStepping, setIsStepping] = useState(false)
   const [pc, setPc] = useState<number | undefined>(undefined)
-  const [stepColors, setStepColors] = useState<Register[]>([]);
+  const [stepColors, setStepColors] = useState<Register[]>([])
 
   /** Memory Map state */
   const memoryMap = useMemoryMap()
@@ -306,8 +306,8 @@ export default function SocPage({}: Props) {
         tlb.setTLBEntries(newTLB)
         setRegisters(socModelRef.current.Processor.getRegisters())
         setPageTable(socModelRef.current.Memory.getPageNumber())
-        console.log('step color: ', modelColors2ViewColors(socModelRef.current.Processor.lineColor));
-        
+        console.log('step color: ', modelColors2ViewColors(socModelRef.current.Processor.lineColor))
+
         setStepColors(modelColors2ViewColors(socModelRef.current.Processor.lineColor))
       })
       socModelRef.current.stepWithEvent()

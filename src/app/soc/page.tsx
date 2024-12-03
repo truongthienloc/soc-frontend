@@ -35,6 +35,7 @@ import PageTable from '~/components/TLBTable/PageTable'
 import { Datapath } from '~/components/Datapath'
 import RegisterTable from '~/components/RegisterTable/RegisterTable'
 import { DMATable } from '~/components/DMATable'
+import { modelColors2ViewColors } from '~/helpers/converts/color.convert'
 
 type Props = {}
 
@@ -75,6 +76,7 @@ export default function SocPage({}: Props) {
   const [stepCode, setStepCode] = useState<string[]>([])
   const [isStepping, setIsStepping] = useState(false)
   const [pc, setPc] = useState<number | undefined>(undefined)
+  const [stepColors, setStepColors] = useState<Register[]>([]);
 
   /** Memory Map state */
   const memoryMap = useMemoryMap()
@@ -287,17 +289,12 @@ export default function SocPage({}: Props) {
       return
     }
 
-    // Start Stepping
-    if (pc === undefined) {
-      setIsStepping(true)
-      setStepCode(
-        socModelRef.current.Assembly_code.map((value: string) => {
-          const split = value.split(' ')
-          return split.slice(0, split.length - 1).join(' ')
-        }),
-      )
+    function step() {
+      if (!socModelRef.current) {
+        return
+      }
+
       setPc(socModelRef.current.Processor.pc)
-      setShowSimulatorType('CODE_EDITOR')
       socModelRef.current.event.once(Soc.SOCEVENT.STEP_END, () => {
         if (!socModelRef.current) {
           return
@@ -309,8 +306,22 @@ export default function SocPage({}: Props) {
         tlb.setTLBEntries(newTLB)
         setRegisters(socModelRef.current.Processor.getRegisters())
         setPageTable(socModelRef.current.Memory.getPageNumber())
+        setStepColors(modelColors2ViewColors(socModelRef.current.Processor.lineColor))
       })
       socModelRef.current.stepWithEvent()
+    }
+
+    // Start Stepping
+    if (pc === undefined) {
+      setIsStepping(true)
+      setStepCode(
+        socModelRef.current.Assembly_code.map((value: string) => {
+          const split = value.split(' ')
+          return split.slice(0, split.length - 1).join(' ')
+        }),
+      )
+      setShowSimulatorType('CODE_EDITOR')
+      step()
       return
     }
 
@@ -322,20 +333,8 @@ export default function SocPage({}: Props) {
       return
     }
 
-    setPc(socModelRef.current.Processor.pc)
-    socModelRef.current.event.once(Soc.SOCEVENT.STEP_END, () => {
-      if (!socModelRef.current) {
-        return
-      }
-
-      const newMemoryTable = convertMemoryCoreToRegisterType(socModelRef.current.Memory.Memory)
-      const newTLB = array2TLB(socModelRef.current.MMU.TLB)
-      setMemoryData(newMemoryTable)
-      tlb.setTLBEntries(newTLB)
-      setRegisters(socModelRef.current.Processor.getRegisters())
-      setPageTable(socModelRef.current.Memory.getPageNumber())
-    })
-    socModelRef.current.stepWithEvent()
+    // Normal step
+    step()
   }
 
   const handleAssembleClick = () => {
@@ -548,7 +547,7 @@ export default function SocPage({}: Props) {
               >
                 {/* <h2 className="text-xl font-bold">Datapath:</h2> */}
                 <div className="flex justify-center">
-                  <Datapath />
+                  <Datapath data={stepColors} />
                 </div>
               </TabPanel>
               <TabPanel

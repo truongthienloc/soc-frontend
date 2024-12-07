@@ -36,6 +36,8 @@ import { Datapath } from '~/components/Datapath'
 import RegisterTable from '~/components/RegisterTable/RegisterTable'
 import { DMATable } from '~/components/DMATable'
 import { modelColors2ViewColors } from '~/helpers/converts/color.convert'
+import useDMAConfig from '~/components/DMATable/useDMAConfig'
+import { convertToDMAStandard } from '~/helpers/converts/dma.convert'
 
 type Props = {}
 
@@ -97,6 +99,10 @@ export default function SocPage({}: Props) {
 
   /** Register Table */
   const [registers, setRegisters] = useState<Register[]>([])
+
+  /** DMA Table */
+  const dmaConfigs = useDMAConfig()
+  const [dmaData, setDmaData] = useState<Register[]>([])
 
   useEffect(() => {
     const socCode = localStorage.getItem('soc_code') ?? ''
@@ -236,6 +242,12 @@ export default function SocPage({}: Props) {
       tlb.setTLBEntries(newTLB)
       setRegisters(socModelRef.current.Processor.getRegisters())
       setPageTable(socModelRef.current.Memory.getPageNumber())
+      setDmaData(
+        convertToDMAStandard(
+          dmaConfigs.src,
+          socModelRef.current.DMA.getData(socModelRef.current.Memory.Memory),
+        ),
+      )
     })
     socModelRef.current.RunAll()
     // setShowSimulatorType('SOC')
@@ -364,6 +376,8 @@ export default function SocPage({}: Props) {
         memoryData.map((mem) => ({ name: hexToBinary(mem.name), value: hexToBinary(mem.value) })),
         tlbEntries,
         parseInt(tlb.pointer, 16),
+        parseInt(dmaConfigs.src, 16),
+        parseInt(dmaConfigs.des, 16),
       )
     ) {
       toast.error('Syntax error')
@@ -612,7 +626,7 @@ export default function SocPage({}: Props) {
               </Button>
             </div>
 
-            <DMATable />
+            <DMATable configs={dmaConfigs} data={dmaData} />
           </div>
 
           {/* Peripherals Section */}

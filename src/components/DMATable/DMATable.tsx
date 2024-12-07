@@ -12,6 +12,7 @@ import type { SxProps, Theme } from '@mui/material/styles'
 import React, { useState } from 'react'
 import { createRangeDmemData } from '~/helpers/generates/dMemRange.generate'
 import { Register } from '~/types/register'
+import { ReturnUseDMAConfig } from './useDMAConfig'
 
 const styles: { [key: string]: SxProps<Theme> } = {
   table: {
@@ -28,20 +29,38 @@ const styles: { [key: string]: SxProps<Theme> } = {
 
 type Props = {
   data?: Register[]
+  configs?: ReturnUseDMAConfig
 }
 
-export default function DMATable({ data }: Props) {
+export default function DMATable({ data, configs }: Props) {
   const [input, setInput] = useState('0x00000000')
   const [start, setStart] = useState(input)
-  const [displayedData, setDisplayedData] = useState(createRangeDmemData(data || [], start))
+  const [displayedData, setDisplayedData] = useState()
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="flex flex-col gap-4">
-        <TextField label="SRC" autoComplete="off" />
-        <TextField label="DES" autoComplete="off" />
-        <TextField label="LEN" autoComplete="off" />
+        <h2 className='font-bold'>DMA Config-Registers</h2>
+        <TextField
+          label="SRC"
+          autoComplete="off"
+          value={configs?.src}
+          onChange={(e) => configs?.setSrc(e.target.value)}
+        />
+        <TextField
+          label="DES"
+          autoComplete="off"
+          value={configs?.des}
+          onChange={(e) => configs?.setDes(e.target.value)}
+        />
+        <TextField
+          label="LEN"
+          autoComplete="off"
+          value={configs?.len}
+          onChange={(e) => configs?.setLen(e.target.value)}
+        />
       </div>
-      <div className="">
+      <div className="h-[calc(100vh-60px)] overflow-auto">
+        <h2 className='font-bold'>DMA Buffer</h2>
         <TableContainer component={Paper}>
           <Table sx={styles.table} stickyHeader>
             <TableHead>
@@ -56,8 +75,8 @@ export default function DMATable({ data }: Props) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {displayedData &&
-                displayedData.map((value) => (
+              {data &&
+                data.map((value) => (
                   <TableRow
                     key={value.name}
                     sx={value.value !== '0x00000000' ? { backgroundColor: '#fff177' } : {}}

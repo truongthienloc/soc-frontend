@@ -33,4 +33,13 @@ export default class DMA {
         }
         return trans_buffer
     }
+
+    public getData(mem: { [key: string]: string}) {
+        const address = this.ScanData()
+        const result = [] as string[]
+        for (const element of address) {
+            result.push(mem[element])
+        }
+        return result
+    }
 }

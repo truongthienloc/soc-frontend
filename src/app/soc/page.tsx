@@ -318,9 +318,13 @@ export default function SocPage({}: Props) {
         tlb.setTLBEntries(newTLB)
         setRegisters(socModelRef.current.Processor.getRegisters())
         setPageTable(socModelRef.current.Memory.getPageNumber())
-        console.log('step color: ', modelColors2ViewColors(socModelRef.current.Processor.lineColor))
-
         setStepColors(modelColors2ViewColors(socModelRef.current.Processor.lineColor))
+        setDmaData(
+          convertToDMAStandard(
+            dmaConfigs.src,
+            socModelRef.current.DMA.Databuffer,
+          ),
+        )
       })
       socModelRef.current.stepWithEvent()
     }
@@ -377,13 +381,19 @@ export default function SocPage({}: Props) {
         tlbEntries,
         parseInt(tlb.pointer, 16),
         parseInt(dmaConfigs.src, 16),
-        parseInt(dmaConfigs.des, 16),
+        parseInt(dmaConfigs.len, 16),
       )
     ) {
       toast.error('Syntax error')
     } else {
       toast.success('Ready to run')
       setAllowRun(true)
+      setDmaData(
+        convertToDMAStandard(
+          dmaConfigs.src,
+          socModelRef.current.DMA.Databuffer,
+        ),
+      )
       localStorage.setItem('soc_code', code)
     }
   }

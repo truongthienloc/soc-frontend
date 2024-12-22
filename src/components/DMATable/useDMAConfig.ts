@@ -6,7 +6,7 @@ export type ReturnUseDMAConfig = ReturnType<typeof useDMAConfig>
 export default function useDMAConfig() {
     const [src, setSrc] = useState(LMPOINT)
     const [des, setDes] = useState(IMEMPOINT)
-    const [len, setLen] = useState('')
+    const [len, setLen] = useState('0')
 
     return {
         src,

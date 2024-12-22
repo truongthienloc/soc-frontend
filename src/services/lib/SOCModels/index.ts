@@ -21,9 +21,19 @@ import *as fs from 'fs'
 const code              = `
 .text 
 addi x3, x0, 80
-addi x4, x0, 0x480
+addi x4, x0, 0x484
 sw   x3, 0(x4)
+addi x4, x0, 0x484
 `
+// loop:
+// addi x2, x0, 0xFFF
+// sw x2, 0(x1)
+// addi x1, x1, 4
+// beq x1, x3, exit
+// jal x0, loop
+// exit:
+
+// `
 const SOC               = new Soc('super SoC')
 SOC.Processor.active    = true
 SOC.MMU.active          = true
@@ -85,9 +95,13 @@ SOC.assemble(
     [7, (7*1023) + (96 + 16 + 1024) *4, 1, 1],
 ]   ,
     70208,
+    0,
+    (96 * 3 + 16) * 4
+
 )
 SOC.RunAll()
-console.log(SOC.Processor.lineColor)
+// console.log(SOC.DMA.ScanData())
+// console.log(SOC.Processor.lineColor)
 
 // //console.log(SOC.Memory.getLedMatrix())
 // console.log(SOC.Memory.IO_point)

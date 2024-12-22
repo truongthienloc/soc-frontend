@@ -12,6 +12,7 @@ export default class RiscVProcessor {
     Instruction_memory: { [key: string]: string }
     lineColor :{ [key: string]: string }
     colorCode :{ [key: string]: string }
+    pre_pc = 0
     pc = 0
 
     ALUOp: any
@@ -34,6 +35,7 @@ export default class RiscVProcessor {
     auiOrLui: any
     wb: any
     imm: any
+    stalled: any
 
     public getRegisters() {
         return handleRegister(this.register)
@@ -152,6 +154,7 @@ export default class RiscVProcessor {
         this.Data_memory = {}
         this.Instruction_memory = {}
         this.pc = 0
+        this.stalled = false
     }
 
     public reset(): void {
@@ -194,7 +197,7 @@ export default class RiscVProcessor {
         this.pc = 0
     }
 
-    RunAll(fileName: string ) {
+    RunAll(fileName: string, stalled: boolean) {
         this.pc = 0
         let count= 0
         if (this.active == true) {
@@ -681,7 +684,8 @@ export default class RiscVProcessor {
 
     run(instruction: string, pc: number): [string, string, string, string, string] {
         if (this.active == true) {
-            let signBit = 0
+            //console.log("this.pc: ",this.pc, this.pre_pc, this.stalled)
+            this.pre_pc = pc
             let readData = ''
             // console.log('instructions', instruction,'pc',pc)
             this.control(instruction.slice(25, 32), instruction.slice(17, 20))
@@ -727,12 +731,13 @@ export default class RiscVProcessor {
             const writeRegister = instruction.slice(20, 25)
             const readData1 = this.register[readRegister1]
             const readData2 = this.register[readRegister2]
+            
             // console.log('readRegister1 readRegister2 writeRegister', readRegister1, readRegister2, writeRegister)
             
             const imm = this.immGen(instruction)
             
             this.aluControl(this.ALUOp, instruction.slice(17, 20), instruction.slice(1,2))
-
+            //console.log(this.register)
             const ALUResult = this.ALU(readData1, mux(readData2, imm, this.ALUSrc), this.operation)
 
             this.branchControl(this.jal, this.jalr, this.branch)
@@ -793,7 +798,12 @@ export default class RiscVProcessor {
             this.register['00000'] = '00000000000000000000000000000000'
             //.log(pc + 4, (dec(imm) << 1) , this.pcSrc1)
             
-            this.pc = mux(mux(pc + 4, (dec(imm) << 1) + pc, this.pcSrc1), ALUResult, this.pcSrc2)
+            if (this.stalled == false) {
+                this.pc     = mux(mux(pc + 4, (dec(imm) << 1) + pc, this.pcSrc1), ALUResult, this.pcSrc2)
+            } else {
+                this.pc     = pc
+            }
+            
             this.lineColor['3']  = mux(this.lineColor['2'], this.lineColor['1'], this.ALUSrc);
             this.lineColor['6']  = mux(this.lineColor['0'], this.lineColor['4'], this.pcSrc1);
             this.lineColor['9']  = mux(this.lineColor['6'], this.lineColor['5'], this.pcSrc2);

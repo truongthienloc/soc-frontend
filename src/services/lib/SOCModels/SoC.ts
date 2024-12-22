@@ -169,6 +169,346 @@ export default class Soc {
         return !this.Assembler.syntax_error
     }
 
+    public IO_operate () {
+        const DMA_buffer = this.DMA.Databuffer
+        //MONITOR MATRIX OPERATE
+        const monitor_address = this.Memory.IO_point.toString(2).padStart(32,'0')
+        //console.log('monitor: ', BinToHex(this.Memory.Memory[monitor_address]))
+        if (this.active_monitor == true) {
+            this.monitor?.println(BinToHex(this.Memory.Memory[monitor_address]))
+            this.view?.monitor.setIsRunning(this.active_monitor)
+        }
+        else {
+            this.println('MONITOR has not actived!!!')
+            console.log('MONITOR has not actived!!!')
+        }
+
+        //LED MATRIX OPERATE
+        let addr_buffer  = 0 
+        if (this.view) 
+            this.view?.ledMatrix.setIsRunning(this.view.matrixModule.getActivated())
+        for (let i = 0; i < 96; i++) {
+            let lineOfLed = DMA_buffer[addr_buffer] + DMA_buffer[addr_buffer + 1] + DMA_buffer[addr_buffer + 2]
+            addr_buffer = addr_buffer + 3
+            for (let j = 0; j < 96; j++) {
+                if (lineOfLed[j] == '0' || lineOfLed[j] == undefined) 
+                    this.Led_matrix[i][j]= false
+                if (lineOfLed[j] == '1')
+                    this.Led_matrix[i][j]= true
+                }
+        }
+
+        this.LedMatrix?.clear()
+        for (let i = 0; i < 96; i++) {
+            for (let j = 0; j < 96; j++) {
+                if (this.Led_matrix[i][j]) {
+                    this.LedMatrix?.turnOn(i, j)
+                }
+                else {
+                    this.LedMatrix?.turnOff(i, j)
+                }
+            }
+        }
+    }
+    
+    public DMA_operate () {
+        const dma2i = this.DMA.Send()
+
+        this.println('Cycle ', this.cycle.toString(), ': DMA is sending GET message to MEMORY')
+        console.log('Cycle ', this.cycle.toString(), ': DMA is sending GET message to MEMORY')
+//****************************CPU OPERATION**************************** */
+        if (this.Processor.pc < (Object.values(this.Processor.Instruction_memory).length - 1) * 4) 
+            this.Processor.active = true
+        else {
+            this.Processor.active =false
+            this.println('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+            console.log('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+        }
+        if ( this.Processor.active == true) {
+            this.println('Cycle ', this.cycle.toString(), ': CPU is processing')
+            console.log('Cycle ', this.cycle.toString(), ': CPU is processing')
+        } 
+        let element             = this.Processor.Instruction_memory[this.Processor.pc.toString(2)]
+        let [CPU_message, , , ] = this.Processor.run(element, this.Processor.pc)
+        this.view?.cpu.setIsRunning(this.Processor.active)
+
+        this.cycle += 1
+        this.Bus.Port_in(dma2i, 2)
+        this.println(
+            'Cycle ',
+            this.cycle.toString(),
+            ': INTERCONNECT is receiving message from DMA',
+        )
+        console.log(
+            'Cycle ',
+            this.cycle.toString(),
+            ': INTERCONNECT is receiving message from DMA',
+        )
+
+        if (CPU_message == 'GET' || CPU_message == 'PUT') {
+            if (this.Processor.pc < (Object.values(this.Processor.Instruction_memory).length - 1) * 4) {
+                this.println('Cycle ', this.cycle.toString(), ': CPU is stalled')
+                console.log('Cycle ', this.cycle.toString(), ': CPU is stalled')
+                this.Processor.stalled = true
+            }
+            else {
+                if (this.Processor.active) {
+                    this.Processor.active =false
+                    this.println('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                    console.log('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                }
+            }
+            element = this.Processor.Instruction_memory[this.Processor.pre_pc.toString(2)];
+            this.view?.cpu.setIsRunning(this.Processor.active);
+            [CPU_message, , , ] = this.Processor.run(element, this.Processor.pre_pc)    
+        } else {
+            if (this.Processor.pc >= (Object.values(this.Processor.Instruction_memory).length - 1) * 4) {
+                if (this.Processor.active) {
+                    this.Processor.active =false
+                    this.println('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                    console.log('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                }
+            }
+            if ( this.Processor.active == true) {
+                this.println('Cycle ', this.cycle.toString(), ': CPU is processing')
+                console.log('Cycle ', this.cycle.toString(), ': CPU is processing')
+            } 
+            element = this.Processor.Instruction_memory[this.Processor.pc.toString(2)];
+            this.view?.cpu.setIsRunning(this.Processor.active);
+            [CPU_message, , , ] = this.Processor.run(element, this.Processor.pc)    
+        }
+        
+        this.cycle += 1
+        if (CPU_message == 'GET' || CPU_message == 'PUT') {
+            if (this.Processor.pc < (Object.values(this.Processor.Instruction_memory).length - 1) * 4) {
+                this.println('Cycle ', this.cycle.toString(), ': CPU is stalled')
+                console.log('Cycle ', this.cycle.toString(), ': CPU is stalled')
+                this.Processor.stalled = true
+            }
+            else {
+                if (this.Processor.active) {
+                    this.Processor.active =false
+                    this.println('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                    console.log('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                }
+            }
+            element = this.Processor.Instruction_memory[this.Processor.pre_pc.toString(2)];
+            this.view?.cpu.setIsRunning(this.Processor.active);
+            [CPU_message, , , ] = this.Processor.run(element, this.Processor.pre_pc)    
+        } else {
+            if (this.Processor.pc >= (Object.values(this.Processor.Instruction_memory).length - 1) * 4) {
+                if (this.Processor.active) {
+                    this.Processor.active =false
+                    this.println('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                    console.log('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                }
+            }
+            if ( this.Processor.active == true) {
+                this.println('Cycle ', this.cycle.toString(), ': CPU is processing')
+                console.log('Cycle ', this.cycle.toString(), ': CPU is processing')
+            } 
+            element = this.Processor.Instruction_memory[this.Processor.pc.toString(2)];
+            this.view?.cpu.setIsRunning(this.Processor.active);
+            [CPU_message, , , ] = this.Processor.run(element, this.Processor.pc)    
+        }
+
+        this.view?.interconnect.setIsRunning(this.Bus.active)
+        this.Bus.Transmit()
+        this.println(
+            'Cycle ',
+            this.cycle.toString(),
+            ': INTERCONNECT is sending message to MEMORY',
+        )
+        console.log(
+            'Cycle ',
+            this.cycle.toString(),
+            ': INTERCONNECT is sending message to MEMORY',
+        )
+
+        this.cycle += 1
+        if (CPU_message == 'GET' || CPU_message == 'PUT') {
+            if (this.Processor.pc < (Object.values(this.Processor.Instruction_memory).length - 1) * 4) {
+                this.println('Cycle ', this.cycle.toString(), ': CPU is stalled')
+                console.log('Cycle ', this.cycle.toString(), ': CPU is stalled')
+                this.Processor.stalled = true
+            }
+            else {
+                if (this.Processor.active) {
+                    this.Processor.active =false
+                    this.println('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                    console.log('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                }
+            }
+            element = this.Processor.Instruction_memory[this.Processor.pre_pc.toString(2)];
+            this.view?.cpu.setIsRunning(this.Processor.active);
+            [CPU_message, , , ] = this.Processor.run(element, this.Processor.pre_pc)    
+        } else {
+            if (this.Processor.pc >= (Object.values(this.Processor.Instruction_memory).length - 1) * 4) {
+                if (this.Processor.active) {
+                    this.Processor.active =false
+                    this.println('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                    console.log('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                }
+            }
+            if ( this.Processor.active == true) {
+                this.println('Cycle ', this.cycle.toString(), ': CPU is processing')
+                console.log('Cycle ', this.cycle.toString(), ': CPU is processing')
+            } 
+            element = this.Processor.Instruction_memory[this.Processor.pc.toString(2)];
+            this.view?.cpu.setIsRunning(this.Processor.active);
+            [CPU_message, , , ] = this.Processor.run(element, this.Processor.pc)    
+        }
+        this.println(
+            'Cycle ',
+            this.cycle.toString(),
+            ': MEMORY is sending ACCESS_ACK message to DMA',
+        )
+        console.log(
+            'Cycle ',
+            this.cycle.toString(),
+            ': MEMORY is sending ACCESS_ACK message to DMA',
+        )
+        const i2memory = this.Bus.Port_out(3)
+        const [, ai2s] = this.Memory.slaveMemory.receive(i2memory)
+        let di2s= this.Memory.Memory[ai2s] 
+        this.Memory.Memory[ai2s] = di2s
+
+        this.cycle += 1
+        if (CPU_message == 'GET' || CPU_message == 'PUT') {
+            if (this.Processor.pc < (Object.values(this.Processor.Instruction_memory).length - 1) * 4) {
+                this.println('Cycle ', this.cycle.toString(), ': CPU is stalled')
+                console.log('Cycle ', this.cycle.toString(), ': CPU is stalled')
+                this.Processor.stalled = true
+            }
+            else {
+                if (this.Processor.active) {
+                    this.Processor.active =false
+                    this.println('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                    console.log('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                }
+            }
+            element = this.Processor.Instruction_memory[this.Processor.pre_pc.toString(2)];
+            this.view?.cpu.setIsRunning(this.Processor.active);
+            [CPU_message, , , ] = this.Processor.run(element, this.Processor.pre_pc)    
+        } else {
+            if (this.Processor.pc >= (Object.values(this.Processor.Instruction_memory).length - 1) * 4) {
+                if (this.Processor.active) {
+                    this.Processor.active =false
+                    this.println('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                    console.log('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                }
+            }
+            if ( this.Processor.active == true) {
+                this.println('Cycle ', this.cycle.toString(), ': CPU is processing')
+                console.log('Cycle ', this.cycle.toString(), ': CPU is processing')
+            } 
+            element = this.Processor.Instruction_memory[this.Processor.pc.toString(2)];
+            this.view?.cpu.setIsRunning(this.Processor.active);
+            [CPU_message, , , ] = this.Processor.run(element, this.Processor.pc)    
+        }
+        this.println(
+            'Cycle ',
+            this.cycle.toString(),
+            ': INTERCONNECT is receiving message from MEMORY',
+        )
+        console.log(
+            'Cycle ',
+            this.cycle.toString(),
+            ': INTERCONNECT is receiving message from MEMORY',
+        )
+        
+        this.cycle += 1
+        if (CPU_message == 'GET' || CPU_message == 'PUT') {
+            if (this.Processor.pc < (Object.values(this.Processor.Instruction_memory).length - 1) * 4) {
+                this.println('Cycle ', this.cycle.toString(), ': CPU is stalled')
+                console.log('Cycle ', this.cycle.toString(), ': CPU is stalled')
+                this.Processor.stalled = true
+            }
+            else {
+                if (this.Processor.active) {
+                    this.Processor.active =false
+                    this.println('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                    console.log('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                }
+            }
+            element = this.Processor.Instruction_memory[this.Processor.pre_pc.toString(2)];
+            this.view?.cpu.setIsRunning(this.Processor.active);
+            [CPU_message, , , ] = this.Processor.run(element, this.Processor.pre_pc)    
+        } else {
+            if (this.Processor.pc >= (Object.values(this.Processor.Instruction_memory).length - 1) * 4) {
+                if (this.Processor.active) {
+                    this.Processor.active =false
+                    this.println('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                    console.log('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                }
+            }
+            if ( this.Processor.active == true) {
+                this.println('Cycle ', this.cycle.toString(), ': CPU is processing')
+                console.log('Cycle ', this.cycle.toString(), ': CPU is processing')
+            } 
+            element = this.Processor.Instruction_memory[this.Processor.pc.toString(2)];
+            this.view?.cpu.setIsRunning(this.Processor.active);
+            [CPU_message, , , ] = this.Processor.run(element, this.Processor.pc)    
+        }
+        this.println(
+            'Cycle ',
+            this.cycle.toString(),
+            ': INTERCONNECT is sending message to CPU',
+        )
+        console.log(
+            'Cycle ',
+            this.cycle.toString(),
+            ': INTERCONNECT is sending message to CPU',
+        )
+
+        this.cycle += 1
+        if (CPU_message == 'GET' || CPU_message == 'PUT') {
+            if (this.Processor.pc < (Object.values(this.Processor.Instruction_memory).length - 1) * 4) {
+                this.println('Cycle ', this.cycle.toString(), ': CPU is stalled')
+                console.log('Cycle ', this.cycle.toString(), ': CPU is stalled')
+                this.Processor.stalled = true
+            }
+            else {
+                if (this.Processor.active) {
+                    this.Processor.active =false
+                    this.println('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                    console.log('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                }
+            }
+            element = this.Processor.Instruction_memory[this.Processor.pre_pc.toString(2)];
+            this.view?.cpu.setIsRunning(this.Processor.active);
+            [CPU_message, , , ] = this.Processor.run(element, this.Processor.pre_pc)    
+        } else {
+            if (this.Processor.pc >= (Object.values(this.Processor.Instruction_memory).length - 1) * 4) {
+                if (this.Processor.active) {
+                    this.Processor.active =false
+                    this.println('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                    console.log('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
+                }
+            }
+            if ( this.Processor.active == true) {
+                this.println('Cycle ', this.cycle.toString(), ': CPU is processing')
+                console.log('Cycle ', this.cycle.toString(), ': CPU is processing')
+            } 
+            element = this.Processor.Instruction_memory[this.Processor.pc.toString(2)];
+            this.view?.cpu.setIsRunning(this.Processor.active);
+            [CPU_message, , , ] = this.Processor.run(element, this.Processor.pc)    
+        }
+        this.println(
+            'Cycle ',
+            this.cycle.toString(),
+            ': DMA is receiving ACCESS_ACK DATA message from INTERCONNECT',
+        )
+        console.log(
+            'Cycle ',
+            this.cycle.toString(),
+            ': DMA is receiving ACCESS_ACK DATA message from INTERCONNECT',
+        )
+        this.DMA.Receive(this.Memory.slaveMemory.send('AccessAckData',di2s))
+        this.Processor.active = true
+        this.Processor.stalled = false
+    }
+
     public RunAll() {
         // CHECK PROCESSOR IS ACTIVED OR NOT
         if (this.Processor.active == false) {
@@ -192,9 +532,7 @@ export default class Soc {
         this.event.emit(Soc.SOCEVENT.STEP_END)
     }
 
-    public async Step() {
-        //console.log('Memory: ', this.Memory.Memory);
-        
+    public async Step() {   
 //---------------------------------------------------------------------------------------------------------\\
         // ****************CHECK CONDITION TO RUN SYSTEM ****************
         // CHECK PROCESSOR IS ACTIVED
@@ -223,10 +561,16 @@ export default class Soc {
         this.cycle += 1
         
         const element = this.Processor.Instruction_memory[this.Processor.pc.toString(2)]
+        //console.log("this.Processor.pre_pc, this.Processor.pc", this.Processor.pre_pc, this.Processor.pc)
         this.view?.cpu.setIsRunning(this.Processor.active)
         // CPU RUN
         let [CPU_message, CPU_data, logical_address, rd] = this.Processor.run(element, this.Processor.pc)
-        if (CPU_message!= 'PUT' && CPU_message != 'GET') return // CHECK message is PUT or GET
+        //console.log("CPU messeage: ", CPU_message)
+        this.IO_operate ()
+        if (CPU_message!= 'PUT' && CPU_message != 'GET') {
+            this.DMA_operate()
+            return 
+        }// CHECK message is PUT or GET
         // ****************IF message is PUT OR GET****************
         // CHECK ADDRESS
         if (dec('0' + logical_address) % 4 != 0) {
@@ -297,11 +641,7 @@ export default class Soc {
             )
             console.log  ('Cycle ', this.cycle.toString()+' : '+'MMU is receiving message from MEMORY')
             this.println ('Cycle ', this.cycle.toString()+' : '+'MMU is receiving message from MEMORY')
-            //console.log('ammurfm',)
 
-            // console.log ('MMU2Memory', MMU2Memory)
-            // console.log ('ai2s ',ai2s)
-            // console.log ('di2s ',this.Memory.Memory[ai2s])
             this.cycle+=1
             const PPN = dec ('0'+ammurfm)
             console.log(VPN)
@@ -313,12 +653,10 @@ export default class Soc {
             let [nphysical_address, MMU_message] = this.MMU.Run(logical_address)
             console.log ('Cycle ', this.cycle.toString()+' : '+ MMU_message)
             this.println('Cycle ', this.cycle.toString()+' : '+ MMU_message)
-            // console.log(MMU_message)
-            // this.println(MMU_message)
+
             console.log(this.MMU.TLB)
             physical_address = nphysical_address
 
-            // console.log('TLB: ', this.MMU.TLB);
         } 
         
         this.println(
@@ -395,7 +733,7 @@ export default class Soc {
                 ': MEMORY is receiving message from INTERCONNECT',
             )
             const [di2s, ai2s] = this.Memory.slaveMemory.receive(doutChA)
-            console.log ('data and address', di2s, ai2s)
+            //console.log ('data and address', di2s, ai2s)
             this.Memory.Memory[ai2s] = di2s
             // MEMORY RESPONSE
            
@@ -451,22 +789,10 @@ export default class Soc {
                 this.cycle.toString(),
                 ': CPU is receiving ACCESS_ACK message from INTERCONNECT',
             )
-            const monitor_address = this.Memory.IO_point.toString(2).padStart(32,'0')
-            console.log('monitor: ', BinToHex(this.Memory.Memory[monitor_address]))
-            // console.log('IO_point',this.Memory.IO_point)
-            if (this.active_monitor == true) {
-                this.monitor?.println(BinToHex(this.Memory.Memory[monitor_address]))
-                this.view?.monitor.setIsRunning(this.active_monitor)}
-            else {
-                this.println('MONITOR has not actived!!!')
-                console.log('MONITOR has not actived!!!')
-            }
-
         }
-    
 
-    // IF MESSAGE IS GET (LOAD): 
-    if (CPU_message == 'GET') {
+        // IF MESSAGE IS GET (LOAD): 
+        if (CPU_message == 'GET') {
         this.println('Cycle ', this.cycle.toString(), ': CPU is sending GET message to MEMORY')
         console.log('Cycle ', this.cycle.toString(), ': CPU is sending GET message to MEMORY')
         // PROCESSOT is sending GET
@@ -491,9 +817,12 @@ export default class Soc {
         //INTERCONNCET RUN
         
         this.cycle += 1
-
         this.view?.interconnect.setIsRunning(this.Bus.active)
+
+//******************************************************************** */
         this.Bus.Port_in(dm2i, 1) // CPU IS LOADING DATA INTO PORT[1]
+//******************************************************************** */
+
         this.Bus.Transmit() // INTERCONNECT IS TRANSMITTING
         this.println(
             'Cycle ',
@@ -525,6 +854,7 @@ export default class Soc {
         const [, ai2s] = this.Memory.slaveMemory.receive(doutChA)
         let di2s= this.Memory.Memory[ai2s] 
         
+        // KEYBOARD
         // console.log("address keyboard", dec ('0'+ai2s), this.Memory.IO_point + 4)
         if (dec ('0'+ai2s)== this.Memory.IO_point + 4) {
             this.println('Cycle ', this.cycle.toString(), ': KEYBOARD is waiting')
@@ -561,7 +891,7 @@ export default class Soc {
             ': INTERCONNECT is receiving message from MEMORY',
         )
 
-        this.Bus.Port_in(doutChD, 1)
+        this.Bus.Port_in(doutChD, 1) //FIX ME
         this.Bus.Transmit()
         
         this.cycle += 1
@@ -591,50 +921,8 @@ export default class Soc {
         if (di2m === 'undefined' || di2m === undefined) this.Processor.register[rd] = '0'.padStart(32, '0')
         if (di2m !== 'undefined' && di2m !== undefined) this.Processor.register[rd] = (di2m.slice(-34)).slice(0,32)
         }
-        // LED MATRIX OPERATE
-        const DMA_buffer = this.DMA.ScanData()
-        //console.log("DMA_buffer", DMA_buffer)
-        let addr_buffer  = 0 
-        if (this.view) 
-            this.view?.ledMatrix.setIsRunning(this.view.matrixModule.getActivated())
-        for (let i = 0; i < 96; i++) {
-            let lineOfLed = this.Memory.Memory[DMA_buffer[addr_buffer]] + this.Memory.Memory[DMA_buffer[addr_buffer + 1]] + this.Memory.Memory[DMA_buffer[addr_buffer + 2]]
-            addr_buffer = addr_buffer + 3
-            for (let j = 0; j < 96; j++) {
-                if (lineOfLed[j] == '0' || lineOfLed[j] == undefined) 
-                    this.Led_matrix[i][j]= false
-                if (lineOfLed[j] == '1')
-                    this.Led_matrix[i][j]= true
-                }
-        }
 
-        this.LedMatrix?.clear()
-        for (let i = 0; i < 96; i++) {
-            for (let j = 0; j < 96; j++) {
-                if (this.Led_matrix[i][j]) {
-                    this.LedMatrix?.turnOn(i, j)
-                }
-                else {
-                    this.LedMatrix?.turnOff(i, j)
-                }
-            }
-        }
-        //console.log(this.Memory.Memory['00000000000000000000000000010100'])
-        //console.log('00000000000000000000000000010100' === DMA_buffer[5])
-        // for (let i = 0; i < 32; i++) {
-        //     for (let j = 0; j < 32; j++) {
-        //         if (this.Memory.Memory[(i*4).toString(2).padStart(32,'0')].padStart(32,'0')[j]==='0') 
-        //             this.Led_matrix[i][j]= false
-        //         if (this.Memory.Memory[(i*4).toString(2).padStart(32,'0')].padStart(32,'0')[j]==='1') 
-        //             this.Led_matrix[i][j]= true;
-        //     }
-        // }
-        // for (let i = 0; i < 32; i++) {
-        //     for (let j = 0; j < 32; j++) {
-        //         if (this.Led_matrix[i][j]==true) this.LedMatrix?.turnOn(i, j)
-        //         if (this.Led_matrix[i][j]==false) this.LedMatrix?.turnOff(i, j)
-        //     }
-        // }
+        this.DMA_operate()
     }
 }
 

@@ -245,7 +245,7 @@ export default function SocPage({}: Props) {
       setDmaData(
         convertToDMAStandard(
           dmaConfigs.src,
-          socModelRef.current.DMA.getData(socModelRef.current.Memory.Memory),
+          socModelRef.current.DMA.Databuffer,
         ),
       )
     })

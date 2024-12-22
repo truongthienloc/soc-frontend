@@ -45,18 +45,27 @@ export default function DMATable({ data, configs }: Props) {
           autoComplete="off"
           value={configs?.src}
           onChange={(e) => configs?.setSrc(e.target.value)}
+          InputProps={{
+            startAdornment: '0x'
+          }}
         />
         <TextField
           label="DES"
           autoComplete="off"
           value={configs?.des}
           onChange={(e) => configs?.setDes(e.target.value)}
+          InputProps={{
+            startAdornment: '0x'
+          }}
         />
         <TextField
           label="LEN"
           autoComplete="off"
           value={configs?.len}
           onChange={(e) => configs?.setLen(e.target.value)}
+          InputProps={{
+            startAdornment: '0x'
+          }}
         />
       </div>
       <div className="h-[calc(100vh-60px)] overflow-auto">

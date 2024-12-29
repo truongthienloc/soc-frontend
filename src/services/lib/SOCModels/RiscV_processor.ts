@@ -203,7 +203,7 @@ export default class RiscVProcessor {
         if (this.active == true) {
             while (this.pc < Object.values(this.Instruction_memory).length * 4 - 4) {
                 const element = this.Instruction_memory[this.pc.toString(2)]
-                this.run(element, this.pc)
+                this.run(element, this.pc, false)
                 // if (count > 300) {
                 //     console.log(fileName, 'problem!!!!')
                 //     break
@@ -682,12 +682,13 @@ export default class RiscVProcessor {
     }
 
 
-    run(instruction: string, pc: number): [string, string, string, string, string] {
+    run(instruction: string, pc: number, icBusy: boolean): [string, string, string, string, string] {
         if (this.active == true) {
             //console.log("this.pc: ",this.pc, this.pre_pc, this.stalled)
             this.pre_pc = pc
+            this.stalled = false 
             let readData = ''
-            // console.log('instructions', instruction,'pc',pc)
+            //console.log('instructions', instruction,'pc',pc)
             this.control(instruction.slice(25, 32), instruction.slice(17, 20))
 
             let size = 'none'
@@ -751,12 +752,14 @@ export default class RiscVProcessor {
                 message = 'PUT'
                 data = readData2
                 address = ALUResult.padStart(32,'0')
+                if (icBusy) this.stalled = true
             }
             if (instruction.slice(25, 32) === '0000011') {
                 // LW
                 message = 'GET'
                 data = ''
                 address = ALUResult.padStart(32,'0')
+                if (icBusy) this.stalled = true
             }
 
             readData = this.dataMemory(ALUResult, this.memRead, this.memWrite, readData2)
@@ -800,9 +803,7 @@ export default class RiscVProcessor {
             
             if (this.stalled == false) {
                 this.pc     = mux(mux(pc + 4, (dec(imm) << 1) + pc, this.pcSrc1), ALUResult, this.pcSrc2)
-            } else {
-                this.pc     = pc
-            }
+            } else this.pc = pc
             
             this.lineColor['3']  = mux(this.lineColor['2'], this.lineColor['1'], this.ALUSrc);
             this.lineColor['6']  = mux(this.lineColor['0'], this.lineColor['4'], this.pcSrc1);

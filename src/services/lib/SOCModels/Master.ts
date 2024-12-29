@@ -40,7 +40,6 @@ export default class Master {
         }
 
         const SlaveName = 'Data Memory'
-        // console.log(' message: ',message)
         if (message === 'GET') {
             this.count_get += 1
             this.ir = `10000001${this.source}${address.padStart(32, '0')}110000000000000000`

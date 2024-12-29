@@ -34,8 +34,7 @@ export async function Step(this: Soc) {
         //console.log("this.Processor.pre_pc, this.Processor.pc", this.Processor.pre_pc, this.Processor.pc)
         this.view?.cpu.setIsRunning(this.Processor.active)
         // CPU RUN
-        let [CPU_message, CPU_data, logical_address, rd] = this.Processor.run(element, this.Processor.pc)
-        //console.log("CPU messeage: ", CPU_message)
+        let [CPU_message, CPU_data, logical_address, rd] = this.Processor.run(element, this.Processor.pc, false)
         this.IO_operate ()
         if (CPU_message!= 'PUT' && CPU_message != 'GET') {
             this.DMA_operate()

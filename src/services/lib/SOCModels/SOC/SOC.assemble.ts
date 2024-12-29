@@ -32,13 +32,14 @@ export function assemble(this: Soc, code: string,
     
     this.Processor.reset()
 
+
     this.Memory.reset( LM_point, IO_point, Imem_point, Dmem_point, Stack_point,
                         Mem_tb  )
     
     this.Processor.setImem(this.Assembler.binary_code)                 // LOAD INTUCTIONS INTO PROCESSOR
     this.Memory.SetInstuctionMemory(this.Processor.Instruction_memory) // LOAD INTUCTIONS INTO MAIN MEMORY
     this.Memory.setPageNumber()
-    this.DMA.config(dmaSrc, dmaLen)
+    this.DMA.config(20, 0, 16, 20)
     this.MMU.SetTLB(TLB, TLB_pointer)
     for (let i of this.Assembler.Instructions)
         if (i != '.text' && i != '') this.Assembly_code.push(i)

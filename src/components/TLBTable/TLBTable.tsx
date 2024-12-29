@@ -67,12 +67,12 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
 
   return (
     <div className="flex flex-col gap-8">
-      <h2 className="text-xl font-bold">TLB:</h2>
+      <h2 className="text-xl font-bold">TLB (LRU Strategy):</h2>
       <div className="flex w-[263px] flex-row items-center gap-1">
         <TextField
           value={editingPointer ? editingPointer : pointer}
           onChange={(e) => setEditingPointer(e.target.value)}
-          label="Page Number Pointer"
+          label="Page Table Pointer"
           InputProps={{
             startAdornment: '0x',
           }}

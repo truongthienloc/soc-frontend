@@ -9,6 +9,7 @@
     "lint": "next lint",
     "format": "prettier --config .prettierrc --write src/**/*.{js,ts,jsx,tsx,css,scss,json}",
     "test:model": "tsx src/services/lib/SOCModels/testing/SoC.test.ts",
+    "test:allocator": "tsx src/services/lib/SOCModels/testing/Allocator.test.ts",
     "test": "tsx src/services/lib/SOCModels/index.ts"
   },
   "dependencies": {

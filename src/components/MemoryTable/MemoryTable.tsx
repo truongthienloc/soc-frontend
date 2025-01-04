@@ -169,6 +169,7 @@ export default function MemoryTable({
               color="error"
               onClick={onResetData}
               disabled={!!modifiedName}
+              className="text-nowrap"
             >
               Init Zero
             </Button>

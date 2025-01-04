@@ -10,11 +10,17 @@ class TestBuddyAllocator {
     runTests() {
         console.log('Running Buddy Allocator Tests...')
 
+        console.log('Test case 1: Basic allocation')
         this.testBasicAllocation()
+        console.log('Test case 2: Multiple allocations')
         this.testMultipleAllocations()
+        console.log('Test case 3: Full memory allocation')
         this.testFullMemoryAllocation()
+        console.log('Test case 4: Deallocation and reuse')
         this.testDeallocationAndReuse()
+        console.log('Test case 5: Buddy merge')
         this.testBuddyMerge()
+        console.log('Test case 6: Edge cases')
         this.testEdgeCases()
 
         console.log('All tests completed.')

@@ -39,6 +39,7 @@ import { modelColors2ViewColors } from '~/helpers/converts/color.convert'
 import useDMAConfig from '~/components/DMATable/useDMAConfig'
 import { convertToDMAStandard } from '~/helpers/converts/dma.convert'
 import { TopFunctionButton } from './_components/CodeEditorSection'
+import { DecToHex } from '~/services/lib/SOCModels/convert'
 
 type Props = {}
 
@@ -184,7 +185,13 @@ export default function SocPage({}: Props) {
         socModel.setLedMatrix(ledMatrix)
 
         setPosition1(410)
-        setRegisters(socModel.Processor.getRegisters())
+        setRegisters([
+          ...socModel.Processor.getRegisters(),
+          {
+            name: 'x32 (pc)',
+            value: DecToHex(socModel.Processor.pc),
+          },
+        ])
         // setPosition2(window.innerWidth / 3 - 10)
 
         setSocModel(socModel)
@@ -241,7 +248,13 @@ export default function SocPage({}: Props) {
       const newTLB = array2TLB(socModelRef.current.MMU.TLB)
       setMemoryData(newMemoryTable)
       tlb.setTLBEntries(newTLB)
-      setRegisters(socModelRef.current.Processor.getRegisters())
+      setRegisters([
+        ...socModelRef.current.Processor.getRegisters(),
+        {
+          name: 'x32 (pc)',
+          value: DecToHex(socModelRef.current.Processor.pc),
+        },
+      ])
       setPageTable(socModelRef.current.Memory.getPageNumber())
       setDmaData(convertToDMAStandard(dmaConfigs.src, socModelRef.current.DMA.Databuffer))
     })
@@ -312,7 +325,13 @@ export default function SocPage({}: Props) {
         const newTLB = array2TLB(socModelRef.current.MMU.TLB)
         setMemoryData(newMemoryTable)
         tlb.setTLBEntries(newTLB)
-        setRegisters(socModelRef.current.Processor.getRegisters())
+        setRegisters([
+          ...socModelRef.current.Processor.getRegisters(),
+          {
+            name: 'x32 (pc)',
+            value: DecToHex(socModelRef.current.Processor.pc),
+          },
+        ])
         setPageTable(socModelRef.current.Memory.getPageNumber())
         setStepColors(modelColors2ViewColors(socModelRef.current.Processor.lineColor))
         setDmaData(convertToDMAStandard(dmaConfigs.src, socModelRef.current.DMA.Databuffer))
@@ -513,8 +532,8 @@ export default function SocPage({}: Props) {
                 className="min-w-[460px] pt-4 max-sm:-ml-14 max-sm:-mt-14 max-sm:mb-14 max-sm:scale-75"
               >
                 <TopFunctionButton
-                  onImportClick={handleMemoryTableImport}
-                  onExportClick={handleMemoryTableExport}
+                  onImportClick={handleImportClick}
+                  onExportClick={handleExportCodeClick}
                   onClose={() => setShowSimulatorType('SOC')}
                 />
                 <div className="grid grid-cols-[4fr_6fr]">

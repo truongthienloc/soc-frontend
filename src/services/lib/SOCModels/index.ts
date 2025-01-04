@@ -20,20 +20,9 @@ import *as fs from 'fs'
 // `
 const code              = `
 .text 
-addi x3, x0, 80
-addi x4, x0, 0x484
-sw   x3, 0(x4)
-addi x4, x0, 0x484
+addi x3, x0, 8
+sw   x3, 4(x4)
 `
-// loop:
-// addi x2, x0, 0xFFF
-// sw x2, 0(x1)
-// addi x1, x1, 4
-// beq x1, x3, exit
-// jal x0, loop
-// exit:
-
-// `
 const SOC               = new Soc('super SoC')
 SOC.Processor.active    = true
 SOC.MMU.active          = true
@@ -96,10 +85,34 @@ SOC.assemble(
 ]   ,
     70208,
     0,
-    (96 * 3 + 16) * 4
-
+    16
 )
-SOC.RunAll()
+SOC.DMA.active = true
+SOC.DMA.masterDMA.active = true
+SOC.DMA.config(0, 0, 16, 16)
+SOC.DMA_operate()
+// SOC.DMA.Send2Memory()
+// SOC.DMA.ReceivefMemory(SOC.Memory.slaveMemory.send('AccessAckData','1'.padStart(32, '1')))
+// SOC.DMA.Send2Peri()
+
+// SOC.DMA.Send2Memory()
+// SOC.DMA.ReceivefMemory(SOC.Memory.slaveMemory.send('AccessAckData','1'.padStart(32, '1')))
+// const sendperi = SOC.DMA.Send2Peri()
+// console.log()
+
+// //console.log(code)
+// //SOC.RunAll()
+// //SOC.DMA_operate()
+// console.log(SOC.DMA.Databuffer)
+
+// const sourcePUT = sendperi.slice(8, 10);
+
+// // Extract address (bits 17-48, indices 16-47)
+// const addressPUT = sendperi.slice(10, 42);
+
+// // Extract data (bits 49 onwards, index 48 to end)
+// const dataPUT = sendperi.slice(45);
+// console.log(sourcePUT, addressPUT, dataPUT)
 // console.log(SOC.DMA.ScanData())
 // console.log(SOC.Processor.lineColor)
 

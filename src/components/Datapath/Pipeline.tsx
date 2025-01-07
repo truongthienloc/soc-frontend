@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react'
-import { IData } from '~/interfaces/data'
+import { Register } from '~/types/register' 
 import { PipelineDatapath } from '~/services/lib/datapath'
 
 interface PipelineProps {
-  data?: IData[] | null
+  data?: Register[] | null
   step?: string
 }
 

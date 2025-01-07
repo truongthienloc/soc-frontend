@@ -392,6 +392,7 @@ export default function SocPage({}: Props) {
         parseInt(tlb.pointer, 16),
         parseInt(dmaConfigs.src, 16),
         parseInt(dmaConfigs.len, 16),
+        parseInt(dmaConfigs.des, 16),
       )
     ) {
       toast.error('Syntax error')

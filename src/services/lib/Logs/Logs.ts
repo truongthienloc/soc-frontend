@@ -40,11 +40,10 @@ export default class Logs {
     }
 
     public getText(): string {
-        return this.container
-            .querySelectorAll('pre')
-            .values()
-            .map((value) => value.textContent)
-            .toArray()
+        const pres = this.container.querySelectorAll('pre')
+
+        return Array.from(pres)
+            .map((pre) => pre.textContent)
             .join('\n')
     }
 }

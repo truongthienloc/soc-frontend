@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Register } from '~/types/register' 
+import { Register } from '~/types/register'
 import { PipelineDatapath } from '~/services/lib/datapath'
 
 interface PipelineProps {

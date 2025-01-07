@@ -256,7 +256,7 @@ export default function SocPage({}: Props) {
         },
       ])
       setPageTable(socModelRef.current.Memory.getPageNumber())
-      setDmaData(modelColors2ViewColors(socModelRef.current.DMA.Databuffer))
+      setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
     })
     socModelRef.current.RunAll()
     // setShowSimulatorType('SOC')
@@ -334,7 +334,7 @@ export default function SocPage({}: Props) {
         ])
         setPageTable(socModelRef.current.Memory.getPageNumber())
         setStepColors(modelColors2ViewColors(socModelRef.current.Processor.lineColor))
-        setDmaData(modelColors2ViewColors(socModelRef.current.DMA.Databuffer))
+        setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
       })
       socModelRef.current.stepWithEvent()
     }
@@ -399,7 +399,7 @@ export default function SocPage({}: Props) {
     } else {
       toast.success('Ready to run')
       setAllowRun(true)
-      setDmaData(modelColors2ViewColors(socModelRef.current.DMA.Databuffer))
+      setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
       localStorage.setItem('soc_code', code)
     }
   }

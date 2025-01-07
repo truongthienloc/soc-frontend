@@ -1,80 +1,83 @@
 // TypeScript
-
+import { channel } from "diagnostics_channel"
+import ChannalA from "./ChannelA"
+import ChannalD from "./ChannelD"
 import { BinToHex } from './convert'
 import { DecToHex } from './convert'
 
 export default class Master {
-    name: string
-    active: boolean
-    source: string
-    count_get: number
-    count_put: number
-    life: number
-    result: number
-    ir: string
+    name        : string
+    active      : boolean
+    source      : string
+    count_get   : number
+    count_put   : number
+    life        : number
+    result      : number
+    ir          : string
+    ChannelA    : ChannalA
 
     constructor(name: string, active: boolean, source: string) {
-        this.name = name
-        this.active = active
-        this.source = source
-        this.count_get = 0
-        this.count_put = 0
-        this.life = 4
-        this.result = 0
-        this.ir = ''
-    }
-
-    process(): void {
-        this.life -= 1
+        this.name       = name
+        this.active     = active
+        this.source     = source
+        this.count_get  = 0
+        this.count_put  = 0
+        this.life       = 4
+        this.result     = 0
+        this.ChannelA   = new ChannalA ('000', '000' , '10'   , this.source   ,
+                                        '0'.padStart(32, '0') , '0000' , 
+                                        '0'.padStart(32, '0') , '0'    )
+        this.ir         = ''
     }
 
     send(
-        message: string,
-        address: string,
-        port: string,
-        cycle: number,
-        data: string,
+        message : string,
+        address : string,
+        data    : string,
     ): string {
         if (!this.active) {
             return ''
         }
 
-        const SlaveName = 'Data Memory'
         if (message === 'GET') {
-            this.count_get += 1
-            this.ir = `10000001${this.source}${address.padStart(32, '0')}110000000000000000`
-            return `10000001${this.source}${address.padStart(32, '0')}11000000000000000000000000000000000000000000000000`
+            this.ChannelA.opcode   = '100'   
+            this.ChannelA.param    = '000'   
+            this.ChannelA.size     = '10'    
+            this.ChannelA.source   = this.source  
+            this.ChannelA.address  = address.padStart(32, '0') 
+            this.ChannelA.mask     = '1111'     
+            this.ChannelA.data     = '0'.padStart(32, '0')    
+            this.ChannelA.corrupt  = '0' 
         }
 
         if (message === 'PUT') {
-            this.count_put += 1
-            //this.ir = `00000010${this.source}${address.padStart(32, '0')}110${data}`
-            return `00000010${this.source}${address.padStart(32, '0')}110${data}`
+            this.ChannelA.opcode   = '000'   
+            this.ChannelA.param    = '000'   
+            this.ChannelA.size     = '10'    
+            this.ChannelA.source   = this.source  
+            this.ChannelA.address  = address.padStart(32, '0') 
+            this.ChannelA.mask     = '1111'     
+            this.ChannelA.data     = data.padStart(32, '0')    
+            this.ChannelA.corrupt  = '0' 
         }
 
         return ''
     }
 
     receive(
-        SlaveName: string,
-        cycle: number,
-        port: string,
-        channelD: { opcode: string; payload: string },
+        message     : string   ,
+        channelD    : ChannalD ,
     ): string | undefined {
         if (!this.active) {
-            return ' '
+            return ''
         }
 
-        // println(`Cycle ${cycle}: Master ${this.name} is receiving data from ${port}`);
-        // println(`Cycle ${cycle}: Master ${this.name} has received data from Slave ${SlaveName}`);
-
-        if (channelD.opcode === '000') {
-            return ' '
+        if (message === 'AccessAck') {
+            return ''
         }
 
-        if (channelD.opcode === '001') {
-            // println(`Cycle ${cycle}: The data is gotten: ${BinToHex(channelD.payload)}`);
-            return channelD.payload
+        if (channelD.opcode === 'AccessAckData') {
+            return channelD.data
         }
     }
 }

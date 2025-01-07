@@ -13,13 +13,13 @@ export function assemble(this: Soc, code: string,
     
     //****************SYNC ACTIVED MODEL VS VIEW****************
     if (this.view) {
-        this.Processor.active = this.view.cpuModule.getActivated()
-        this.MMU.active = this.view.mmuModule.getActivated()
-        this.Bus.active = this.view.interconnect.getActivated()
-        this.DMA.active = this.view.dmaModule.getActivated()
-        this.Memory.active = this.view.memoryModule.getActivated()
-        this.active_keyboard = this.view.keyboardModule.getActivated()
-        this.active_monitor = this.view.monitorModule.getActivated()
+        this.Processor.active   = this.view.cpuModule.getActivated()
+        this.MMU.active         = this.view.mmuModule.getActivated()
+        this.Bus.active         = this.view.interconnect.getActivated()
+        this.DMA.active         = this.view.dmaModule.getActivated()
+        this.Memory.active      = this.view.memoryModule.getActivated()
+        this.active_keyboard    = this.view.keyboardModule.getActivated()
+        this.active_monitor     = this.view.monitorModule.getActivated()
     }
     
     //****************CHECK SYNTAX ERROR****************
@@ -29,10 +29,7 @@ export function assemble(this: Soc, code: string,
     
     //****************SET INITIAL STATUS****************
     // SET INITIAL DATA
-    
     this.Processor.reset()
-
-
     this.Memory.reset( LM_point, IO_point, Imem_point, Dmem_point, Stack_point,
                         Mem_tb  )
     

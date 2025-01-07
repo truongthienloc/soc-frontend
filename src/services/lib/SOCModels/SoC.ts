@@ -13,6 +13,7 @@ import { Register } from '~/types/register'
 import { eventNames } from 'process'
 import EventEmitter from '../EventEmitter/EventEmitter'
 
+
 import type { TLB, TLBEntries } from './soc.d'
 import { Disassembly } from '~/components/CodeEditor'
 import { assemble } from './SOC/SOC.assemble'
@@ -77,7 +78,7 @@ export default class Soc {
 
     constructor(name: string) {
         this.Processor = new RiscVProcessor('RiscV CPU', '01', false)
-        this.Bus = new InterConnect(6, 6, false)
+        this.Bus = new InterConnect(false)
         this.MMU = new MMU(false)
         this.Memory = new Memory(false)
         this.DMA = new DMA(false)

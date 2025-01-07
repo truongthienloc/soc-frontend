@@ -203,7 +203,7 @@ export default class Agent extends TileLinkObject {
     }
 
     public setIsRunning(isRunning: boolean): void {
-        if (isRunning) {
+        if (isRunning && this.animTweens.length === 0) {
             const toPixel = Scene.toPixel
             const LINE_SIZE = 1.2
             const DURATION = 0.3
@@ -303,7 +303,7 @@ export default class Agent extends TileLinkObject {
             this.animTweens.push(tweenLine2)
             this.animTweens.push(tweenLine3)
             this.animTweens.push(tweenLine4)
-        } else {
+        } else if (!isRunning) {
             this.animTweens.forEach((tween) => tween.destroy())
             this.animLines.forEach((line) => line.destroy())
             this.animTweens = []

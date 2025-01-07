@@ -1,11 +1,7 @@
-// TypeScript
 
 import { dec, handleRegister } from './sub_function'
 import { mux } from './sub_function'
 import Master from './Master'
-import { assemblerFromIns } from './assembler'
-import { Logger } from './soc.d'
-import Assembler from './check_syntax'
 
 export default class RiscVProcessor {
     name: string
@@ -14,7 +10,9 @@ export default class RiscVProcessor {
     register: { [key: string]: string }
     Data_memory: { [key: string]: string }
     Instruction_memory: { [key: string]: string }
-    Assembler: Assembler
+    lineColor :{ [key: string]: string }
+    colorCode :{ [key: string]: string }
+    pre_pc = 0
     pc = 0
 
     ALUOp: any
@@ -37,68 +35,126 @@ export default class RiscVProcessor {
     auiOrLui: any
     wb: any
     imm: any
+    stalled: any
 
     public getRegisters() {
         return handleRegister(this.register)
     }
 
-    public setImem(code: string) {
-        let pc0 = 0
-        let binary_code: string[] = []
-        binary_code = assemblerFromIns(code)
-        let instruction_memory0: { [key: string]: string } = {}
-        for (let i of binary_code) {
-            instruction_memory0[pc0.toString(2)] = i
-            pc0 += 4
+    public setImem(binary_code: string[] = []) {
+        if (this.active == true) {
+            let pc_addr = 0
+            for (let i of binary_code) {
+                this.Instruction_memory[pc_addr.toString(2)] = i
+                pc_addr += 4
+            }
         }
-        pc0 = 0
-        // this.println('Set instruction')
-        //console.log('instruction_memory: ', instruction_memory0)
-
-        this.Instruction_memory = instruction_memory0
     }
     constructor(name: string, source: string, active: boolean) {
-        this.name = name
-        this.active = active
-        this.master = new Master(name, true, source)
-        this.register = {
-            '00000': '00000000000000000000000000000000',
-            '00001': '00000000000000000000000000000000',
-            '00010': '00000000000000000000000000000000',
-            '00011': '00000000000000000000000000000000',
-            '00100': '00000000000000000000000000000000',
-            '00101': '00000000000000000000000000000000',
-            '00110': '00000000000000000000000000000000',
-            '00111': '00000000000000000000000000000000',
-            '01000': '00000000000000000000000000000000',
-            '01001': '00000000000000000000000000000000',
-            '01010': '00000000000000000000000000000000',
-            '01011': '00000000000000000000000000000000',
-            '01100': '00000000000000000000000000000000',
-            '01101': '00000000000000000000000000000000',
-            '01110': '00000000000000000000000000000000',
-            '01111': '00000000000000000000000000000000',
-            '10000': '00000000000000000000000000000000',
-            '10001': '00000000000000000000000000000000',
-            '10010': '00000000000000000000000000000000',
-            '10011': '00000000000000000000000000000000',
-            '10100': '00000000000000000000000000000000',
-            '10101': '00000000000000000000000000000000',
-            '10110': '00000000000000000000000000000000',
-            '10111': '00000000000000000000000000000000',
-            '11000': '00000000000000000000000000000000',
-            '11001': '00000000000000000000000000000000',
-            '11010': '00000000000000000000000000000000',
-            '11011': '00000000000000000000000000000000',
-            '11100': '00000000000000000000000000000000',
-            '11101': '00000000000000000000000000000000',
-            '11110': '00000000000000000000000000000000',
-            '11111': '00000000000000000000000000000000',
+        this.name      = name
+        this.active    = active
+        this.master    = new Master(name, true, source)
+        this.colorCode = {
+        'orange'  : 'FF8000',
+        'red'     : 'FF0000',
+        'yellow'  : 'FFFF00',
+        'green'   : '00CC00',
+        'pink'    : 'FF33FF',
+        'blue'    : '3333FF',
+        'purple'  : '6600CC',
+        'brown'   : '994C00',
         }
+        this.lineColor = {
+        '0'         : this.colorCode['orange'], 
+        '1'         : this.colorCode['red']   , 
+        '2'         : this.colorCode['yellow'], 
+        '3'         : ''      , 
+        '4'         : this.colorCode['green'] , 
+        '5'         : this.colorCode['pink']  , 
+        '6'         : ''      , 
+        '7'         : this.colorCode['green'] , 
+        '8'         : this.colorCode['blue']  ,
+        '9'         : ''      , 
+        '10'        : ''      , 
+        '11'        : ''      , 
+        '12'        : ''      , 
+        '13'        : this.colorCode['brown'] , 
+        '14'        : this.colorCode['purple'], 
+        '15'        : ''      , 
+        '16'        : ''      , 
+        '17'        : ''      ,
+        'ALUOp'     : ''      ,
+        'zero'      : ''      ,
+        'ALUSrc'    : ''      ,   
+        'operation' : ''      ,   
+        'jal'       : ''      ,   
+        'jalr'      : ''      ,   
+        'branch'    : ''      ,   
+        'memRead'   : ''      ,   
+        'memWrite'  : ''      ,   
+        'unsigned'  : ''      ,   
+        'memToReg'  : ''      ,   
+        'jump'      : ''      ,   
+        'regWrite'  : ''      ,   
+        'pcSrc1'    : ''      ,   
+        'pcSrc2'    : ''      ,   
+        'signBit'   : ''      ,   
+        'slt'       : ''      ,   
+        'auiOrLui'  : ''      ,   
+        'wb'        : ''      ,   
+        'imm'       : ''      ,   
+        };  
+        this.register = {
+        '00000': '00000000000000000000000000000000',
+        '00001': '00000000000000000000000000000000',
+        '00010': '00000000000000000000000000000000',
+        '00011': '00000000000000000000000000000000',
+        '00100': '00000000000000000000000000000000',
+        '00101': '00000000000000000000000000000000',
+        '00110': '00000000000000000000000000000000',
+        '00111': '00000000000000000000000000000000',
+        '01000': '00000000000000000000000000000000',
+        '01001': '00000000000000000000000000000000',
+        '01010': '00000000000000000000000000000000',
+        '01011': '00000000000000000000000000000000',
+        '01100': '00000000000000000000000000000000',
+        '01101': '00000000000000000000000000000000',
+        '01110': '00000000000000000000000000000000',
+        '01111': '00000000000000000000000000000000',
+        '10000': '00000000000000000000000000000000',
+        '10001': '00000000000000000000000000000000',
+        '10010': '00000000000000000000000000000000',
+        '10011': '00000000000000000000000000000000',
+        '10100': '00000000000000000000000000000000',
+        '10101': '00000000000000000000000000000000',
+        '10110': '00000000000000000000000000000000',
+        '10111': '00000000000000000000000000000000',
+        '11000': '00000000000000000000000000000000',
+        '11001': '00000000000000000000000000000000',
+        '11010': '00000000000000000000000000000000',
+        '11011': '00000000000000000000000000000000',
+        '11100': '00000000000000000000000000000000',
+        '11101': '00000000000000000000000000000000',
+        '11110': '00000000000000000000000000000000',
+        '11111': '00000000000000000000000000000000',
+        }
+        this.jal = 0
+        this.jalr = 0
+        this.branch = '000'
+        this.auiOrLui = 0
+        this.wb = 0
+        this.memToReg = 0
+        this.unsigned = 0
+        this.memRead = '000'
+        this.memWrite = '000'
+        this.ALUSrc = 0
+        this.regWrite = 0
+        this.ALUOp = 'z'
+        this.slt = 0
         this.Data_memory = {}
         this.Instruction_memory = {}
         this.pc = 0
-        this.Assembler = new Assembler ()
+        this.stalled = false
     }
 
     public reset(): void {
@@ -139,21 +195,28 @@ export default class RiscVProcessor {
         this.Data_memory = {}
         this.Instruction_memory = {}
         this.pc = 0
-
     }
 
-    RunAll() {
+    RunAll(fileName: string, stalled: boolean) {
         this.pc = 0
-
-        while (this.pc < Object.values(this.Instruction_memory).length * 4) {
-            const element = this.Instruction_memory[this.pc.toString(2)]
-            this.run(element, this.pc)
+        let count= 0
+        if (this.active == true) {
+            while (this.pc < Object.values(this.Instruction_memory).length * 4 - 4) {
+                const element = this.Instruction_memory[this.pc.toString(2)]
+                this.run(element, this.pc, false)
+                // if (count > 300) {
+                //     console.log(fileName, 'problem!!!!')
+                //     break
+                // }
+                // count++
+            }
         }
     }
 
-    dataMemory(address: string, memRead: string, memWrite: string, writeData: string): string {
-        //console.log('memRead', memRead)
-        //console.log('check address', !(address in this.Data_memory))
+    dataMemory(address: string, memRead: string, memWrite: string, writeData: string) {
+        if (dec('0' + address) % 4 != 0) {
+            return '00000000000000000000000000000000'
+        }
         if (memRead[0] === '1') {
             if (!(address in this.Data_memory)) {
                 return '00000000000000000000000000000000'
@@ -189,10 +252,11 @@ export default class RiscVProcessor {
 
     ALU(operand1: any, operand2: any, operation: string): string {
         this.zero = 0
-        let signBit = 0
-        let ALUResult: string | number = '0'
-
-        //console.log('operand: ', operand1, operand2, operation)
+        this.signBit = 0
+        let ALUResult: any 
+        if (operation == 'z') { 
+            return '0'
+        }
 
         operand1 = dec(operand1)
         operand2 = dec(operand2)
@@ -206,7 +270,7 @@ export default class RiscVProcessor {
             operand2 = Math.abs(operand2)
         }
         const signOperand1 = operand1 < 0 ? 1 : 0
-
+        // console.log(' operation',operation.slice(1))
         switch (operation.slice(1)) {
             case '000':
                 ALUResult = operand1 & operand2
@@ -238,14 +302,21 @@ export default class RiscVProcessor {
         }
 
         if (ALUResult === 0) this.zero = 1
-        if (dec(ALUResult.toString()) < 0) {
-            signBit = 1
-            ALUResult = (1 << 32) + dec(ALUResult.toString())
-        }
+
+
+
+        if (ALUResult< 0) {
+            this.signBit = 1
+            ALUResult = (4294967296) + ALUResult
+        } 
+
+
         ALUResult = ALUResult.toString(2)
 
+        
         if (ALUResult[0] === '-') ALUResult = ALUResult.slice(3).padStart(32, '1')
         if (ALUResult[0] === '0') ALUResult = ALUResult.slice(2).padStart(32, '0')
+        //console.log('operand: ', operand1, operand2, dec('0'+ALUResult), operation, operation.slice(1))
 
         return ALUResult
     }
@@ -262,7 +333,7 @@ export default class RiscVProcessor {
 
     immGen(instruction: string): string {
         // let imm = '';
-        //("instruction: ", instruction);
+        //console.log("instruction: ", instruction);
 
         if (instruction.slice(-7) === '0110011') {
             // R-type
@@ -297,11 +368,13 @@ export default class RiscVProcessor {
             // U-TYPE
             this.imm = instruction.slice(0, 20)
         }
+        // console.log('imm', this.imm)
         if (['0110111', '0010111'].includes(instruction.slice(-7))) {
             return this.imm.padStart(32, '0')
         } else {
             return this.imm.padStart(32, this.imm[0])
         }
+        
     }
 
     control(opcode: string, funct3: string): void {
@@ -482,7 +555,7 @@ export default class RiscVProcessor {
                         this.operation = funct7 === '0' ? '0011' : '0100'
                         break
                     case '001':
-                        this.operation = '0105'
+                        this.operation = '0101'
                         break
                     case '010':
                         this.operation = '0100'
@@ -510,7 +583,7 @@ export default class RiscVProcessor {
                         this.operation = '0011' // ADDI
                         break
                     case '001':
-                        this.operation = '0105' // SLLI
+                        this.operation = '0101' // SLLI
                         break
                     case '010':
                         this.operation = '0100' // SLTI
@@ -608,123 +681,160 @@ export default class RiscVProcessor {
         }
     }
 
-    run(instruction: string, pc: number): [string, string, string, string, string] {
-        let signBit = 0
-        let readData = ''
-        //console.log('Instruction', instruction)
 
-        this.control(instruction.slice(25, 32), instruction.slice(17, 20))
-        let size = 'none'
-        if (instruction.slice(25, 32) === '0000011')
-            switch (instruction.slice(17, 20)) {
-                case '000':
-                    size = 'lb'
-                    break
-                case '001':
-                    size = 'lh'
-                    break
-                case '010':
-                    size = 'lw'
-                    break
-                case '100':
-                    size = 'lbu'
-                    break
-                case '101':
-                    size = 'lhu'
-                    break
-                default:
-                    break
+    run(instruction: string, pc: number, icBusy: boolean): [string, string, string, string, string] {
+        if (this.active == true) {
+            //console.log("this.pc: ",this.pc, this.pre_pc, this.stalled)
+            this.pre_pc = pc
+            this.stalled = false 
+            let readData = ''
+            //console.log('instructions', instruction,'pc',pc)
+            this.control(instruction.slice(25, 32), instruction.slice(17, 20))
+
+            let size = 'none'
+            if (instruction.slice(25, 32) === '0000011')
+                switch (instruction.slice(17, 20)) {
+                    case '000':
+                        size = 'lb'
+                        break
+                    case '001':
+                        size = 'lh'
+                        break
+                    case '010':
+                        size = 'lw'
+                        break
+                    case '100':
+                        size = 'lbu'
+                        break
+                    case '101':
+                        size = 'lhu'
+                        break
+                    default:
+                        break
+                }
+
+            if (instruction.slice(25, 32) === '0100011')
+                switch (instruction.slice(17, 20)) {
+                    case '000': //Load
+                        size = 'sb'
+                        break
+                    case '001': //Store
+                        size = 'sh'
+                        break
+                    case '010': //Load
+                        size = 'sw'
+                        break
+                    default:
+                        break
+                }
+            const readRegister1 = instruction.slice(12, 17)
+            const readRegister2 = instruction.slice(7, 12)
+            const writeRegister = instruction.slice(20, 25)
+            const readData1 = this.register[readRegister1]
+            const readData2 = this.register[readRegister2]
+            
+            // console.log('readRegister1 readRegister2 writeRegister', readRegister1, readRegister2, writeRegister)
+            
+            const imm = this.immGen(instruction)
+            
+            this.aluControl(this.ALUOp, instruction.slice(17, 20), instruction.slice(1,2))
+            //console.log(this.register)
+            const ALUResult = this.ALU(readData1, mux(readData2, imm, this.ALUSrc), this.operation)
+
+            this.branchControl(this.jal, this.jalr, this.branch)
+
+            let message = 'None'
+            let data = '0'
+            let address = ''
+            
+            if (instruction.slice(25, 32) === '0100011') {
+                // SW
+                message = 'PUT'
+                data = readData2
+                address = ALUResult.padStart(32,'0')
+                if (icBusy) this.stalled = true
+            }
+            if (instruction.slice(25, 32) === '0000011') {
+                // LW
+                message = 'GET'
+                data = ''
+                address = ALUResult.padStart(32,'0')
+                if (icBusy) this.stalled = true
             }
 
-        if (instruction.slice(25, 32) === '0100011')
-            switch (instruction.slice(17, 20)) {
-                case '000': //Load
-                    size = 'sb'
-                    break
-                case '001': //Store
-                    size = 'sh'
-                    break
-                case '010': //Load
-                    size = 'sw'
-                    break
-                default:
-                    break
+            readData = this.dataMemory(ALUResult, this.memRead, this.memWrite, readData2)
+
+            readData = this.dataGen(readData, this.unsigned)
+
+            let writeDataR = mux(
+                mux(
+                    mux(
+                        mux(ALUResult, readData, this.memToReg),
+                        pc.toString(2).padStart(32, '0'),
+                        this.jump,
+                    ),
+                    mux(
+                        '00000000000000000000000000000000',
+                        '00000000000000000000000000000001',
+                        this.signBit,
+                    ),
+                    this.slt,
+                ),
+                mux(
+                    (dec(imm) << 12).toString(2).padStart(32, '0') +
+                        pc.toString(2).padStart(32, '0'),
+                    (dec(imm) << 12).toString(2).padStart(32, '0'),
+                    this.auiOrLui,
+                ),
+                this.wb,
+            )
+            // if (this.pc== 4) {
+            //     this.active = false
+            //     console.log('ALUResult: ', ALUResult)
+            //     console.log('writeDataR: ', writeDataR)
+            // }
+            writeDataR = writeDataR.padStart(32, '0')
+            if (this.regWrite === 1) {
+                this.register[writeRegister] = writeDataR
             }
-        const readRegister1 = instruction.slice(12, 17)
-        const readRegister2 = instruction.slice(7, 12)
-        const writeRegister = instruction.slice(20, 25)
-        const readData1 = this.register[readRegister1]
-        const readData2 = this.register[readRegister2]
 
-        const imm = this.immGen(instruction)
-        this.aluControl(this.ALUOp, instruction.slice(17, 20), instruction.slice(1))
-
-        const ALUResult = this.ALU(readData1, mux(readData2, imm, this.ALUSrc), this.operation)
-        this.branchControl(this.jal, this.jalr, this.branch)
-
-        let message = 'None'
-        let data = '0'
-        let address = ''
-        if (instruction.slice(25, 32) === '0100011') {
-            // SW
-            message = 'PUT'
-            data = readData2
-            address = ALUResult
-        }
-        if (instruction.slice(25, 32) === '0000011') {
-            // LW
-            message = 'GET'
-            data = ''
-            address = ALUResult
-        }
-
-        readData = this.dataMemory(ALUResult, this.memRead, this.memWrite, readData2)
-
-        readData = this.dataGen(readData, this.unsigned)
-
-        // if (instruction.slice(25, 32) === '0100011') {
-        //     // SW
-        //     message = 'PUT'
-        //     data = readData2
-        //     address = readData
-        // }
-        // if (instruction.slice(25, 32) === '0000011') {
-        //     // LW
-        //     message = 'GET'
-        //     data = ''
-        //     address = readData
-        // }
-
-        let writeDataR = mux(
-            mux(
-                mux(
-                    mux(ALUResult, readData, this.memToReg),
-                    pc.toString(2).padStart(32, '0'),
-                    this.jump,
-                ),
-                mux(
-                    '00000000000000000000000000000000',
-                    '00000000000000000000000000000001',
-                    signBit,
-                ),
-                this.slt,
-            ),
-            mux(
-                (dec(imm) << 12).toString(2).padStart(32, '0') + pc.toString(2).padStart(32, '0'),
-                (dec(imm) << 12).toString(2).padStart(32, '0'),
-                this.auiOrLui,
-            ),
-            this.wb,
-        )
-        //console.log(writeDataR)
-        //console.log(this.slt)
-        writeDataR = writeDataR.padStart(32, '0')
-        if (this.regWrite === 1) {
-            this.register[writeRegister] = writeDataR
-        }
-
-        this.register['00000'] = '00000000000000000000000000000000'
-        this.pc = mux(mux(pc + 4, (dec(imm) << 1) + pc, this.pcSrc1), ALUResult, this.pcSrc2)
-        return [message, data, address, writeRegister, size]
+            this.register['00000'] = '00000000000000000000000000000000'
+            //.log(pc + 4, (dec(imm) << 1) , this.pcSrc1)
+            
+            if (this.stalled == false) {
+                this.pc     = mux(mux(pc + 4, (dec(imm) << 1) + pc, this.pcSrc1), ALUResult, this.pcSrc2)
+            } else this.pc = pc
+            
+            this.lineColor['3']  = mux(this.lineColor['2'], this.lineColor['1'], this.ALUSrc);
+            this.lineColor['6']  = mux(this.lineColor['0'], this.lineColor['4'], this.pcSrc1);
+            this.lineColor['9']  = mux(this.lineColor['6'], this.lineColor['5'], this.pcSrc2);
+            this.lineColor['10'] = mux(this.lineColor['5'], this.lineColor['8'], this.memToReg);
+            this.lineColor['11'] = mux(this.lineColor['10'], this.lineColor['0'], this.jump);
+            this.lineColor['12'] = mux(this.lineColor['14'], this.lineColor['13'], this.signBit);
+            this.lineColor['15'] = mux(this.lineColor['11'], this.lineColor['12'], this.slt);
+            this.lineColor['16'] = mux(this.lineColor['7'], this.lineColor['1'], this.auiOrLui);
+            this.lineColor['17'] = mux(this.lineColor['15'], this.lineColor['16'], this.wb);
+            this.lineColor['ALUOp'   ]  = this.ALUOp.toString()   
+            this.lineColor['zero'    ]  = this.zero.toString()      
+            this.lineColor['ALUSrc'  ]  = this.ALUSrc.toString()      
+            this.lineColor['operation'] = this.operation.toString()  
+            this.lineColor['jal'     ]  = this.jal.toString()         
+            this.lineColor['jalr'    ]  = this.jalr.toString()        
+            this.lineColor['branch'  ]  = this.branch.toString()       
+            this.lineColor['memRead' ]  = this.memRead.toString()      
+            this.lineColor['memWrite']  = this.memWrite.toString()     
+            this.lineColor['unsigned']  = this.unsigned.toString()     
+            this.lineColor['memToReg']  = this.memToReg.toString()     
+            this.lineColor['jump'    ]  = this.jump.toString()         
+            this.lineColor['regWrite']  = this.regWrite.toString()    
+            this.lineColor['pcSrc1'  ]  = this.pcSrc1.toString()       
+            this.lineColor['pcSrc2'  ]  = this.pcSrc2.toString()      
+            this.lineColor['signBit' ]  = this.signBit.toString()     
+            this.lineColor['slt'     ]  = this.slt.toString()          
+            this.lineColor['auiOrLui']  = this.auiOrLui.toString()     
+            this.lineColor['wb'      ]  = this.wb.toString()           
+            this.lineColor['imm'     ]  = this.imm.toString()         
+            return [message, data, address, writeRegister, size]
+        } else return ['', '', '', '', '']
     }
 }

@@ -505,7 +505,7 @@ function SBType(input: string): string {
 
 function UType(input: string): string {
     const mlist = input.split(' ')
-    console.log (input)
+    console.log(input)
 
     const opcode = OPCODE[mlist[0]]
     // console.log('opcode: ' + opcode);
@@ -579,7 +579,7 @@ export function assemblerFromIns(code: string): string[] {
             continue
         }
         let string = ''
-
+        console.log ('FMT[t[0]]', FMT[t[0]] )
         if (FMT[t[0]] === 'R') {
             string = RType(ins[i])
         }
@@ -606,5 +606,3 @@ export function assemblerFromIns(code: string): string[] {
     lines.pop() // Remove the last element
     return lines
 }
-
-

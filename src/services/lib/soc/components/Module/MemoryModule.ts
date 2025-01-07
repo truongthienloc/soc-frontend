@@ -37,7 +37,8 @@ export default class MemoryModule extends Module {
         })
         const adapter = new Konva.Line({
             x: toPixel(this.w / 2),
-            y: toPixel(0),
+            // y: toPixel(0),
+            y: toPixel(this.h),
             // stroke: Scene.BORDER_COLOR,
             // fill: Scene.FILL_COLOR,
             // offsetX: toPixel(aW / 2),

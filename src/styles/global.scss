@@ -13,3 +13,16 @@
         text-wrap: balance;
     }
 }
+
+@keyframes fadeIn {
+    from {
+        scale: 0;
+    }
+    to {
+        scale: 1;
+    }
+}
+
+.animation-fade-in {
+    animation: fadeIn 250ms ease-in forwards;
+}

@@ -1,223 +1,112 @@
-// TypeScript
-
-import { dec } from './convert'
-
-interface Port {
-    active: boolean
-    data: any[]
-}
-
-function createPort(active: boolean): Port {
-    return { active, data: [] }
-}
-
-class ChannelA {
-    opcode: string
-    param: string
-    size: string
-    source: string
-    address: string
-    mask: string
-    corrupt: string
-    data: string
-    channelA: string
-    name?: string
-    cycle?: number
-    valid?: string
-    ready?: string
-
-    constructor(name: string, cycle: number, channelA: string) {
-        if (channelA === '') {
-            this.opcode = ''
-            this.param = ''
-            this.size = ''
-            this.source = ''
-            this.address = ''
-            this.mask = ''
-            this.corrupt = ''
-            this.data = ''
-            this.channelA = ''
-        } else {
-            this.name = name
-            this.cycle = cycle
-            this.valid = '1'
-            this.ready = ''
-            this.opcode = channelA.slice(0, 3)
-            this.param = channelA.slice(3, 6)
-            this.size = channelA.slice(6, 8)
-            this.source = channelA.slice(8, 10)
-            this.address = channelA.slice(10, 42)
-            this.mask = channelA.slice(42, 44)
-            this.corrupt = channelA[44]
-            this.data = channelA.slice(45)
-            this.channelA = channelA
-            //(`Cycle ${this.cycle}: ${this.name}: Data are on Channel A`);
-        }
-    }
-
-    Ready(Port_des: string): void {
-        if (this.channelA !== '') {
-            //(`Cycle ${this.cycle! + 1}: ${Port_des}: The receiver accepted the offered progress`);
-            this.ready = '1'
-        }
-    }
-}
-
-class ChannelD {
-    opcode: string
-    param: string
-    size: string
-    source: string
-    sink: string
-    deni: string
-    corrupt: string
-    payload: string
-    channelD: string
-    ready: string
-    name?: string
-    cycle?: number
-    valid?: string
-
-    constructor(name: string, cycle: number, channelD: string) {
-        this.ready = '1'
-        if (channelD !== '') {
-            this.name = name
-            this.cycle = cycle
-            this.opcode = channelD.slice(0, 3)
-            this.param = channelD.slice(3, 5)
-            this.size = channelD.slice(5, 7)
-            this.source = channelD.slice(7, 9)
-            this.sink = channelD.slice(9, 11)
-            this.deni = channelD[12]
-            this.corrupt = channelD.slice(-2)
-            this.payload = channelD.slice(13, -2)
-            this.channelD = channelD
-            this.valid = ''
-            //(`Cycle ${this.cycle}: ${this.name}: Data are on Channel D`);
-        } else {
-            this.opcode = ''
-            this.param = ''
-            this.size = ''
-            this.source = ''
-            this.sink = ''
-            this.deni = ''
-            this.corrupt = ''
-            this.payload = ''
-            this.channelD = ''
-            this.valid = ''
-        }
-    }
-
-    Ready(Port_des: string): void {
-        if (this.channelD !== '') {
-            //(`Cycle ${this.cycle! + 1}: ${Port_des}: The receiver accepted the offered progress`);
-            this.valid = '1'
-        }
-    }
-}
+import ChannalA from "./ChannelA"
+import ChannalD from "./ChannelD"
+import { dec, BinToHex } from './convert' 
 
 export default class InterConnect {
-    Pin: Port[]
-    Pout: Port[]
-    numPin: number
-    numPout: number
-    ChannelA_queue: ChannelA[]
-    ChannelD_queue: ChannelD[]
-    ChannelA: string
-    ChannelD: string
-
-    constructor(numPin: number, numPout: number) {
-        this.numPin = numPin
-        this.numPout = numPout
-        this.Pin = []
-        this.Pout = []
-        for (let index = 0; index < numPin; index++) {
-            this.Pin.push(createPort(true))
-        }
-        for (let index = 0; index < numPout; index++) {
-            this.Pout.push(createPort(true))
-        }
-        this.ChannelA_queue = []
-        this.ChannelD_queue = []
-        this.ChannelA = ''
-        this.ChannelD = ''
+    active      : boolean                       ;
+    Pin         : any    ;
+    Pout        : any   ;
+    Pactived    : boolean[]                     ;
+    constructor(active: boolean) {
+        this.active     = active    ;
+        // Initialize arrays
+        this.Pin        = [];
+        this.Pout       = [];
+        this.Pactived   = Array(12).fill(false) ; // Initialize with 12 false values
+        // Initialize Pin array
+        this.Pin[0] = new ChannalA('000', '000', '10', '00', '0'.padStart(32, '0'), '0000', '0'.padStart(32, '0'), '0');
+        this.Pin[1] = new ChannalA('000', '000', '10', '01', '0'.padStart(32, '0'), '0000', '0'.padStart(32, '0'), '0');
+        this.Pin[2] = new ChannalD('000', '00', '10', '00', '0', '0', '0'.padStart(32, '0'), '0');
+        this.Pin[3] = new ChannalD('000', '00', '10', '00', '0', '0', '0'.padStart(32, '0'), '0');
+        this.Pin[4] = new ChannalD('000', '00', '10', '00', '0', '0', '0'.padStart(32, '0'), '0');
+        this.Pin[5] = new ChannalD('000', '00', '10', '00', '0', '0', '0'.padStart(32, '0'), '0');
+        // Initialize Pout array
+        this.Pout[0] = new ChannalD('000', '00', '10', '00', '0', '0', '0'.padStart(32, '0'), '0');
+        this.Pout[1] = new ChannalD('000', '00', '10', '00', '0', '0', '0'.padStart(32, '0'), '0');
+        this.Pout[2] = new ChannalA('000', '000', '10', '00', '0'.padStart(32, '0'), '0000', '0'.padStart(32, '0'), '0');
+        this.Pout[3] = new ChannalA('000', '000', '10', '00', '0'.padStart(32, '0'), '0000', '0'.padStart(32, '0'), '0');
+        this.Pout[4] = new ChannalA('000', '000', '10', '00', '0'.padStart(32, '0'), '0000', '0'.padStart(32, '0'), '0');
+        this.Pout[5] = new ChannalA('000', '000', '10', '00', '0'.padStart(32, '0'), '0000', '0'.padStart(32, '0'), '0');
     }
 
-    Port_in_CA(data: string, index: number, cycle: number): void {
-        this.Pin[index].data.push(data)
-        this.Pin[index].active = true
-        const port_name = `Port_in[${index}]`
-        this.ChannelA_queue.push(new ChannelA(port_name, cycle, data))
-    }
-
-    Port_in_CD(data: string, index: number, cycle: number): void {
-        this.Pin[index].data.push(data)
-        this.Pin[index].active = true
-        const port_name = `Port_in[${index}]`
-        this.ChannelD_queue.push(new ChannelD(port_name, cycle, data))
+    Port_in(data: any, index: number): void {
+        if (this.active == true) {
+            this.Pin[index]      = data
+            this.Pactived[index] = true
+        }
     }
 
     Port_out(index: number): any {
-        if (this.Pout[index].data.length === 0) {
-            return -1
+        if (this.active == true) {
+            const data = this.Pout[index]
+            return data
         }
-        const data = this.Pout[index].data[0]
-        this.Pout[index].data.shift()
-        return data
     }
 
-    TransmitChannelA(): void {
-        for (const ChA of this.ChannelA_queue) {
-            //console.log('cha adrr', dec(ChA.address))
-            if (dec('0' + ChA.address) < 399 && 0 <= dec('0' + ChA.address)) {
-                this.Pout[1].data.push(ChA)
+    Transmit(): void {
+        if (this.Pactived[0]==true) {
+            const data          = this.Pin[0].data
+            const address       = this.Pin[0].address
+            this.Pout[2].data   = data.padStart(32, '0') 
+            this.Pout[2].source = '00'
+            this.Pout[2].address= address
+        }
+        if (this.Pactived[1]==true) {
+            const opcode        = this.Pin[1].opcode
+            const address       = this.Pin[1].address
+            const data          = this.Pin[1].data
+            this.Pout[2].source = '01'
+            if (opcode == '100') { // GET
+                this.Pout[2].data    = '0'.padStart(32, '0')
+                this.Pout[2].address = address
             }
-            if (dec('0' + ChA.address) < 499 && 400 <= dec('0' + ChA.address)) {
-                this.Pout[2].data.push(ChA)
-            }
-            if (dec('0' + ChA.address) < 599 && 500 <= dec('0' + ChA.address)) {
-                this.Pout[3].data.push(ChA)
+            if (opcode == '000') { //PUT
+                
+                if ( (dec(address) >= 0) && (dec(address) < 96 * 3 * 4)) {
+                    this.Pout[3].data    = data
+                }
+                if ( (dec(address) > 0) && (dec(address) < (96 * 3 + 16) * 4)) {
+                    this.Pout[4].data    = data
+                }
+
             }
         }
-        this.ChannelA_queue = []
-    }
-
-    TransmitChannelD(): void {
-        let count0 = 0
-        // let count1 = 0;
-        // let count2 = 0;
-        // let count3 = 0;
-
-        for (const ChD of this.ChannelD_queue) {
-            if (ChD.source === '00') {
-                //console.log('payload cd', ChD.payload)
-                this.Pout[0].data.push(ChD)
-                if (count0 === 0) ChD.Ready('Port_out[0]')
-                this.Pout[0].active = true
-                count0 += 1
+        if (this.Pactived[2]==true) {
+            const source = this.Pin[2].source
+            const opcode = this.Pin[2].opcode
+            const data   = this.Pin[2].data
+            if (source == '00') {
+                if (opcode == '000') {// AccessAck
+                    this.Pout[0].data   = '0'.padStart(32, '0')
+                    this.Pout[0].source = source
+                }
+                if (opcode == '001') {// AccessAckData
+                    this.Pout[0].data   = data
+                    this.Pout[0].source = source
+                }
             }
-
-            // if (ChD.source === '01') {
-            //     this.Pout[1].data.push(ChD);
-            //     if (count1 === 0) ChD.Ready('Port_out[1]');
-            //     this.Pout[1].active = true;
-            //     count1 += 1;
-            // }
-
-            // if (ChD.source === '10') {
-            //     this.Pout[2].data.push(ChD);
-            //     if (count2 === 0) ChD.Ready('Port_out[2]');
-            //     this.Pout[2].active = true;
-            //     count2 += 1;
-            // }
-
-            // if (ChD.source === '11') {
-            //     this.Pout[3].data.push(ChD);
-            //     if (count3 === 0) ChD.Ready('Port_out[3]');
-            //     this.Pout[3].active = true;
-            //     count3 += 1;
-            // }
+            if (source == '01') {
+                if (opcode == '000') {// AccessAck
+                    this.Pout[1].data   = '0'.padStart(32, '0')
+                    this.Pout[1].source = source
+                }
+                if (opcode == '001') {// AccessAckData
+                    this.Pout[1].data   = data
+                    this.Pout[1].source = source
+                }
+            }
+                
         }
-        this.ChannelD_queue = []
+        
+        if (this.Pactived[3]==true) {
+
+        }
+        if (this.Pactived[4]==true) {
+
+        }
+        if (this.Pactived[5]==true) {
+
+        }
     }
 }
+

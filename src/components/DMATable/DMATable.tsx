@@ -39,14 +39,14 @@ export default function DMATable({ data, configs }: Props) {
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="flex flex-col gap-4">
-        <h2 className='font-bold'>DMA Config-Registers</h2>
+        <h2 className="font-bold">DMA Config-Registers</h2>
         <TextField
           label="SRC"
           autoComplete="off"
           value={configs?.src}
           onChange={(e) => configs?.setSrc(e.target.value)}
           InputProps={{
-            startAdornment: '0x'
+            startAdornment: '0x',
           }}
         />
         {/* <TextField
@@ -64,12 +64,12 @@ export default function DMATable({ data, configs }: Props) {
           value={configs?.len}
           onChange={(e) => configs?.setLen(e.target.value)}
           InputProps={{
-            startAdornment: '0x'
+            startAdornment: '0x',
           }}
         />
       </div>
       <div className="h-[calc(100vh-60px)] overflow-auto">
-        <h2 className='font-bold'>DMA Buffer</h2>
+        <h2 className="font-bold">DMA Buffer</h2>
         <TableContainer component={Paper}>
           <Table sx={styles.table} stickyHeader>
             <TableHead>

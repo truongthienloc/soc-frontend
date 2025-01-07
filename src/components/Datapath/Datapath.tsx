@@ -42,7 +42,7 @@ function Datapath({ data, step }: DatapathProps) {
 
   return (
     <div
-      className="flex h-full w-full max-w-[900px] flex-col overflow-y-auto text-lg"
+      className="flex h-full w-full max-w-[800px] flex-col overflow-y-auto text-lg"
       id="datapath"
     ></div>
   )

@@ -1,5 +1,5 @@
-import { Register } from "~/types/register";
-import { binaryToHex } from "./Hextobin";
+import { Register } from '~/types/register'
+import { binaryToHex } from './Hextobin'
 
 export function convertToDMAStandard(_start: string, pure: string[]): Register[] {
     const result: Register[] = []

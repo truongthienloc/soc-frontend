@@ -38,6 +38,8 @@ import { DMATable } from '~/components/DMATable'
 import { modelColors2ViewColors } from '~/helpers/converts/color.convert'
 import useDMAConfig from '~/components/DMATable/useDMAConfig'
 import { convertToDMAStandard } from '~/helpers/converts/dma.convert'
+import { TopFunctionButton } from './_components/CodeEditorSection'
+import { DecToHex } from '~/services/lib/SOCModels/convert'
 
 type Props = {}
 
@@ -183,7 +185,13 @@ export default function SocPage({}: Props) {
         socModel.setLedMatrix(ledMatrix)
 
         setPosition1(410)
-        setRegisters(socModel.Processor.getRegisters())
+        setRegisters([
+          ...socModel.Processor.getRegisters(),
+          {
+            name: 'x32 (pc)',
+            value: DecToHex(socModel.Processor.pc),
+          },
+        ])
         // setPosition2(window.innerWidth / 3 - 10)
 
         setSocModel(socModel)
@@ -240,14 +248,15 @@ export default function SocPage({}: Props) {
       const newTLB = array2TLB(socModelRef.current.MMU.TLB)
       setMemoryData(newMemoryTable)
       tlb.setTLBEntries(newTLB)
-      setRegisters(socModelRef.current.Processor.getRegisters())
+      setRegisters([
+        ...socModelRef.current.Processor.getRegisters(),
+        {
+          name: 'x32 (pc)',
+          value: DecToHex(socModelRef.current.Processor.pc),
+        },
+      ])
       setPageTable(socModelRef.current.Memory.getPageNumber())
-      setDmaData(
-        convertToDMAStandard(
-          dmaConfigs.src,
-          socModelRef.current.DMA.Databuffer,
-        ),
-      )
+      setDmaData(convertToDMAStandard(dmaConfigs.src, socModelRef.current.DMA.Databuffer))
     })
     socModelRef.current.RunAll()
     // setShowSimulatorType('SOC')
@@ -316,15 +325,16 @@ export default function SocPage({}: Props) {
         const newTLB = array2TLB(socModelRef.current.MMU.TLB)
         setMemoryData(newMemoryTable)
         tlb.setTLBEntries(newTLB)
-        setRegisters(socModelRef.current.Processor.getRegisters())
+        setRegisters([
+          ...socModelRef.current.Processor.getRegisters(),
+          {
+            name: 'x32 (pc)',
+            value: DecToHex(socModelRef.current.Processor.pc),
+          },
+        ])
         setPageTable(socModelRef.current.Memory.getPageNumber())
         setStepColors(modelColors2ViewColors(socModelRef.current.Processor.lineColor))
-        setDmaData(
-          convertToDMAStandard(
-            dmaConfigs.src,
-            socModelRef.current.DMA.Databuffer,
-          ),
-        )
+        setDmaData(convertToDMAStandard(dmaConfigs.src, socModelRef.current.DMA.Databuffer))
       })
       socModelRef.current.stepWithEvent()
     }
@@ -388,12 +398,7 @@ export default function SocPage({}: Props) {
     } else {
       toast.success('Ready to run')
       setAllowRun(true)
-      setDmaData(
-        convertToDMAStandard(
-          dmaConfigs.src,
-          socModelRef.current.DMA.Databuffer,
-        ),
-      )
+      setDmaData(convertToDMAStandard(dmaConfigs.src, socModelRef.current.DMA.Databuffer))
       localStorage.setItem('soc_code', code)
     }
   }
@@ -521,35 +526,16 @@ export default function SocPage({}: Props) {
                 <Tab label="Schematic View" />
                 <Tab label="Disassembly" />
               </Tabs>
-              {/* Tab index = 0 */}
+              {/* Tab index = 0: Coding View and Registers table */}
               <TabPanel
                 index={0}
                 className="min-w-[460px] pt-4 max-sm:-ml-14 max-sm:-mt-14 max-sm:mb-14 max-sm:scale-75"
               >
-                <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
-                  <div className="flex items-center gap-2">
-                    {/* <h2 className="text-xl font-bold">Code Editor:</h2> */}
-                    <Button
-                      className=""
-                      variant="outlined"
-                      color="secondary"
-                      onClick={handleImportClick}
-                    >
-                      Import
-                    </Button>
-                    <Button
-                      className=""
-                      variant="outlined"
-                      color="secondary"
-                      onClick={handleExportCodeClick}
-                    >
-                      Export
-                    </Button>
-                  </div>
-                  <Button onClick={() => setShowSimulatorType('SOC')}>
-                    <CloseIcon />
-                  </Button>
-                </div>
+                <TopFunctionButton
+                  onImportClick={handleImportClick}
+                  onExportClick={handleExportCodeClick}
+                  onClose={() => setShowSimulatorType('SOC')}
+                />
                 <div className="grid grid-cols-[4fr_6fr]">
                   <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
                     {isStepping ? (
@@ -566,14 +552,32 @@ export default function SocPage({}: Props) {
                   <RegisterTable isShown data={registers} />
                 </div>
               </TabPanel>
-              {/* Tab index = 1 */}
+              {/* Tab index = 1: Schematic View */}
               <TabPanel
                 index={1}
-                className="flex flex-1 flex-col gap-4 pt-8 max-sm:mb-20 max-sm:w-dvw max-sm:overflow-auto max-sm:px-1"
+                className="flex flex-1 flex-col pt-4 max-sm:mb-20 max-sm:w-dvw max-sm:overflow-auto max-sm:px-1"
               >
-                {/* <h2 className="text-xl font-bold">Datapath:</h2> */}
-                <div className="flex justify-center">
-                  <Datapath data={stepColors} />
+                <TopFunctionButton
+                  onImportClick={handleMemoryTableImport}
+                  onExportClick={handleMemoryTableExport}
+                  onClose={() => setShowSimulatorType('SOC')}
+                />
+                <div className="grid grid-cols-[4fr_6fr]">
+                  <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
+                    {isStepping ? (
+                      <DisplayStepCode code={stepCode} pc={pc} />
+                    ) : (
+                      <CodeEditor
+                        value={code}
+                        onChange={handleChangeCode}
+                        disable={disableCodeEditor}
+                        hidden={showSimulatorType !== 'CODE_EDITOR'}
+                      />
+                    )}
+                  </div>
+                  <div className="flex justify-center">
+                    <Datapath data={stepColors} />
+                  </div>
                 </div>
               </TabPanel>
               <TabPanel
@@ -593,16 +597,20 @@ export default function SocPage({}: Props) {
                 <CloseIcon />
               </Button>
             </div>
-            <MemoryMap className="mb-4" memoryMap={memoryMap} disabled={isStepping} />
-            <MemoryTable
-              data={memoryData}
-              onChangeData={handleChangeMemoryData}
-              onResetData={handleResetMemoryTable}
-              disabled={isStepping}
-              memoryMap={memoryMap}
-              onImportClick={handleMemoryTableImport}
-              onExportClick={handleMemoryTableExport}
-            />
+            <div className="grid grid-cols-2 gap-2 pr-4">
+              <div className="flex items-center">
+                <MemoryMap className="" memoryMap={memoryMap} disabled={isStepping} />
+              </div>
+              <MemoryTable
+                data={memoryData}
+                onChangeData={handleChangeMemoryData}
+                onResetData={handleResetMemoryTable}
+                disabled={isStepping}
+                memoryMap={memoryMap}
+                onImportClick={handleMemoryTableImport}
+                onExportClick={handleMemoryTableExport}
+              />
+            </div>
           </div>
 
           {/* MMU SECTION */}

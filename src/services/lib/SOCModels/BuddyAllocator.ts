@@ -2,10 +2,12 @@ import { Allocator } from "./Allocator"
 
 
 export default class BuddyAllocator implements Allocator {
+    private startAddress: number = 0
     private totalSize: number = 0
     private freeBlocks: Record<number, number[]> = {}
 
-    constructor(totalSize: number) {
+    constructor(totalSize: number, start: number = 0) {
+        this.startAddress = start
         this.totalSize = totalSize
         this.freeBlocks[this.totalSize] = [0] // init with free block
     }
@@ -32,7 +34,7 @@ export default class BuddyAllocator implements Allocator {
                     }
                     this.freeBlocks[availableSize].push(buddy)
                 }
-                return blockStart
+                return this.startAddress + blockStart
             }
         }
 
@@ -40,7 +42,7 @@ export default class BuddyAllocator implements Allocator {
     }
 
     free(address: number, size: number) {
-        let blockStart = address
+        let blockStart = address - this.startAddress
         let blockSize = 1
         while (blockSize < size) {
             blockSize *= 2

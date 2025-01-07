@@ -17,7 +17,7 @@ const styles: { [key: string]: SxProps<Theme> } = {
     minWidth: 650,
     maxWidth: 1000,
     '& .MuiTableCell-root': {
-      height: '2.125rem',
+      height: '2rem',
       padding: '0.15rem',
       border: '1px solid black',
       // width: '50px',
@@ -33,8 +33,10 @@ type Props = {
 function compareTwinRegister(prev: TwinRegister | null, data: TwinRegister): boolean[] {
   const res = []
   if (!prev) {
-    const num1 = parseInt(data.register1.value, 16)
-    const num2 = parseInt(data.register2.value, 16)
+    const num1 = parseInt(data.register1.value, 16) || 0
+    const num2 = parseInt(data.register2.value, 16) || 0
+
+    console.log('num2: ', num2)
 
     res.push(num1 !== 0)
     res.push(num2 !== 0)

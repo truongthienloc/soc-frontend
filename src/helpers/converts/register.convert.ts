@@ -13,5 +13,7 @@ export function convertRegisters2TwinRegisters(registers: Register[]): TwinRegis
         })
     }
 
+    console.log('res: ', res)
+
     return res
 }

@@ -49,7 +49,7 @@ export default function DMATable({ data, configs }: Props) {
             startAdornment: '0x',
           }}
         />
-        {/* <TextField
+        <TextField
           label="DES"
           autoComplete="off"
           value={configs?.des}
@@ -57,7 +57,7 @@ export default function DMATable({ data, configs }: Props) {
           InputProps={{
             startAdornment: '0x'
           }}
-        /> */}
+        />
         <TextField
           label="LEN"
           autoComplete="off"

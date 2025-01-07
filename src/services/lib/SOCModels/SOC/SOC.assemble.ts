@@ -6,7 +6,7 @@ export function assemble(this: Soc, code: string,
                 LM_point: number, IO_point: number, Imem_point: number, 
                 Dmem_point: number, Stack_point: number , 
                 Mem_tb: Register[], TLB: TLBEntries[], TLB_pointer: number,
-                dmaSrc: number, dmaLen: number
+                dmaSrc: number, dmaLen: number, dmaDes: number
             ) {
     this.println('Cycle ', this.cycle.toString(), ': System is setting up')
     console.log('Cycle ', this.cycle.toString(), ': System is setting up')
@@ -36,7 +36,7 @@ export function assemble(this: Soc, code: string,
     this.Processor.setImem(this.Assembler.binary_code)                 // LOAD INTUCTIONS INTO PROCESSOR
     this.Memory.SetInstuctionMemory(this.Processor.Instruction_memory) // LOAD INTUCTIONS INTO MAIN MEMORY
     this.Memory.setPageNumber()
-    this.DMA.config(20, 0, 16, 20)
+    this.DMA.config(dmaDes, dmaSrc, dmaLen, 20)
     this.MMU.SetTLB(TLB, TLB_pointer)
     for (let i of this.Assembler.Instructions)
         if (i != '.text' && i != '') this.Assembly_code.push(i)

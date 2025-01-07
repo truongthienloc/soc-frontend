@@ -1,4 +1,6 @@
 import Soc from "../SoC"
+import ChannalA from "../ChannelA"
+// import ChannalD from "./ChannelD"
 
 export function handleCpuOperation(this: Soc) {
     if (this.Processor.pc >= (Object.values(this.Processor.Instruction_memory).length - 1) * 4) {
@@ -22,197 +24,119 @@ export function handleCpuOperation(this: Soc) {
 }
 
 export function DMA_operate (this: Soc) {
-    console.log(        
-    ' Destination Address: ', this.DMA.Des_addr, '\n',
-    'Start address: ',this.DMA.Start_addr      ,'\n',
-    'Number of Transaction: ',this.DMA.NumTransaction     ,'\n',
-    
-    'Length of internal Buffer: ',this.DMA.BufferLen          ,'\n',
-    'Internal buffer: ',this.DMA.Databuffer         , 
-  
-    )
-    const dma2i = this.DMA.Send2Memory()
-    this.println('Cycle ', this.cycle.toString(), ': DMA is sending GET message to MEMORY')
-    console.log('Cycle ', this.cycle.toString(), ': DMA is sending GET message to MEMORY')
-//****************************CPU OPERATION**************************** */
-    //handleCpuOperation.call(this);
+    // console.log(        
+    // ' Destination Address:  ', this.DMA.Des_addr, '\n',
+    // 'Start address:         ',this.DMA.Start_addr      ,'\n',
+    // 'Number of Transaction: ',this.DMA.NumTransaction     ,'\n',
+    // 'Length of internal Buffer: ',this.DMA.BufferLen          ,'\n',
+    // 'Internal buffer: ',this.DMA.Databuffer         , 
+    // )
+    this.DMA.Send2Memory()
+    const dma2i = this.DMA.masterDMA.ChannelA
+    this.println('Cycle ', this.cycle.toString(), ': The DMA is sending a GET message to MEMORY through the INTERCONNECT.')
+    console.log('Cycle ', this.cycle.toString(),  ': The DMA is sending a GET message to MEMORY through the INTERCONNECT')
+    this.Bus.Port_in(dma2i, 1)
 
     this.cycle += 1
-    this.Bus.Port_in(dma2i, 2)
-    this.println(
-        'Cycle ',
-        this.cycle.toString(),
-        ': INTERCONNECT is receiving message from DMA',
-    )
-    console.log(
-        'Cycle ',
-        this.cycle.toString(),
-        ': INTERCONNECT is receiving message from DMA',
-    )
-    //handleCpuOperation.call(this);
-    
-    this.cycle += 1
+    handleCpuOperation.call(this);
     this.view?.interconnect.setIsRunning(this.Bus.active)
+    this.println('Cycle ', this.cycle.toString(), ': The INTERCONNECT is forwarding the message to MEMORY.')
+    console.log('Cycle ', this.cycle.toString(),  ': The INTERCONNECT is forwarding the message to MEMORY.')
     this.Bus.Transmit()
-    this.println(
-        'Cycle ',
-        this.cycle.toString(),
-        ': INTERCONNECT is sending message to MEMORY',
-    )
-    console.log(
-        'Cycle ',
-        this.cycle.toString(),
-        ': INTERCONNECT is sending message to MEMORY',
-    )
-    //handleCpuOperation.call(this);
 
     this.cycle += 1
-    this.println(
-        'Cycle ',
-        this.cycle.toString(),
-        ': MEMORY is sending ACCESS_ACK_DATA message to DMA',
-    )
-    console.log(
-        'Cycle ',
-        this.cycle.toString(),
-        ': MEMORY is sending ACCESS_ACK_DATA message to DMA',
-    )
-    const i2memory = this.Bus.Port_out(3)
+    handleCpuOperation.call(this);
+    this.println('Cycle ', this.cycle.toString(), ': The MEMORY is receiving a GET message from the INTERCONNECT.')
+    console.log('Cycle ', this.cycle.toString(),  ': The MEMORY is receiving a GET message from the INTERCONNECT.')
+    const i2memory = this.Bus.Port_out(2)
     const [, ai2s] = this.Memory.slaveMemory.receive(i2memory)
-    //let di2s= this.Memory.Memory[ai2s] '1'.padStart(32, '1')
-    let di2s=  '1'.padStart(32, '1')
-    // console.log("di2s: ", di2s)
-    // console.log("ai2s: ", ai2s)
-    //handleCpuOperation.call(this);
 
     this.cycle += 1
-    this.println(
-        'Cycle ',
-        this.cycle.toString(),
-        ': INTERCONNECT is receiving message from MEMORY',
-    )
-    console.log(
-        'Cycle ',
-        this.cycle.toString(),
-        ': INTERCONNECT is receiving message from MEMORY',
-    )
-    //handleCpuOperation.call(this);
-    
-    this.cycle += 1
-    this.println(
-        'Cycle ',
-        this.cycle.toString(),
-        ': INTERCONNECT is sending message to DMA',
-    )
-    console.log(
-        'Cycle ',
-        this.cycle.toString(),
-        ': INTERCONNECT is sending message to DMA',
-    )
-    //handleCpuOperation.call(this);
+    handleCpuOperation.call(this);
+    this.println('Cycle ', this.cycle.toString(), ': The MEMORY is sending an AccessAckData message to the DMA.')
+    console.log('Cycle ', this.cycle.toString(),  ': The MEMORY is sending an AccessAckData message to the DMA.')
+    // this.Memory.Memory[ai2s] = '1'.padStart(32, '1')
+    this.Memory.slaveMemory.send('AccessAckData','01', this.Memory.Memory[ai2s])
+    const m2dma =   this.Memory.slaveMemory.ChannelD
+    this.Bus.Port_in(m2dma, 2)
+
+    this.cycle = this.cycle + 1
+    handleCpuOperation.call(this);
+    this.Bus.Transmit()
+    this.println('Cycle ', this.cycle.toString(),': The INTERCONNECT is forwarding the message to DMA.')
+    console.log('Cycle ', this.cycle.toString(), ': The INTERCONNECT is forwarding the message to DMA.')
 
     this.cycle += 1
-    this.println(
-        'Cycle ',
-        this.cycle.toString(),
-        ': DMA is receiving ACCESS_ACK_DATA message from INTERCONNECT',
-    )
-    console.log(
-        'Cycle ',
-        this.cycle.toString(),
-        ': DMA is receiving ACCESS_ACK_DATA message from INTERCONNECT',
-    )
-    
-    //handleCpuOperation.call(this);
-    this.DMA.ReceivefMemory(this.Memory.slaveMemory.send('AccessAckData',di2s))
-    console.log("DMA_buffer: ", this.DMA.Databuffer)
+    handleCpuOperation.call(this);
+    const i2dma = this.Bus.Port_out(1)
+    this.println('Cycle ', this.cycle.toString(), ': The DMA is receiving an AccessAckData message from the INTERCONNECT.')
+    console.log('Cycle ', this.cycle.toString(),  ': The DMA is receiving an AccessAckData message from the INTERCONNECT.')
+    this.DMA.ReceivefMemory(i2dma.data)
 
     this.cycle +=1
-    this.println('Cycle ', this.cycle.toString(), ': DMA is sending PUT message to PERIPHERAL')
-    console.log('Cycle ', this.cycle.toString(), ': DMA is sending PUT message to PERIPHERAL')
-
-    const dma2p= this.DMA.Send2Peri()
-    this.cycle += 1
-    this.Bus.Port_in(dma2p, 2)
-    this.println(
-        'Cycle ',
-        this.cycle.toString(),
-        ': INTERCONNECT is receiving message from DMA',
-    )
-    console.log(
-        'Cycle ',
-        this.cycle.toString(),
-        ': INTERCONNECT is receiving message from DMA',
-    )
-
-    this.cycle += 1
+    handleCpuOperation.call(this);
+    this.println('Cycle ', this.cycle.toString(), ': The DMA is sending a PUT message to MEMORY through the INTERCONNECT.')
+    console.log('Cycle ', this.cycle.toString(),  ': The DMA is sending a PUT message to MEMORY through the INTERCONNECT.')
+    this.DMA.Send2Peri()
+    const dma2p= this.DMA.masterDMA.ChannelA
     this.view?.interconnect.setIsRunning(this.Bus.active)
-    this.Bus.Transmit()
-    this.println(
-        'Cycle ',
-        this.cycle.toString(),
-        ': INTERCONNECT is sending message to PERIPHERAL',
-    )
-    console.log(
-        'Cycle ',
-        this.cycle.toString(),
-        ': INTERCONNECT is sending message to PERIPHERAL',
-    )
 
     this.cycle += 1
+    handleCpuOperation.call(this);
+    this.Bus.Port_in(dma2p, 1)
 
-    this.println(
-        'Cycle ',
-        this.cycle.toString(),
-        ': PERIPHERAL is sending ACCESS_ACK message to CPU',
-    )
-    console.log(
-        'Cycle ',
-        this.cycle.toString(),
-        ': PERIPHERAL is sending ACCESS_ACK message to CPU',
-    )
+    this.Bus.Transmit()
+    this.println('Cycle ', this.cycle.toString(),': The INTERCONNECT is forwarding the message to the PERIPHERAL.')
+    console.log('Cycle ', this.cycle.toString(), ': The INTERCONNECT is forwarding the message to the PERIPHERAL.')
 
-    // const doutChD = this.Memory.slaveMemory.send('AccessAck','',)
+    this.cycle += 1
+    handleCpuOperation.call(this);
+    this.println('Cycle ', this.cycle.toString(), ': The PERIPHERAL is receiving a PUT message from the INTERCONNECT.')
+    console.log('Cycle ', this.cycle.toString(),  ': The PERIPHERAL is receiving a PUT message from the INTERCONNECT.')
 
-    this.println(
-        'Cycle ',
-        this.cycle.toString(),
-        ': INTERCONNECT is receiving message from PERIPHERAL',
-    )
-    console.log(
-        'Cycle ',
-        this.cycle.toString(),
-        ': INTERCONNECT is receiving message from PERIPHERAL',
-    )
+    this.cycle += 1
+    handleCpuOperation.call(this);
+    this.println('Cycle ', this.cycle.toString(), ': The PERIPHERAL is sending an AccessAck message to the DMA.')
+    console.log('Cycle ', this.cycle.toString(),  ': The PERIPHERAL is sending an AccessAck message to the DMA.')
 
+    this.cycle += 1
+    handleCpuOperation.call(this);
+    this.println('Cycle ', this.cycle.toString(),': The INTERCONNECT is forwarding the message to the DMA.')
+    console.log('Cycle ', this.cycle.toString(), ': The INTERCONNECT is forwarding the message to the DMA.')
+
+    this.cycle += 1
+    handleCpuOperation.call(this);
+    this.println('Cycle ', this.cycle.toString(), ': The DMA is receiving an AccessAck message from the INTERCONNECT.')
+    console.log('Cycle ', this.cycle.toString(),  ': The DMA is receiving an AccessAck message from the INTERCONNECT.')
+    //this.DMA.masterDMA.ChannelA = new ChannalA('000', '000', '10', '00', '0'.padStart(32, '0'), '0000', '0'.padStart(32, '0'), '0')
     // this.Bus.Port_in(doutChD, 0)
-    this.Bus.Transmit()
-    this.Bus.Port_out(1)
+    // this.Bus.Transmit()
+    // this.Bus.Port_out(1)
     
-    this.cycle += 1
+    // this.cycle += 1
 
-    this.println(
-        'Cycle ',
-        this.cycle.toString(),
-        ': INTERCONNECT is sending message to DMA',
-    )
-    console.log(
-        'Cycle ',
-        this.cycle.toString(),
-        ': INTERCONNECT is sending message to DMA',
-    )
+    // this.println(
+    //     'Cycle ',
+    //     this.cycle.toString(),
+    //     ': INTERCONNECT is sending message to DMA',
+    // )
+    // console.log(
+    //     'Cycle ',
+    //     this.cycle.toString(),
+    //     ': INTERCONNECT is sending message to DMA',
+    // )
 
-    this.cycle += 1
-    this.println(
-        'Cycle ',
-        this.cycle.toString(),
-        ': DMA is receiving ACCESS_ACK message from INTERCONNECT',
-    )
-    console.log(
-        'Cycle ',
-        this.cycle.toString(),
-        ': DMA is receiving ACCESS_ACK message from INTERCONNECT',
-    )
+    // this.cycle += 1
+    // this.println(
+    //     'Cycle ',
+    //     this.cycle.toString(),
+    //     ': DMA is receiving ACCESS_ACK message from INTERCONNECT',
+    // )
+    // console.log(
+    //     'Cycle ',
+    //     this.cycle.toString(),
+    //     ': DMA is receiving ACCESS_ACK message from INTERCONNECT',
+    // )
     // this.Processor.active = true
     // this.Processor.stalled = false
 }

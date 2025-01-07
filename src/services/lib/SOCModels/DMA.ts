@@ -57,50 +57,34 @@ export default class DMA {
         }
     }
     
-    public Send2Memory (): string {
-        let mstmess = ''
+    public Send2Memory () {
+        this.masterDMA.active = this.active
         //console.log("this.SendAddrM",this.SendAddrM)
         this.CountTransaction += 1
-        mstmess = this.masterDMA.send('GET', this.SendAddrM.toString(2), '_', 0, '_')
+        this.masterDMA.send('GET', this.SendAddrM.toString(2), '')
         if (this.CountTransaction == this.NumTransaction) {
             this.SendAddrM        = 0
             this.CountTransaction = 0
-        }
-        else this.SendAddrM += this.Start_addr + 4
-        return mstmess
+        } else this.SendAddrM += this.Start_addr + 4
     }
 
-    public ReceivefMemory (memoryMesseage: string) {
-        const prefix = '0010010'; 
-        const suffix = '1110';
-        const postfix = '00'; 
-
-        const prefixLength = prefix.length;
-        const sourceEndIndex = memoryMesseage.indexOf(suffix, prefixLength); 
-        
-        if (sourceEndIndex === -1) {
-            throw new Error("Invalid memoryMesseage format: Unable to find suffix.");
-        }
-    
-        const dataStartIndex = sourceEndIndex + suffix.length;
-        const dataEndIndex   = memoryMesseage.length - postfix.length;
-        this.Databuffer[this.bufferPointerW.toString(2).padStart(32, '0')] = memoryMesseage.slice(dataStartIndex, dataEndIndex);
+    public ReceivefMemory (data: string) {
+        this.Databuffer[this.bufferPointerW.toString(2).padStart(32, '0')] = data
         this.ReceiveAddr     = this.ReceiveAddr + 1
         if (this.bufferPointerW <= this.BufferLen) this.bufferPointerW += 4
         else this.bufferPointerW = 0
     }
 
-    public Send2Peri (): string {
-        let mstmess = ''
+    public Send2Peri ()  {
         //this.CountTransaction += 1
         const data = this.Databuffer[this.bufferPointerR.toString(2).padStart(32, '0')] 
         //console.log("this.Addrbuffer[this.SendAddrP]", this.Databuffer[this.SendAddrP.toString(2).padStart(32, '0')])
-        mstmess = this.masterDMA.send('PUT', this.bufferPointerR.toString(2), '_', 0, data)
+        this.masterDMA.send('PUT', this.bufferPointerR.toString(2),  data)
         if (this.bufferPointerR == this.BufferLen) {
             this.bufferPointerR        = 0
         }
         else this.bufferPointerR += this.Des_addr + 4
-        return mstmess
+
     }
     
     

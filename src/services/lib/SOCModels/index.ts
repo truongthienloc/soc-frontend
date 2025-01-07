@@ -18,10 +18,12 @@ import *as fs from 'fs'
 // jal x0, loop
 // exit:
 // `
-const code              = `
+const code              = 
+`
 .text 
-addi x3, x0, 8
-sw   x3, 4(x4)
+addi x3, x0, 9
+sw   x3, 8(x4)
+lw   x3, 0(x4)
 `
 const SOC               = new Soc('super SoC')
 SOC.Processor.active    = true
@@ -87,10 +89,10 @@ SOC.assemble(
     0,
     16
 )
-SOC.DMA.active = true
-SOC.DMA.masterDMA.active = true
-SOC.DMA.config(0, 0, 16, 16)
-SOC.DMA_operate()
+// SOC.DMA.active = true
+// SOC.DMA.masterDMA.active = true
+// SOC.DMA.config(0, 0, 16, 16)
+// SOC.DMA_operate()
 // SOC.DMA.Send2Memory()
 // SOC.DMA.ReceivefMemory(SOC.Memory.slaveMemory.send('AccessAckData','1'.padStart(32, '1')))
 // SOC.DMA.Send2Peri()
@@ -101,9 +103,10 @@ SOC.DMA_operate()
 // console.log()
 
 // //console.log(code)
-// //SOC.RunAll()
+SOC.RunAll()
 // //SOC.DMA_operate()
-// console.log(SOC.DMA.Databuffer)
+console.log(SOC.DMA.Databuffer)
+console.log(SOC.Memory.Memory['00000000000000000000000000001000'])
 
 // const sourcePUT = sendperi.slice(8, 10);
 

@@ -39,9 +39,6 @@ export default class MMU {
         let message: string;
         const page_num = dec('0' + logic_address.slice(18).slice(0, 4));  // Slice first 24 bits for page number
         const offset   = dec('0' + logic_address.slice(18).slice(4));  // Slice the rest for the offset
-        // console.log('MMU: Page Number:', page_num, logic_address.slice(12));
-        // console.log('dec(0 + logic_address)*4', dec('0' + logic_address)*4)
-        // Check if logic_address is within base memory range
         if (dec('0' + logic_address) >= 0 && dec('0' + logic_address) <= MMU.BASE_ADDRESS) {
             this.physical_address = dec('0' + logic_address);  // Casting logic_address to number
             message = 'MMU is passed!';

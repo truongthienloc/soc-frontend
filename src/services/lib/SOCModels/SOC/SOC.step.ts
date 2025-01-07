@@ -1,4 +1,6 @@
 import { BinToHex, stringToAsciiAndBinary } from "../convert"
+import ChannalA from "../ChannelA"
+import ChannalD from "../ChannelD"
 import Soc from "../SoC"
 import { dec } from "../sub_function"
 
@@ -66,7 +68,7 @@ export async function Step(this: Soc) {
         // RUN MMU
         this.view?.mmu.setIsRunning(this.MMU.active)
         let [physical_address, MMU_message] = this.MMU.Run(logical_address)
-        console.log ('Cycle ', this.cycle.toString() +' : '+ MMU_message)
+        console.log  ('Cycle ', this.cycle.toString() +' : '+ MMU_message)
         this.println ('Cycle ', this.cycle.toString()+' : '+ MMU_message)
 
         //console.log(this.MMU.TLB)
@@ -80,40 +82,48 @@ export async function Step(this: Soc) {
             const VPN = dec('0' + logical_address.slice(18).slice(0, 4));
 
             console.log('Cycle ', this.cycle.toString()+' : '+ 
-            'MMU want to GET data at address '+
+            'The MMU want to GET data at address '+
             BinToHex((VPN*4 + this.MMU.pageNumberPointer).toString(2).padStart(32,'0'))+' from MEMORY')
             this.println('Cycle ', this.cycle.toString()+' : '+ 
-            'MMU want to GET data at address '+
+            'The MMU want to GET data at address '+
             BinToHex((VPN*4 + this.MMU.pageNumberPointer).toString(2).padStart(32,'0'))+' from MEMORY')
             
-            const MMU2Memory = this.MMU.master.send('GET', 
-            (VPN*4 + this.MMU.pageNumberPointer).toString(2).padStart(32,'0'),
-            '0', this.cycle, '0')
-            console.log  ('Cycle ', this.cycle.toString()+' : '+'MMU is sending message GET to MEMORY')
-            this.println ('Cycle ', this.cycle.toString()+' : '+'MMU is sending message GET to MEMORY')
+            this.MMU.master.send('GET', (VPN*4 + this.MMU.pageNumberPointer).toString(2).padStart(32,'0'), '0')
+            console.log  ('Cycle ', this.cycle.toString()+': The MMU is sending a GET message to MEMORY through the INTERCONNECT.')
+            this.println ('Cycle ', this.cycle.toString()+': The MMU is sending a GET message to MEMORY through the INTERCONNECT.')
 
             this.cycle = this.cycle + 1
+            console.log  ('Cycle ', this.cycle.toString()+': The INTERCONNECT is forwarding the message to MEMORY.')
+            this.println ('Cycle ', this.cycle.toString()+': The INTERCONNECT is forwarding the message to MEMORY.')
+            this.Bus.Port_in(this.MMU.master.ChannelA, 0)
+            this.Bus.Transmit()
+
+            this.cycle = this.cycle + 1
+            const MMU2Memory = this.Bus.Port_out(2) // channelD
             const [, ai2s]  = this.Memory.slaveMemory.receive (MMU2Memory)
-            console.log  ('Cycle ', this.cycle.toString()+' : '+'MEMORY is receiving message from MMU')
-            this.println ('Cycle ', this.cycle.toString()+' : '+'MEMORY is receiving message from MMU')
+            console.log  ('Cycle ', this.cycle.toString()+': The MEMORY is receiving a GET message from the INTERCONNECT.')
+            this.println ('Cycle ', this.cycle.toString()+': The MEMORY is receiving a GET message from the INTERCONNECT.')
 
             this.cycle = this.cycle + 1
-            const dfm2mmu   = this.Memory.slaveMemory.send('AccessAckData', this.Memory.Memory[ai2s])
-            console.log  ('Cycle ', this.cycle.toString()+' : '+'MEMORY is sending message to MMU')
-            this.println ('Cycle ', this.cycle.toString()+' : '+'MEMORY is sending message to MMU')
+            this.Memory.slaveMemory.send('AccessAckData','00', this.Memory.Memory[ai2s])
+            this.Bus.Port_in(this.Memory.slaveMemory.ChannelD, 2)
+            console.log  ('Cycle ', this.cycle.toString()+': The MEMORY is sending an AccessAckData message to the INTERCONNECT.')
+            this.println ('Cycle ', this.cycle.toString()+': The MEMORY is sending an AccessAckData message to the INTERCONNECT.')
 
             this.cycle = this.cycle + 1
-            const ammurfm   = this.MMU.master.receive ('MEMORY', 
-                this.cycle, 
-                'bn',
-                {opcode: '001', payload: ''+this.Memory.Memory[ai2s]},
-            )
-            console.log  ('Cycle ', this.cycle.toString()+' : '+'MMU is receiving message from MEMORY')
-            this.println ('Cycle ', this.cycle.toString()+' : '+'MMU is receiving message from MEMORY')
+            this.Bus.Transmit()
+            console.log  ('Cycle ', this.cycle.toString()+': The INTERCONNECT is forwarding the message to MMU.')
+            this.println ('Cycle ', this.cycle.toString()+': The INTERCONNECT is forwarding the message to MMU.')
+
+            this.cycle       = this.cycle + 1
+            const Memory2MMU = this.Bus.Port_out(2) // channelD
+            const ammurfm    = this.MMU.master.receive ('AccessAckData', Memory2MMU)
+            console.log  ('Cycle ', this.cycle.toString()+': The MMU is receiving an AccessAckData message from the INTERCONNECT.')
+            this.println ('Cycle ', this.cycle.toString()+': The MMU is receiving an AccessAckData message from the INTERCONNECT.')
 
             this.cycle+=1
             const PPN = dec ('0'+ammurfm)
-            console.log(VPN)
+            //console.log(VPN)
             this.MMU.pageReplace([VPN, PPN, 1, this.cycle])
             console.log ('Cycle ', this.cycle.toString()+' : ' + 'TLB: Page Number is replaced')
             this.println('Cycle ', this.cycle.toString()+' : ' + 'TLB: Page Number is replaced')
@@ -146,170 +156,139 @@ export async function Step(this: Soc) {
         )
         // IF MESSAGE IS PUT (STORE): 
         if (CPU_message == 'PUT') {
-            this.println('Cycle ', this.cycle.toString(), ': CPU is sending PUT message to MEMORY')
-            console.log('Cycle ', this.cycle.toString(), ': CPU is sending PUT message to MEMORY')
+            this.println('Cycle '       , 
+                this.cycle.toString()   , 
+                ': The CPU is sending a PUT message to MEMORY through the INTERCONNECT.'
+            )
+            console.log ('Cycle '       , 
+                this.cycle.toString()   , 
+                ': The CPU is sending a PUT message to MEMORY through the INTERCONNECT.'
+            )
+                
             // PROCESSOT is sending PUT
-            const dm2i = this.Processor.master.send(
-                CPU_message,
-                physical_address,
-                '0',
-                this.cycle,
-                CPU_data,
+            this.Processor.master.send(
+                CPU_message         ,
+                physical_address    ,
+                CPU_data            ,
             )
+            const dm2i = this.Processor.master.ChannelA
+            this.Bus.Port_in(dm2i, 0) // CPU IS LOADING DATA INTO PORT[1]
 
-            this.println(
-                'Cycle ',
-                this.cycle.toString(),
-                ': INTERCONNECT is receiving message from CPU',
-            )
-            console.log(
-                'Cycle ',
-                this.cycle.toString(),
-                ': INTERCONNECT is receiving message from CPU',
-            )
             //INTERCONNCET RUN
-           
             this.cycle += 1
-
             this.view?.interconnect.setIsRunning(this.Bus.active)
-            this.Bus.Port_in(dm2i, 1) // CPU IS LOADING DATA INTO PORT[1]
             this.Bus.Transmit() // INTERCONNECT IS TRANSMITTING
             this.println(
                 'Cycle ',
                 this.cycle.toString(),
-                ': INTERCONNECT is sending message to MEMORY',
+                ': The INTERCONNECT is forwarding the message to MEMORY.',
             )
             console.log(
                 'Cycle ',
                 this.cycle.toString(),
-                ': INTERCONNECT is sending message to MEMORY',
+                ': The INTERCONNECT is forwarding the message to MEMORY.',
             )
-            const doutChA = this.Bus.Port_out(0) // GET DATA FROM POUT[0], POUT[0] IS POUT FOR MEMORY
             
             //MEMORY RUN
-            
-            this.cycle += 1
-
+            this.cycle      += 1
+            const cpu2mem    = this.Bus.Port_out(2) // GET DATA FROM POUT[0], POUT[0] IS POUT FOR MEMORY
             this.view?.memory.setIsRunning(this.Memory.active)
             this.println(
                 'Cycle ',
                 this.cycle.toString(),
-                ': MEMORY is receiving message from INTERCONNECT',
+               ': The MEMORY is receiving a PUT message from the INTERCONNECT.',
             )
             console.log(
                 'Cycle ',
                 this.cycle.toString(),
-                ': MEMORY is receiving message from INTERCONNECT',
+                ': The MEMORY is receiving a PUT message from the INTERCONNECT.',
             )
-            const [di2s, ai2s] = this.Memory.slaveMemory.receive(doutChA)
-            //console.log ('data and address', di2s, ai2s)
+            const [di2s, ai2s] = this.Memory.slaveMemory.receive(cpu2mem)
+            // console.log ('data and address', di2s, ai2s)
             this.Memory.Memory[ai2s] = di2s
+            //console.log(" this.Memory.Memory[ai2s]: ",  this.Memory.Memory[ai2s])
+
             // MEMORY RESPONSE
-           
             this.cycle += 1
-
+            const mem2cpu = this.Memory.slaveMemory.ChannelD
+            this.Bus.Port_in(mem2cpu, 0)
+            this.Memory.slaveMemory.send('AccessAck','00', '')
             this.println(
                 'Cycle ',
                 this.cycle.toString(),
-                ': MEMORY is sending ACCESS_ACK message to CPU',
+                ': The MEMORY is sending an AccessAckData message to the CPU.',
             )
             console.log(
                 'Cycle ',
                 this.cycle.toString(),
-                ': MEMORY is sending ACCESS_ACK message to CPU',
+                ': The MEMORY is sending an AccessAckData message to the CPU.',
             )
 
-            const doutChD = this.Memory.slaveMemory.send('AccessAck','',)
-
-            this.println(
-                'Cycle ',
-                this.cycle.toString(),
-                ': INTERCONNECT is receiving message from MEMORY',
-            )
-            console.log(
-                'Cycle ',
-                this.cycle.toString(),
-                ': INTERCONNECT is receiving message from MEMORY',
-            )
-
-            this.Bus.Port_in(doutChD, 0)
+            this.cycle += 1
             this.Bus.Transmit()
-            this.Bus.Port_out(1)
-            
-            this.cycle += 1
+            this.println(
+                'Cycle ',
+                this.cycle.toString(),
+               ': The INTERCONNECT is forwarding the message to CPU.',
+            )
+            console.log(
+                'Cycle ',
+                this.cycle.toString(),
+                ': The INTERCONNECT is forwarding the message to CPU.',
+            )
 
+            this.cycle += 1
+            this.Bus.Port_out(1)
             this.println(
                 'Cycle ',
                 this.cycle.toString(),
-                ': INTERCONNECT is sending message to CPU',
+                ': The CPU is receiving an AccessAckData message from the INTERCONNECT.',
             )
             console.log(
                 'Cycle ',
                 this.cycle.toString(),
-                ': INTERCONNECT is sending message to CPU',
-            )
-            this.println(
-                'Cycle ',
-                this.cycle.toString(),
-                ': CPU is receiving ACCESS_ACK message from INTERCONNECT',
-            )
-            console.log(
-                'Cycle ',
-                this.cycle.toString(),
-                ': CPU is receiving ACCESS_ACK message from INTERCONNECT',
+                ': The CPU is receiving an AccessAckData message from the INTERCONNECT.',
             )
         }
 
         // IF MESSAGE IS GET (LOAD): 
         if (CPU_message == 'GET') {
-        this.println('Cycle ', this.cycle.toString(), ': CPU is sending GET message to MEMORY')
-        console.log('Cycle ', this.cycle.toString(), ': CPU is sending GET message to MEMORY')
+        this.println(
+            'Cycle ', 
+            this.cycle.toString(), 
+            ': The CPU is sending a GET message to MEMORY through the INTERCONNECT.'
+        )
+        console.log (
+            'Cycle ', 
+            this.cycle.toString(), 
+            ': The CPU is sending a GET message to MEMORY through the INTERCONNECT.'
+        )
         // PROCESSOT is sending GET
-        const dm2i = this.Processor.master.send(
+        this.Processor.master.send(
             CPU_message,
             physical_address,
-            '0',
-            this.cycle,
             CPU_data,
         )
-
-        this.println(
-            'Cycle ',
-            this.cycle.toString(),
-            ': INTERCONNECT is receiving message from CPU',
-        )
-        console.log(
-            'Cycle ',
-            this.cycle.toString(),
-            ': INTERCONNECT is receiving message from CPU',
-        )
+        const dm2i =  this.Processor.master.ChannelA
+        this.Bus.Port_in(dm2i, 0)
         //INTERCONNCET RUN
         
         this.cycle += 1
+        this.println(
+            'Cycle ',
+            this.cycle.toString(),
+            ': The INTERCONNECT is forwarding the message to MEMORY.',
+        )
+        console.log(
+            'Cycle ',
+            this.cycle.toString(),
+            ': The INTERCONNECT is forwarding the message to MEMORY.',
+        )
         this.view?.interconnect.setIsRunning(this.Bus.active)
-
-//******************************************************************** */
-        this.Bus.Port_in(dm2i, 1) // CPU IS LOADING DATA INTO PORT[1]
-//******************************************************************** */
-
         this.Bus.Transmit() // INTERCONNECT IS TRANSMITTING
-        this.println(
-            'Cycle ',
-            this.cycle.toString(),
-            ': INTERCONNECT is sending message to MEMORY',
-        )
-        console.log(
-            'Cycle ',
-            this.cycle.toString(),
-            ': INTERCONNECT is sending message to MEMORY',
-        )
-        const doutChA = this.Bus.Port_out(0) // GET DATA FROM POUT[0], POUT[0] IS POUT FOR MEMORY
-        
-        //MEMORY RUN
-       
-        this.cycle += 1
 
-        this.view?.memory.setIsRunning(this.Memory.active)
+        //MEMORY RUN
+        this.cycle += 1
         this.println(
             'Cycle ',
             this.cycle.toString(),
@@ -320,22 +299,22 @@ export async function Step(this: Soc) {
             this.cycle.toString(),
             ': MEMORY is receiving message from INTERCONNECT',
         )
-        const [, ai2s] = this.Memory.slaveMemory.receive(doutChA)
-        let di2s= this.Memory.Memory[ai2s] 
+        const cpu2mem = this.Bus.Port_out(2) // GET DATA FROM POUT[0], POUT[0] IS POUT FOR MEMORY
+        this.view?.memory.setIsRunning(this.Memory.active)
+        const [, ai2mem] = this.Memory.slaveMemory.receive(cpu2mem)
+        let di2mem= this.Memory.Memory[ai2mem] 
         
         // KEYBOARD
-        // console.log("address keyboard", dec ('0'+ai2s), this.Memory.IO_point + 4)
-        if (dec ('0'+ai2s)== this.Memory.IO_point + 4) {
+        if (dec ('0'+ai2mem)== this.Memory.IO_point + 4) {
             this.println('Cycle ', this.cycle.toString(), ': KEYBOARD is waiting')
             console.log('Cycle ', this.cycle.toString(), ': KEYBOARD is waiting')
             this.view?.keyboard.setIsRunning(this.active_keyboard)
-            this.keyboard?.getEvent().once('line-down', (text: string) => {di2s = stringToAsciiAndBinary(text).binary.join('')})
+            this.keyboard?.getEvent().once('line-down', (text: string) => {di2mem = stringToAsciiAndBinary(text).binary.join('')})
             await this.delay()
         }
 
         // MEMORY RESPONSE
         this.cycle += 1
-
         this.println(
             'Cycle ',
             this.cycle.toString(),
@@ -346,25 +325,11 @@ export async function Step(this: Soc) {
             this.cycle.toString(),
             ': MEMORY is sending ACCESS_ACK message to CPU',
         )
+        this.Memory.slaveMemory.send('AccessAckData','00', di2mem)
+        const mem2cpu = this.Memory.slaveMemory.ChannelD
+        this.Bus.Port_in(mem2cpu, 2) //FIX ME
 
-        const doutChD = this.Memory.slaveMemory.send('AccessAckData',di2s)
-
-        this.println(
-            'Cycle ',
-            this.cycle.toString(),
-            ': INTERCONNECT is receiving message from MEMORY',
-        )
-        console.log(
-            'Cycle ',
-            this.cycle.toString(),
-            ': INTERCONNECT is receiving message from MEMORY',
-        )
-
-        this.Bus.Port_in(doutChD, 1) //FIX ME
-        this.Bus.Transmit()
-        
         this.cycle += 1
-
         this.println(
             'Cycle ',
             this.cycle.toString(),
@@ -375,21 +340,23 @@ export async function Step(this: Soc) {
             this.cycle.toString(),
             ': INTERCONNECT is sending message to CPU',
         )
-        this.println(
-            'Cycle ',
-            this.cycle.toString(),
-            ': CPU is receiving ACCESS_ACK DATA message from INTERCONNECT',
-        )
-        console.log(
-            'Cycle ',
-            this.cycle.toString(),
-            ': CPU is receiving ACCESS_ACK DATA message from INTERCONNECT',
-        )
+        this.Bus.Transmit()
 
-        const di2m = this.Bus.Port_out(0)
+        this.cycle += 1
+        const di2m = this.Bus.Port_out(0).data
         if (di2m === 'undefined' || di2m === undefined) this.Processor.register[rd] = '0'.padStart(32, '0')
         if (di2m !== 'undefined' && di2m !== undefined) this.Processor.register[rd] = (di2m.slice(-34)).slice(0,32)
-        }
-
-        this.DMA_operate()
+        this.println(
+            'Cycle ',
+            this.cycle.toString(),
+            ': CPU is receiving ACCESS_ACK_DATA message from INTERCONNECT',
+        )
+        console.log(
+            'Cycle ',
+            this.cycle.toString(),
+            ': CPU is receiving ACCESS_ACK_DATA message from INTERCONNECT',
+        )
     }
+        this.cycle = this.cycle + 1
+        this.DMA_operate()
+}

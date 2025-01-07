@@ -188,7 +188,7 @@ export default function SocPage({}: Props) {
         setRegisters([
           ...socModel.Processor.getRegisters(),
           {
-            name: 'x32 (pc)',
+            name: 'pc',
             value: DecToHex(socModel.Processor.pc),
           },
         ])
@@ -251,7 +251,7 @@ export default function SocPage({}: Props) {
       setRegisters([
         ...socModelRef.current.Processor.getRegisters(),
         {
-          name: 'x32 (pc)',
+          name: 'pc',
           value: DecToHex(socModelRef.current.Processor.pc),
         },
       ])
@@ -328,7 +328,7 @@ export default function SocPage({}: Props) {
         setRegisters([
           ...socModelRef.current.Processor.getRegisters(),
           {
-            name: 'x32 (pc)',
+            name: 'pc',
             value: DecToHex(socModelRef.current.Processor.pc),
           },
         ])

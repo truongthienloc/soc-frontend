@@ -55,7 +55,7 @@ export default function DMATable({ data, configs }: Props) {
           value={configs?.des}
           onChange={(e) => configs?.setDes(e.target.value)}
           InputProps={{
-            startAdornment: '0x'
+            startAdornment: '0x',
           }}
         />
         <TextField

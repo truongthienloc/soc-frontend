@@ -113,7 +113,7 @@ export default class Soc {
                     Mem_tb: Register[], TLB: TLBEntries[], TLB_pointer: number,
                     dmaSrc: number, dmaLen: number, dmaDes: number
                 ) {
-        return assemble.bind(this)(code, LM_point, IO_point, Imem_point, Dmem_point, Stack_point, Mem_tb, TLB, TLB_pointer, dmaSrc, dmaLen, dmaDes, dmaDes)
+        return assemble.bind(this)(code, LM_point, IO_point, Imem_point, Dmem_point, Stack_point, Mem_tb, TLB, TLB_pointer, dmaSrc, dmaLen, dmaDes)
     }
 
     public IO_operate () {

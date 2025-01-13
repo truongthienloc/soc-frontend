@@ -8,7 +8,7 @@ export default class BuddyAllocator implements Allocator {
 
     constructor(totalSize: number, start: number = 0) {
         this.startAddress = start
-        this.totalSize = totalSize
+        this.totalSize  = totalSize
         this.freeBlocks[this.totalSize] = [0] // init with free block
     }
 

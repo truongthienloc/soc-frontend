@@ -37,8 +37,11 @@ export default class DMA {
         this.slaveDMA           = new Slave('DMA Slave', active)
         this.masterDMA          = new Master('DMA Master', active, '01')
 
-        this.Len          = 0
+        this.Len                = 0
         this.Databuffer         = {}
+        for (let i = 0; i < 16 * 4; i+=4) {
+            this.Databuffer[i.toString(2).padStart(32, '0')] = '0'.padStart(32, '0');
+        }
         this.bufferPointerW     = 0
         this.bufferPointerR     = 0
         this.Addrbuffer         = []
@@ -50,7 +53,7 @@ export default class DMA {
     ) {
         this.Des_addr           = Des_addr
         this.Start_addr         = Start_addr
-        this.Len          = Len
+        this.Len                = Len
         this.NumTransaction     = NumTransaction
         for (let i = 0; i < this.Len * 4; i+=4) {
             this.Databuffer[i.toString(2).padStart(32, '0')] = '0'.padStart(32, '0');

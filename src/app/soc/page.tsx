@@ -195,6 +195,7 @@ export default function SocPage({}: Props) {
         // setPosition2(window.innerWidth / 3 - 10)
 
         setSocModel(socModel)
+        setPageTable(socModel.Memory.getPageNumber())
       }
 
       firstLoad()
@@ -399,6 +400,7 @@ export default function SocPage({}: Props) {
     } else {
       toast.success('Ready to run')
       setAllowRun(true)
+      setPageTable(socModelRef.current.Memory.getPageNumber())
       setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
       localStorage.setItem('soc_code', code)
     }
@@ -599,10 +601,10 @@ export default function SocPage({}: Props) {
               </Button>
             </div>
             <div className="grid grid-cols-2 gap-2 pr-4">
-              <div className="flex items-center">
+              <div className="flex items-start">
                 <MemoryMap className="" memoryMap={memoryMap} disabled={isStepping} />
               </div>
-              <MemoryTable
+              <MemoryTable  
                 data={memoryData}
                 onChangeData={handleChangeMemoryData}
                 onResetData={handleResetMemoryTable}

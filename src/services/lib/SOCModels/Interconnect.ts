@@ -3,10 +3,10 @@ import ChannalD from "./ChannelD"
 import { dec, BinToHex } from './convert' 
 
 export default class InterConnect {
-    active      : boolean                       ;
-    Pin         : any    ;
-    Pout        : any   ;
-    Pactived    : boolean[]                     ;
+    active      : boolean                       
+    Pin         : any    
+    Pout        : any   
+    Pactived    : boolean[]                     
     constructor(active: boolean) {
         this.active     = active    ;
         // Initialize arrays

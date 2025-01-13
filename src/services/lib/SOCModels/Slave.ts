@@ -8,17 +8,11 @@ import { changeEnd } from 'codemirror'
 export default class Slave {
     name            : string
     active          : boolean
-    AccessAck       : number
-    AccessAckData   : number
     ChannelD        : ChannalD
-    ir              : string
 
     constructor(name: string, active: boolean) {
         this.name           = name
         this.active         = active
-        this.AccessAck      = 0
-        this.AccessAckData  = 0
-        this.ir             = ''
         this.ChannelD       = new ChannalD ('000', '00' , '10'    , '00'   ,
                                             '0'  , '0'  , '0'.padStart(32, '0') , 
                                             '0'  , )
@@ -31,7 +25,6 @@ export default class Slave {
     ) {
         if (!this.active) return ''
         if (message === 'AccessAck') {
-            this.AccessAck        += 1
             this.ChannelD.opcode   = '000'    
             this.ChannelD.param    = '00'    
             this.ChannelD.size     = '10'     
@@ -42,7 +35,6 @@ export default class Slave {
             this.ChannelD.corrupt  = '0'   
         }
         if (message === 'AccessAckData') {
-            this.AccessAckData    += 1
             this.ChannelD.opcode   = '001'    
             this.ChannelD.param    = '00'    
             this.ChannelD.size     = '10'     

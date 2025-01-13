@@ -9,25 +9,15 @@ export default class Master {
     name        : string
     active      : boolean
     source      : string
-    count_get   : number
-    count_put   : number
-    life        : number
-    result      : number
-    ir          : string
     ChannelA    : ChannalA
 
     constructor(name: string, active: boolean, source: string) {
         this.name       = name
         this.active     = active
         this.source     = source
-        this.count_get  = 0
-        this.count_put  = 0
-        this.life       = 4
-        this.result     = 0
         this.ChannelA   = new ChannalA ('000', '000' , '10'   , this.source   ,
                                         '0'.padStart(32, '0') , '0000' , 
                                         '0'.padStart(32, '0') , '0'    )
-        this.ir         = ''
     }
 
     send(

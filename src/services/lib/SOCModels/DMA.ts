@@ -13,7 +13,7 @@ export default class DMA {
     NumTransaction  : number
     CountTransaction: number
     SendAddrM       : number 
-    BufferLen       : number
+    Len       : number
     SendAddrP       : number
     Databuffer      : { [key: string]: string }
 
@@ -37,7 +37,7 @@ export default class DMA {
         this.slaveDMA           = new Slave('DMA Slave', active)
         this.masterDMA          = new Master('DMA Master', active, '01')
 
-        this.BufferLen          = 0
+        this.Len          = 0
         this.Databuffer         = {}
         this.bufferPointerW     = 0
         this.bufferPointerR     = 0
@@ -46,13 +46,13 @@ export default class DMA {
     }
 
     public config (Des_addr: number, Start_addr: number,
-                   BufferLen: number, NumTransaction: number
+                   Len: number, NumTransaction: number
     ) {
         this.Des_addr           = Des_addr
         this.Start_addr         = Start_addr
-        this.BufferLen          = BufferLen
+        this.Len          = Len
         this.NumTransaction     = NumTransaction
-        for (let i = 0; i < this.BufferLen * 4; i+=4) {
+        for (let i = 0; i < this.Len * 4; i+=4) {
             this.Databuffer[i.toString(2).padStart(32, '0')] = '0'.padStart(32, '0');
         }
     }
@@ -71,7 +71,7 @@ export default class DMA {
     public ReceivefMemory (data: string) {
         this.Databuffer[this.bufferPointerW.toString(2).padStart(32, '0')] = data
         this.ReceiveAddr     = this.ReceiveAddr + 1
-        if (this.bufferPointerW <= this.BufferLen) this.bufferPointerW += 4
+        if (this.bufferPointerW <= this.Len) this.bufferPointerW += 4
         else this.bufferPointerW = 0
     }
 
@@ -80,7 +80,7 @@ export default class DMA {
         const data = this.Databuffer[this.bufferPointerR.toString(2).padStart(32, '0')] 
         //console.log("this.Addrbuffer[this.SendAddrP]", this.Databuffer[this.SendAddrP.toString(2).padStart(32, '0')])
         this.masterDMA.send('PUT', this.bufferPointerR.toString(2),  data)
-        if (this.bufferPointerR == this.BufferLen) {
+        if (this.bufferPointerR == this.Len) {
             this.bufferPointerR        = 0
         }
         else this.bufferPointerR += this.Des_addr + 4

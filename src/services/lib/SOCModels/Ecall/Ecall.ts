@@ -51,6 +51,7 @@ export default class Ecall {
         if (type === CALL_NUMBER.READ_INT) {
             return new Promise((resolve) => {
                 this.keyboard?.getEvent().on(Keyboard.EVENT.LINE_DOWN, (line: string) => {
+                    registers['a0'] = parseInt(line).toString(2)
                     resolve(parseInt(line))
                     // TODO: Store number to register
                 })

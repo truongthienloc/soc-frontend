@@ -6,5 +6,5 @@ export interface IEcall {
     keyboard?: Keyboard
     ledMatrix?: LedMatrix
 
-    execute(type: number, registers: Record<string, string>): Promise<void>
+    execute(registers: Record<string, string>): Promise<void>
 }

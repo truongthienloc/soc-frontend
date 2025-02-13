@@ -684,6 +684,7 @@ export default class RiscVProcessor {
 
     run(instruction: string, pc: number, icBusy: boolean): [string, string, string, string, string] {
         if (this.active == true) {
+            this.register['00100'] = '00000000010000000001000000000100'
             //console.log("this.pc: ",this.pc, this.pre_pc, this.stalled)
             this.pre_pc = pc
             this.stalled = false 
@@ -732,8 +733,6 @@ export default class RiscVProcessor {
             const writeRegister = instruction.slice(20, 25)
             const readData1 = this.register[readRegister1]
             const readData2 = this.register[readRegister2]
-            
-            // console.log('readRegister1 readRegister2 writeRegister', readRegister1, readRegister2, writeRegister)
             
             const imm = this.immGen(instruction)
             
@@ -833,7 +832,8 @@ export default class RiscVProcessor {
             this.lineColor['slt'     ]  = this.slt.toString()          
             this.lineColor['auiOrLui']  = this.auiOrLui.toString()     
             this.lineColor['wb'      ]  = this.wb.toString()           
-            this.lineColor['imm'     ]  = this.imm.toString()         
+            this.lineColor['imm'     ]  = this.imm.toString()        
+            
             return [message, data, address, writeRegister, size]
         } else return ['', '', '', '', '']
     }

@@ -46,12 +46,12 @@ export default class Memory {
             for (let i = Imem_point + 4; i < Dmem_point; i+=4) 
                 this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
             // MEMORY AREA OF D-MEM
-            for (let i = Dmem_point; i < Stack_point; i+=4) 
+            for (let i = Dmem_point; i <  4 * 16 *16 * 4096 ; i+=4) // P0: 4096 P1: 4 4 bytes
                 this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
             
             // MEMORY AREA OF STACK
-            for (let i = Stack_point; i < Stack_point + 32 * 4; i+=4) 
-                this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
+            // for (let i = Stack_point; i < Stack_point + 32 * 4; i+=4) 
+            //     this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
             // CONFIG MEMORY
             for (const element of Mem_tb) 
                 this.Memory[element.name] = element.value   
@@ -59,12 +59,18 @@ export default class Memory {
 
     public setPageNumber () {
         let count = 0
+        const PageTablePointer0 = this.Dmem_point + 4 * 4096 * 4096
         //console.log(this.Stack_point, (this.Stack_point + 100)*4)
-        for (let i = this.Stack_point + 32 * 4 ; i < (this.Stack_point + 32 * 4 + 16 *4); i+=4) {
-            this.Memory[i.toString(2).padStart(32,'0')] = (count*1023+ this.Dmem_point).toString(2).padStart(32,'0') 
+        for (let i = PageTablePointer0; i < (PageTablePointer0 + 4 * 16); i+=4) { // 16 PTE0 
+            this.Memory[i.toString(2).padStart(32,'0')] = (count*16*4).toString(2).padStart(32,'0') 
             count ++ 
         }
-        
+        count = 0
+        const PageTablePointer1 = PageTablePointer0 + 4 * 16 
+        for (let i = PageTablePointer1; i < (PageTablePointer1 + 16 * 16 * 4); i+=4) { // 16 * 4096 PTE0
+            this.Memory[i.toString(2).padStart(32,'0')] = (count*4096+ this.Dmem_point).toString(2).padStart(32,'0') 
+            count ++ 
+        } 
     }
 
     public getPageNumber (): Register[] {

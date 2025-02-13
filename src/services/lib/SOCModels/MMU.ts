@@ -35,24 +35,39 @@ export default class MMU {
         this.pageNumberPointer = pointer
     }
 
-    public Run(logic_address: string): [string, string] {
+    public Run(logic_address: string, PageTablePointer1: number): [string, string] {
         let message: string;
-        const page_num = dec('0' + logic_address.slice(18).slice(0, 4));  // Slice first 24 bits for page number
-        const offset   = dec('0' + logic_address.slice(18).slice(4));  // Slice the rest for the offset
-        if (dec('0' + logic_address) >= 0 && dec('0' + logic_address) <= MMU.BASE_ADDRESS) {
-            this.physical_address = dec('0' + logic_address);  // Casting logic_address to number
+        
+        // Tách các trường từ địa chỉ logic
+        const VPN0 = logic_address.slice(0, 10);  // 10 bit đầu tiên
+        const VPN1 = logic_address.slice(10, 20); // 10 bit tiếp theo
+        const OFFSET = logic_address.slice(20, 32); // 12 bit cuối cùng
+    
+        // Chuyển đổi từ nhị phân sang số nguyên
+        const vpn0_dec = parseInt(VPN0, 2)
+        const vpn1_dec = parseInt(VPN1, 2) ;
+        const offset_dec = parseInt(OFFSET, 2);
+        const check_page = (16 * 4 * vpn0_dec + vpn1_dec * 4)  + PageTablePointer1
+        console.log ('check_page: ', check_page)
+        console.log ('offset_dec: ', offset_dec)
+        console.log ('TLB: ', this.TLB)
+        const logic_address_dec = parseInt(logic_address, 2);
+        
+        if (logic_address_dec >= 0 && logic_address_dec <= MMU.BASE_ADDRESS) {
+            this.physical_address = logic_address_dec;
             message = 'MMU is passed!';
         } else {
+            // Kiểm tra trong TLB xem có VPN1 hay không và giá trị cột thứ 2 có bằng 1 không
             const check_pagenum = this.TLB.map(
-                (tlbEntry) => page_num === tlbEntry[0] && tlbEntry[2] === 1
+                (tlbEntry) => check_page === tlbEntry[0] && tlbEntry[2] === 1
             );
-
-            const exist = check_pagenum.some(Boolean);  // Check if any of the pages exist
-
+    
+            const exist = check_pagenum.some(Boolean);
+            
             const physical_addresses = this.TLB.map(
-                (tlbEntry) => offset + tlbEntry[1]
+                (tlbEntry) => offset_dec + tlbEntry[1]
             );
-
+    
             if (exist) {
                 message = "TLB: PPN is caught.";
                 this.physical_address = physical_addresses[check_pagenum.indexOf(true)];
@@ -60,8 +75,9 @@ export default class MMU {
                 message = "TLB: PPN is missed.";
                 this.physical_address = 0;
             }
+            console.log ('offset_dec: ', offset_dec, this.physical_address)
         }
-
-        return [this.physical_address.toString(2).padStart(32, '0'), message];  // Return binary address
+        
+        return [this.physical_address.toString(2).padStart(32, '0'), message];
     }
 }

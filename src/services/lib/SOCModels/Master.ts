@@ -57,7 +57,7 @@ export default class Master {
     receive(
         message     : string   ,
         channelD    : ChannalD ,
-    ): string | undefined {
+    ): string  {
         if (!this.active) {
             return ''
         }
@@ -66,8 +66,9 @@ export default class Master {
             return ''
         }
 
-        if (channelD.opcode === 'AccessAckData') {
+        if (message === 'AccessAckData') {
             return channelD.data
         }
+        return ''
     }
 }

@@ -67,7 +67,7 @@ export async function Step(this: Soc) {
         }
         // RUN MMU
         this.view?.mmu.setIsRunning(this.MMU.active)
-        let [physical_address, MMU_message] = this.MMU.Run(logical_address)
+        let [physical_address, MMU_message] = this.MMU.Run(logical_address, this.Memory.Dmem_point + 4 * 4096 * 4096)
         console.log  ('Cycle ', this.cycle.toString() +' : '+ MMU_message)
         this.println ('Cycle ', this.cycle.toString()+' : '+ MMU_message)
 
@@ -78,17 +78,79 @@ export async function Step(this: Soc) {
             // CALCULATE physical_address
             // this.Memory.IOpoint
             this.cycle+=1
-            
-            const VPN = dec('0' + logical_address.slice(18).slice(0, 4));
+            const VPN0 = logical_address.slice(0, 10);  // 10 bit đầu tiên
+            console.log('logical_address: ', logical_address)
+            console.log('VPN0: ', parseInt(VPN0, 2))
+            const VPN1 = logical_address.slice(10, 20); // 10 bit tiếp theo
 
+            const PageTablePointer0 = this.Memory.Dmem_point + 4 * 4096 * 4096
+            const PageTablePointer1 = PageTablePointer0 + 4 * 16 
+
+            //***************************GET PTE0 ****************************
+            const PTE0 = PageTablePointer0 + parseInt(VPN0, 2) * 4
+            console.log('VPN0: ', parseInt(VPN0, 2) * 4)
+            console.log('PTE0: ', PTE0)
+            console.log('PageTablePointer0: ', PageTablePointer0)
+            console.log('Memory[PTE0]: ', this.Memory.Memory[(PTE0).toString(2).padStart(32,'0')])
             console.log('Cycle ', this.cycle.toString()+' : '+ 
             'The MMU want to GET data at address '+
-            BinToHex((VPN*4 + this.MMU.pageNumberPointer).toString(2).padStart(32,'0'))+' from MEMORY')
+            BinToHex((PTE0).toString(2).padStart(32,'0'))+' from MEMORY')
             this.println('Cycle ', this.cycle.toString()+' : '+ 
             'The MMU want to GET data at address '+
-            BinToHex((VPN*4 + this.MMU.pageNumberPointer).toString(2).padStart(32,'0'))+' from MEMORY')
+            BinToHex((PTE0).toString(2).padStart(32,'0'))+' from MEMORY')
             
-            this.MMU.master.send('GET', (VPN*4 + this.MMU.pageNumberPointer).toString(2).padStart(32,'0'), '0')
+            this.MMU.master.send('GET', (PTE0).toString(2).padStart(32,'0'), '0')
+            console.log  ('Cycle ', this.cycle.toString()+': The MMU is sending a GET message to MEMORY through the INTERCONNECT.')
+            this.println ('Cycle ', this.cycle.toString()+': The MMU is sending a GET message to MEMORY through the INTERCONNECT.')
+            this.Bus.Port_in(this.MMU.master.ChannelA, 0)
+
+            this.cycle = this.cycle + 1
+            console.log  ('Cycle ', this.cycle.toString()+': The INTERCONNECT is forwarding the message to MEMORY.')
+            this.println ('Cycle ', this.cycle.toString()+': The INTERCONNECT is forwarding the message to MEMORY.')
+            this.Bus.Transmit()
+
+            this.cycle = this.cycle + 1
+            let MMU2Memory = this.Bus.Port_out(2) // channelD
+            let [, ai2s]  = this.Memory.slaveMemory.receive (MMU2Memory)
+
+            console.log  ('Cycle ', this.cycle.toString()+': The MEMORY is receiving a GET message from the INTERCONNECT.')
+            this.println ('Cycle ', this.cycle.toString()+': The MEMORY is receiving a GET message from the INTERCONNECT.')
+
+            this.cycle = this.cycle + 1
+            this.Memory.slaveMemory.send('AccessAckData','00', this.Memory.Memory[ai2s])
+            this.Bus.Port_in(this.Memory.slaveMemory.ChannelD, 2)
+            console.log  ('Cycle ', this.cycle.toString()+': The MEMORY is sending an AccessAckData message to the INTERCONNECT.')
+            this.println ('Cycle ', this.cycle.toString()+': The MEMORY is sending an AccessAckData message to the INTERCONNECT.')
+            this.Bus.Port_in(this.Memory.slaveMemory.ChannelD, 2)
+
+            this.cycle = this.cycle + 1
+            this.Bus.Transmit()
+            console.log  ('Cycle ', this.cycle.toString()+': The INTERCONNECT is forwarding the message to MMU.')
+            this.println ('Cycle ', this.cycle.toString()+': The INTERCONNECT is forwarding the message to MMU.')
+
+            this.cycle       = this.cycle + 1
+            let Memory2MMU = this.Bus.Port_out(0) // channelD
+            let ammurfm    = this.MMU.master.receive ('AccessAckData', this.Bus.Port_out(0))
+            console.log('ammurfm: ', ammurfm)
+            console.log  ('Cycle ', this.cycle.toString()+': The MMU is receiving an AccessAckData message from the INTERCONNECT.')
+            this.println ('Cycle ', this.cycle.toString()+': The MMU is receiving an AccessAckData message from the INTERCONNECT.')
+            this.cycle+=1
+
+           //***************************GET PTE1 ****************************
+           const PTE1 = PageTablePointer1 + dec ('0'+ammurfm) + dec ('0'+VPN1)*4
+           console.log("dec ('0'+ammurfm): ", dec ('0'+ammurfm))
+           console.log("dec ('0'+VPN1)*4 : ", dec ('0'+VPN1)*4)
+           console.log('PageTablePointer1: ', PageTablePointer1)
+           console.log('this.Memory.Dmem_point: ', this.Memory.Dmem_point)
+           console.log('Mem[PTE1]: ', dec ('0' + this.Memory.Memory[(PTE1).toString(2).padStart(32,'0')]))
+           console.log('Cycle ', this.cycle.toString()+' : '+ 
+            'The MMU want to GET data at address '+
+            BinToHex((PTE1).toString(2).padStart(32,'0'))+' from MEMORY')
+            this.println('Cycle ', this.cycle.toString()+' : '+ 
+            'The MMU want to GET data at address '+
+            BinToHex((PTE1).toString(2).padStart(32,'0'))+' from MEMORY')
+
+            this.MMU.master.send('GET', (PTE1).toString(2).padStart(32,'0'), '0')
             console.log  ('Cycle ', this.cycle.toString()+': The MMU is sending a GET message to MEMORY through the INTERCONNECT.')
             this.println ('Cycle ', this.cycle.toString()+': The MMU is sending a GET message to MEMORY through the INTERCONNECT.')
 
@@ -99,13 +161,13 @@ export async function Step(this: Soc) {
             this.Bus.Transmit()
 
             this.cycle = this.cycle + 1
-            const MMU2Memory = this.Bus.Port_out(2) // channelD
-            const [, ai2s]  = this.Memory.slaveMemory.receive (MMU2Memory)
+            MMU2Memory = this.Bus.Port_out(2) // channelD
+            let [ ,ai2s2]  = this.Memory.slaveMemory.receive (MMU2Memory)
             console.log  ('Cycle ', this.cycle.toString()+': The MEMORY is receiving a GET message from the INTERCONNECT.')
             this.println ('Cycle ', this.cycle.toString()+': The MEMORY is receiving a GET message from the INTERCONNECT.')
 
             this.cycle = this.cycle + 1
-            this.Memory.slaveMemory.send('AccessAckData','00', this.Memory.Memory[ai2s])
+            this.Memory.slaveMemory.send('AccessAckData','00', this.Memory.Memory[ai2s2])
             this.Bus.Port_in(this.Memory.slaveMemory.ChannelD, 2)
             console.log  ('Cycle ', this.cycle.toString()+': The MEMORY is sending an AccessAckData message to the INTERCONNECT.')
             this.println ('Cycle ', this.cycle.toString()+': The MEMORY is sending an AccessAckData message to the INTERCONNECT.')
@@ -116,24 +178,24 @@ export async function Step(this: Soc) {
             this.println ('Cycle ', this.cycle.toString()+': The INTERCONNECT is forwarding the message to MMU.')
 
             this.cycle       = this.cycle + 1
-            const Memory2MMU = this.Bus.Port_out(2) // channelD
-            const ammurfm    = this.MMU.master.receive ('AccessAckData', Memory2MMU)
+            Memory2MMU       = this.Bus.Port_out(0) // channelD
+            ammurfm          = this.MMU.master.receive ('AccessAckData', Memory2MMU)
             console.log  ('Cycle ', this.cycle.toString()+': The MMU is receiving an AccessAckData message from the INTERCONNECT.')
             this.println ('Cycle ', this.cycle.toString()+': The MMU is receiving an AccessAckData message from the INTERCONNECT.')
 
             this.cycle+=1
-            const PPN = dec ('0'+ammurfm)
-            //console.log(VPN)
-            this.MMU.pageReplace([VPN, PPN, 1, this.cycle])
-            console.log ('Cycle ', this.cycle.toString()+' : ' + 'TLB: Page Number is replaced')
-            this.println('Cycle ', this.cycle.toString()+' : ' + 'TLB: Page Number is replaced')
+            console.log ('ammurfm: ', dec ('0'+ammurfm))
+            const PPN= dec ('0'+ammurfm) + dec ('0'+VPN1)
+            this.MMU.pageReplace([PTE1, dec ('0'+ammurfm), 1, this.cycle])
+            console.log('TLB: ', this.MMU.TLB)
+            console.log ('Cycle ', this.cycle.toString()+' : ' + 'TLB: Page Number is replaced.')
+            this.println('Cycle ', this.cycle.toString()+' : ' + 'TLB: Page Number is replaced.')
 
             this.cycle+=1
-            let [nphysical_address, MMU_message] = this.MMU.Run(logical_address)
+            let [nphysical_address, MMU_message] = this.MMU.Run(logical_address, PageTablePointer1)
             console.log ('Cycle ', this.cycle.toString()+' : '+ MMU_message)
             this.println('Cycle ', this.cycle.toString()+' : '+ MMU_message)
 
-            console.log(this.MMU.TLB)
             physical_address = nphysical_address
 
         } 

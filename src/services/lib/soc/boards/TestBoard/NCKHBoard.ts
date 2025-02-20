@@ -10,7 +10,11 @@ import {
     MemoryAllocator,
     Monitor,
 } from '../../components/Agent'
-import { Interconnect, SingleMasterInterconnect } from '../../components/Interconnect'
+import {
+    Interconnect,
+    SingleMasterInterconnect,
+    SubInterconnect,
+} from '../../components/Interconnect'
 import {
     CPUModule,
     CacheModule,
@@ -23,8 +27,8 @@ import {
 import { Scene } from '../../components/Scene'
 
 export default class NCKHBoard {
-    private X: number = 0
-    private Y: number = 6
+    private X: number = -2
+    private Y: number = 1
 
     public cpuModule: Module
     public memoryModule: Module
@@ -49,11 +53,11 @@ export default class NCKHBoard {
         const scene = new Scene(containerId, 30, 30)
         const { X, Y } = this
 
-        const cpuModule1 = scene.createModuleWithC(CPUModule, X + 15, Y + 5)
-        const osModule1 = scene.createModuleWithC(OSModule, cpuModule1.x, cpuModule1.y - 7.5)
+        const cpuModule1 = scene.createModuleWithC(CPUModule, X + 9.25, Y + 3)
+        const osModule1 = scene.createModuleWithC(OSModule, cpuModule1.x + 5.75 * 2, cpuModule1.y)
         // const cpuModule2 = scene.createModuleWithC(CPUModule, X + 12, Y + 5)
 
-        const mmuModule1 = scene.createModuleWithC(MMUModule, cpuModule1.x, cpuModule1.y + 6)
+        const mmuModule1 = scene.createModuleWithC(MMUModule, cpuModule1.x, cpuModule1.y + 8)
         // const cacheModule1 = scene.createModuleWithC(
         //     CacheModule,
         //     mmuModule1.x,
@@ -87,14 +91,8 @@ export default class NCKHBoard {
 
         const memoryModule1 = scene.createModuleWithC(
             MemoryModule,
-            cpuModule1.x - 5.75,
-            cpuModule1.y,
-        )
-
-        const memoryModule2 = scene.createModuleWithC(
-            MemoryModule,
-            cpuModule1.x + 5.75,
-            cpuModule1.y,
+            cpuModule1.x + 5.75 * 2,
+            mmuModule1.y - 1.75,
         )
 
         // const ioModule1 = scene.createModuleWithC(IOModule, X + 6, interconnect.y + 6.5)
@@ -110,11 +108,32 @@ export default class NCKHBoard {
             ioModule1.x + 5.75,
             interconnect.y + 6.5,
         )
+
+        const subInterconnect = scene.createInterconnectWithC(
+            SubInterconnect,
+            ioModule1.x + 9,
+            interconnect.y + 4,
+        )
+        const subInterTopAdapter1 = subInterconnect.getAdapter('t001') as Adapter
+        const subInterBottomAdapter1 = subInterconnect.getAdapter('b001') as Adapter
+        const subInterBottomAdapter2 = subInterconnect.getAdapter('b002') as Adapter
+
         const ioModule3 = scene.createModuleWithC(
             IOModule,
-            ioModule2.x + 5.75,
-            interconnect.y + 6.5,
+            subInterconnect.x + 2.5,
+            subInterconnect.y + 6.5,
         )
+
+        const memoryModule2 = scene.createModuleWithC(
+            MemoryModule,
+            ioModule3.x + 5.75,
+            subInterconnect.y + 6.5,
+        )
+        memoryModule2
+            .getShape()
+            .getChildren()
+            .find((child) => child.name() === 'adapters')
+            ?.rotate(180)
 
         const cpu1 = scene.createAgentWithC(CPU, X + 10, Y + 5)
         const mmu1 = scene.createAgentWithC(MMU, X + 10, Y + 5)
@@ -144,7 +163,7 @@ export default class NCKHBoard {
         // Create Links
         scene.createLink(osModule1.getAdapter().shape, cpuModule1.getAdapter('t001').shape)
         scene.createLink(cpuModule1.getAdapter('b001').shape, mmuModule1.getAdapter('t001').shape)
-        scene.createLink(mmuModule1.getAdapter('b001').shape, interTopAdapter2.shape)
+        scene.createLink(mmuModule1.getAdapter('b001').shape, interTopAdapter1.shape)
 
         // scene.createLink(
         //     cpuModule2.getAdapter().shape,
@@ -152,11 +171,14 @@ export default class NCKHBoard {
         // )
         // scene.createLink(mmuModule2.getAdapter('b001').shape, interTopAdapter2.shape)
 
+        scene.createLink(interBottomAdapter3.shape, subInterTopAdapter1.shape)
+
         scene.createLink(interBottomAdapter1.shape, ioModule1.getAdapter().shape)
         scene.createLink(interBottomAdapter2.shape, ioModule2.getAdapter().shape)
-        scene.createLink(interBottomAdapter3.shape, ioModule3.getAdapter().shape)
-        scene.createLink(interTopAdapter1.shape, memoryModule1.getAdapter().shape)
-        scene.createLink(interTopAdapter3.shape, memoryModule2.getAdapter().shape)
+        scene.createLink(subInterBottomAdapter1.shape, ioModule3.getAdapter().shape)
+        scene.createLink(subInterBottomAdapter2.shape, memoryModule2.getAdapter().shape)
+        scene.createLink(interTopAdapter3.shape, memoryModule1.getAdapter().shape)
+        // scene.createLink(interTopAdapter3.shape, memoryModule2.getAdapter().shape)
 
         // mmuModule1.setActivated(false)
         // mmuModule2.setActivated(false)

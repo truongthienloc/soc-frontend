@@ -32,8 +32,8 @@ export default class CPUModule extends Module {
             y: toPixel(this.h),
         })
         const topAdapterShape = new Konva.Line({
-            x: toPixel(this.w / 2),
-            y: toPixel(0),
+            x: toPixel(this.w),
+            y: toPixel(this.h / 2),
         })
 
         const bottomAdapter = new Adapter(this, bottomAdapterShape)

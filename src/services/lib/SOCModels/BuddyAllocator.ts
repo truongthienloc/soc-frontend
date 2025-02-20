@@ -1,7 +1,8 @@
+import { Block } from "@mui/icons-material"
 import { Allocator } from "./Allocator"
 
 
-export default class BuddyAllocator implements Allocator {
+export default class BuddyAllocator {
     private startAddress: number = 0
     private totalSize: number = 0
     private freeBlocks: Record<number, number[]> = {}
@@ -11,35 +12,47 @@ export default class BuddyAllocator implements Allocator {
         this.totalSize  = totalSize
         this.freeBlocks[this.totalSize] = [0] // init with free block
     }
+    
+    allocate (required_size : number) {
 
-    allocate(size: number) {
-        if (size <= 0 || size > this.totalSize) {
-            return null
-        }
-
-        let blockSize = 1
-        while (blockSize < size) {
-            blockSize *= 2
-        }
-
-        for (const [key, freeBlocks] of Object.entries(this.freeBlocks)) {
-            let availableSize = parseInt(key)
-            if (availableSize >= blockSize && freeBlocks.length > 0) {
-                const blockStart = freeBlocks.shift() as number
-                while (availableSize > blockSize) {
-                    availableSize /= 2
-                    let buddy = blockStart + availableSize
-                    if (!this.freeBlocks[buddy]) {
-                        this.freeBlocks[buddy] = []
-                    }
-                    this.freeBlocks[availableSize].push(buddy)
-                }
-                return this.startAddress + blockStart
-            }
-        }
-
-        return null
+        let buddy = 1
+        while (required_size > buddy) buddy *= 2
+        this.startAddress += buddy
+        this.totalSize    -= buddy
+        return this.startAddress - buddy
     }
+    // }
+    // allocate(size: number) {
+    //     if (size <= 0 || size > this.totalSize) {
+    //         return null
+    //     }
+
+    //     let blockSize = 1
+    //     while (blockSize < size) { // tim co so 2 gan voi gia tri size (chan tren)
+    //         blockSize *= 2
+    //     }
+    //     console.log ('blockSize: ', blockSize)
+
+    //     for (const [key, freeBlocks] of Object.entries(this.freeBlocks)) {
+    //         console.log ('key, freeBlocks: ', key, freeBlocks)
+    //         let availableSize = parseInt(key)
+    //         if (availableSize >= blockSize && freeBlocks.length > 0) { // availble block > req block && toatal block > 0
+    //             const blockStart = freeBlocks.shift() as number // freeBlocks[8]= [0] -> 0
+    //             console.log ('blockStart: ', blockStart)
+    //             while (availableSize > blockSize) {
+    //                 availableSize /= 2 // 4 // 2
+    //                 let buddy = blockStart + availableSize // 4 // 
+    //                 if (!this.freeBlocks[availableSize]) { 
+    //                     this.freeBlocks[availableSize] = [] // freeBlocks[4]= []
+    //                 }
+    //                 this.freeBlocks[availableSize].push(buddy) //freeBlocks[4]= [4]
+    //             }
+    //             return this.startAddress + blockStart // 0
+    //         }
+    //     }
+
+    //     return null
+    // }
 
     free(address: number, size: number) {
         let blockStart = address - this.startAddress

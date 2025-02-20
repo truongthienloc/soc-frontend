@@ -1,6 +1,6 @@
-import Keyboard from "../../control/Keyboard"
+import { Keyboard, Monitor } from "../soc.d" 
+import Keyboard_ from "../../control/Keyboard"
 import LedMatrix from "../../control/LedMatrix"
-import Monitor from "../../control/Monitor"
 import { CALL_NUMBER } from "./callNumber.constant"
 
 export default class Ecall {
@@ -37,21 +37,23 @@ export default class Ecall {
         /** Get type (call number) .
          * type = register a7
         */
-        const type = parseInt(registers['a7'], 2)
+        const type = parseInt(registers['00111'], 2)
+        console.log('type: ', type)
 
         if (type === CALL_NUMBER.PRINT_INT) {
-            const value = parseInt(registers['a0'], 2)
+            const value = parseInt(registers['11111'], 2)
+            console.log('value: ', value)
             return this.monitor?.println(value.toString())
         }
         if (type === CALL_NUMBER.PRINT_STRING) {
-            const address = registers['a0']
+            const address = registers['11111']
             // TODO: GET string from address
             // TODO: Print string to monitor
         }
         if (type === CALL_NUMBER.READ_INT) {
             return new Promise((resolve) => {
-                this.keyboard?.getEvent().on(Keyboard.EVENT.LINE_DOWN, (line: string) => {
-                    registers['a0'] = parseInt(line).toString(2)
+                this.keyboard?.getEvent().on(Keyboard_.EVENT.LINE_DOWN, (line: string) => {
+                    registers['11111'] = parseInt(line).toString(2)
                     resolve(parseInt(line))
                     // TODO: Store number to register
                 })

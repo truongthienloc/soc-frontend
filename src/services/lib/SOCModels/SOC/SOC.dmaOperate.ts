@@ -19,7 +19,7 @@ export function handleCpuOperation(this: Soc) {
         } else {
                 this.println('Cycle ', this.cycle.toString(), ': CPU is processing');
                 console.log('Cycle ', this.cycle.toString(), ': CPU is processing ');
-            } 
+        }
     }
 }
 

@@ -46,8 +46,9 @@ export default class Master {
             this.ChannelA.size     = '10'    
             this.ChannelA.source   = this.source  
             this.ChannelA.address  = address.padStart(32, '0') 
-            this.ChannelA.mask     = '1111'     
-            this.ChannelA.data     = data.padStart(32, '0')    
+            this.ChannelA.mask     = '1111'   
+            this.ChannelA.data     = data.padStart(32, '0')   
+             
             this.ChannelA.corrupt  = '0' 
         }
 

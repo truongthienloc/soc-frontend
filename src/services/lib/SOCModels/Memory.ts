@@ -6,53 +6,39 @@ import { hexToBinary } from '~/helpers/converts/Hextobin'
 export default class Memory {
     Memory: { [key: string]: string }
     active: boolean
-    LM_point: number
-    IO_point: number
+    Peri_point: number
     Imem_point: number
     Dmem_point: number
-    Stack_point: number
     slaveMemory: Slave
     constructor(active: boolean) {
-            this.LM_point    = 0
-            this.IO_point    = 0
-            this.Imem_point  = 0
-            this.Dmem_point  = 0 
-            this.Stack_point = 0
+            this.Peri_point         = 0
+            this.Imem_point         = 0
+            this.Dmem_point         = 0 
         
         this.Memory = {}
         this.active = active
         this.slaveMemory = new Slave('DataMemory', true)
     }
-    public reset( LM_point: number, IO_point: number, 
-    Imem_point: number, Dmem_point: number, Stack_point: number, 
+    public reset( Peri_point: number,
+    Imem_point: number, Dmem_point: number, 
     Mem_tb: Register[]
     ){
-            this.LM_point    = LM_point
-            this.IO_point    = IO_point
+            this.Peri_point  = Peri_point
             this.Imem_point  = Imem_point
             this.Dmem_point  = Dmem_point
-            this.Stack_point = Stack_point
             
-            // MEMORY AREA OF LED MATRIX
-            for (let i = LM_point; i < IO_point; i+=4) 
+            // MEMORY AREA OF PERI
+            for (let i = Peri_point; i < Imem_point; i+=4) 
                 this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
-            
-            // MEMORY AREA OF I/O
-            for (let i = IO_point; i < Imem_point; i+=4) 
-                this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
-                this.Memory[Imem_point.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
             
             // MEMORY AREA OF I-MEM
             for (let i = Imem_point + 4; i < Dmem_point; i+=4) 
                 this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
+            
             // MEMORY AREA OF D-MEM
             for (let i = Dmem_point; i <  4 * 16 *16 * 4096 ; i+=4) // P0: 4096 P1: 4 4 bytes
                 this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
             
-            // MEMORY AREA OF STACK
-            // for (let i = Stack_point; i < Stack_point + 32 * 4; i+=4) 
-            //     this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
-            // CONFIG MEMORY
             for (const element of Mem_tb) 
                 this.Memory[element.name] = element.value   
     }
@@ -73,38 +59,38 @@ export default class Memory {
         } 
     }
 
-    public getPageNumber (): Register[] {
-        const result: Register[] = []
-        for (let i = this.Stack_point + 32 * 4 ; i < (this.Stack_point + 32 * 4 + 16 *4); i+=4) {
-            result.push({
-                name: '0x' +  i.toString(16).padStart(8,'0'), 
-                value: '0x' + dec('0' + this.Memory[i.toString(2).padStart(32,'0')]).toString(16).padStart(8,'0')
-            })
-        }
+    // public getPageNumber (): Register[] {
+    //     const result: Register[] = []
+    //     for (let i = this.Stack_point + 32 * 4 ; i < (this.Stack_point + 32 * 4 + 16 *4); i+=4) {
+    //         result.push({
+    //             name: '0x' +  i.toString(16).padStart(8,'0'), 
+    //             value: '0x' + dec('0' + this.Memory[i.toString(2).padStart(32,'0')]).toString(16).padStart(8,'0')
+    //         })
+    //     }
 
-        return result
-        // console.log i, dec (this.Memory[i.toString(2).padStart(32,'0')]))
-    }
+    //     return result
+    //     // console.log i, dec (this.Memory[i.toString(2).padStart(32,'0')]))
+    // }
 
-    public getLedMatrix () {
-        for (let i = this.LM_point; i < this.IO_point; i+=4) 
-            console.log(i.toString(2).padStart(32,'0'), this.Memory[i.toString(2).padStart(32,'0')])
-    }
+    // public getLedMatrix () {
+    //     for (let i = this.LM_point; i < this.Monitor_point; i+=4) 
+    //         console.log(i.toString(2).padStart(32,'0'), this.Memory[i.toString(2).padStart(32,'0')])
+    // }
 
-    public getIO () {
-        for (let i = this.IO_point; i < this.Imem_point; i+=4) 
-            console.log(this.Memory[i.toString(2).padStart(32,'0')])
-    }
+    // public getIO () {
+    //     for (let i = this.Monitor_point; i < this.Imem_point; i+=4) 
+    //         console.log(this.Memory[i.toString(2).padStart(32,'0')])
+    // }
 
-    public getImem () {
-        for (let i = this.Imem_point; i < this.Dmem_point; i+=4) 
-            console.log(this.Memory[i.toString(2).padStart(32,'0')])
-    }
+    // public getImem () {
+    //     for (let i = this.Imem_point; i < this.Dmem_point; i+=4) 
+    //         console.log(this.Memory[i.toString(2).padStart(32,'0')])
+    // }
 
-    public getDmem () {
-        for (let i = this.Dmem_point; i < this.Stack_point; i+=4) 
-            console.log(this.Memory[i.toString(2).padStart(32,'0')])
-    }
+    // public getDmem () {
+    //     for (let i = this.Dmem_point; i < this.Stack_point; i+=4) 
+    //         console.log(this.Memory[i.toString(2).padStart(32,'0')])
+    // }
 
     public GetMemory(): { [key: string]: string } {
         // Chuyển object sang mảng các cặp [key, value]
@@ -164,6 +150,6 @@ export default class Memory {
             }
         }
         
-        return result;
+        return result
     }
 }

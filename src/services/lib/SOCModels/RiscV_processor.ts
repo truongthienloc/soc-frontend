@@ -689,6 +689,19 @@ export default class RiscVProcessor {
             this.pre_pc = pc
             this.stalled = false 
             let readData = ''
+            if (instruction == '1'.padStart(32,'1')) {
+                
+                if (icBusy) {
+                    this.stalled = true
+                    this.pc = this.pc 
+                }
+                else {
+                    this.stalled = false
+                    this.pc = this.pc + 4
+                }
+                    
+                return ['ECALL', '', '', '', '']
+            }
             //console.log('instructions', instruction,'pc',pc)
             this.control(instruction.slice(25, 32), instruction.slice(17, 20))
 
@@ -737,7 +750,6 @@ export default class RiscVProcessor {
             const imm = this.immGen(instruction)
             
             this.aluControl(this.ALUOp, instruction.slice(17, 20), instruction.slice(1,2))
-            //console.log(this.register)
             const ALUResult = this.ALU(readData1, mux(readData2, imm, this.ALUSrc), this.operation)
 
             this.branchControl(this.jal, this.jalr, this.branch)
@@ -761,43 +773,41 @@ export default class RiscVProcessor {
                 if (icBusy) this.stalled = true
             }
 
-            readData = this.dataMemory(ALUResult, this.memRead, this.memWrite, readData2)
+            if (this.stalled == false) {
+                readData = this.dataMemory(ALUResult, this.memRead, this.memWrite, readData2)
 
-            readData = this.dataGen(readData, this.unsigned)
+                readData = this.dataGen(readData, this.unsigned)
 
-            let writeDataR = mux(
-                mux(
+                let writeDataR = mux(
                     mux(
-                        mux(ALUResult, readData, this.memToReg),
-                        pc.toString(2).padStart(32, '0'),
-                        this.jump,
+                        mux(
+                            mux(ALUResult, readData, this.memToReg),
+                            pc.toString(2).padStart(32, '0'),
+                            this.jump,
+                        ),
+                        mux(
+                            '00000000000000000000000000000000',
+                            '00000000000000000000000000000001',
+                            this.signBit,
+                        ),
+                        this.slt,
                     ),
                     mux(
-                        '00000000000000000000000000000000',
-                        '00000000000000000000000000000001',
-                        this.signBit,
+                        (dec(imm) << 12).toString(2).padStart(32, '0') +
+                            pc.toString(2).padStart(32, '0'),
+                        (dec(imm) << 12).toString(2).padStart(32, '0'),
+                        this.auiOrLui,
                     ),
-                    this.slt,
-                ),
-                mux(
-                    (dec(imm) << 12).toString(2).padStart(32, '0') +
-                        pc.toString(2).padStart(32, '0'),
-                    (dec(imm) << 12).toString(2).padStart(32, '0'),
-                    this.auiOrLui,
-                ),
-                this.wb,
-            )
-            // if (this.pc== 4) {
-            //     this.active = false
-            //     console.log('ALUResult: ', ALUResult)
-            //     console.log('writeDataR: ', writeDataR)
-            // }
-            writeDataR = writeDataR.padStart(32, '0')
-            if (this.regWrite === 1) {
-                this.register[writeRegister] = writeDataR
+                    this.wb,
+                )
+
+                writeDataR = writeDataR.padStart(32, '0')
+                if (this.regWrite === 1) {
+                    this.register[writeRegister] = writeDataR
+                }
+
+                this.register['00000'] = '00000000000000000000000000000000'
             }
-
-            this.register['00000'] = '00000000000000000000000000000000'
             //.log(pc + 4, (dec(imm) << 1) , this.pcSrc1)
             
             if (this.stalled == false) {

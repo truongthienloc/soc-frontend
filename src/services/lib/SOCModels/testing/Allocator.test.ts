@@ -22,6 +22,8 @@ class TestBuddyAllocator {
         this.testBuddyMerge()
         console.log('Test case 6: Edge cases')
         this.testEdgeCases()
+        console.log('Test case 7: Edge cases')
+        this.testIO()
 
         console.log('All tests completed.')
     }
@@ -92,11 +94,25 @@ class TestBuddyAllocator {
         const blockLarge = this.allocator.allocate(2048)
         this.assertEqual(blockLarge, null, 'Allocation larger than memory should fail.')
     }
+
+    private testIO() {
+        this.allocator = new BuddyAllocator(8) // Reset allocator
+        const block1 = this.allocator.allocate(4)
+        this.allocator.print()
+        const block2 = this.allocator.allocate(2)
+        this.allocator.print()
+
+        this.assertEqual(block1 !== null, true, 'First allocation should succeed.')
+        this.assertEqual(block2 !== null, true, 'Second allocation should succeed.')
+
+        this.allocator.print()
+    }
 }
 
 // Example usage
 const tests = new TestBuddyAllocator()
 tests.runTests()
+
 
 // const allocator = new BuddyAllocator(1024) // Reset allocator
 // allocator.print()

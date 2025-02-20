@@ -10,11 +10,11 @@ export default class MMU {
     static readonly PAGE_SIZE = 256;
 
     constructor(active: boolean) {
-        this.active = active;
-        this.master = new Master('MMU', true, '0')
-        this.physical_address = 0;  // Initialized with a number
-        this.pageNumberPointer = 0xffffff;
-        this.TLB = new Array(8).fill([0, 0, 0, 0]);  // Initialized as 8 rows of [0, 0, 0, 0]
+        this.active             = active;
+        this.master             = new Master('MMU', true, '0')
+        this.physical_address   = 0;  // Initialized with a number
+        this.pageNumberPointer  = 0xffffff;
+        this.TLB                = new Array(8).fill([0, 0, 0, 0]);  // Initialized as 8 rows of [0, 0, 0, 0]
     }
 
     public pageReplace(Replacement_page: [number, number, number, number]) {
@@ -39,18 +39,15 @@ export default class MMU {
         let message: string;
         
         // Tách các trường từ địa chỉ logic
-        const VPN0 = logic_address.slice(0, 10);  // 10 bit đầu tiên
-        const VPN1 = logic_address.slice(10, 20); // 10 bit tiếp theo
-        const OFFSET = logic_address.slice(20, 32); // 12 bit cuối cùng
+        const VPN0      = logic_address.slice(0, 10);  // 10 bit đầu tiên
+        const VPN1      = logic_address.slice(10, 20); // 10 bit tiếp theo
+        const OFFSET    = logic_address.slice(20, 32); // 12 bit cuối cùng
     
         // Chuyển đổi từ nhị phân sang số nguyên
-        const vpn0_dec = parseInt(VPN0, 2)
-        const vpn1_dec = parseInt(VPN1, 2) ;
-        const offset_dec = parseInt(OFFSET, 2);
-        const check_page = (16 * 4 * vpn0_dec + vpn1_dec * 4)  + PageTablePointer1
-        console.log ('check_page: ', check_page)
-        console.log ('offset_dec: ', offset_dec)
-        console.log ('TLB: ', this.TLB)
+        const vpn0_dec          = parseInt(VPN0, 2)
+        const vpn1_dec          = parseInt(VPN1, 2) ;
+        const offset_dec        = parseInt(OFFSET, 2);
+        const check_page        = (16 * 4 * vpn0_dec + vpn1_dec * 4)  + PageTablePointer1
         const logic_address_dec = parseInt(logic_address, 2);
         
         if (logic_address_dec >= 0 && logic_address_dec <= MMU.BASE_ADDRESS) {
@@ -75,7 +72,6 @@ export default class MMU {
                 message = "TLB: PPN is missed.";
                 this.physical_address = 0;
             }
-            console.log ('offset_dec: ', offset_dec, this.physical_address)
         }
         
         return [this.physical_address.toString(2).padStart(32, '0'), message];

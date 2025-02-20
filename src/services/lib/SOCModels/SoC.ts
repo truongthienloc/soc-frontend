@@ -5,6 +5,7 @@ import MMU from './MMU'
 import { dec, stringToAsciiAndBinary, BinToHex } from './convert'
 import Memory from './Memory'
 import { Keyboard, Logger, Monitor } from './soc.d'
+import Ecall from './Ecall/Ecall'
 import { NCKHBoard } from '../soc/boards'
 import DMA from './DMA'
 import Assembler from './check_syntax'
@@ -21,6 +22,7 @@ import { IO_operate } from './SOC/SOC.ioOperate'
 import { DMA_operate } from './SOC/SOC.dmaOperate'
 import { RunAll } from './SOC/SOC.runAll'
 import { Step } from './SOC/SOC.step'
+import BuddyAllocator from "./BuddyAllocator"
 
 export default class Soc {
     name: string
@@ -32,6 +34,8 @@ export default class Soc {
     Led_matrix: boolean[][]
     Assembler: Assembler
     Disassembly : disAssembly
+    Allocator   : BuddyAllocator
+    // Ecall       : Ecall
 
     cycle: number
     public static SOCEVENT = {DONE_ALL: 'DONE ALL', STEP_END: 'STEP END'}
@@ -53,11 +57,13 @@ export default class Soc {
     }
 
     public setKeyboard(keyboard: Keyboard) {
-        this.keyboard = keyboard
+        this.keyboard       = keyboard
+        // this.Ecall.keyboard = keyboard
     }
 
     public setMonitor(monitor: Monitor) {
-        this.monitor = monitor
+        this.monitor        = monitor
+        // this.Ecall.monitor  = monitor
     }
 
     public setView(view: NCKHBoard) {
@@ -77,15 +83,17 @@ export default class Soc {
     }
 
     constructor(name: string) {
-        this.Processor = new RiscVProcessor('RiscV CPU', '01', false)
-        this.Bus = new InterConnect(false)
-        this.MMU = new MMU(false)
-        this.Memory = new Memory(false)
-        this.DMA = new DMA(false)
-        this.Assembler = new Assembler()
-        this.Assembly_code = []
-        this.Led_matrix = []
-        this.Disassembly = new disAssembly ('')
+        this.Processor      = new RiscVProcessor('RiscV CPU', '01', false)
+        this.Bus            = new InterConnect(false)
+        this.MMU            = new MMU(false)
+        this.Memory         = new Memory(false)
+        this.DMA            = new DMA(false)
+        this.Assembler      = new Assembler()
+        this.Assembly_code  = []
+        this.Led_matrix     = []
+        this.Allocator    = new BuddyAllocator (0)
+        // this.Ecall          = new Ecall
+        this.Disassembly    = new disAssembly ('')
         for (let i = 0; i < 96; i++) {
             let row: boolean[] = [];
             for (let j = 0; j < 96; j++) row.push(false);
@@ -107,13 +115,32 @@ export default class Soc {
         })
     }
 
-    public assemble(code: string, 
-                    LM_point: number, IO_point: number, Imem_point: number, 
-                    Dmem_point: number, Stack_point: number , 
-                    Mem_tb: Register[], TLB: TLBEntries[], TLB_pointer: number,
-                    dmaSrc: number, dmaLen: number, dmaDes: number
-                ) {
-        return assemble.bind(this)(code, LM_point, IO_point, Imem_point, Dmem_point, Stack_point, Mem_tb, TLB, TLB_pointer, dmaSrc, dmaLen, dmaDes)
+    public assemble(                 
+         code               : string 
+        ,Total_mem          : number
+        ,Peri_require_mem   : number
+        ,Imem_require_mem   : number
+        ,Dmem_require_mem   : number
+        ,Mem_tb             : Register  []
+        ,TLB                : TLBEntries[]
+        ,TLB_pointer        : number
+        ,dmaSrc             : number
+        ,dmaLen             : number
+        ,dmaDes             : number
+        ) {
+        return assemble.bind(this) (
+            code            
+            ,Total_mem          
+            ,Peri_require_mem   
+            ,Imem_require_mem   
+            ,Dmem_require_mem   
+            ,Mem_tb            
+            ,TLB         
+            ,TLB_pointer        
+            ,dmaSrc             
+            ,dmaLen             
+            ,dmaDes                  
+        )
     }
 
     public IO_operate () {

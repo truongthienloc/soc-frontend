@@ -1,12 +1,23 @@
 import { Register } from "~/types/register"
 import Soc from "../SoC"
 import { TLBEntries } from "../soc.d"
+import BuddyAllocator from "../BuddyAllocator"
+import { Monitor } from "@mui/icons-material"
 
-export function assemble(this: Soc, code: string, 
-                LM_point: number, IO_point: number, Imem_point: number, 
-                Dmem_point: number, Stack_point: number , 
-                Mem_tb: Register[], TLB: TLBEntries[], TLB_pointer: number,
-                dmaSrc: number, dmaLen: number, dmaDes: number
+
+export function assemble(
+                this                : Soc
+                ,code               : string 
+                ,Total_mem          : number
+                ,Peri_require_mem   : number
+                ,Imem_require_mem   : number
+                ,Dmem_require_mem   : number
+                ,Mem_tb             : Register[]
+                ,TLB                : TLBEntries[]
+                ,TLB_pointer        : number
+                ,dmaSrc             : number
+                ,dmaLen             : number
+                ,dmaDes             : number
             ) {
     this.println('Cycle ', this.cycle.toString(), ': System is setting up')
     console.log('Cycle ', this.cycle.toString(), ': System is setting up')
@@ -20,6 +31,7 @@ export function assemble(this: Soc, code: string,
         this.Memory.active      = this.view.memoryModule.getActivated()
         this.active_keyboard    = this.view.keyboardModule.getActivated()
         this.active_monitor     = this.view.monitorModule.getActivated()
+        
     }
     
     //****************CHECK SYNTAX ERROR****************
@@ -30,8 +42,24 @@ export function assemble(this: Soc, code: string,
     //****************SET INITIAL STATUS****************
     // SET INITIAL DATA
     this.Processor.reset()
-    this.Memory.reset( LM_point, IO_point, Imem_point, Dmem_point, Stack_point,
-                        Mem_tb  )
+    const required_size = Peri_require_mem + Imem_require_mem + Dmem_require_mem
+    if (required_size  >= 0 && required_size <= Total_mem) {
+        this.Allocator      = new BuddyAllocator (Total_mem)
+        const Peri_point    = this.Allocator.allocate (Peri_require_mem)
+        const Imem_point    = this.Allocator.allocate (Imem_require_mem)
+        const Dmem_point    = this.Allocator.allocate (Dmem_require_mem)
+
+        console.log ("Peri_point: ", Peri_point)
+        console.log ("Imem_point: ", Imem_point)
+        console.log ("Dmem_point: ", Dmem_point)
+        
+        this.Memory.reset(Peri_point, Imem_point, Dmem_point, Mem_tb)
+    } 
+    else {
+        this.println('ALLOCATION ERROR!!!')
+        console.log ('ALLOCATION ERROR!!!')
+        return false
+    }
     
     this.Processor.setImem(this.Assembler.binary_code)                 // LOAD INTUCTIONS INTO PROCESSOR
     this.Memory.SetInstuctionMemory(this.Processor.Instruction_memory) // LOAD INTUCTIONS INTO MAIN MEMORY
@@ -63,7 +91,7 @@ export function assemble(this: Soc, code: string,
         console.log('SYSTEM IS READY TO RUN')
     }
 
-    console.log("MMU: ", this.MMU);
+    // console.log("MMU: ", this.MMU);
     
     return !this.Assembler.syntax_error
 }

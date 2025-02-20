@@ -81,12 +81,11 @@ export default class DMA {
     public Send2Peri ()  {
         //this.CountTransaction += 1
         const data = this.Databuffer[this.bufferPointerR.toString(2).padStart(32, '0')] 
-        //console.log("this.Addrbuffer[this.SendAddrP]", this.Databuffer[this.SendAddrP.toString(2).padStart(32, '0')])
         this.masterDMA.send('PUT', this.bufferPointerR.toString(2),  data)
         if (this.bufferPointerR == this.Len) {
             this.bufferPointerR        = 0
         }
-        else this.bufferPointerR += this.Des_addr + 4
+        else this.bufferPointerR += this.bufferPointerR + 4
 
     }
     

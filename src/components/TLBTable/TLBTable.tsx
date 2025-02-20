@@ -72,7 +72,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
         <TextField
           value={editingPointer ? editingPointer : pointer}
           onChange={(e) => setEditingPointer(e.target.value)}
-          label="Page Table Pointer"
+          label="STAP"
           InputProps={{
             startAdornment: '0x',
           }}
@@ -131,8 +131,10 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
         <Table sx={styles.table}>
           <TableHead>
             <TableRow>
-              <TableCell align="center">VPN</TableCell>
-              <TableCell align="center">PPN</TableCell>
+              <TableCell align="center">VPN0</TableCell>
+              <TableCell align="center">PPN0</TableCell>
+              <TableCell align="center">VPN1</TableCell>
+              <TableCell align="center">PPN1</TableCell>
               <TableCell align="center">Valid</TableCell>
               <TableCell align="center">Timestamp</TableCell>
               <TableCell></TableCell>
@@ -144,11 +146,25 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                 <TableCell>
                   <Input
                     className={cn('px-2', {})}
-                    value={editingIndex === index ? editingTLB?.pageNumber : row.pageNumber}
+                    value={editingIndex === index ? editingTLB?.pageNumber0 : row.pageNumber0}
                     onChange={(e) =>
                       setEditingTLB({
                         ...editingTLB!,
-                        pageNumber: e.target.value,
+                        pageNumber0: e.target.value,
+                      })
+                    }
+                    startAdornment="0x"
+                    disabled={editingIndex !== index}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Input
+                    className={cn('px-2', {})}
+                    value={editingIndex === index ? editingTLB?.pageNumber1 : row.pageNumber1}
+                    onChange={(e) =>
+                      setEditingTLB({
+                        ...editingTLB!,
+                        pageNumber1: e.target.value,
                       })
                     }
                     startAdornment="0x"
@@ -158,12 +174,28 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                 <TableCell>
                   <Input
                     value={
-                      editingIndex === index ? editingTLB?.physicalAddress : row.physicalAddress
+                      editingIndex === index ? editingTLB?.physicalAddress0 : row.physicalAddress0
                     }
                     onChange={(e) =>
                       setEditingTLB({
                         ...editingTLB!,
-                        physicalAddress: e.target.value,
+                        physicalAddress0: e.target.value,
+                      })
+                    }
+                    className={cn({})}
+                    startAdornment="0x"
+                    disabled={editingIndex !== index}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Input
+                    value={
+                      editingIndex === index ? editingTLB?.physicalAddress1 : row.physicalAddress1
+                    }
+                    onChange={(e) =>
+                      setEditingTLB({
+                        ...editingTLB!,
+                        physicalAddress1: e.target.value,
                       })
                     }
                     className={cn({})}

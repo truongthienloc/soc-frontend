@@ -4,7 +4,7 @@ export default class MMU {
     active: boolean;
     master: Master;
     physical_address: number;  // Explicitly typed as number
-    TLB: [number, number, number, number][];  // Define TLB as 2D array of tuples with 4 numbers
+    TLB: [number, number, number, number, number, number][];  // Define TLB as 2D array of tuples with 4 numbers
     pageNumberPointer: number;
     static readonly BASE_ADDRESS = (96 * 3 + 16) * 4;  // Replace magic numbers with constants
     static readonly PAGE_SIZE = 256;
@@ -30,7 +30,7 @@ export default class MMU {
         if (minIndex !== -1) this.TLB[minIndex] = Replacement_page;  // Replace with new row values
     }
 
-    public SetTLB(P: [number, number, number, number][], pointer: number) {
+    public SetTLB(P: [number, number, number, number, number, number][], pointer: number) {
         this.TLB = P;
         this.pageNumberPointer = pointer
     }

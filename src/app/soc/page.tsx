@@ -400,6 +400,13 @@ export default function SocPage({}: Props) {
       toast.success('Ready to run')
       setAllowRun(true)
       setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
+      setRegisters([
+        ...socModelRef.current.Processor.getRegisters(),
+        {
+          name: 'pc',
+          value: DecToHex(socModelRef.current.Processor.pc),
+        },
+      ])
       localStorage.setItem('soc_code', code)
     }
   }

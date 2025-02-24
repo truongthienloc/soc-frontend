@@ -24,15 +24,17 @@ const defaultDecTLBData = [
     [7, 0, 11705, 0, 0, 0],
 ]
 
-const defaultTLBData = defaultDecTLBData.map(([pageNumber0, pageNumber1, physicalAddress0, physicalAddress1, timestamp, valid]) => ({
-    id: short.generate(),
-    pageNumber0: pageNumber0.toString(16),
-    pageNumber1: pageNumber1.toString(16),
-    physicalAddress0: physicalAddress0.toString(16).padStart(8, '0'),
-    physicalAddress1: physicalAddress1.toString(16).padStart(8, '0'),
-    timestamp: timestamp.toString(),
-    valid: valid.toString(),
-}))
+const defaultTLBData = defaultDecTLBData.map(
+    ([pageNumber0, pageNumber1, physicalAddress0, physicalAddress1, timestamp, valid]) => ({
+        id: short.generate(),
+        pageNumber0: pageNumber0.toString(16),
+        pageNumber1: pageNumber1.toString(16),
+        physicalAddress0: physicalAddress0.toString(16).padStart(8, '0'),
+        physicalAddress1: physicalAddress1.toString(16).padStart(8, '0'),
+        timestamp: timestamp.toString(),
+        valid: valid.toString(),
+    }),
+)
 
 export default function useTLB(_length?: number) {
     const [length, setLength] = useState(_length ?? 8)

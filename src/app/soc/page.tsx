@@ -611,7 +611,7 @@ export default function SocPage({}: Props) {
               <div className="flex items-start">
                 <MemoryMap className="" memoryMap={memoryMap} disabled={isStepping} />
               </div>
-              <MemoryTable  
+              <MemoryTable
                 data={memoryData}
                 onChangeData={handleChangeMemoryData}
                 onResetData={handleResetMemoryTable}

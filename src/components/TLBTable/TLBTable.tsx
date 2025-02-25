@@ -131,10 +131,12 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
         <Table sx={styles.table}>
           <TableHead>
             <TableRow>
-              <TableCell align="center">VPN0</TableCell>
+              <TableCell align="center">VPN</TableCell>
+              <TableCell align="center">PPN</TableCell>
+              {/* <TableCell align="center">VPN0</TableCell>
               <TableCell align="center">PPN0</TableCell>
               <TableCell align="center">VPN1</TableCell>
-              <TableCell align="center">PPN1</TableCell>
+              <TableCell align="center">PPN1</TableCell> */}
               <TableCell align="center">Valid</TableCell>
               <TableCell align="center">Timestamp</TableCell>
               <TableCell></TableCell>
@@ -157,7 +159,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                     disabled={editingIndex !== index}
                   />
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <Input
                     className={cn('px-2', {})}
                     value={editingIndex === index ? editingTLB?.pageNumber1 : row.pageNumber1}
@@ -170,7 +172,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                     startAdornment="0x"
                     disabled={editingIndex !== index}
                   />
-                </TableCell>
+                </TableCell> */}
                 <TableCell>
                   <Input
                     value={
@@ -187,7 +189,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                     disabled={editingIndex !== index}
                   />
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <Input
                     value={
                       editingIndex === index ? editingTLB?.physicalAddress1 : row.physicalAddress1
@@ -202,7 +204,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                     startAdornment="0x"
                     disabled={editingIndex !== index}
                   />
-                </TableCell>
+                </TableCell> */}
                 <TableCell className="text-center">
                   <Input
                     className={cn('w-10 px-1 [&>input]:inline-block [&>input]:text-center', {})}

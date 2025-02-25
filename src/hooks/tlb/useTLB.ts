@@ -4,9 +4,9 @@ import short from 'short-uuid'
 export type TLBEntry = {
     id: string
     pageNumber0: string
-    pageNumber1: string
+    // pageNumber1: string
     physicalAddress0: string
-    physicalAddress1: string
+    // physicalAddress1: string
     timestamp: string
     valid: string
 }
@@ -25,12 +25,12 @@ const defaultDecTLBData = [
 ]
 
 const defaultTLBData = defaultDecTLBData.map(
-    ([pageNumber0, pageNumber1, physicalAddress0, physicalAddress1, timestamp, valid]) => ({
+    ([pageNumber0, , physicalAddress0, , timestamp, valid]) => ({
         id: short.generate(),
         pageNumber0: pageNumber0.toString(16),
-        pageNumber1: pageNumber1.toString(16),
+        pageNumber1: pageNumber0.toString(16),
         physicalAddress0: physicalAddress0.toString(16).padStart(8, '0'),
-        physicalAddress1: physicalAddress1.toString(16).padStart(8, '0'),
+        physicalAddress1: physicalAddress0.toString(16).padStart(8, '0'),
         timestamp: timestamp.toString(),
         valid: valid.toString(),
     }),

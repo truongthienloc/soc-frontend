@@ -2,7 +2,13 @@ import short from 'short-uuid'
 import { TLBEntry } from '~/hooks/tlb/useTLB'
 
 /** pageNumber, physicalAddress, timestamp, valid */
-type TLBEntries = [number, number, number, number, number, number]
+type TLBEntries = [
+    number,
+    number,
+    number,
+    number,
+    // number, number
+]
 
 type TLB = {
     p0: TLBEntries
@@ -27,8 +33,8 @@ export function tlb2Array(tlb: TLBEntry[]): TLBEntries[] {
         array.push([
             parseInt(entry.pageNumber0, 16),
             parseInt(entry.physicalAddress0, 16),
-            parseInt(entry.pageNumber1, 16),
-            parseInt(entry.physicalAddress1, 16),
+            // parseInt(entry.pageNumber1, 16),
+            // parseInt(entry.physicalAddress1, 16),
             parseInt(entry.valid),
             parseInt(entry.timestamp),
         ])
@@ -43,10 +49,10 @@ export function array2TLB(array: TLBEntries[]): TLBEntry[] {
             id: short.generate(),
             pageNumber0: entry[0].toString(16),
             physicalAddress0: entry[1].toString(16).padStart(8, '0'),
-            pageNumber1: entry[2].toString(16),
-            physicalAddress1: entry[3].toString(16).padStart(8, '0'),
-            valid: entry[4].toString(16),
-            timestamp: entry[5].toString(16),
+            // pageNumber1: entry[2].toString(16),
+            // physicalAddress1: entry[3].toString(16).padStart(8, '0'),
+            valid: entry[2].toString(16),
+            timestamp: entry[3].toString(16),
         })
     }
     return tlb

@@ -6,71 +6,72 @@ import { hexToBinary } from '~/helpers/converts/Hextobin'
 export default class Memory {
     Memory: { [key: string]: string }
     active: boolean
-    Peri_point: number
-    Imem_point: number
-    Dmem_point: number
+    Kernel_point: number
+    User_point: number
+    IO_point: number
     slaveMemory: Slave
     constructor(active: boolean) {
-            this.Peri_point         = 0
-            this.Imem_point         = 0
-            this.Dmem_point         = 0 
+        this.Kernel_point     = 0
+        this.User_point       = 0
+        this.IO_point         = 0 
         
         this.Memory = {}
         this.active = active
         this.slaveMemory = new Slave('DataMemory', true)
     }
-    public reset( Peri_point: number,
-    Imem_point: number, Dmem_point: number, 
-    Mem_tb: Register[]
-    ){
-            this.Peri_point  = Peri_point
-            this.Imem_point  = Imem_point
-            this.Dmem_point  = Dmem_point
-            
-            // MEMORY AREA OF PERI
-            for (let i = Peri_point; i < Imem_point; i+=4) 
-                this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
-            
-            // MEMORY AREA OF I-MEM
-            for (let i = Imem_point + 4; i < Dmem_point; i+=4) 
-                this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
-            
-            // MEMORY AREA OF D-MEM
-            for (let i = Dmem_point; i <  4 * 16 *16 * 4096 ; i+=4) // P0: 4096 P1: 4 4 bytes
-                this.Memory[i.toString(2).padStart(32,'0')] = '0'.padStart(32,'0')
-            
-            for (const element of Mem_tb) 
-                this.Memory[element.name] = element.value   
+    public reset(Mem_tb: Register[], Kernel_point: number, User_point: number, IO_point: number){
+
+        this.Kernel_point     = 0x07FFF
+        this.User_point       = 0x1BFFF
+        this.IO_point         = 0x1FFFF
+        
+        // MEMORY AREA OF Kernel
+        for (let i = 0; i < 0x07FFF  + 1; i+=4) 
+            this.Memory[i.toString(2).padStart(17,'0')] = '0'.padStart(32,'0')
+
+        // MEMORY AREA OF RVD 
+        for (let i = 0x07FFF  + 1; i < 0x0BFFF  + 1; i+=4) 
+            this.Memory[i.toString(2).padStart(17,'0')] = '0'.padStart(32,'0')
+        
+        // MEMORY AREA OF IO
+        for (let i = 0x0BFFF  + 1 ; i < 0x1BFFF  + 1; i+=4)
+            this.Memory[i.toString(2).padStart(17,'0')] = '0'.padStart(32,'0')
+        
+        // MEMORY AREA OF user
+        for (let i =  0x1BFFF  + 1  ; i < 0x1FFFF; i+=4) // 17bit physical address
+            this.Memory[i.toString(2).padStart(17,'0')] = '0'.padStart(32,'0')
+        
+        for (const element of Mem_tb) 
+            this.Memory[element.name] = element.value   
     }
 
     public setPageNumber () {
         let count = 0
-        const PageTablePointer0 = this.Dmem_point + 4 * 4096 * 4096
-        //console.log(this.Stack_point, (this.Stack_point + 100)*4)
-        for (let i = PageTablePointer0; i < (PageTablePointer0 + 4 * 16); i+=4) { // 16 PTE0 
-            this.Memory[i.toString(2).padStart(32,'0')] = (count*16*4).toString(2).padStart(32,'0') 
+        const PageTablePointer = 0x1FFFF + 1
+        for (let i = PageTablePointer + 8 * 4; i < (PageTablePointer + 4 * 16); i+=4) { 
+            this.Memory[i.toString(2).padStart(17,'0')] = (0x0BFFF + count*4096 + 1).toString(2).padStart(32,'0') 
             count ++ 
         }
-        count = 0
-        const PageTablePointer1 = PageTablePointer0 + 4 * 16 
-        for (let i = PageTablePointer1; i < (PageTablePointer1 + 16 * 16 * 4); i+=4) { // 16 * 4096 PTE0
-            this.Memory[i.toString(2).padStart(32,'0')] = (count*4096+ this.Dmem_point).toString(2).padStart(32,'0') 
+        for (let i = PageTablePointer; i < (PageTablePointer + 8 * 4); i+=4) { 
+            this.Memory[i.toString(2).padStart(17,'0')] = (0x0BFFF + count*4096 + 1).toString(2).padStart(32,'0') 
             count ++ 
-        } 
+        }
+
     }
 
-    // public getPageNumber (): Register[] {
-    //     const result: Register[] = []
-    //     for (let i = this.Stack_point + 32 * 4 ; i < (this.Stack_point + 32 * 4 + 16 *4); i+=4) {
-    //         result.push({
-    //             name: '0x' +  i.toString(16).padStart(8,'0'), 
-    //             value: '0x' + dec('0' + this.Memory[i.toString(2).padStart(32,'0')]).toString(16).padStart(8,'0')
-    //         })
-    //     }
-
-    //     return result
-    //     // console.log i, dec (this.Memory[i.toString(2).padStart(32,'0')]))
-    // }
+    public getPageNumber (): Register[] {
+        const result: Register[] = []
+        let count = 0
+        const PageTablePointer0 =   0x1FFFF + 1
+        for (let i = PageTablePointer0; i < (PageTablePointer0 + 4 * 16); i+=4) {
+            result.push({
+                name: '0x' +  i.toString(16).padStart(8,'0'), 
+                value: '0x' + dec('0' + this.Memory[i.toString(2).padStart(17,'0')]).toString(16).padStart(8,'0')
+            })
+        }
+        return result
+        // console.log i, dec (this.Memory[i.toString(2).padStart(32,'0')]))
+    }
 
     // public getLedMatrix () {
     //     for (let i = this.LM_point; i < this.Monitor_point; i+=4) 
@@ -114,10 +115,10 @@ export default class Memory {
     
     public SetInstuctionMemory (Instruction_memory: { [key: string]: string}) {
         console.log('Instruction Mem',Instruction_memory)
-        let count = this.Imem_point + 4
+        let count = 0
         for (const key in Instruction_memory) {
             if (Instruction_memory.hasOwnProperty(key) && (Instruction_memory[key]!= '')) {
-                this.Memory[count.toString(2).padStart(32,'0')] = Instruction_memory[key];
+                this.Memory[count.toString(2).padStart(17,'0')] = Instruction_memory[key];
                 count+=4
             }
         }

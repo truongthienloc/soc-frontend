@@ -684,7 +684,9 @@ export default class RiscVProcessor {
 
     run(instruction: string, pc: number, icBusy: boolean): [string, string, string, string, string] {
         if (this.active == true) {
-            this.register['00100'] = '00000000010000000001000000000100'
+        // this.register['00000'] = '00000000000000001000000000000100'
+
+
             //console.log("this.pc: ",this.pc, this.pre_pc, this.stalled)
             this.pre_pc = pc
             this.stalled = false 
@@ -702,7 +704,6 @@ export default class RiscVProcessor {
                     
                 return ['ECALL', '', '', '', '']
             }
-            //console.log('instructions', instruction,'pc',pc)
             this.control(instruction.slice(25, 32), instruction.slice(17, 20))
 
             let size = 'none'
@@ -813,7 +814,7 @@ export default class RiscVProcessor {
             if (this.stalled == false) {
                 this.pc     = mux(mux(pc + 4, (dec(imm) << 1) + pc, this.pcSrc1), ALUResult, this.pcSrc2)
             } else this.pc = pc
-            
+
             this.lineColor['3']  = mux(this.lineColor['2'], this.lineColor['1'], this.ALUSrc);
             this.lineColor['6']  = mux(this.lineColor['0'], this.lineColor['4'], this.pcSrc1);
             this.lineColor['9']  = mux(this.lineColor['6'], this.lineColor['5'], this.pcSrc2);

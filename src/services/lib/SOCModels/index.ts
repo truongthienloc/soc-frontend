@@ -1,98 +1,96 @@
+import DMA from './DMA'
 import Soc from './SoC'
+import ChannalD from './ChannelD'
+const SOC               = new Soc('super SoC')
+const channelD          = new ChannalD( '001'                   ,                       //opcode
+                                        '00'                    ,                       //param
+                                        '10'                    ,                       //size
+                                        '00'                    ,                       //source
+                                        '0'.padStart(21, '0')   ,     //sink
+                                        '0'                     ,                       //denied
+                                        '1'.padStart(32, '1')   ,      //data
+                                        '0'                         //corrupt
+                                    );
 
+SOC.Memory.Memory['11000000000000000'] = '1'.padStart(32, '1')
+SOC.Memory.Memory['100'.padStart(17, '0')] = '0'.padStart(32, '01')
+// SOC.DMA.active  = true
+// SOC.Bus0.active = true
+// SOC.Bus1.active = true
+// SOC.Bus1.setaddress (0x2241f, 0x2240, 0x223ff )
+// SOC.DMA.config (0x1fff + 1, 0x4, 4)
+// SOC.DMA_Get ()
+// console.log (SOC.DMA_put ())
+// SOC.DMA.RECfromMemory (channelD)
+
+// console.log (SOC.DMA.buffer)
+// console.log (SOC.DMA.SENDtoLED())
+// console.log (SOC.DMA.SENDtoLED())
+// const code              = 
+// `
+// .text  
+// lui  x2 , 0x00017
+// addi x2, x0, 32
+// addi x1, x0, 1
+// sw   x1 , 0(x2)
+// lw   x1 , 0(x2)
+
+// `
 const code              = 
 `
-.text 
-lw   x3, 0 (x4)
+.text  
+lui  x2 , 0x00008  
+lui  x3 , 0x00009 
+lui  x4 , 0x0000A 
+lui  x5 , 0x0000B
+lui  x6 , 0x0000C 
+lui  x8 , 0x0001D 
+
+addi x1 , x0, 1
+sw   x1 , 0(x2)
+sw   x1 , 0(x3)
+sw   x1 , 0(x4)
+sw   x1 , 0(x5)
+sw   x1 , 0(x6)
+sw   x1 , 4(x7)
+sw   x1 , 4(x8)
 `
-const SOC               = new Soc('super SoC')
+
 SOC.Processor.active    = true
 SOC.MMU.active          = true
-SOC.Bus.active          = true
+SOC.Bus0.active          = true
+SOC.Bus1.active          = true
 SOC.Memory.active       = true
 SOC.DMA.active          = true
 
 SOC.assemble(
-        code                    //code                
-        , 16 * 16 * 1024        //Total_mem          
-        , 5 * 1024              //Peri_require_mem   
-        , 1 * 1024              //Imem_require_mem   
-        , (16 * 16 - 2) * 1024  //Dmem_require_mem   
-        , []//Mem_tb             
-        , [
-          [0, (0*1023) + (96 + 16 + 1024) *4, 1, 0], // 11c0
-          [1, (1*1023) + (96 + 16 + 1024) *4, 1, 1], // 
-          [2, (2*1023) + (96 + 16 + 1024) *4, 1, 1], // 19be
-          [3, (3*1023) + (96 + 16 + 1024) *4, 1, 1], // 
-          [4, (4*1023) + (96 + 16 + 1024) *4, 1, 1],
-          [5, (5*1023) + (96 + 16 + 1024) *4, 1, 1],
-          [6, (6*1023) + (96 + 16 + 1024) *4, 1, 1],
-          [7, (7*1023) + (96 + 16 + 1024) *4, 1, 1],
-        ]//TLB                
-        , 70208 //TLB_pointer        
-        , 0     //dmaSrc             
-        , 16    //dmaLen             
-        , 16    //dmaDes             
-)
-// SOC.assemble(
-//     code 
-//     ,0   * 4 //   LM point
-//     ,10  * 1024 //  I/O point //0x480
-//     ,11  * 1024   // I-Mem point // 4C0
-//     ,20  * 1024
-//    (96 * 3+ 16 + 1024) *4, // D-Mem point  // 14C0
-//    (96 * 3 + 16 + 1024 + 1024*16) *4, //Stack point 
-//    [],
-//     [
-//     [0, (0*1023) + (96 + 16 + 1024) *4, 1, 0], // 11c0
-//     [1, (1*1023) + (96 + 16 + 1024) *4, 1, 1], // 
-//     [2, (2*1023) + (96 + 16 + 1024) *4, 1, 1], // 19be
-//     [3, (3*1023) + (96 + 16 + 1024) *4, 1, 1], // 
-//     [4, (4*1023) + (96 + 16 + 1024) *4, 1, 1],
-//     [5, (5*1023) + (96 + 16 + 1024) *4, 1, 1],
-//     [6, (6*1023) + (96 + 16 + 1024) *4, 1, 1],
-//     [7, (7*1023) + (96 + 16 + 1024) *4, 1, 1],
-//     ],
-//     70208,
-//     0,
-//     16,
-//     16 
-// )
-// SOC.DMA.active = true
-// SOC.DMA.masterDMA.active = true
-// SOC.DMA.config(0, 0, 16, 16)
-// SOC.DMA_operate()
-// SOC.DMA.Send2Memory()
-// SOC.DMA.ReceivefMemory(SOC.Memory.slaveMemory.send('AccessAckData','1'.padStart(32, '1')))
-// SOC.DMA.Send2Peri()
-
-// SOC.DMA.Send2Memory()
-// SOC.DMA.ReceivefMemory(SOC.Memory.slaveMemory.send('AccessAckData','1'.padStart(32, '1')))
-// const sendperi = SOC.DMA.Send2Peri()
-// console.log()
-
-// //console.log(code)
-// SOC.RunAll()
-// // //SOC.DMA_operate()
-// console.log(SOC.DMA.Databuffer)
-// console.log(SOC.Memory.Memory['00000000000000000000000000001000'])
-
-// const sourcePUT = sendperi.slice(8, 10);
-
-// // Extract address (bits 17-48, indices 16-47)
-// const addressPUT = sendperi.slice(10, 42);
-
-// // Extract data (bits 49 onwards, index 48 to end)
-// const dataPUT = sendperi.slice(45);
-// console.log(sourcePUT, addressPUT, dataPUT)
-// console.log(SOC.DMA.ScanData())
-// console.log(SOC.Processor.lineColor)
-
-// //console.log(SOC.Memory.getLedMatrix())
-// console.log(SOC.Memory.IO_point)
-// console.log(SOC.Memory.getIO())
-// console.log(SOC.Led_matrix)
-
-// console.log(SOC.Processor.getRegisters())
-// // console.log(SOC.MMU.TLB)
-// SOC.Memory.getPageNumber()
+            code                                     // ,code               : string 
+            ,3 * 4096                               // ,required_mem       : number
+            ,[]                                      // ,Mem_tb             : Register[]
+            ,[
+                 //[0, (0x07FFF + 1 ) + 4096*0, 1, 0]
+                 [8, 49152, 1, 6 ]
+                ,[0, (0x07FFF + 1 ) + 4096*1, 1, 1]
+                ,[0, (0x07FFF + 1 ) + 4096*2, 1, 0]
+                ,[0, (0x07FFF + 1 ) + 4096*3, 1, 1]
+                ,[0, (0x07FFF + 1 ) + 4096*4, 1, 1]
+                ,[0, (0x07FFF + 1 ) + 4096*5, 1, 1]
+                ,[0, (0x07FFF + 1 ) + 4096*6, 1, 1]
+                ,[0, (0x07FFF + 1 ) + 4096*7, 1, 1]
+            ]                                       // ,TLB                : TLBEntries[]
+            ,0x1FFFF + 1                            // ,stap               : number
+            ,0x1BFFF + 1                            // ,dmaSrc             : number
+            ,16*32                                  // ,dmaLen             : number
+            ,0x17FFF + 1                            // ,dmaDes             : number
+) 
+SOC.Memory.Memory['11100000000000000'] = '1'.padStart(32, '1')
+SOC.RunAll()
+console.log(SOC.Processor.getRegisters())
+console.log(SOC.Memory.getPageNumber())
+// console.log(SOC.Memory.Memory)
+// console.log(SOC.Memory.Memory['01100000000000000'])
+// console.log(SOC.Memory.Memory['01101000000000000'])
+// console.log(SOC.Memory.Memory['01110000000000000'])
+// console.log(SOC.Memory.Memory['01111000000000000'])
+// console.log(SOC.Memory.Memory['11011000000000000'])
+// console.log(SOC.DMA.buffer)

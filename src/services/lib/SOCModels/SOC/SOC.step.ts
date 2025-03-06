@@ -6,218 +6,21 @@ import { dec } from "../sub_function"
 
 export async function Step(this: Soc) {   
 //---------------------------------------------------------------------------------------------------------\\
-        // ****************CHECK CONDITION TO RUN SYSTEM ****************
-        // CHECK PROCESSOR IS ACTIVED
-        if (this.Processor.active == false) {
-            console.log('CPU HAS NOT BEEN ACTIVED!!!')
-            this.println('CPU HAS NOT BEEN ACTIVED!!!')
-            return
-        }
-        // CHECK THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE
-        if (
-            this.Processor.pc >=
-            (Object.values(this.Processor.Instruction_memory).length - 1) * 4
-        ) {
-            this.println('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
-            console.log('THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.')
-            return
-        }
-        // CHECK SYNTAX ERROR
-        if (this.Assembler.syntax_error) return
-
+        this.Check_Processor ()
 //---------------------------------------------------------------------------------------------------------\\
         // ****************RUN SYSTEM ****************
-        this.println('Cycle ', this.cycle.toString(), ': CPU is processing')
-        console.log('Cycle ', this.cycle.toString(), ': CPU is processing')
-        
-       
-        
-        const element = this.Processor.Instruction_memory[this.Processor.pc.toString(2)]
-        //console.log("this.Processor.pre_pc, this.Processor.pc", this.Processor.pre_pc, this.Processor.pc)
-        this.view?.cpu.setIsRunning(this.Processor.active)
-        // CPU RUN
-        let [CPU_message, CPU_data, logical_address, rd] = this.Processor.run(element, this.Processor.pc, false)
-        
-        if (CPU_message == 'ECALL') {
-            this.println('Cycle ', this.cycle.toString(), ': Ecall instruction')
-            console.log('Cycle ', this.cycle.toString(), ': Ecall instruction')
-            
-            // await this.Ecall.execute (this.Processor.register)
-            return 
-        }
-        this.IO_operate ()
-        if (CPU_message!= 'PUT' && CPU_message != 'GET') {
-            if (this.DMA.active) this.DMA_operate()
-            return 
-        }// CHECK message is PUT or GET
-        // ****************IF message is PUT OR GET****************
+        let  [CPU_message, CPU_data, logical_address, rd, size] = this.Processor_run ()
+        this.Ecall(CPU_message)
+        this.Check_otherComponents ()
         // CHECK ADDRESS
         if (dec('0' + logical_address) % 4 != 0) {
             console.log('ERORR: Invaild Address!!!')
             this.println('ERORR: Invaild Address!!!')
             return
         }
-        // CHECK INTERCONNET 
-        if (this.Bus.active == false) {
-            console.log('ERORR: INTERCONNECT has not been actived!!!')
-            this.println('ERORR: INTERCONNECT has not been actived!!!')
-            return
-        }
-        // CHECK MEMORY 
-        if (this.Memory.active == false) {
-            console.log('ERORR: MEMORY has not been actived!!!')
-            this.println('ERORR: MEMORY has not been actived!!!')
-            return
-        }
-        if (this.DMA.active == false) {
-            console.log('WARNING: DMA has not been actived!!!')
-            this.println('WARNING: DMA has not been actived!!!')
-        }
-        // RUN MMU
-        this.view?.mmu.setIsRunning(this.MMU.active)
-        let [physical_address, MMU_message] = this.MMU.Run(logical_address, this.Memory.Dmem_point + 4 * 4096 * 4096)
-        
-        //console.log(this.MMU.TLB)
-        this.println('Cycle '       , 
-            this.cycle.toString()   , 
-            ': The CPU is sending a ' +CPU_message+ ' message to MEMORY through the INTERCONNECT.'
-        )
-        console.log ('Cycle '       , 
-            this.cycle.toString()   , 
-           ': The CPU is sending a ' +CPU_message+ ' message to MEMORY through the INTERCONNECT.'
-        )
-        this.println(
-            'Logic address: ', BinToHex(logical_address) 
-        )
-        console.log (
-           'Logic address: ', BinToHex(logical_address) 
-        )
-
-        console.log  ('Cycle ', this.cycle.toString() +' : '+ MMU_message)
-        this.println ('Cycle ', this.cycle.toString()+' : '+ MMU_message)
-
+        const physical_address = this.MMU_run (logical_address)
 
         this.cycle += 1
-
-        if (MMU_message == 'TLB: PPN is missed.') {
-            // MISSED
-            // CALCULATE physical_address
-            // this.Memory.IOpoint
-            const VPN0 = logical_address.slice(0, 10);  // 10 bit đầu tiên
-            const VPN1 = logical_address.slice(10, 20); // 10 bit tiếp theo
-
-            const PageTablePointer0 = this.Memory.Dmem_point + 4 * 4096 * 4096
-            const PageTablePointer1 = PageTablePointer0 + 4 * 16 
-            console.log (
-                'Logic address: ', BinToHex(logical_address) 
-             )
-
-            //***************************GET PTE0 ****************************
-            const PTE0 = PageTablePointer0 + parseInt(VPN0, 2) * 4
-            console.log('stap: 0x', PageTablePointer0.toString(16))
-            console.log('Cycle ', this.cycle.toString()+' : '+ 
-            'The MMU want to GET data at address '+
-            BinToHex((PTE0).toString(2).padStart(32,'0'))+' from MEMORY')
-            this.println('Cycle ', this.cycle.toString()+' : '+ 
-            'The MMU want to GET data at address '+
-            BinToHex((PTE0).toString(2).padStart(32,'0'))+' from MEMORY')
-            
-            this.MMU.master.send('GET', (PTE0).toString(2).padStart(32,'0'), '0')
-            console.log  ('Cycle ', this.cycle.toString()+': The MMU is sending a GET message to MEMORY through the INTERCONNECT.')
-            this.println ('Cycle ', this.cycle.toString()+': The MMU is sending a GET message to MEMORY through the INTERCONNECT.')
-            this.Bus.Port_in(this.MMU.master.ChannelA, 0)
-
-            this.cycle = this.cycle + 1
-            console.log  ('Cycle ', this.cycle.toString()+': The INTERCONNECT is forwarding the message to MEMORY.')
-            this.println ('Cycle ', this.cycle.toString()+': The INTERCONNECT is forwarding the message to MEMORY.')
-            this.Bus.Transmit()
-
-            this.cycle     = this.cycle + 1
-            let MMU2Memory = this.Bus.Port_out(2) // channelD
-            let [, ai2s]   = this.Memory.slaveMemory.receive (MMU2Memory)
-
-            console.log  ('Cycle ', this.cycle.toString()+': The MEMORY is receiving a GET message from the INTERCONNECT.')
-            this.println ('Cycle ', this.cycle.toString()+': The MEMORY is receiving a GET message from the INTERCONNECT.')
-
-            this.cycle = this.cycle + 1
-            this.Memory.slaveMemory.send('AccessAckData','00', this.Memory.Memory[ai2s])
-            this.Bus.Port_in(this.Memory.slaveMemory.ChannelD, 2)
-            console.log  ('Cycle ', this.cycle.toString()+': The MEMORY is sending an AccessAckData message to the INTERCONNECT.')
-            this.println ('Cycle ', this.cycle.toString()+': The MEMORY is sending an AccessAckData message to the INTERCONNECT.')
-            this.Bus.Port_in(this.Memory.slaveMemory.ChannelD, 2)
-
-            this.cycle = this.cycle + 1
-            this.Bus.Transmit()
-            console.log  ('Cycle ', this.cycle.toString()+': The INTERCONNECT is forwarding the message to MMU.')
-            this.println ('Cycle ', this.cycle.toString()+': The INTERCONNECT is forwarding the message to MMU.')
-
-            this.cycle       = this.cycle + 1
-            let Memory2MMU = this.Bus.Port_out(0) // channelD
-            let ammurfm    = this.MMU.master.receive ('AccessAckData', this.Bus.Port_out(0))
-            console.log  ('Cycle ', this.cycle.toString()+': The MMU is receiving an AccessAckData message from the INTERCONNECT.')
-            this.println ('Cycle ', this.cycle.toString()+': The MMU is receiving an AccessAckData message from the INTERCONNECT.')
-            this.cycle+=1
-
-           //***************************GET PTE1 ****************************
-           
-           const PTE1 = PageTablePointer1 + dec ('0'+ammurfm) + dec ('0'+VPN1)*4
-           console.log('Memory['+ BinToHex((PTE0).toString(2).padStart(32,'0'))+']: 0x'+ PTE1.toString(16))
-        
-           console.log('Cycle ', this.cycle.toString()+' : '+ 
-            'The MMU want to GET data at address '+
-            BinToHex((PTE1).toString(2).padStart(32,'0'))+' from MEMORY')
-            this.println('Cycle ', this.cycle.toString()+' : '+ 
-            'The MMU want to GET data at address '+
-            BinToHex((PTE1).toString(2).padStart(32,'0'))+' from MEMORY')
-
-            this.MMU.master.send('GET', (PTE1).toString(2).padStart(32,'0'), '0')
-            console.log  ('Cycle ', this.cycle.toString()+': The MMU is sending a GET message to MEMORY through the INTERCONNECT.')
-            this.println ('Cycle ', this.cycle.toString()+': The MMU is sending a GET message to MEMORY through the INTERCONNECT.')
-
-            this.cycle = this.cycle + 1
-            console.log  ('Cycle ', this.cycle.toString()+': The INTERCONNECT is forwarding the message to MEMORY.')
-            this.println ('Cycle ', this.cycle.toString()+': The INTERCONNECT is forwarding the message to MEMORY.')
-            this.Bus.Port_in(this.MMU.master.ChannelA, 0)
-            this.Bus.Transmit()
-
-            this.cycle = this.cycle + 1
-            MMU2Memory = this.Bus.Port_out(2) // channelD
-            let [ ,ai2s2]  = this.Memory.slaveMemory.receive (MMU2Memory)
-            console.log  ('Cycle ', this.cycle.toString()+': The MEMORY is receiving a GET message from the INTERCONNECT.')
-            this.println ('Cycle ', this.cycle.toString()+': The MEMORY is receiving a GET message from the INTERCONNECT.')
-
-            this.cycle = this.cycle + 1
-            this.Memory.slaveMemory.send('AccessAckData','00', this.Memory.Memory[ai2s2])
-            this.Bus.Port_in(this.Memory.slaveMemory.ChannelD, 2)
-            console.log  ('Cycle ', this.cycle.toString()+': The MEMORY is sending an AccessAckData message to the INTERCONNECT.')
-            this.println ('Cycle ', this.cycle.toString()+': The MEMORY is sending an AccessAckData message to the INTERCONNECT.')
-
-            this.cycle = this.cycle + 1
-            this.Bus.Transmit()
-            console.log  ('Cycle ', this.cycle.toString()+': The INTERCONNECT is forwarding the message to MMU.')
-            this.println ('Cycle ', this.cycle.toString()+': The INTERCONNECT is forwarding the message to MMU.')
-
-            this.cycle       = this.cycle + 1
-            Memory2MMU       = this.Bus.Port_out(0) // channelD
-            ammurfm          = this.MMU.master.receive ('AccessAckData', Memory2MMU)
-            console.log  ('Cycle ', this.cycle.toString()+': The MMU is receiving an AccessAckData message from the INTERCONNECT.')
-            this.println ('Cycle ', this.cycle.toString()+': The MMU is receiving an AccessAckData message from the INTERCONNECT.')
-            console.log('Memory['+ BinToHex((PTE1).toString(2).padStart(32,'0')) +']: '+ BinToHex((dec ('0'+ammurfm)).toString(2).padStart(32,'0')))
-
-            this.cycle+=1
-            this.MMU.pageReplace([PTE1, dec ('0'+ammurfm), 1, this.cycle])
-            console.log ('Cycle ', this.cycle.toString()+' : ' + 'TLB: Page Number is replaced.')
-            this.println('Cycle ', this.cycle.toString()+' : ' + 'TLB: Page Number is replaced.')
-
-            this.cycle+=1
-            let [nphysical_address, MMU_message] = this.MMU.Run(logical_address, PageTablePointer1)
-            console.log ('Cycle ', this.cycle.toString()+' : '+ MMU_message)
-            this.println('Cycle ', this.cycle.toString()+' : '+ MMU_message)
-
-            physical_address = nphysical_address
-
-        } 
-        
         this.println(
             'Cycle ',
             this.cycle.toString(),
@@ -234,6 +37,7 @@ export async function Step(this: Soc) {
             ' Physical address: ',
             BinToHex(physical_address)
         )
+        
         // IF MESSAGE IS PUT (STORE): 
         if (CPU_message == 'PUT') {
             this.println('Cycle '       , 
@@ -440,4 +244,5 @@ export async function Step(this: Soc) {
         this.cycle = this.cycle + 1
 
         if (this.DMA.active) this.DMA_operate()
+            
 }

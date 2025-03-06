@@ -2,23 +2,20 @@ import { Register } from "~/types/register"
 import Soc from "../SoC"
 import { TLBEntries } from "../soc.d"
 import BuddyAllocator from "../BuddyAllocator"
-import { Monitor } from "@mui/icons-material"
+import { ConstructionOutlined, Monitor } from "@mui/icons-material"
 
 
 export function assemble(
                 this                : Soc
                 ,code               : string 
-                ,Total_mem          : number
-                ,Peri_require_mem   : number
-                ,Imem_require_mem   : number
-                ,Dmem_require_mem   : number
+                ,required_mem       : number
                 ,Mem_tb             : Register[]
                 ,TLB                : TLBEntries[]
-                ,TLB_pointer        : number
+                ,stap               : number
                 ,dmaSrc             : number
                 ,dmaLen             : number
                 ,dmaDes             : number
-            ) {
+    ) {
     this.println('Cycle ', this.cycle.toString(), ': System is setting up')
     console.log('Cycle ', this.cycle.toString(), ': System is setting up')
     
@@ -26,7 +23,8 @@ export function assemble(
     if (this.view) {
         this.Processor.active   = this.view.cpuModule.getActivated()
         this.MMU.active         = this.view.mmuModule.getActivated()
-        this.Bus.active         = this.view.interconnect.getActivated()
+        this.Bus0.active        = this.view.interconnect.getActivated()
+        this.Bus1.active        = this.view.interconnect.getActivated()
         this.DMA.active         = this.view.dmaModule.getActivated()
         this.Memory.active      = this.view.memoryModule.getActivated()
         this.active_keyboard    = this.view.keyboardModule.getActivated()
@@ -41,37 +39,30 @@ export function assemble(
     
     //****************SET INITIAL STATUS****************
     // SET INITIAL DATA
-    this.Processor.reset()
-    const required_size = Peri_require_mem + Imem_require_mem + Dmem_require_mem
-    if (required_size  >= 0 && required_size <= Total_mem) {
-        this.Allocator      = new BuddyAllocator (Total_mem)
-        const Peri_point    = this.Allocator.allocate (Peri_require_mem)
-        const Imem_point    = this.Allocator.allocate (Imem_require_mem)
-        const Dmem_point    = this.Allocator.allocate (Dmem_require_mem)
 
-        console.log ("Peri_point: ", Peri_point)
-        console.log ("Imem_point: ", Imem_point)
-        console.log ("Dmem_point: ", Dmem_point)
-        
-        this.Memory.reset(Peri_point, Imem_point, Dmem_point, Mem_tb)
-    } 
-    else {
-        this.println('ALLOCATION ERROR!!!')
-        console.log ('ALLOCATION ERROR!!!')
-        return false
-    }
-    
+    // const endaddr = this.Allocator.allocate(required_mem)
+    this.Processor.reset()
     this.Processor.setImem(this.Assembler.binary_code)                 // LOAD INTUCTIONS INTO PROCESSOR
+    this.Memory.reset (Mem_tb, 0x07FFF, 0x1BFFF, 0x1FFFF)
     this.Memory.SetInstuctionMemory(this.Processor.Instruction_memory) // LOAD INTUCTIONS INTO MAIN MEMORY
     this.Memory.setPageNumber()
-    this.DMA.config(dmaDes, dmaSrc, dmaLen, 20)
-    this.MMU.SetTLB(TLB, TLB_pointer)
+    this.DMA.config(dmaDes, dmaSrc, dmaLen)
+    this.MMU.Set(
+        TLB                 // P: [number, number, number, number][]
+        , stap              // , pointer       : number
+        , this.Allocator.allocate(required_mem)           // , end_addr      : number
+        , 0x07FFF + 1  // , start_addr    : number
+        , 0x1BFFF        // , 0x1BFFF    : number
+        , 0x07FFF      // , 0x07FFF  : number
+        , 0x1FFFF          // , 0x1FFFF      : number
+    )
+    this.Bus0.setaddress (0x07FFF , 0x1BFFF)
     for (let i of this.Assembler.Instructions)
         if (i != '.text' && i != '') this.Assembly_code.push(i)
     //SET INITIAL ANIMATION'STATUS
     
     this.logger?.clear()
-    this.monitor?.clear()
+    // this.monitor?.clear()
     this.LedMatrix?.clear()
     this.cycle = 0
     this.view?.cpu.setIsRunning(false)
@@ -92,6 +83,5 @@ export function assemble(
     }
 
     // console.log("MMU: ", this.MMU);
-    
     return !this.Assembler.syntax_error
 }

@@ -14,12 +14,11 @@ export default class BuddyAllocator {
     }
     
     allocate (required_size : number) {
-
         let buddy = 1
         while (required_size > buddy) buddy *= 2
         this.startAddress += buddy
         this.totalSize    -= buddy
-        return this.startAddress - buddy
+        return this.startAddress
     }
     // }
     // allocate(size: number) {

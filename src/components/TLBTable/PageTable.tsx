@@ -28,7 +28,7 @@ type Props = {
 export default function PageTable({ data = [] }: Props) {
   return (
     <div className="flex flex-col gap-8">
-      <h2 className="text-xl font-bold">Page Table:</h2>
+      <h2 className="text-xl font-bold">First Page Table:</h2>
       <TableContainer component={Paper}>
         <Table sx={styles.table}>
           <TableHead>

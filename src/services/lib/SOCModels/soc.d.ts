@@ -14,7 +14,9 @@ export type Monitor = {
     clear: () => void
 }
 
-type TLBEntries = [number, number, number, number]
+type TLBEntries = [number, number, number, number, 
+    // number, number
+    ]
 
 type TLB = {
     p0: TLBEntries,

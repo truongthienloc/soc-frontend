@@ -13,6 +13,8 @@ import React, { useState } from 'react'
 import { createRangeDmemData } from '~/helpers/generates/dMemRange.generate'
 import { Register } from '~/types/register'
 import { ReturnUseDMAConfig } from './useDMAConfig'
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 
 const styles: { [key: string]: SxProps<Theme> } = {
   table: {
@@ -36,6 +38,15 @@ export default function DMATable({ data, configs }: Props) {
   const [input, setInput] = useState('0x00000000')
   const [start, setStart] = useState(input)
   const [displayedData, setDisplayedData] = useState()
+
+  /** Add hex and dec. Output is hex */
+  function add(a: string, b: number) {
+    const dec = parseInt(a, 16) + b
+    if (dec < 0) return a
+    if (dec > 16) return a
+    return dec.toString(16).toUpperCase()
+  }
+
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="flex flex-col gap-4">
@@ -58,15 +69,32 @@ export default function DMATable({ data, configs }: Props) {
             startAdornment: '0x',
           }}
         />
-        <TextField
-          label="LEN"
-          autoComplete="off"
-          value={configs?.len}
-          onChange={(e) => configs?.setLen(e.target.value)}
-          InputProps={{
-            startAdornment: '0x',
-          }}
-        />
+        <div className="relative flex flex-col">
+          <TextField
+            label="LEN"
+            autoComplete="off"
+            value={configs?.len}
+            onChange={(e) => configs?.setLen(e.target.value)}
+            InputProps={{
+              startAdornment: '0x',
+              readOnly: true,
+            }}
+          />
+          <div className="absolute right-1 flex flex-col gap-1 p-1">
+            <button
+              className="flex h-[22px] w-[22px] justify-center rounded bg-gray-50 shadow transition-colors hover:bg-gray-200"
+              onClick={() => configs?.setLen(add(configs?.len, 1))}
+            >
+              <ArrowDropUpIcon />
+            </button>
+            <button
+              className="flex h-[22px] w-[22px] justify-center rounded bg-gray-50 shadow transition-colors hover:bg-gray-200"
+              onClick={() => configs?.setLen(add(configs?.len, -1))}
+            >
+              <ArrowDropDownIcon />
+            </button>
+          </div>
+        </div>
       </div>
       <div className="h-[calc(100vh-60px)] overflow-auto">
         <h2 className="font-bold">DMA Buffer</h2>

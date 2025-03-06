@@ -402,6 +402,13 @@ export default function SocPage({}: Props) {
       setAllowRun(true)
       setPageTable(socModelRef.current.Memory.getPageNumber())
       setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
+      setRegisters([
+        ...socModelRef.current.Processor.getRegisters(),
+        {
+          name: 'pc',
+          value: DecToHex(socModelRef.current.Processor.pc),
+        },
+      ])
       localStorage.setItem('soc_code', code)
     }
   }
@@ -604,7 +611,7 @@ export default function SocPage({}: Props) {
               <div className="flex items-start">
                 <MemoryMap className="" memoryMap={memoryMap} disabled={isStepping} />
               </div>
-              <MemoryTable  
+              <MemoryTable
                 data={memoryData}
                 onChangeData={handleChangeMemoryData}
                 onResetData={handleResetMemoryTable}

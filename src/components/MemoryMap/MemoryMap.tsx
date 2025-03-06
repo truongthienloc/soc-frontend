@@ -60,7 +60,7 @@ export default function MemoryMap({ className, memoryMap, disabled = false }: Pr
 
   return (
     <div className={cn('grid grid-cols-2 gap-2', className)}>
-      <TextField
+      {/* <TextField
         label="LED_base_address"
         value={lmPoint}
         onChange={(e) => onChangeLmPoint(e.target.value)}
@@ -68,9 +68,10 @@ export default function MemoryMap({ className, memoryMap, disabled = false }: Pr
           startAdornment: <InputAdornment position="start">0x</InputAdornment>,
         }}
         disabled={disabled}
-      />
+      /> */}
       <TextField
-        label="I/O_base_address"
+        label="Memory Requirement"
+        // label="I/O_base_address"
         value={ioPoint}
         onChange={(e) => onChangeIOPoint(e.target.value)}
         InputProps={{
@@ -78,7 +79,7 @@ export default function MemoryMap({ className, memoryMap, disabled = false }: Pr
         }}
         disabled={disabled}
       />
-      <TextField
+      {/* <TextField
         label="I-Mem_base_address"
         value={iMemPoint}
         onChange={(e) => onChangeIMemPoint(e.target.value)}
@@ -104,7 +105,7 @@ export default function MemoryMap({ className, memoryMap, disabled = false }: Pr
           startAdornment: <InputAdornment position="start">0x</InputAdornment>,
         }}
         disabled={disabled}
-      />
+      /> */}
       <div className="flex justify-center gap-2">
         <Button
           className="h-fit w-fit px-3 py-2"

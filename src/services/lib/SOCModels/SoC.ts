@@ -58,22 +58,22 @@ export default class Soc {
     active_monitor: any
     LedMatrix?: LedMatrix
     keyboard?: Keyboard
-    // monitor?: Monitor
+    monitor?: Monitor
     view?: NCKHBoard
 
     public setLogger(logger: Logger) {
         this.logger = logger
     }
 
-    // public setKeyboard(keyboard: Keyboard) {
-    //     this.keyboard       = keyboard
-    //     // this.Ecall.keyboard = keyboard
-    // }
+    public setKeyboard(keyboard: Keyboard) {
+        this.keyboard       = keyboard
+        // this.Ecall.keyboard = keyboard
+    }
 
-    // public setMonitor(monitor: Monitor) {
-    //     this.monitor        = monitor
-    //     // this.Ecall.monitor  = monitor
-    // }
+    public setMonitor(monitor: Monitor) {
+        this.monitor        = monitor
+        // this.Ecall.monitor  = monitor
+    }
 
     public setView(view: NCKHBoard) {
         this.view = view

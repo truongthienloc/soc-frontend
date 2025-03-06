@@ -52,7 +52,7 @@ export default function SocPage({}: Props) {
   } = useResizable({
     axis: 'x',
     min: 50,
-    initial: 410,
+    initial: 430,
     // initial: window ? window.innerWidth / 3 - 10 : 455,
   })
   // const {
@@ -180,11 +180,11 @@ export default function SocPage({}: Props) {
         logRef.current = logs
         socModel.setLogger(logs)
         socModel.setView(soc)
-        socModel.setKeyboard(keyboard)
-        socModel.setMonitor(monitor)
+        // socModel.setKeyboard(keyboard)
+        // socModel.setMonitor(monitor)
         socModel.setLedMatrix(ledMatrix)
 
-        setPosition1(410)
+        setPosition1(430)
         setRegisters([
           ...socModel.Processor.getRegisters(),
           {
@@ -257,7 +257,7 @@ export default function SocPage({}: Props) {
         },
       ])
       setPageTable(socModelRef.current.Memory.getPageNumber())
-      setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
+      // setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
     })
     socModelRef.current.RunAll()
     // setShowSimulatorType('SOC')
@@ -335,7 +335,7 @@ export default function SocPage({}: Props) {
         ])
         setPageTable(socModelRef.current.Memory.getPageNumber())
         setStepColors(modelColors2ViewColors(socModelRef.current.Processor.lineColor))
-        setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
+        // setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
       })
       socModelRef.current.stepWithEvent()
     }
@@ -379,15 +379,12 @@ export default function SocPage({}: Props) {
     const decStack_point = parseInt(stackPoint, 16)
 
     const tlbEntries = tlb2Array(tlb.tlbData)
+    const requirementMem = decIO_point
 
     if (
       !socModelRef.current?.assemble(
         code,
-        decLM_point,
-        decIO_point,
-        decImem_point,
-        decDmem_point,
-        decStack_point,
+        requirementMem,
         memoryData.map((mem) => ({ name: hexToBinary(mem.name), value: hexToBinary(mem.value) })),
         tlbEntries,
         parseInt(tlb.pointer, 16),
@@ -401,7 +398,7 @@ export default function SocPage({}: Props) {
       toast.success('Ready to run')
       setAllowRun(true)
       setPageTable(socModelRef.current.Memory.getPageNumber())
-      setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
+      // setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
       setRegisters([
         ...socModelRef.current.Processor.getRegisters(),
         {
@@ -493,18 +490,25 @@ export default function SocPage({}: Props) {
                 </p>
                 <img className="h-32 w-32" src="/images/logo/LogoUIT.png" alt="UIT's Logo" />
               </div>
-              <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center [&_a]:text-blue-500 hover:[&_a]:underline">
                 <p className="font-semibold">SOC - Simulator</p>
                 <p className="text-sm">
-                  AUTHORS:{' '}
+                  <strong>INSTRUCTOR:</strong>{' '}
+                  <a target="_blank" href="https://www.linkedin.com/in/duong-tran-3a650a113/">
+                    Trần Đại Dương
+                  </a>
+                </p>
+                <p className="text-sm">
+                  <strong>AUTHORS:</strong>{' '}
                   <a target="_blank" href="https://www.linkedin.com/in/ngbn111723/">
                     Nguyễn Gia Bảo Ngọc
                   </a>{' '}
                   &{' '}
                   <a target="_blank" href="https://www.linkedin.com/in/truongthienloc/">
-                    Thương Thiên Lộc
+                    Trương Thiên Lộc
                   </a>
                 </p>
+                
               </div>
               <div id="simulation"></div>
             </div>
@@ -535,6 +539,7 @@ export default function SocPage({}: Props) {
                 <Tab label="Coding View" />
                 <Tab label="Schematic View" />
                 <Tab label="Disassembly" />
+                <Tab label="Console" />
               </Tabs>
               {/* Tab index = 0: Coding View and Registers table */}
               <TabPanel
@@ -595,6 +600,24 @@ export default function SocPage({}: Props) {
                 className="flex flex-1 flex-col gap-4 pt-8 max-sm:mb-20 max-sm:w-dvw max-sm:overflow-auto max-sm:px-1"
               >
                 <Disassembly socModel={socModel} />
+              </TabPanel>
+              <TabPanel index={3} className="grid grid-cols-[4fr_6fr] pt-8">
+                <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
+                  {isStepping ? (
+                    <DisplayStepCode code={stepCode} pc={pc} />
+                  ) : (
+                    <CodeEditor
+                      value={code}
+                      onChange={handleChangeCode}
+                      disable={disableCodeEditor}
+                      hidden={showSimulatorType !== 'PERIPHERALS' || tabIndex != 0}
+                    />
+                  )}
+                </div>
+                <div className="mt-8 min-w-[460px] max-sm:-ml-14 max-sm:-mt-14 max-sm:mb-14 max-sm:scale-75">
+                  <div className="monitor" id="monitor" tabIndex={0}></div>
+                  <Keyboard />
+                </div>
               </TabPanel>
             </TabContext>
           </div>
@@ -667,11 +690,11 @@ export default function SocPage({}: Props) {
             {/* Tab Bar */}
             <TabContext index={tabIndex} setIndex={setTabIndex}>
               <Tabs>
-                <Tab label="Monitor & Keyboard" />
+                {/* <Tab label="Monitor & Keyboard" /> */}
                 <Tab label="Led Matrix" />
               </Tabs>
               {/* Tab index = 0 */}
-              <TabPanel index={0} className="grid grid-cols-[4fr_6fr]">
+              {/* <TabPanel index={0} className="grid grid-cols-[4fr_6fr]">
                 <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
                   {isStepping ? (
                     <DisplayStepCode code={stepCode} pc={pc} />
@@ -688,9 +711,9 @@ export default function SocPage({}: Props) {
                   <div className="monitor" id="monitor" tabIndex={0}></div>
                   <Keyboard />
                 </div>
-              </TabPanel>
+              </TabPanel> */}
               {/* Tab index = 1 */}
-              <TabPanel index={1} className="grid grid-cols-[4fr_6fr]">
+              <TabPanel index={0} className="grid grid-cols-[4fr_6fr]">
                 <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
                   {isStepping ? (
                     <DisplayStepCode code={stepCode} pc={pc} />
@@ -781,7 +804,7 @@ export default function SocPage({}: Props) {
             disabled={!allowRun}
             onClick={handleRunAllClick}
           >
-            Run all
+            SOC Run
           </Button>
           <Button
             className="h-fit capitalize"
@@ -789,7 +812,7 @@ export default function SocPage({}: Props) {
             onClick={handleStepClick}
             disabled={!allowRun}
           >
-            Step
+            Processor Step
           </Button>
         </div>
       </div>

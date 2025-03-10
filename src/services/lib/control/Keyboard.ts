@@ -25,7 +25,7 @@ export default class Keyboard {
         this.keyboardIO = keyboardIO
         this.monitorManagement = monitorManagement
         this.openKeyboardBehavior()
-        this.initIOEvent()
+        // this.initIOEvent()
     }
 
     private initIOEvent() {

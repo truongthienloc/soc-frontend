@@ -127,8 +127,8 @@ export default function SocPage({}: Props) {
         const LedMatrix = (await import('~/services/lib/control/LedMatrix')).default
 
         const soc = new NCKHBoard('simulation')
-        const monitor = new Monitor('#monitor', soc.monitorModule)
-        const keyboard = new Keyboard('#keyboard', soc.keyboardModule, monitor)
+        // const monitor = new Monitor('#monitor', soc.monitorModule)
+        // const keyboard = new Keyboard('#keyboard', soc.keyboardModule, monitor)
         const ledMatrix = new LedMatrix('.led-matrix')
         const logs = new Logs('#logs')
 
@@ -163,16 +163,16 @@ export default function SocPage({}: Props) {
           memory,
           mmu,
           dma,
-          monitor: viewMonitor,
-          keyboard: viewKeyboard,
+          // monitor: viewMonitor,
+          // keyboard: viewKeyboard,
           ledMatrix: viewLedMatrix,
         } = soc
         cpu.getEvent().on(Agent.Event.CLICK, handleCPUClick)
         memory.getEvent().on(Agent.Event.CLICK, handleMemoryClick)
         mmu.getEvent().on(Agent.Event.CLICK, handleMMUClick)
         dma.getEvent().on(Agent.Event.CLICK, handleDMAClick)
-        viewMonitor.getEvent().on(Agent.Event.CLICK, handleIOClick)
-        viewKeyboard.getEvent().on(Agent.Event.CLICK, handleIOClick)
+        // viewMonitor.getEvent().on(Agent.Event.CLICK, handleIOClick)
+        // viewKeyboard.getEvent().on(Agent.Event.CLICK, handleIOClick)
         viewLedMatrix.getEvent().on(Agent.Event.CLICK, handleLedMatrixClick)
 
         const socModel = new Soc('abc')

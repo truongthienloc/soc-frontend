@@ -12,7 +12,7 @@ export default class Monitor {
         this.containerQuery = containerQuery
         this.monitorIO = monitorIO
         this.openMonitorBehavior()
-        this.initIOEvent()
+        // this.initIOEvent()
     }
 
     private initIOEvent() {

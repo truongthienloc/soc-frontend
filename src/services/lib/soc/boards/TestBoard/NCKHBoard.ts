@@ -34,15 +34,15 @@ export default class NCKHBoard {
     public memoryModule: Module
     public dmaModule: Module
     public mmuModule: Module
-    public monitorModule: IOModule
-    public keyboardModule: IOModule
+    // public monitorModule: IOModule
+    // public keyboardModule: IOModule
     public osModule: Module
     public cpu: CPU
     public mmu: MMU
     public memory: Memory
     public dma: DMA
-    public monitor: Monitor
-    public keyboard: Keyboard
+    // public monitor: Monitor
+    // public keyboard: Keyboard
     public interconnect: Interconnect
     public matrixModule: IOModule
     public ledMatrix: LedMatrix
@@ -121,23 +121,23 @@ export default class NCKHBoard {
         const subInterBottomAdapter2 = subInterconnect.getAdapter('b002') as Adapter
         const subInterBottomAdapter3 = subInterconnect.getAdapter('b003') as Adapter
 
-        const ioModule2 = scene.createModuleWithC(
-            IOModule,
-            subInterconnect.x + 2.5,
-            subInterconnect.y + 6.5,
-        )
+        // const ioModule2 = scene.createModuleWithC(
+        //     IOModule,
+        //     subInterconnect.x + 2.5,
+        //     subInterconnect.y + 6.5,
+        // )
 
         const ioModule3 = scene.createModuleWithC(
             IOModule,
-            ioModule2.x + 5.75,
+            subInterconnect.x + 5.75 + 2.5,
             subInterconnect.y + 6.5,
         )
 
-        const ioModule1 = scene.createModuleWithC(
-            IOModule,
-            ioModule3.x + 5.75,
-            subInterconnect.y + 6.5,
-        )
+        // const ioModule1 = scene.createModuleWithC(
+        //     IOModule,
+        //     ioModule3.x + 5.75,
+        //     subInterconnect.y + 6.5,
+        // )
 
         // const memoryModule2 = scene.createModuleWithC(
         //     MemoryModule,
@@ -153,8 +153,8 @@ export default class NCKHBoard {
 
         const cpu1 = scene.createAgentWithC(CPU, X + 10, Y + 5)
         const mmu1 = scene.createAgentWithC(MMU, X + 10, Y + 5)
-        const monitor = scene.createAgentWithC(Monitor, X + 10, Y + 5)
-        const keyboard = scene.createAgentWithC(Keyboard, X + 10, Y + 5)
+        // const monitor = scene.createAgentWithC(Monitor, X + 10, Y + 5)
+        // const keyboard = scene.createAgentWithC(Keyboard, X + 10, Y + 5)
         const ledMatrix = scene.createAgentWithC(LedMatrix, X + 10, Y + 5)
         const memory = scene.createAgentWithC(Memory, X + 10, Y + 5)
         const dma = scene.createAgentWithC(DMA, X + 10, Y + 5)
@@ -167,8 +167,8 @@ export default class NCKHBoard {
         // mmuModule2.setAgent(mmu2)
         // cacheModule1.setAgent(cache1)
         // cacheModule2.setAgent(cache2)
-        ioModule1.setAgent(monitor)
-        ioModule2.setAgent(keyboard)
+        // ioModule1.setAgent(monitor)
+        // ioModule2.setAgent(keyboard)
         ioModule3.setAgent(ledMatrix)
         memoryModule1.setAgent(memory)
         memoryModule2.setAgent(dma)
@@ -191,9 +191,9 @@ export default class NCKHBoard {
 
         scene.createLink(interBottomAdapter1.shape, memoryModule1.getAdapter().shape)
         // scene.createLink(interBottomAdapter2.shape, ioModule2.getAdapter().shape)
-        scene.createLink(subInterBottomAdapter1.shape, ioModule2.getAdapter().shape)
+        // scene.createLink(subInterBottomAdapter1.shape, ioModule2.getAdapter().shape)
         scene.createLink(subInterBottomAdapter2.shape, ioModule3.getAdapter().shape)
-        scene.createLink(subInterBottomAdapter3.shape, ioModule1.getAdapter().shape)
+        // scene.createLink(subInterBottomAdapter3.shape, ioModule1.getAdapter().shape)
         scene.createLink(interTopAdapter3.shape, memoryModule2.getAdapter().shape)
         // scene.createLink(interTopAdapter3.shape, memoryModule2.getAdapter().shape)
 
@@ -204,8 +204,8 @@ export default class NCKHBoard {
         this.mmuModule = mmuModule1
         this.memoryModule = memoryModule1
         this.dmaModule = memoryModule2
-        this.monitorModule = ioModule1
-        this.keyboardModule = ioModule2
+        // this.monitorModule = ioModule1
+        // this.keyboardModule = ioModule2
         this.matrixModule = ioModule3
         this.osModule = osModule1
 
@@ -213,8 +213,8 @@ export default class NCKHBoard {
         this.mmu = mmu1
         this.memory = memory
         this.dma = dma
-        this.keyboard = keyboard
-        this.monitor = monitor
+        // this.keyboard = keyboard
+        // this.monitor = monitor
         this.interconnect = interconnect
         this.ledMatrix = ledMatrix
         this.memoryAllocator = memoryAllocator

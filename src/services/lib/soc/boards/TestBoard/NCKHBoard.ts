@@ -36,7 +36,7 @@ export default class NCKHBoard {
     public mmuModule: Module
     // public monitorModule: IOModule
     // public keyboardModule: IOModule
-    public osModule: Module
+    // public osModule: Module
     public cpu: CPU
     public mmu: MMU
     public memory: Memory
@@ -46,7 +46,7 @@ export default class NCKHBoard {
     public interconnect: Interconnect
     public matrixModule: IOModule
     public ledMatrix: LedMatrix
-    public memoryAllocator: MemoryAllocator
+    // public memoryAllocator: MemoryAllocator
 
     constructor(containerId: string) {
         Scene.CELL = 13
@@ -54,7 +54,7 @@ export default class NCKHBoard {
         const { X, Y } = this
 
         const cpuModule1 = scene.createModuleWithC(CPUModule, X + 9.25, Y + 3)
-        const osModule1 = scene.createModuleWithC(OSModule, cpuModule1.x + 5.75 * 2, cpuModule1.y)
+        // const osModule1 = scene.createModuleWithC(OSModule, cpuModule1.x + 5.75 * 2, cpuModule1.y)
         // const cpuModule2 = scene.createModuleWithC(CPUModule, X + 12, Y + 5)
 
         const mmuModule1 = scene.createModuleWithC(MMUModule, cpuModule1.x, cpuModule1.y + 8)
@@ -110,16 +110,16 @@ export default class NCKHBoard {
             interconnect.y + 6.5,
         )
 
-        const subInterconnect = scene.createInterconnectWithC(
-            SubInterconnect,
-            memoryModule1.x + 3.25,
-            interconnect.y + 4,
-        )
-        const subInterTopAdapter1 = subInterconnect.getAdapter('t001') as Adapter
-        const subInterTopAdapter2 = subInterconnect.getAdapter('t002') as Adapter
-        const subInterBottomAdapter1 = subInterconnect.getAdapter('b001') as Adapter
-        const subInterBottomAdapter2 = subInterconnect.getAdapter('b002') as Adapter
-        const subInterBottomAdapter3 = subInterconnect.getAdapter('b003') as Adapter
+        // const subInterconnect = scene.createInterconnectWithC(
+        //     SubInterconnect,
+        //     memoryModule1.x + 3.25,
+        //     interconnect.y + 4,
+        // )
+        // const subInterTopAdapter1 = subInterconnect.getAdapter('t001') as Adapter
+        // const subInterTopAdapter2 = subInterconnect.getAdapter('t002') as Adapter
+        // const subInterBottomAdapter1 = subInterconnect.getAdapter('b001') as Adapter
+        // const subInterBottomAdapter2 = subInterconnect.getAdapter('b002') as Adapter
+        // const subInterBottomAdapter3 = subInterconnect.getAdapter('b003') as Adapter
 
         // const ioModule2 = scene.createModuleWithC(
         //     IOModule,
@@ -129,8 +129,8 @@ export default class NCKHBoard {
 
         const ioModule3 = scene.createModuleWithC(
             IOModule,
-            subInterconnect.x + 5.75 + 2.5,
-            subInterconnect.y + 6.5,
+            interconnect.x + 5.75 + 5.75 + 5.75,
+            interconnect.y + 6.5,
         )
 
         // const ioModule1 = scene.createModuleWithC(
@@ -158,7 +158,7 @@ export default class NCKHBoard {
         const ledMatrix = scene.createAgentWithC(LedMatrix, X + 10, Y + 5)
         const memory = scene.createAgentWithC(Memory, X + 10, Y + 5)
         const dma = scene.createAgentWithC(DMA, X + 10, Y + 5)
-        const memoryAllocator = scene.createAgentWithC(MemoryAllocator, X + 10, Y + 5)
+        // const memoryAllocator = scene.createAgentWithC(MemoryAllocator, X + 10, Y + 5)
 
         // Agent -> Module
         cpuModule1.setAgent(cpu1)
@@ -172,12 +172,12 @@ export default class NCKHBoard {
         ioModule3.setAgent(ledMatrix)
         memoryModule1.setAgent(memory)
         memoryModule2.setAgent(dma)
-        osModule1.setAgent(memoryAllocator)
+        // osModule1.setAgent(memoryAllocator)
 
         // Get Interconnect Adapters
 
         // Create Links
-        scene.createLink(osModule1.getAdapter().shape, cpuModule1.getAdapter('t001').shape)
+        // scene.createLink(osModule1.getAdapter().shape, cpuModule1.getAdapter('t001').shape)
         scene.createLink(cpuModule1.getAdapter('b001').shape, mmuModule1.getAdapter('t001').shape)
         scene.createLink(mmuModule1.getAdapter('b001').shape, interTopAdapter1.shape)
 
@@ -187,12 +187,12 @@ export default class NCKHBoard {
         // )
         // scene.createLink(mmuModule2.getAdapter('b001').shape, interTopAdapter2.shape)
 
-        scene.createLink(interBottomAdapter3.shape, subInterTopAdapter2.shape)
+        // scene.createLink(interBottomAdapter3.shape, subInterTopAdapter2.shape)
 
         scene.createLink(interBottomAdapter1.shape, memoryModule1.getAdapter().shape)
         // scene.createLink(interBottomAdapter2.shape, ioModule2.getAdapter().shape)
         // scene.createLink(subInterBottomAdapter1.shape, ioModule2.getAdapter().shape)
-        scene.createLink(subInterBottomAdapter2.shape, ioModule3.getAdapter().shape)
+        scene.createLink(interBottomAdapter3.shape, ioModule3.getAdapter().shape)
         // scene.createLink(subInterBottomAdapter3.shape, ioModule1.getAdapter().shape)
         scene.createLink(interTopAdapter3.shape, memoryModule2.getAdapter().shape)
         // scene.createLink(interTopAdapter3.shape, memoryModule2.getAdapter().shape)
@@ -207,7 +207,7 @@ export default class NCKHBoard {
         // this.monitorModule = ioModule1
         // this.keyboardModule = ioModule2
         this.matrixModule = ioModule3
-        this.osModule = osModule1
+        // this.osModule = osModule1
 
         this.cpu = cpu1
         this.mmu = mmu1
@@ -217,7 +217,7 @@ export default class NCKHBoard {
         // this.monitor = monitor
         this.interconnect = interconnect
         this.ledMatrix = ledMatrix
-        this.memoryAllocator = memoryAllocator
+        // this.memoryAllocator = memoryAllocator
 
         // interconnect.setIsRunning(true)
         // cpu1.setIsRunning(true)

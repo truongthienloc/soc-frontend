@@ -110,15 +110,15 @@ export default class NCKHBoard {
             interconnect.y + 6.5,
         )
 
-        // const subInterconnect = scene.createInterconnectWithC(
-        //     SubInterconnect,
-        //     memoryModule1.x + 3.25,
-        //     interconnect.y + 4,
-        // )
+        const subInterconnect = scene.createInterconnectWithC(
+            SubInterconnect,
+            memoryModule1.x + 3.25,
+            interconnect.y + 4,
+        )
         // const subInterTopAdapter1 = subInterconnect.getAdapter('t001') as Adapter
-        // const subInterTopAdapter2 = subInterconnect.getAdapter('t002') as Adapter
+        const subInterTopAdapter2 = subInterconnect.getAdapter('t002') as Adapter
         // const subInterBottomAdapter1 = subInterconnect.getAdapter('b001') as Adapter
-        // const subInterBottomAdapter2 = subInterconnect.getAdapter('b002') as Adapter
+        const subInterBottomAdapter2 = subInterconnect.getAdapter('b002') as Adapter
         // const subInterBottomAdapter3 = subInterconnect.getAdapter('b003') as Adapter
 
         // const ioModule2 = scene.createModuleWithC(
@@ -130,7 +130,7 @@ export default class NCKHBoard {
         const ioModule3 = scene.createModuleWithC(
             IOModule,
             interconnect.x + 5.75 + 5.75 + 5.75,
-            interconnect.y + 6.5,
+            subInterconnect.y + 6.5,
         )
 
         // const ioModule1 = scene.createModuleWithC(
@@ -192,7 +192,8 @@ export default class NCKHBoard {
         scene.createLink(interBottomAdapter1.shape, memoryModule1.getAdapter().shape)
         // scene.createLink(interBottomAdapter2.shape, ioModule2.getAdapter().shape)
         // scene.createLink(subInterBottomAdapter1.shape, ioModule2.getAdapter().shape)
-        scene.createLink(interBottomAdapter3.shape, ioModule3.getAdapter().shape)
+        scene.createLink(interBottomAdapter3.shape, subInterTopAdapter2.shape)
+        scene.createLink(subInterBottomAdapter2.shape, ioModule3.getAdapter().shape)
         // scene.createLink(subInterBottomAdapter3.shape, ioModule1.getAdapter().shape)
         scene.createLink(interTopAdapter3.shape, memoryModule2.getAdapter().shape)
         // scene.createLink(interTopAdapter3.shape, memoryModule2.getAdapter().shape)

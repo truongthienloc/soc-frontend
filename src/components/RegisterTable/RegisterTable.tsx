@@ -7,7 +7,7 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import clsx from 'clsx'
-import { useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { cn } from '~/helpers/cn'
 import { convertRegisters2TwinRegisters } from '~/helpers/converts/register.convert'
 import { Register, TwinRegister } from '~/types/register'
@@ -48,7 +48,7 @@ function compareTwinRegister(prev: TwinRegister | null, data: TwinRegister): boo
   return res
 }
 
-export default function RegisterTable({ data, isShown }: Props) {
+const RegisterTable = React.memo(function RegisterTable({ data, isShown }: Props) {
   const twinData = useMemo(() => {
     return convertRegisters2TwinRegisters(data)
   }, [data])
@@ -104,4 +104,6 @@ export default function RegisterTable({ data, isShown }: Props) {
       </Table>
     </TableContainer>
   )
-}
+})
+
+export default RegisterTable

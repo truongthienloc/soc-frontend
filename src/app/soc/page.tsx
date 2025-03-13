@@ -215,9 +215,11 @@ export default function SocPage({}: Props) {
 
   const handleChangeCode = (code: string) => {
     setCode(code)
-    startTransition(() => {
-      setAllowRun(false)
-    })
+    // if (allowRun) {
+    //   startTransition(() => {
+    //     setAllowRun(false)
+    //   })
+    // }
   }
 
   const handleChangeMemoryData = (address: string, data: string) => {
@@ -508,7 +510,6 @@ export default function SocPage({}: Props) {
                     Trương Thiên Lộc
                   </a>
                 </p>
-                
               </div>
               <div id="simulation"></div>
             </div>
@@ -726,7 +727,7 @@ export default function SocPage({}: Props) {
                     />
                   )}
                 </div>
-                <LedMatrix />
+                {showSimulatorType === 'PERIPHERALS' && <LedMatrix />}
               </TabPanel>
             </TabContext>
           </div>

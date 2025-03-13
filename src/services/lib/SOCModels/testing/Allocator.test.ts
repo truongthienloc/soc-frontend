@@ -113,7 +113,6 @@ class TestBuddyAllocator {
 const tests = new TestBuddyAllocator()
 tests.runTests()
 
-
 // const allocator = new BuddyAllocator(1024) // Reset allocator
 // allocator.print()
 // const block1 = allocator.allocate(128)

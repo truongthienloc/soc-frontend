@@ -8,6 +8,7 @@ import Ecall from './Ecall/Ecall'
 import ChannelD from './ChannelD'
 import { measureMemory } from 'vm'
 import { symlink, write } from 'fs'
+import { Console } from 'console'
 
 export default class RiscVProcessor {
     name                        : string
@@ -27,7 +28,7 @@ export default class RiscVProcessor {
     state                       = 0
     pre_pc                      = 0
     pc                          = 0
-    Ecall                       : Ecall
+    // Ecall                       : Ecall
 
     ALUOp                       : any
     zero                        : any
@@ -76,7 +77,7 @@ export default class RiscVProcessor {
         this.SendData                   = ''
         this.instruction                = ''
 
-        this.Ecall                      = new Ecall
+        // this.Ecall                      = new Ecall
 
         this.colorCode = {
         'orange'  : 'FF8000',
@@ -886,6 +887,7 @@ export default class RiscVProcessor {
           icBusy            : boolean
         , cycle             : number
         , Memory2CPU        : any
+        , ready             : boolean
     ) 
     {
         if (this.state == 0) {
@@ -902,13 +904,13 @@ export default class RiscVProcessor {
                 this.master.receive (Memory2CPU)
                 this.instruction = this.master.ChannelD.data
                 this.state +=1
-                // this.master.ChannelA.valid = '1'
+
             }
             return
         }
         if (this.state == 2) {
             let [message, data, logic_address, writeRegister, size] = this.internalProcessing (this.instruction, this.pc, icBusy)
-            this.master.ChannelA.valid = '1'
+            console.log(message)
             if (message == 'PUT' || message == 'GET') {
                 this.Processor_messeage = message
                 this.SendData           = data
@@ -916,17 +918,23 @@ export default class RiscVProcessor {
                 this.writeReg           = writeRegister
                 this.state              += 1
             }
-            else this.state = 0
+            else {
+                // this.master.ChannelA.valid = '1'
+                this.state = 0
+            } 
             return
         }
         if (this.state == 3) {
             let physical_address = this.MMU.run(cycle, this.SendAddress)
             this.master.send (this.Processor_messeage,  physical_address, this.SendData)
+            this.master.ChannelA.valid = '1'
+
             if (this.MMU.MMU_message == 'TLB: VPN is missed.') this.state = 5
             else this.state = 4
             return
         }
         if (this.state == 4) {
+            this.master.ChannelA.valid = '0'
             if (Memory2CPU.valid == '1') {
                 this.master.receive (Memory2CPU)
                 if (Memory2CPU.opcode == '001') this.register[this.writeReg] =  this.master.ChannelD.data

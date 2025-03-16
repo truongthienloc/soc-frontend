@@ -47,7 +47,7 @@ export function assemble(
     this.Memory.SetInstructionMemory(this.Assembler.binary_code) // LOAD INTUCTIONS INTO MAIN MEMORY
     this.Memory.setPageNumber()
     // this.DMA.config(dmaDes, dmaSrc, dmaLen)
-    this.MMU.Set(
+    this.Processor.MMU.Set(
         TLB                 // P: [number, number, number, number][]
         , stap              // , pointer       : number
         , this.Allocator.allocate(required_mem)           // , end_addr      : number

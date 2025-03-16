@@ -64,7 +64,7 @@ export default class InterConnect {
                 ,dataFromSub_valid          
                 ,cycle                      
             )
-            this.state +=1
+            if (! ((this.Pin[0].isEmpty()) && (this.Pin[1].isEmpty()) && (this.Pin[2].isEmpty()) && (this.Pin[3].isEmpty()))) this.state +=1
             return
         }
         if (this.state == 1) {
@@ -160,33 +160,36 @@ export default class InterConnect {
     }
 
     Route (Abiter: number) {
-        console.log('abiter', Abiter)
+        console.log('route')
         if (Abiter == 0) {
-            
+            console.log('pin0',this.Pin[0])
             const dataFromProcessor = {...this.Pin[0].dequeue()}
-            if (this.Pin[0].dequeue() instanceof ChannelA) {
+            console.log('pin0',this.Pin[0])   
+
+            // if (this.Pin[0].dequeue() instanceof ChannelA) {
                 // if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(dataFromProcessor)
                 if (
                     (
-                        (parseInt('0'+dataFromProcessor.address, 16)    > 0x000305C + 1) 
-                    &&  (parseInt('0'+dataFromProcessor.address, 16)    < 0X1BFFF    + 1)
+                        (parseInt('0'+dataFromProcessor.address, 2)    > 0x000305C + 1) 
+                    &&  (parseInt('0'+dataFromProcessor.address, 2)    < 0X1BFFF    + 1)
                     ) || 
                     (
-                        (parseInt('0'+dataFromProcessor.address, 16)    >= 0)
-                    &&  (parseInt('0'+dataFromProcessor.address, 16)    <= 0x000304C  )
+                        (parseInt('0'+dataFromProcessor.address, 2)    >= 0)
+                    &&  (parseInt('0'+dataFromProcessor.address, 2)    <= 0x000304C  )
                     )
                     
                 ) {
+
                     if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(dataFromProcessor)
                 }
                 if (
-                    (parseInt('0'+dataFromProcessor.address, 16) > 0x000304C) 
-                    && (parseInt('0'+dataFromProcessor.address, 16) <= 0x000305C)
+                    (parseInt('0'+dataFromProcessor.address, 2) > 0x000304C) 
+                    && (parseInt('0'+dataFromProcessor.address, 2) <= 0x000305C)
                 ) {
                     if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromProcessor)
                 }
             }
-        }
+        //}
         if (Abiter == 1) {
             const dataFromDMA = this.Pin[1].dequeue()
             if (dataFromDMA instanceof ChannelA) {

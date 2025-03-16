@@ -24,6 +24,7 @@ import { Step } from './SOC/SOC.step'
 import BuddyAllocator from "./BuddyAllocator"
 import sub_InterConnect from './sub_Interconnect'
 import ChannelA from './ChannelA'
+import { Console } from 'console'
 // import {Monitor} from './Monitor'
 // import {Keyboard} from './Keyboard'
 
@@ -68,12 +69,12 @@ export default class Soc {
 
     public setKeyboard(keyboard: Keyboard) {
         this.keyboard       = keyboard
-        this.Processor.Ecall.keyboard = keyboard
+        // this.Processor.Ecall.keyboard = keyboard
     }
 
     public setMonitor(monitor: Monitor) {
         this.monitor        = monitor
-        this.Processor.Ecall.monitor  = monitor
+        // this.Processor.Ecall.monitor  = monitor
     }
 
     public setView(view: NCKHBoard) {
@@ -173,7 +174,9 @@ export default class Soc {
         this.Processor.Run(
             false
             , this.cycle
-            , this.Bus0.Pout[0].dequeue())
+            , this.Bus0.Pout[0].dequeue()
+            , this.Bus0.state ==0
+        )
             
         this.Memory.Run(
             this.cycle
@@ -191,6 +194,19 @@ export default class Soc {
             ,this.cycle
         )
         this.cycle +=1
+
+        console.log('this.Processor.master.ChannelA', this.Processor.master.ChannelA)
+        console.log('this.Memory.slaveMemory.ChannelD', this.Memory.slaveMemory.ChannelD)
+        console.log('this.Processor.state, this.Memory.step, this.Bus0.state', this.Processor.state, this.Memory.step, this.Bus0.state)
+        console.log(this.Bus0.Timming)
+        console.log('pin0',this.Bus0.Pin[0])
+        console.log('********************************')
+        // console.log('this.Processor.state, this.Memory.step, this.Bus0.state', this.Processor.state, this.Memory.step, this.Bus0.state)
+        // console.log('pin0',this.Bus0.Pin[0].peek())
+
+        // if (this.Processor)
+
+
     }
 //     public async Step()                                                                                             {
 //         this.Check_Processor ()

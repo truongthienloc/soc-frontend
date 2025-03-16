@@ -1,7 +1,7 @@
 import ChannelA from "./ChannelA";
 
 export class FIFO_ChannelA {
-    private queue: ChannelA[];
+    queue: ChannelA[];
 
     constructor() {
         this.queue = [];

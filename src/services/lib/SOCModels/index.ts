@@ -11,9 +11,12 @@ const SOC               = new Soc('super SoC')
 const code              = 
 `
 .text  
-lui  x1 , 0x00007  
-lui  x22 , 0x00008
-addi x11, x0, 0x15
+addi x1, x0, 1
+sw x1, 4(x0)
+lw x2, 4(x0)
+addi x1, x0, 4
+sw x1, 4(x0)
+lw x3, 4(x0)
 `
 
 SOC.Processor.active    = true
@@ -45,4 +48,18 @@ SOC.assemble(
 )
 
 SOC.RunAll()
+// SOC.Step()
+// SOC.Step()
+// SOC.Step()
+// SOC.Step()
+// SOC.Step()
+// SOC.Step()
+// SOC.Step()
+// console.log(SOC.Bus0.Timming)
+// console.log(SOC.Bus0.Pin[0].peek())
+// SOC.Step()
+// console.log(SOC.Bus0.Pout[2].peek())
 console.log(SOC.Processor.getRegisters())
+// SOC.Step()
+// SOC.Step()
+// SOC.Step()

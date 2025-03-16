@@ -21,8 +21,8 @@ export default class Master {
                                         , '0000'                // mask
                                         , '0'.padStart(32, '0') // data
                                         , '0'                   // corrupt
-                                        , '1'
-                                        , '1'
+                                        , '0'
+                                        , '0'
                                     )  
         this.ChannelD   = new ChannelD (  '000'                 // opcode
                                         , '00'                  // param
@@ -32,8 +32,8 @@ export default class Master {
                                         , '0'                   // denied
                                         , '0'.padStart(32, '0') // data
                                         , '0'                   // corrupt
-                                        , '1'
-                                        , '1'
+                                        , '0'
+                                        , '0'
                                     )
     }
 

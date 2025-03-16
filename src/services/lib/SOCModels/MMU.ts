@@ -70,11 +70,11 @@ export default class MMU {
         const offset_dec        = parseInt(OFFSET, 2);
         const logic_address_dec = parseInt(logic_address, 2);
 
-        if ( (logic_address_dec >= 0 && logic_address_dec <= this.kernel_point) || 
-             (logic_address_dec >= this.user_point && logic_address_dec <= this.IO_point)){
-            this.physical_address = logic_address_dec;
-            message = 'MMU is passed!';
-        } else {
+        // if ( (logic_address_dec >= 0 && logic_address_dec <= this.kernel_point) || 
+        //      (logic_address_dec >= this.user_point && logic_address_dec <= this.IO_point)){
+        //     this.physical_address = logic_address_dec;
+        //     message = 'MMU is passed!';
+        // } else {
             // Kiểm tra trong TLB xem có VPN1 hay không và giá trị cột thứ 2 có bằng 1 không
             const check_pagenum = this.TLB.map(
                 (tlbEntry) => vpn_dec === tlbEntry[0] && tlbEntry[2] === 1 
@@ -93,7 +93,7 @@ export default class MMU {
                 message = "TLB: VPN is missed.";
                 this.physical_address = this.stap;
             }
-        }
+        //}
         return [this.physical_address.toString(2).padStart(32, '0'), message];
     }
 
@@ -141,12 +141,14 @@ export default class MMU {
     ) 
     {
         let [physical_address, MMU_message] = this.search_in_TLB (logic_address)
+        console.log('stap', this.stap)
         console.log  ('Cycle ', cycle.toString()+' : ' + MMU_message)
         //this.println ('Cycle ', this.cycle.toString()+' : ' + MMU_message)
 
         if (this.MMU_message == 'TLB: VPN is missed.') {
             const VPN       = logic_address.slice(0, 20)  // 10 bit đầu tiên
             const stap      = this.stap
+  
             const PTE       = stap + (parseInt(VPN , 2) & 0xf)* 4
             return (PTE).toString(2).padStart(17,'0')
         } else {

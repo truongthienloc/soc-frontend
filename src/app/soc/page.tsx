@@ -127,8 +127,8 @@ export default function SocPage({}: Props) {
         const LedMatrix = (await import('~/services/lib/control/LedMatrix')).default
 
         const soc = new NCKHBoard('simulation')
-        // const monitor = new Monitor('#monitor', soc.monitorModule)
-        // const keyboard = new Keyboard('#keyboard', soc.keyboardModule, monitor)
+        const monitor = new Monitor('#monitor')
+        const keyboard = new Keyboard('#keyboard', monitor)
         const ledMatrix = new LedMatrix('.led-matrix')
         const logs = new Logs('#logs')
 
@@ -151,7 +151,7 @@ export default function SocPage({}: Props) {
 
         const handleLedMatrixClick = () => {
           setShowSimulatorType('PERIPHERALS')
-          setTabIndex(1)
+          setTabIndex(0)
         }
 
         const handleDMAClick = () => {
@@ -611,7 +611,7 @@ export default function SocPage({}: Props) {
                       value={code}
                       onChange={handleChangeCode}
                       disable={disableCodeEditor}
-                      hidden={showSimulatorType !== 'PERIPHERALS' || tabIndex != 0}
+                      hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex != 3}
                     />
                   )}
                 </div>
@@ -723,7 +723,7 @@ export default function SocPage({}: Props) {
                       value={code}
                       onChange={handleChangeCode}
                       disable={disableCodeEditor}
-                      hidden={showSimulatorType !== 'PERIPHERALS' || tabIndex != 1}
+                      hidden={showSimulatorType !== 'PERIPHERALS' || tabIndex != 0}
                     />
                   )}
                 </div>

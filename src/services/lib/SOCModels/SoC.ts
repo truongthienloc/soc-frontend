@@ -4,8 +4,8 @@ import disAssembly from './Disassembly'
 import MMU from './MMU'
 import { dec, stringToAsciiAndBinary, BinToHex } from './convert'
 import Memory from './Memory'
-// import { Keyboard, Logger, Monitor } from './soc.d'
-import {Logger } from './soc.d'
+import { Keyboard, Logger, Monitor } from './soc.d'
+// import {Logger } from './soc.d'
 import Ecall from './Ecall/Ecall'
 import { NCKHBoard } from '../soc/boards'
 import DMA from './DMA'
@@ -24,8 +24,8 @@ import { Step } from './SOC/SOC.step'
 import BuddyAllocator from "./BuddyAllocator"
 import sub_InterConnect from './sub_Interconnect'
 import ChannelA from './ChannelA'
-import {Monitor} from './Monitor'
-import {Keyboard} from './Keyboard'
+// import {Monitor} from './Monitor'
+// import {Keyboard} from './Keyboard'
 
 export default class Soc {
     name        : string
@@ -36,8 +36,8 @@ export default class Soc {
     Memory      : Memory
     DMA         : DMA
     Led_matrix  : boolean[][]
-    Monitor     : Monitor
-    Keyboard    : Keyboard
+    // Monitor     : Monitor
+    // Keyboard    : Keyboard
 
     arbiter     : boolean
 
@@ -63,16 +63,17 @@ export default class Soc {
 
     public setLogger(logger: Logger) {
         this.logger = logger
+        this.Processor.setLogger(logger)
     }
 
     public setKeyboard(keyboard: Keyboard) {
         this.keyboard       = keyboard
-        // this.Ecall.keyboard = keyboard
+        this.Processor.Ecall.keyboard = keyboard
     }
 
     public setMonitor(monitor: Monitor) {
         this.monitor        = monitor
-        // this.Ecall.monitor  = monitor
+        this.Processor.Ecall.monitor  = monitor
     }
 
     public setView(view: NCKHBoard) {
@@ -101,8 +102,8 @@ export default class Soc {
         this.Assembler      = new Assembler()
         this.Assembly_code  = []
         this.Led_matrix     = []
-        this.Monitor        = new Monitor        ()
-        this.Keyboard       = new Keyboard       ()
+        // this.Monitor        = new Monitor        ()
+        // this.Keyboard       = new Keyboard       ()
         this.Allocator      = new BuddyAllocator (0x0BFFF, 0X0C000)
         this.MMU_endAddr    = 0
         this.arbiter        = false

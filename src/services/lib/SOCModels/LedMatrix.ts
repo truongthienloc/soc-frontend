@@ -1,5 +1,6 @@
 import Slave from './Slave'
 import ChannelA from "./ChannelA"
+import LedMatrix from '../control/LedMatrix'
 
 export class LEDMatrix {
     

@@ -2,6 +2,9 @@ import MMU from './MMU'
 import { dec, handleRegister } from './sub_function'
 import { mux } from './sub_function'
 import Master from './Master'
+import {Logger } from './soc.d'
+import Ecall from './Ecall/Ecall'
+
 import ChannelD from './ChannelD'
 import { measureMemory } from 'vm'
 import { symlink, write } from 'fs'
@@ -23,7 +26,8 @@ export default class RiscVProcessor {
     instruction                 : string
     state                       = 0
     pre_pc                      = 0
-    pc                          = 4
+    pc                          = 0
+    Ecall                       : Ecall
 
     ALUOp                       : any
     zero                        : any
@@ -46,6 +50,20 @@ export default class RiscVProcessor {
     wb                          : any
     imm                         : any
     stalled                     : any
+    logger?: Logger
+
+    public println(...args: string[]) {
+        if (!this.logger) {
+            return
+        }
+        this.logger.println(...args)
+        //console.log(...args)
+    }
+
+    public setLogger(logger: Logger) {
+        this.logger = logger
+    }
+    
 
     constructor(name: string, source: string, active: boolean) {
         this.name                       = name
@@ -57,6 +75,9 @@ export default class RiscVProcessor {
         this.SendAddress                = ''
         this.SendData                   = ''
         this.instruction                = ''
+
+        this.Ecall                      = new Ecall
+
         this.colorCode = {
         'orange'  : 'FF8000',
         'red'     : 'FF0000',
@@ -156,7 +177,7 @@ export default class RiscVProcessor {
         this.slt = 0
         this.Data_memory = {}
         this.Instruction_memory = {}
-        this.pc = 4
+        this.pc = 0
         this.stalled = false
     }
 

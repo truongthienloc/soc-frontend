@@ -1,6 +1,6 @@
 import { Register } from 'C:/Users/LENOVO/Desktop/KLTN/src/soc-frontend/src/types/register'
 import Slave from './Slave'
-import { dec } from './sub_function'
+import { dec, } from './sub_function'
 import ChannelA from './ChannelA'
 
 export default class Memory {
@@ -209,7 +209,7 @@ export default class Memory {
     }
     
     
-    }
+    
 
     // public GetMemory(): { [key: string]: string } {
     //     // Chuyển object sang mảng các cặp [key, value]
@@ -231,33 +231,33 @@ export default class Memory {
     //     return sortedObj;
     // }
     
-//     public setMemoryFromString(input: string): { beforeColon: string; afterColon: string }[] {
-//         // Split the input into sections using regex that considers new lines and colons
-//         const sections = input.split(/\n(?=0x)/).map(section => section.trim());
-//         // TAO CODE 
-//         const result = sections.map(section => {
-//             // Split each section into beforeColon and afterColon based on the first colon
-//             const [beforeColon, afterColon] = section.split(/:\s*/);
-//             return {
-//                 beforeColon: beforeColon.trim(),
-//                 afterColon: (afterColon || '').trim().replace(/\s+/g, ' ') // Replace multiple spaces/newlines with single space
-//             };
-//         });
+    public setMemoryFromString(input: string): { beforeColon: string; afterColon: string }[] {
+        // Split the input into sections using regex that considers new lines and colons
+        const sections = input.split(/\n(?=0x)/).map(section => section.trim());
+        // TAO CODE 
+        const result = sections.map(section => {
+            // Split each section into beforeColon and afterColon based on the first colon
+            const [beforeColon, afterColon] = section.split(/:\s*/);
+            return {
+                beforeColon: beforeColon.trim(),
+                afterColon: (afterColon || '').trim().replace(/\s+/g, ' ') // Replace multiple spaces/newlines with single space
+            };
+        });
         
-//         for (const element of result) {
-//             let count = 0
-//             const address = parseInt(element.beforeColon, 16)
+        for (const element of result) {
+            let count = 0
+            const address = parseInt(element.beforeColon, 16)
             
-//             for (const element1 of element.afterColon.split(" ")) {
+            for (const element1 of element.afterColon.split(" ")) {
                 
-//                 const data    = hexToBinary (element1).padStart(32,'0')
-//                 console.log(data)
-//                 this.Memory[ (address + count).toString(2).padStart(32,'0')] = data
-//                 //console.log('address',hexToBinary (address + count).padStart(32,'0'))
-//                 count+=4
-//             }
-//         }
+                const data    = hexToBinary (element1).padStart(32,'0')
+                console.log(data)
+                this.Memory[ (address + count).toString(2).padStart(32,'0')] = data
+                //console.log('address',hexToBinary (address + count).padStart(32,'0'))
+                count+=4
+            }
+        }
         
-//         return result
-//     }
-// }
+        return result
+    }
+}

@@ -27,8 +27,8 @@ export function assemble(
         this.Bus1.active        = this.view.interconnect.getActivated()
         // this.DMA.active         = this.view.dmaModule.getActivated()
         this.Memory.active      = this.view.memoryModule.getActivated()
-        this.active_keyboard    = this.view.keyboardModule.getActivated()
-        this.active_monitor     = this.view.monitorModule.getActivated()
+        // this.active_keyboard    = this.view.keyboardModule.getActivated()
+        // this.active_monitor     = this.view.monitorModule.getActivated()
         
     }
     
@@ -67,8 +67,8 @@ export function assemble(
     this.cycle = 0
     this.view?.cpu.setIsRunning(false)
     this.view?.mmu.setIsRunning(false)
-    this.view?.monitor.setIsRunning(false)
-    this.view?.keyboard.setIsRunning(false)
+    // this.view?.monitor.setIsRunning(false)
+    // this.view?.keyboard.setIsRunning(false)
     this.view?.memory.setIsRunning(false)
     this.view?.dma.setIsRunning(false)
     this.view?.interconnect.setIsRunning(false)

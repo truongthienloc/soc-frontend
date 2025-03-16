@@ -1,133 +1,129 @@
 import Slave from './Slave';
 import Master from './Master';
-import ChannalD from './ChannelD';
+import ChannelA             from "./ChannelA"
+import ChannelD             from "./ChannelD"
 
 export default class DMA {
-    active: boolean
-    masterDMA: Master
+    sourceAddress       : string
+    destinationAddress  : string
+    length              : string
+    control             : string
+    status              : string
+    state               : number 
+    sendoffset          : number
+    DMA_Master          : Master
+    DMA_Slave           : Slave
+    DMA_buffer          : string[]
 
-    Src_addr: number
-    Des_addr: number
-    Size: number
-    buffer: boolean[][]
-    phase: boolean
-    line_rec: number
-    line_send: number
-    offset_send: number
-    
-    constructor(active: boolean) {
-        this.active     = active
-        this.Des_addr   = 0
-        this.Src_addr   = 0
-        this.Size       = 0
-        this.phase      = false
-        this.line_rec   = 0
-        this.line_send  = 0
-        this.offset_send  = 0
-
-        this.masterDMA = new Master('DMA Master', active, '01');
-        this.buffer = Array(96).fill(null).map(() => Array(96).fill(false));
+    constructor() {
+        this.sourceAddress      = '00000000000000000000000000000000'
+        this.destinationAddress = '00000000000000000000000000000000'
+        this.length             = '00000000000000000000000000000000'
+        this.control            = '00000000000000000000000000000000'
+        this.status             = '00000000000000000000000000000000'
+        this.state              = 0
+        this.sendoffset         = 0
+        this.DMA_Master         = new Master('DMA_Master', true, '01')
+        this.DMA_Master.ChannelA.size = '10'
+        this.DMA_Slave          = new Slave ('DMA_Slave', true)
+        this.DMA_buffer         = Array(288).fill('00000000000000000000000000000000')
     }
-
-    public config(Des_addr: number, Src_addr: number, Size: number) {
-        this.Des_addr = Des_addr;
-        this.Src_addr = Src_addr;
-        this.Size = Size;
-    }
-
-    public SENDtoMemory() {
-        this.masterDMA.active = this.active;
-        if (this.Size > 0) {
-            this.masterDMA.send('GET', this.Src_addr.toString(2), '');
-            this.Size -= 4;
-        } else {
-            this.active = false;
+    public run (sub2DMA: ChannelA, Memrory2DMA: any, Led2DMA: any) {
+        //console.log (sub2DMA.address.length, sub2DMA.data.length)
+        if (this.state == 0 && sub2DMA.valid == '1') {
+            this.DMA_Slave.receive(sub2DMA)
+            this.config (this.DMA_Slave.ChannelA.address, this.DMA_Slave.ChannelA.data)
+            return
         }
-    }
-
-    public RECfromMemory(channelD: ChannalD) {
-        this.masterDMA.active = this.active;
-        if (this.line_rec < 96) {
-            let data = this.masterDMA.receive('AccessAckData', channelD);
-            // console.log('data: ', data)
-            let boolArray: boolean[] = data.split('').map(char => char === '1');
-            // console.log ('boolArray: ', boolArray)
-            // console.log ('data: ', this.active)
-            for (let j = 0; j < 32; j++) {
-                this.buffer[this.line_rec][j] = boolArray[j];
-            }
-            this.line_rec = (this.line_rec + 32) % 96;
-        } else {
-            this.active = false;
-        }
-    }
-
-    public SENDtoLED() {
-        this.masterDMA.active = this.active;
-        if (this.line_send < 96) {
-            let row         = this.buffer[this.line_send]
-            let data1       = row.slice(this.offset_send*32, this.offset_send*32 + 32).map(value => value ? '1' : '0').join('')
-            this.masterDMA.send('PUT', this.Des_addr.toString(2), data1)
+        if (this.state == 1 || this.state == 2) {
+            return this.get    (Memrory2DMA)
             
-            this.line_send  = (this.line_send + 32) % 96
-        } else 
-        {
-            this.active = false
         }
-        return this.masterDMA.ChannelA.data
+        if (this.state == 3 || this.state == 4) {
+            return this.put    (Led2DMA)
+        }
+
+    }
+
+    config(address: string, data: string) {
+        // Kiểm tra địa chỉ và dữ liệu có hợp lệ không
+        if (address.length !== 17 || data.length !== 32) {
+            console.log("Invalid address or data length");
+            return;
+        }
+
+        // Chuyển địa chỉ từ chuỗi nhị phân sang số nguyên và sau đó sang hex
+        const hexAddress = '0x' + parseInt(address, 2).toString(16).toUpperCase().padStart(8, '0');
+
+        if (this.state == 0) {
+            switch (hexAddress) {
+                case '0x0000304C':
+                    this.sourceAddress = data;
+                    break;
+                case '0x00003050':
+                    this.destinationAddress = data;
+                    break;
+                case '0x00003054':
+                    this.length = data;
+                    break;
+                case '0x00003058':
+                    this.control = data;
+                    break;
+                default:
+                    console.log("Invalid address for configuration: " + hexAddress);
+                    return;
+            }
+        }
+
+        // Kiểm tra xem đã cấu hình đầy đủ chưa
+        if ((this.sourceAddress         != '00000000000000000000000000000000') && 
+            (this.destinationAddress    != '00000000000000000000000000000000') && 
+            (this.length                != '00000000000000000000000000000000') && 
+            (this.control               != '00000000000000000000000000000000')
+        ) {
+            this.state += 1;
+        }
+    }
+
+    get(Memory2DMA: any) {
+        if (this.state == 1) {
+            // Get operation for different addresses and store results in beats array
+            this.DMA_Master.send(
+                'GET',
+                (parseInt(this.sourceAddress.slice(-17), 2)).toString(2).padStart(17, '0'),
+                ''
+            );
+            this.state += 1;
+            return {...this.DMA_Master.ChannelA};
+        }
+    
+        if (this.state == 2) {
+            if (Memory2DMA.valid == '1') {
+                this.DMA_Master.receive(Memory2DMA);
+                this.DMA_buffer[parseInt(this.length, 2)] = this.DMA_Master.ChannelD.data;
+                this.length = (parseInt(this.length, 2) - 4).toString(2).padStart(32, '0');
+                this.state += 1;
+            }
+        }
+    }
+
+    put(Led2DMA: any) {
+        if (this.state == 3 ) {
+            console.log(`Sending data from source address: ${this.sourceAddress}`);
+            this.DMA_Master.send (
+                'PUT'
+                , (this.destinationAddress).slice(0,18)
+                , this.DMA_buffer [parseInt(this.destinationAddress + this.sendoffset + 0, 2)]
+            )
+            this.state += 1
+            return {...this.DMA_Master.ChannelA};
+        }
+
+        if (this.state == 4 ) {
+            if (Led2DMA.valid == '1') {
+                this.DMA_Master.receive (Led2DMA)
+                this.state = 0
+            }
+        }
     }
 }
-
-
-    
-    // public Send2Memory () {
-    //     this.masterDMA.active = this.active
-    //     this.masterDMA.send('GET', this.SendAddrM.toString(2), '')
-    //     if (this.CountTransaction == this.NumTransaction) {
-    //         this.SendAddrM        = 0
-    //         this.CountTransaction = 0
-    //     } else this.SendAddrM += this.Start_addr + 4
-    // }
-
-    // public ReceivefMemory (data: string) {
-    //     this.Databuffer[this.bufferPointerW.toString(2).padStart(32, '0')] = data
-    //     this.ReceiveAddr     = this.ReceiveAddr + 1
-    //     if (this.bufferPointerW <= this.Len) this.bufferPointerW += 4
-    //     else this.bufferPointerW = 0
-    // }
-
-    // public Send2Peri ()  {
-    //     //this.CountTransaction += 1
-    //     const data = this.Databuffer[this.bufferPointerR.toString(2).padStart(32, '0')] 
-    //     this.masterDMA.send('PUT', this.bufferPointerR.toString(2),  data)
-    //     if (this.bufferPointerR == this.Len) {
-    //         this.bufferPointerR        = 0
-    //     }
-    //     else this.bufferPointerR += this.bufferPointerR + 4
-
-    // }
-    
-    
-    // public ScanData() {
-    //     let addr = this.Start_addr;
-    //     let trans_buffer: string[] = [];
-    //     const TransLen = this.NumTransaction;
-
-    //     for (let i = 0; i < TransLen; i++) {
-    //         trans_buffer.push(
-    //             this.masterDMA.send('GET', addr.toString(2), '_', 0, '_').slice(10, 42)
-    //         );
-    //         addr += 4; 
-    //     }
-    //     return trans_buffer;
-    // }
-    
-    // public getData(mem: { [key: string]: string}) {
-    //     const address = this.ScanData()
-    //     const result = [] as string[]
-    //     for (const element of address) {
-    //         result.push(mem[element])
-    //     }
-    //     return result
-    // }
-

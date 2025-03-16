@@ -25,7 +25,7 @@ export function assemble(
         this.MMU.active         = this.view.mmuModule.getActivated()
         this.Bus0.active        = this.view.interconnect.getActivated()
         this.Bus1.active        = this.view.interconnect.getActivated()
-        this.DMA.active         = this.view.dmaModule.getActivated()
+        // this.DMA.active         = this.view.dmaModule.getActivated()
         this.Memory.active      = this.view.memoryModule.getActivated()
         this.active_keyboard    = this.view.keyboardModule.getActivated()
         this.active_monitor     = this.view.monitorModule.getActivated()
@@ -42,11 +42,11 @@ export function assemble(
 
     // const endaddr = this.Allocator.allocate(required_mem)
     this.Processor.reset()
-    this.Processor.setImem(this.Assembler.binary_code)                 // LOAD INTUCTIONS INTO PROCESSOR
-    this.Memory.reset (Mem_tb, 0x07FFF, 0x1BFFF, 0x1FFFF)
-    this.Memory.SetInstuctionMemory(this.Processor.Instruction_memory) // LOAD INTUCTIONS INTO MAIN MEMORY
+    //this.Processor.setImem(this.Assembler.binary_code)                 // LOAD INTUCTIONS INTO PROCESSOR
+    this.Memory.reset (Mem_tb)
+    this.Memory.SetInstructionMemory(this.Assembler.binary_code) // LOAD INTUCTIONS INTO MAIN MEMORY
     this.Memory.setPageNumber()
-    this.DMA.config(dmaDes, dmaSrc, dmaLen)
+    // this.DMA.config(dmaDes, dmaSrc, dmaLen)
     this.MMU.Set(
         TLB                 // P: [number, number, number, number][]
         , stap              // , pointer       : number
@@ -56,7 +56,7 @@ export function assemble(
         , 0x07FFF      // , 0x07FFF  : number
         , 0x1FFFF          // , 0x1FFFF      : number
     )
-    this.Bus0.setaddress (0x07FFF , 0x1BFFF)
+    // this.Bus0.setaddress (0x07FFF , 0x1BFFF)
     for (let i of this.Assembler.Instructions)
         if (i != '.text' && i != '') this.Assembly_code.push(i)
     //SET INITIAL ANIMATION'STATUS

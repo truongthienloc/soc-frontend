@@ -1,59 +1,96 @@
-import DMA from './DMA'
+// import DMA from './DMA'
 import Soc from './SoC'
-import ChannalD from './ChannelD'
+import ChannelD from './ChannelD'
+import ChannelA from "./ChannelA";
+import DMA from './DMA';
+import { LayersTwoTone } from '@mui/icons-material';
+import { cyan } from '@mui/material/colors';
+import { Console } from 'console';
+
+// let sub2DMA  = new ChannelA (  
+//                               '000'                 // opcode 
+//                             , '000'                 // param
+//                             , '10'                  // size
+//                             , '00'                  // source
+//                             , '0011000001001100'.padStart(17, '0') // address
+//                             , '0000'                // mask
+//                             , '1'.padStart(32, '0') // data
+//                             , '0'                   // corrupt
+//                             , '1'
+//                             , '0'
+//                         ) 
+// let Memory2DMA = new ChannelD (  '000'                 // opcode
+//                                 , '00'                  // param
+//                                 , '10'                  // size
+//                                 , '00'                  // source
+//                                 , '0'                   // sink
+//                                 , '0'                   // denied
+//                                 , '1'.padStart(32, '0') // data
+//                                 , '0'                   // corrupt
+//                                 , '1'
+//                                 , '0'
+//                           )
+                        
+// const dma = new DMA ()
+// dma.run (sub2DMA, '', '')
+// console.log (dma.sourceAddress, dma.sourceAddress.length)
+ 
+// sub2DMA  = new ChannelA (  
+//     '000'                 // opcode 
+//   , '000'                 // param
+//   , '10'                  // size
+//   , '00'                  // source
+//   , '0011000001010000'.padStart(17, '0') // address
+//   , '0000'                // mask
+//   , '1'.padStart(32, '0') // data
+//   , '0'                   // corrupt
+//   , '1'
+//   , '0'
+// ) 
+// dma.run (sub2DMA, '', '')
+// console.log (dma.destinationAddress, dma.destinationAddress.length)
+
+// sub2DMA  = new ChannelA (  
+//     '000'                 // opcode 
+//   , '000'                 // param
+//   , '10'                  // size
+//   , '00'                  // source
+//   , '0011000001010100'.padStart(17, '0') // address
+//   , '0000'                // mask
+//   , '1'.padStart(32, '0') // data
+//   , '0'                   // corrupt
+//   , '1'
+//   , '0'
+// ) 
+// dma.run (sub2DMA, '', '')
+// console.log (dma.length, dma.length.length)
+
+// sub2DMA  = new ChannelA (  
+//     '000'                 // opcode 
+//   , '000'                 // param
+//   , '10'                  // size
+//   , '00'                  // source
+//   , '0011000001011000'.padStart(17, '0') // address
+//   , '0000'                // mask
+//   , '1'.padStart(32, '0') // data
+//   , '0'                   // corrupt
+//   , '1'
+//   , '0'
+// ) 
+// dma.run (sub2DMA, '', '')
+// console.log (dma.control, dma.control.length)
+// console.log (dma.run (sub2DMA, '', ''),dma.state)
+// console.log (dma.run (sub2DMA, Memory2DMA, ''),dma.state)
+// console.log (dma.run (sub2DMA, '', ''),dma.state)
+// Memrory2DMA = new ChannelD (
+
+// )
 const SOC               = new Soc('super SoC')
-const channelD          = new ChannalD( '001'                   ,                       //opcode
-                                        '00'                    ,                       //param
-                                        '10'                    ,                       //size
-                                        '00'                    ,                       //source
-                                        '0'.padStart(21, '0')   ,     //sink
-                                        '0'                     ,                       //denied
-                                        '1'.padStart(32, '1')   ,      //data
-                                        '0'                         //corrupt
-                                    );
-
-SOC.Memory.Memory['11000000000000000'] = '1'.padStart(32, '1')
-SOC.Memory.Memory['100'.padStart(17, '0')] = '0'.padStart(32, '01')
-// SOC.DMA.active  = true
-// SOC.Bus0.active = true
-// SOC.Bus1.active = true
-// SOC.Bus1.setaddress (0x2241f, 0x2240, 0x223ff )
-// SOC.DMA.config (0x1fff + 1, 0x4, 4)
-// SOC.DMA_Get ()
-// console.log (SOC.DMA_put ())
-// SOC.DMA.RECfromMemory (channelD)
-
-// console.log (SOC.DMA.buffer)
-// console.log (SOC.DMA.SENDtoLED())
-// console.log (SOC.DMA.SENDtoLED())
-// const code              = 
-// `
-// .text  
-// lui  x2 , 0x00017
-// addi x2, x0, 32
-// addi x1, x0, 1
-// sw   x1 , 0(x2)
-// lw   x1 , 0(x2)
-
-// `
 const code              = 
 `
 .text  
 lui  x2 , 0x00008  
-lui  x3 , 0x00009 
-lui  x4 , 0x0000A 
-lui  x5 , 0x0000B
-lui  x6 , 0x0000C 
-lui  x8 , 0x0001D 
-
-addi x1 , x0, 1
-sw   x1 , 0(x2)
-sw   x1 , 0(x3)
-sw   x1 , 0(x4)
-sw   x1 , 0(x5)
-sw   x1 , 0(x6)
-sw   x1 , 4(x7)
-sw   x1 , 4(x8)
+lui  x1 , 0x00008
 `
 
 SOC.Processor.active    = true
@@ -61,7 +98,7 @@ SOC.MMU.active          = true
 SOC.Bus0.active          = true
 SOC.Bus1.active          = true
 SOC.Memory.active       = true
-SOC.DMA.active          = true
+// SOC.DMA.active          = true
 
 SOC.assemble(
             code                                     // ,code               : string 
@@ -82,15 +119,530 @@ SOC.assemble(
             ,0x1BFFF + 1                            // ,dmaSrc             : number
             ,16*32                                  // ,dmaLen             : number
             ,0x17FFF + 1                            // ,dmaDes             : number
-) 
-SOC.Memory.Memory['11100000000000000'] = '1'.padStart(32, '1')
+)
+
 SOC.RunAll()
 console.log(SOC.Processor.getRegisters())
-console.log(SOC.Memory.getPageNumber())
-// console.log(SOC.Memory.Memory)
-// console.log(SOC.Memory.Memory['01100000000000000'])
-// console.log(SOC.Memory.Memory['01101000000000000'])
-// console.log(SOC.Memory.Memory['01110000000000000'])
-// console.log(SOC.Memory.Memory['01111000000000000'])
-// console.log(SOC.Memory.Memory['11011000000000000'])
-// console.log(SOC.DMA.buffer)
+// let cycle = 0
+// SOC.Processor.Run(false, cycle, SOC.Bus0.Pout[0].dequeue())
+// SOC.Memory.Run(cycle, SOC.Bus0.Pout[2].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,SOC.Memory.slaveMemory.ChannelD.valid == '1'
+//   ,false
+//   ,cycle
+// )
+// cycle +=1
+// console.log('SOC.Processor.master.ChannelA  :  ', SOC.Processor.master.ChannelA)
+// console.log('SOC.Memory.slaveMemory.ChannelD:  ', SOC.Memory.slaveMemory.ChannelD)
+// console.log('Timming fifo',SOC.Bus0.Timming)
+// console.log('state',SOC.Processor.state, SOC.Bus0.state, SOC.Memory.step)
+
+// SOC.Processor.Run(false, cycle, SOC.Bus0.Pout[0].dequeue())
+// SOC.Memory.Run(cycle, SOC.Bus0.Pout[2].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,SOC.Memory.slaveMemory.ChannelD.valid == '1'
+//   ,false
+//   ,cycle
+// )
+// cycle +=1
+// console.log('SOC.Processor.master.ChannelA  :  ', SOC.Processor.master.ChannelA)
+// console.log('SOC.Memory.slaveMemory.ChannelD:  ', SOC.Memory.slaveMemory.ChannelD)
+// console.log('Timming fifo',SOC.Bus0.Timming)
+// console.log('state',SOC.Processor.state, SOC.Bus0.state, SOC.Memory.step)
+
+// SOC.Processor.Run(false, cycle, SOC.Bus0.Pout[0].dequeue())
+// SOC.Memory.Run(cycle, SOC.Bus0.Pout[2].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,SOC.Memory.slaveMemory.ChannelD.valid == '1'
+//   ,false
+//   ,cycle
+// )
+// cycle +=1
+// console.log('SOC.Processor.master.ChannelA  :  ', SOC.Processor.master.ChannelA)
+// console.log('SOC.Memory.slaveMemory.ChannelD:  ', SOC.Memory.slaveMemory.ChannelD)
+// console.log('Timming fifo',SOC.Bus0.Timming)
+// console.log('state',SOC.Processor.state, SOC.Bus0.state, SOC.Memory.step)
+
+// SOC.Processor.Run(false, cycle, SOC.Bus0.Pout[0].dequeue())
+// SOC.Memory.Run(cycle, SOC.Bus0.Pout[2].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,SOC.Memory.slaveMemory.ChannelD.valid == '1'
+//   ,false
+//   ,cycle
+// )
+// cycle +=1
+// console.log('SOC.Processor.master.ChannelA  :  ', SOC.Processor.master.ChannelA)
+// console.log('SOC.Memory.slaveMemory.ChannelD:  ', SOC.Memory.slaveMemory.ChannelD)
+// console.log('Timming fifo',SOC.Bus0.Timming)
+// console.log('state',SOC.Processor.state, SOC.Bus0.state, SOC.Memory.step)
+// console.log('SOC.Bus0.Pout[0].peek(): ', SOC.Bus0.Pout[0].peek())
+
+// SOC.Processor.Run(false, cycle, SOC.Bus0.Pout[0].dequeue())
+// SOC.Memory.Run(cycle, SOC.Bus0.Pout[2].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,SOC.Memory.slaveMemory.ChannelD.valid == '1'
+//   ,false
+//   ,cycle
+// )
+// cycle +=1
+// console.log('SOC.Processor.master.ChannelA  :  ', SOC.Processor.master.ChannelA)
+// console.log('SOC.Memory.slaveMemory.ChannelD:  ', SOC.Memory.slaveMemory.ChannelD)
+// console.log('Timming fifo',SOC.Bus0.Timming)
+// console.log('state',SOC.Processor.state, SOC.Bus0.state, SOC.Memory.step)
+// console.log('SOC.Bus0.Pout[0].peek(): ', SOC.Bus0.Pout[0].peek())
+
+// SOC.Processor.Run(false, cycle, SOC.Bus0.Pout[0].dequeue())
+// SOC.Memory.Run(cycle, SOC.Bus0.Pout[2].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,SOC.Memory.slaveMemory.ChannelD.valid == '1'
+//   ,false
+//   ,cycle
+// )
+// cycle +=1
+// console.log('SOC.Processor.master.ChannelA  :  ', SOC.Processor.master.ChannelA)
+// console.log('SOC.Memory.slaveMemory.ChannelD:  ', SOC.Memory.slaveMemory.ChannelD)
+// console.log('Timming fifo',SOC.Bus0.Timming)
+// console.log('state',SOC.Processor.state, SOC.Bus0.state, SOC.Memory.step)
+// console.log('SOC.Bus0.Pout[0].peek(): ', SOC.Bus0.Pout[0].peek())
+// console.log(SOC.Processor.getRegisters())
+
+// SOC.Processor.Run(false, cycle, SOC.Bus0.Pout[0].dequeue())
+// SOC.Memory.Run(cycle, SOC.Bus0.Pout[2].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,SOC.Memory.slaveMemory.ChannelD.valid == '1'
+//   ,false
+//   ,cycle
+// )
+// cycle +=1
+// console.log('SOC.Processor.master.ChannelA  :  ', SOC.Processor.master.ChannelA)
+// console.log('SOC.Memory.slaveMemory.ChannelD:  ', SOC.Memory.slaveMemory.ChannelD)
+// console.log('Timming fifo',SOC.Bus0.Timming)
+// console.log('state',SOC.Processor.state, SOC.Bus0.state, SOC.Memory.step)
+// console.log('SOC.Bus0.Pout[0].peek(): ', SOC.Bus0.Pout[0].peek())
+
+// SOC.Processor.Run(false, cycle, SOC.Bus0.Pout[0].dequeue())
+// SOC.Memory.Run(cycle, SOC.Bus0.Pout[2].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,SOC.Memory.slaveMemory.ChannelD.valid == '1'
+//   ,false
+//   ,cycle
+// )
+// cycle +=1
+// console.log('SOC.Processor.master.ChannelA  :  ', SOC.Processor.master.ChannelA)
+// console.log('SOC.Memory.slaveMemory.ChannelD:  ', SOC.Memory.slaveMemory.ChannelD)
+// console.log('Timming fifo',SOC.Bus0.Timming)
+// console.log('state',SOC.Processor.state, SOC.Bus0.state, SOC.Memory.step)
+// console.log('SOC.Bus0.Pout[0].peek(): ', SOC.Bus0.Pout[0].peek())
+// console.log('SOC.Bus0.Pout[2].peek(): ', SOC.Bus0.Pout[2].peek())
+
+// SOC.Processor.Run(false, cycle, SOC.Bus0.Pout[0].dequeue())
+// SOC.Memory.Run(cycle, SOC.Bus0.Pout[2].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,SOC.Memory.slaveMemory.ChannelD.valid == '1'
+//   ,false
+//   ,cycle
+// )
+// cycle +=1
+// console.log('SOC.Processor.master.ChannelA  :  ', SOC.Processor.master.ChannelA)
+// console.log('SOC.Memory.slaveMemory.ChannelD:  ', SOC.Memory.slaveMemory.ChannelD)
+// console.log('Timming fifo',SOC.Bus0.Timming)
+// console.log('state',SOC.Processor.state, SOC.Bus0.state, SOC.Memory.step)
+// console.log('SOC.Bus0.Pout[0].peek(): ', SOC.Bus0.Pout[0].peek())
+// console.log('SOC.Bus0.Pout[2].peek(): ', SOC.Bus0.Pout[2].peek())
+
+// SOC.Processor.Run(false, cycle, SOC.Bus0.Pout[0].dequeue())
+// SOC.Memory.Run(cycle, SOC.Bus0.Pout[2].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,SOC.Memory.slaveMemory.ChannelD.valid == '1'
+//   ,false
+//   ,cycle
+// )
+// cycle +=1
+// console.log('SOC.Processor.master.ChannelA  :  ', SOC.Processor.master.ChannelA)
+// console.log('SOC.Memory.slaveMemory.ChannelD:  ', SOC.Memory.slaveMemory.ChannelD)
+// console.log('Timming fifo',SOC.Bus0.Timming)
+// console.log('state',SOC.Processor.state, SOC.Bus0.state, SOC.Memory.step)
+// console.log('SOC.Bus0.Pout[0].peek(): ', SOC.Bus0.Pout[0].peek())
+// console.log('SOC.Bus0.Pout[2].peek(): ', SOC.Bus0.Pout[2].peek())
+
+// SOC.Processor.Run(false, cycle, SOC.Bus0.Pout[0].dequeue())
+// SOC.Memory.Run(cycle, SOC.Bus0.Pout[2].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,SOC.Memory.slaveMemory.ChannelD.valid == '1'
+//   ,false
+//   ,cycle
+// )
+// cycle +=1
+// console.log('SOC.Processor.master.ChannelA  :  ', SOC.Processor.master.ChannelA)
+// console.log('SOC.Memory.slaveMemory.ChannelD:  ', SOC.Memory.slaveMemory.ChannelD)
+// console.log('Timming fifo',SOC.Bus0.Timming)
+// console.log('state',SOC.Processor.state, SOC.Bus0.state, SOC.Memory.step)
+// console.log('SOC.Bus0.Pout[0].peek(): ', SOC.Bus0.Pout[0].peek())
+// console.log('SOC.Bus0.Pout[2].peek(): ', SOC.Bus0.Pout[2].peek())
+
+// SOC.Processor.Run(false, cycle, SOC.Bus0.Pout[0].dequeue())
+// SOC.Memory.Run(cycle, SOC.Bus0.Pout[2].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,SOC.Memory.slaveMemory.ChannelD.valid == '1'
+//   ,false
+//   ,cycle
+// )
+// cycle +=1
+// console.log('SOC.Processor.master.ChannelA  :  ', SOC.Processor.master.ChannelA)
+// console.log('SOC.Memory.slaveMemory.ChannelD:  ', SOC.Memory.slaveMemory.ChannelD)
+// console.log('Timming fifo',SOC.Bus0.Timming)
+// console.log('state',SOC.Processor.state, SOC.Bus0.state, SOC.Memory.step)
+// console.log('SOC.Bus0.Pout[0].peek(): ', SOC.Bus0.Pout[0].peek())
+// console.log('SOC.Bus0.Pout[2].peek(): ', SOC.Bus0.Pout[2].peek())
+// console.log(SOC.Processor.getRegisters())
+// console.log('SOC.Processor.master.ChannelA  :  ', SOC.Processor.master.ChannelA)
+// console.log('SOC.Memory.slaveMemory.ChannelD:  ', SOC.Memory.slaveMemory.ChannelD)
+// console.log('Timming fifo',SOC.Bus0.Timming)
+// console.log('state',SOC.Processor.state, SOC.Bus0.state, SOC.Memory.step)
+// console.log('SOC.Bus0.Pout[0].peek(): ', SOC.Bus0.Pout[0].peek())
+// console.log('SOC.Bus0.Pout[2].peek(): ', SOC.Bus0.Pout[2].peek())
+// console.log('SOC.Processor.master.ChannelA  :  ', SOC.Processor.master.ChannelA)
+// console.log('SOC.Memory.slaveMemory.ChannelD:  ', SOC.Memory.slaveMemory.ChannelD)
+// console.log('Timming fifo',SOC.Bus0.Timming)
+// console.log('state',SOC.Processor.state, SOC.Bus0.state, SOC.Memory.step)
+// console.log('SOC.Bus0.Pout[0].peek(): ', SOC.Bus0.Pout[0].peek())
+// console.log(SOC.Processor.getRegisters)
+// SOC.Processor.Run(false, cycle, SOC.Bus0.Pout[0].dequeue())
+// SOC.Memory.Run(cycle, SOC.Bus0.Pout[2].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,true
+//   ,false
+//   ,cycle
+// )
+// cycle +=1
+
+// console.log(SOC.Processor.getRegisters())
+// SOC.Processor.Run(false, 0, SOC.Bus0.Pout[0].dequeue())
+// console.log('1 SOC.Processor.master.ChannelA: ',   SOC.Processor.master.ChannelA)
+// console.log('1 SOC.Bus0.Pout[2].peek(): ',   SOC.Bus0.Pout[2].peek())
+// SOC.Memory.Run(0, SOC.Bus0.Pout[2].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,true
+//   ,false
+//   ,0
+// )
+// console.log()
+// console.log('1 SOC.Bus0.Pout[0].peek(): ', SOC.Bus0.Pout[0].peek(), SOC.Processor.state)
+// console.log(SOC.Processor.getRegisters())
+
+// SOC.Processor.Run(false, 0, SOC.Bus0.Pout[0].dequeue())
+// console.log('2 SOC.Processor.master.ChannelA: ',   SOC.Processor.master.ChannelA)
+// console.log('2 SOC.Bus0.Pout[2].peek(): ',   SOC.Bus0.Pout[2].peek())
+// SOC.Memory.Run(0, SOC.Bus0.Pout[2].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,true
+//   ,false
+//   ,0
+// )
+// console.log('2 SOC.Bus0.Pout[0].peek(): ', SOC.Bus0.Pout[0].peek(), SOC.Processor.state)
+// console.log(SOC.Processor.getRegisters())
+// // SOC.Processor.Run(false, 0, SOC.Bus0.Pout[0].dequeue())
+// SOC.Memory.Run(0, SOC.Bus0.Pout[2].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,true
+//   ,false
+//   ,0
+// )
+
+// SOC.Processor.Run(false, 0, SOC.Bus0.Pout[0].dequeue())
+// SOC.Memory.Run(0, SOC.Bus0.Pout[2].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,true
+//   ,false
+//   ,0
+// )
+
+// SOC.Processor.Run(false, 0, SOC.Bus0.Pout[0].dequeue())
+// SOC.Memory.Run(0, SOC.Bus0.Pout[2].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,true
+//   ,false
+//   ,0
+// )
+// console.log(SOC.Processor.state)
+
+// SOC.Processor.Run(false, 0, SOC.Bus0.Pout[0].dequeue())
+// SOC.Memory.Run(0, SOC.Bus0.Pout[2].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,true
+//   ,false
+//   ,0
+// )
+// console.log(SOC.Processor.state)
+// console.log(SOC.Processor.getRegisters())
+// console.log('state: ', SOC.Bus0.state)
+
+// // console.log (SOC.Memory.slaveMemory.ChannelD)
+
+// SOC.Processor.Run(false, 0, SOC.Bus0.Pout[0].dequeue())
+
+// console.log(SOC.Bus0.Pout[0].peek(), SOC.Processor.state)
+// SOC.Memory.Run(0, SOC.Bus0.Pout[2].dequeue())
+// console.log('state: ', SOC.Bus0.state)
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,true
+//   ,false
+//   ,0
+// )
+// SOC.Processor.Run(false, 0, SOC.Bus0.Pout[0].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,true
+//   ,false
+//   ,1
+// )
+// SOC.Memory.Run(1, SOC.Bus0.Pout[2].dequeue())
+
+// SOC.Processor.Run(false, 0, SOC.Bus0.Pout[0].dequeue())
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,true
+//   ,false
+//   ,2
+// )
+// SOC.Memory.Run(2, SOC.Bus0.Pout[2].dequeue())
+
+// SOC.Processor.Run(false, 0, SOC.Bus0.Pout[0].dequeue())
+// console.log(SOC.Processor.master.ChannelA.valid == '1')
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,SOC.Processor.master.ChannelA.valid == '1'
+//   ,false
+//   ,true
+//   ,false
+//   ,2
+// )
+// SOC.Memory.Run(2, SOC.Bus0.Pout[2].dequeue())
+// console.log('SOC.Memory.step, SOC.Bus0.state, SOC.Processor.state', SOC.Memory.step, SOC.Bus0.state, SOC.Processor.state)
+// console.log(SOC.Bus0.Pout[2].peek())
+// SOC.Memory.Run(0, SOC.Bus0.Pout[2].dequeue())
+// console.log(SOC.Bus0.Pout[2].peek())
+
+// SOC.Processor.Run(false, 0, SOC.Bus0.Pout[0].dequeue())
+// console.log(SOC.Bus0.Pin[0].peek())
+// // console.log('SOC.Processor.master.ChannelA ',SOC.Processor.master.ChannelA)
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,(SOC.Processor.state == 1) || (SOC.Processor.state == 3)
+//   ,true
+//   ,true
+//   ,true
+//   ,0
+// )
+// console.log(SOC.Bus0.Pout[2].peek())
+// SOC.Memory.Run(0, SOC.Bus0.Pout[2].dequeue())
+// console.log(SOC.Bus0.Pout[2].peek())
+// console.log('SOC.Memory: ', SOC.Memory.step, SOC.Bus0.state, SOC.Processor.state)
+
+// SOC.Processor.Run(false, 0, SOC.Bus0.Pout[0].dequeue())
+// console.log('SOC.Processor.master.ChannelA ',SOC.Processor.master.ChannelA)
+// console.log('SOC.Processor.state ',SOC.Processor.state)
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,true
+//   ,true
+//   ,true
+//   ,true
+//   ,0
+// )
+// console.log(SOC.Bus0.Pout[2].peek())
+// SOC.Memory.Run(0, SOC.Bus0.Pout[2].dequeue())
+// console.log('SOC.Memory: ', SOC.Memory.step, SOC.Bus0.state)
+
+// SOC.Processor.Run(false, 0, SOC.Bus0.Pout[0].dequeue())
+// console.log('SOC.Processor.master.ChannelA ',SOC.Processor.master.ChannelA)
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,true
+//   ,true
+//   ,true
+//   ,true
+//   ,0
+// )
+// console.log(SOC.Bus0.Pout[2].peek())
+// SOC.Memory.Run(0, SOC.Bus0.Pout[2].dequeue())
+// console.log('SOC.Memory: ', SOC.Memory.step, SOC.Bus0.state)
+
+// SOC.Processor.Run(false, 0, SOC.Bus0.Pout[0].dequeue())
+// console.log('SOC.Processor.master.ChannelA ',SOC.Processor.master.ChannelA)
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,true
+//   ,true
+//   ,true
+//   ,true
+//   ,0
+// )
+// SOC.Memory.Run(0, SOC.Bus0.Pout[2].dequeue())
+// console.log(SOC.Bus0.Pout[0].dequeue())
+// console.log(SOC.Bus0.state)
+// console.log(SOC.Memory.slaveMemory.ChannelD)
+
+// SOC.Processor.Run(false, 0, SOC.Bus0.Pout[0].dequeue())
+// console.log('SOC.Processor.master.ChannelA ',SOC.Processor.master.ChannelA)
+// SOC.Bus0.Run (
+//   SOC.Processor.master.ChannelA
+//   ,SOC.DMA.DMA_Master.ChannelA
+//   ,SOC.Memory.slaveMemory.ChannelD
+//   ,SOC.Bus1.Pout[0].dequeue()
+//   ,true
+//   ,true
+//   ,true
+//   ,true
+//   ,0
+// )
+// SOC.Memory.Run(0, SOC.Bus0.Pout[2].dequeue())
+// console.log('SOC.Memory: ', SOC.Bus0.Pout[0].peek())
+// SOC.Processor.Run(false, 0, SOC.Bus0.Pout[0].dequeue())
+// console.log(SOC.Processor.state)
+// console.log(SOC.Processor.getRegisters())

@@ -1,57 +1,60 @@
-// println Import necessary functions from the 'convert' module
-import { BinToHex } from './convert'
-import { dec } from './convert'
-import ChannalA from "./ChannelA"
-import ChannalD from "./ChannelD"
-import { changeEnd } from 'codemirror'
+import ChannelA from "./ChannelA"
+import ChannelD from "./ChannelD"
 
 export default class Slave {
-    name            : string
-    active          : boolean
-    ChannelD        : ChannalD
+    name    : string
+    active  : boolean
+    ChannelD: ChannelD
+    ChannelA: ChannelA
 
     constructor(name: string, active: boolean) {
-        this.name           = name
-        this.active         = active
-        this.ChannelD       = new ChannalD ('000', '00' , '10'    , '00'   ,
-                                            '0'  , '0'  , '0'.padStart(32, '0') , 
-                                            '0'  , )
+        this.name       = name
+        this.active     = active
+        this.ChannelD   = new ChannelD (  '000'                 // opcode
+                                        , '00'                  // param
+                                        , '10'                  // size
+                                        , '00'                  // source
+                                        , '0'                   // sink
+                                        , '0'                   // denied
+                                        , '0'.padStart(32, '0') // data
+                                        , '0'                   // corrupt
+                                        , '0'
+                                        , '0'
+                                    )
+        this.ChannelA   = new ChannelA (  '000'                 // opcode 
+                                        , '000'                 // param
+                                        , '10'                  // size
+                                        , '00'                  // source
+                                        , '0'.padStart(17, '0') // address
+                                        , '0000'                // mask
+                                        , '0'.padStart(32, '0') // data
+                                        , '0'                   // corrupt
+                                        , '0'
+                                        , '0'
+                                    ) 
+        
+        
     }
 
-    send(
-        message : string ,
-        source  : string ,
-        data    : string ,
-    ) {
-        if (!this.active) return ''
-        if (message === 'AccessAck') {
-            this.ChannelD.opcode   = '000'    
-            this.ChannelD.param    = '00'    
-            this.ChannelD.size     = '10'     
-            this.ChannelD.source   = source   
-            this.ChannelD.sink     = '0'  
-            this.ChannelD.denied   = '0'      
-            this.ChannelD.data     = '0'.padStart(32, '0')     
-            this.ChannelD.corrupt  = '0'   
-        }
-        if (message === 'AccessAckData') {
-            this.ChannelD.opcode   = '001'    
-            this.ChannelD.param    = '00'    
-            this.ChannelD.size     = '10'     
-            this.ChannelD.source   = source   
-            this.ChannelD.sink     = '0'  
-            this.ChannelD.denied   = '0'      
-            this.ChannelD.data     = data     
-            this.ChannelD.corrupt  = '0'  
-        }
+    send(message: string, source: string, data: string) {
+        if (!this.active) return null
+
+        let opcode = message === "AccessAck" ? '000' : message === "AccessAckData" ? '001' : ''
+
+        this.ChannelD = new ChannelD (opcode
+                                    , '000'
+                                    , '10'
+                                    , source
+                                    , '0'.padStart(17, '0')
+                                    , '0000'
+                                    , data
+                                    , '0'
+                                    , '1'
+                                    , '1')
     }
 
-    receive(
-        ChannelA: ChannalA
-    ): [string, string] {
-        if (!this.active) {
-            return ['', ''] //[di2s, ai2s]
-        }
-        return [ChannelA.data, ChannelA.address]
+    receive(channelA: ChannelA){
+        if (!this.active) return null
+        this.ChannelA = channelA
     }
 }

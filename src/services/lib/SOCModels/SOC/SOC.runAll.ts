@@ -7,11 +7,13 @@ export function RunAll(this: Soc) {
         this.println('CPU has not been actived!!!')
         return
     }
-
+    console.log ('this.Processor.pc: ', this.Processor.pc)
+    console.log ('this.Processor.pc: ', this.Memory.Ins_pointer)
     while (
         this.Processor.pc <
-        (Object.values(this.Processor.Instruction_memory).length - 1) * 4
+        this.Memory.Ins_pointer
     ) {
+
         this.Step()
     }
 

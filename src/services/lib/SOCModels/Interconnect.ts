@@ -1,209 +1,245 @@
-import ChannelA from "./ChannelA"
-import ChannelD from "./ChannelD"
-import { dec, BinToHex } from './convert' 
+import ChannelA             from "./ChannelA"
+import ChannelD             from "./ChannelD"
+import { FIFO_ChannelA }    from "./FIFO_ChannelA"
+import { FIFO_ChannelD }    from "./FIFO_ChannelD"
+import { FIFO_timing }      from "./FIFO_timing"
 
 export default class InterConnect {
-    active          : boolean                       
-    Pin             : any    
-    Pout            : any   
-    Pactived        : boolean[]   
-    kernel_point      : number
-    usr_point      : number
-             
+    active      : boolean
+    Pin         : (FIFO_ChannelD | FIFO_ChannelA)[]
+    Timming     : FIFO_timing[]
+    Pout        : (FIFO_ChannelD | FIFO_ChannelA)[]
+    Pactived    : boolean[]
+    state       : number
+
     constructor(active: boolean) {
-        this.active         = active    
-        this.kernel_point   = 0 
-        this.usr_point      = 0
-        // Initialize arrays
-        this.Pin        = [];
-        this.Pout       = [];
-        this.Pactived   = Array(8).fill(false) ; // Initialize with 12 false values
+        this.active = active
+        this.state  = 0
 
-        // Initialize Pin array
-        this.Pin[0] = new ChannelA( '000'   ,                   //opcode 
-                                    '000'   ,                   //para
-                                    '10'    ,                   //size
-                                    '00'    ,                   //source
-                                    '0'.padStart(17, '0'),      //address
-                                    '0000'  ,                   //mask
-                                    '0'.padStart(32, '0'),      //data
-                                    '0'                         //corrupt
-        );
+        this.Pin = [
+                    new FIFO_ChannelA() // Processor
+                    , new FIFO_ChannelA() // DMA
+                    , new FIFO_ChannelD() // Memory
+                    , new FIFO_ChannelD()  // Sub-Interconnect
+        ]
 
-        this.Pin[1] = new ChannelA( '000'   ,                   //opcode 
-                                    '000'   ,                   //para
-                                    '10'    ,                   //size
-                                    '00'    ,                   //source
-                                    '0'.padStart(17, '0'),      //address
-                                    '0000'  ,                   //mask
-                                    '0'.padStart(32, '0'),      //data
-                                    '0'                         //corrupt
-        );
+        this.Pout = [
+                    new FIFO_ChannelD()
+                    ,new FIFO_ChannelD()
+                    ,new FIFO_ChannelA()
+                    ,new FIFO_ChannelA()
+        ]
 
-        this.Pin[2] = new ChannelD( '000',                       //opcode
-                                    '00',                       //param
-                                    '10',                       //size
-                                    '00',                       //source
-                                    '0'.padStart(21, '0') ,     //sink
-                                    '0' ,                       //denied
-                                    '0'.padStart(32, '0'),      //data
-                                    '0'                         //corrupt
-        );
+        this.Timming = [
+                    new FIFO_timing()
+                    ,new FIFO_timing()
+                    ,new FIFO_timing()
+                    ,new FIFO_timing()
+        ]
 
-        this.Pin[3] = new ChannelD( '000',                       //opcode
-                                    '00',                       //param
-                                    '10',                       //size
-                                    '00',                       //source
-                                    '0'.padStart(21, '0') ,     //sink
-                                    '0' ,                       //denied
-                                    '0'.padStart(32, '0'),      //data
-                                    '0'                         //corrupt
-        );
-        
-        // Initialize Pout array
-        this.Pout[0] = new ChannelD('000',                       //opcode
-                                    '00',                       //param
-                                    '10',                       //size
-                                    '00',                       //source
-                                    '0'.padStart(21, '0') ,     //sink
-                                    '0' ,                       //denied
-                                    '0'.padStart(32, '0'),      //data
-                                    '0'                         //corrupt
-        );
-
-        this.Pout[1] = new ChannelD('000',                       //opcode
-                                    '00',                       //param
-                                    '10',                       //size
-                                    '00',                       //source
-                                    '0'.padStart(21, '0') ,     //sink
-                                    '0' ,                       //denied
-                                    '0'.padStart(32, '0'),      //data
-                                    '0'                         //corrupt
-        );
-
-        this.Pout[2] = new ChannelA('000'   ,                   //opcode 
-                                    '000'   ,                   //para
-                                    '10'    ,                   //size
-                                    '00'    ,                   //source
-                                    '0'.padStart(17, '0'),      //address
-                                    '0000'  ,                   //mask
-                                    '0'.padStart(32, '0'),      //data
-                                    '0'                         //corrupt
-        );
-
-        this.Pout[3] = new ChannelA('000'   ,                   //opcode 
-                                    '000'   ,                   //para
-                                    '10'    ,                   //size
-                                    '00'    ,                   //source
-                                    '0'.padStart(17, '0'),      //address
-                                    '0000'  ,                   //mask
-                                    '0'.padStart(32, '0'),      //data
-                                    '0'                         //corrupt
-        );
-       
-    }
-    setaddress (kernel_point  : number, usr_point : number) {
-        this.kernel_point   = kernel_point 
-        this.usr_point      = usr_point
+        this.Pactived = [true, true, true, true]
 
     }
 
-    Port_in(data: any, index: number): void {
-        if (this.active == true) {
-            this.Pin[index]      = data
-            this.Pactived[index] = true
+    Run (
+        dataFromProcessor           : ChannelA
+        ,dataFromDMA                : ChannelA
+        ,dataFromMemory             : ChannelD
+        ,dataFromSub                : ChannelD
+        ,dataFromProcessor_valid    : boolean
+        ,dataFromDMA_valid          : boolean
+        ,dataFromMemory_valid       : boolean
+        ,dataFromSub_valid          : boolean
+        ,cycle                      : number
+    ) {
+        if (this.state == 0) {
+            this.RecData (
+                dataFromProcessor           
+                ,dataFromDMA                
+                ,dataFromMemory             
+                ,dataFromSub                
+                ,dataFromProcessor_valid    
+                ,dataFromDMA_valid          
+                ,dataFromMemory_valid       
+                ,dataFromSub_valid          
+                ,cycle                      
+            )
+            this.state +=1
+            return
+        }
+        if (this.state == 1) {
+            this.Route (this.Abiter())
+            this.state = 0
+            return
         }
     }
 
-    Port_out(index: number): any {
-        if (this.active == true) {
-            const data = this.Pout[index]
-            return data
+    RecData(
+        dataFromProcessor           : ChannelA
+        ,dataFromDMA                : ChannelA
+        ,dataFromMemory             : ChannelD
+        ,dataFromSub                : ChannelD
+        ,dataFromProcessor_valid    : boolean
+        ,dataFromDMA_valid          : boolean
+        ,dataFromMemory_valid       : boolean
+        ,dataFromSub_valid          : boolean
+        ,cycle                      : number
+    ) {
+        this.RecFromProcessor(dataFromProcessor, cycle, dataFromProcessor_valid)
+        this.RecFromDMA(dataFromDMA, cycle, dataFromDMA_valid)
+        this.RecFromMem(dataFromMemory, cycle, dataFromMemory_valid)
+        this.RecFromSub(dataFromSub, cycle, dataFromSub_valid)
+    }
+
+    RecFromProcessor(data: ChannelA, cycle: number, valid: boolean): void {
+        if (this.active && this.Pactived[0] && valid && data.valid == '1') {
+            
+            if (this.Pin[0] instanceof FIFO_ChannelA) {
+                this.Pin[0].enqueue({...data})
+                this.Timming[0].enqueue(cycle)
+            } else {
+                console.error("Error: Pin[0] is not FIFO_ChannelA")
+            }
         }
     }
 
-    Transmit(): void {
-        if (this.Pactived[0]==true) {
-            const data          = this.Pin[0].data
-            const address       = this.Pin[0].address
-            if ((dec ('0' + address)) > this.kernel_point) {
-                this.Pout[2].data   = data.padStart(32, '0') 
-                this.Pout[2].source = '00'
-                this.Pout[2].address= address
-            }
-            if ((dec ('0' + address)) > this.usr_point) {
-                this.Pout[3].data   = data.padStart(32, '0') 
-                this.Pout[3].source = '00'
-                this.Pout[3].address= address
+    RecFromDMA(data: ChannelA, cycle: number, valid: boolean): void {
+        if (this.active && this.Pactived[1] && valid && data.valid == '1') {
+            if (this.Pin[1] instanceof FIFO_ChannelA) {
+                this.Pin[1].enqueue({...data})
+                this.Timming[1].enqueue(cycle)
+            } else {
+                console.error("Error: Pin[1] is not FIFO_ChannelA")
             }
         }
-        if (this.Pactived[1]==true) {
-            const opcode        = this.Pin[1].opcode
-            const address       = this.Pin[1].address
-            const data          = this.Pin[1].data
-            this.Pout[2].source = '01'
-            if (opcode == '100') { // GET
-                this.Pout[2].data    = '0'.padStart(32, '0')
-                this.Pout[2].address = address
-                this.Pout[2].opcode  = '100'
-            }
-            if (opcode == '000') { //PUT
-                this.Pout[3].data   = data.padStart(32, '0') 
-                this.Pout[3].source = this.Pin[1].source
-                this.Pout[3].address= address
-                this.Pout[3].opcode = '000'
+    }
+
+    RecFromMem(data: ChannelD, cycle: number, valid: boolean): void {
+        if (this.active && this.Pactived[2] && valid && data.valid == '1') {
+            if (this.Pin[2] instanceof FIFO_ChannelD) {
+                this.Pin[2].enqueue({...data})
+                this.Timming[2].enqueue(cycle)
+            } else {
+                console.error("Error: Pin[2] is not FIFO_ChannelD")
             }
         }
-        if (this.Pactived[2]==true) {
-            const source = this.Pin[2].source
-            const opcode = this.Pin[2].opcode
-            const data   = this.Pin[2].data
-            if (source == '00') {
-                if (opcode == '000') {// AccessAck
-                    this.Pout[0].data   = '0'.padStart(32, '0')
-                    this.Pout[0].source = source
-                }
-                if (opcode == '001') {// AccessAckData
-                    this.Pout[0].data   = data
-                    this.Pout[0].source = source
-                }
+    }
+
+    RecFromSub(data: ChannelD, cycle: number, valid: boolean): void {
+        if (this.active && this.Pactived[3] && valid && data.valid == '1') {
+            if (this.Pin[3] instanceof FIFO_ChannelD) {
+                this.Pin[3].enqueue({...data})
+                this.Timming[3].enqueue(cycle)
+            } else {
+                console.error("Error: Pin[3] is not FIFO_ChannelD")
             }
-            if (source == '01') {
-                if (opcode == '000') {// AccessAck
-                    this.Pout[1].data   = '0'.padStart(32, '0')
-                    this.Pout[1].source = source
-                }
-                if (opcode == '001') {// AccessAckData
-                    this.Pout[1].data   = data
-                    this.Pout[1].source = source
-                }
-            }     
         }
-        if (this.Pactived[3]==true) {
-            const source = this.Pin[3].source
-            const opcode = this.Pin[3].opcode
-            const data   = this.Pin[3].data
-            if (source == '00') {
-                if (opcode == '000') {// AccessAck
-                    this.Pout[0].data   = '0'.padStart(32, '0')
-                    this.Pout[0].source = source
+    }
+
+    Abiter()  {
+
+        const Processor_timming       = this.Timming[0].peek()
+        const DMA_timming             = this.Timming[1].peek()
+        const Memory_timming          = this.Timming[2].peek()
+        const SInterconnect_timming   = this.Timming[3].peek()
+
+        const firstTimming =  Math.min(...[
+            Processor_timming           // Processor
+            ,DMA_timming                // DMA
+            ,Memory_timming             // Memory
+            ,SInterconnect_timming      // Sub-Interconnect
+        ]) 
+
+        for (let i = 0; i < this.Timming.length; i++) {
+            if (this.Timming[i].peek() === firstTimming) {
+                this.Timming[i].dequeue();
+                return i;
+            }
+        }
+        return -1
+    }
+
+    Route (Abiter: number) {
+        console.log('abiter', Abiter)
+        if (Abiter == 0) {
+            
+            const dataFromProcessor = {...this.Pin[0].dequeue()}
+            if (this.Pin[0].dequeue() instanceof ChannelA) {
+                // if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(dataFromProcessor)
+                if (
+                    (
+                        (parseInt('0'+dataFromProcessor.address, 16)    > 0x000305C + 1) 
+                    &&  (parseInt('0'+dataFromProcessor.address, 16)    < 0X1BFFF    + 1)
+                    ) || 
+                    (
+                        (parseInt('0'+dataFromProcessor.address, 16)    >= 0)
+                    &&  (parseInt('0'+dataFromProcessor.address, 16)    <= 0x000304C  )
+                    )
+                    
+                ) {
+                    if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(dataFromProcessor)
                 }
-                if (opcode == '001') {// AccessAckData
-                    this.Pout[0].data   = data
-                    this.Pout[0].source = source
+                if (
+                    (parseInt('0'+dataFromProcessor.address, 16) > 0x000304C) 
+                    && (parseInt('0'+dataFromProcessor.address, 16) <= 0x000305C)
+                ) {
+                    if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromProcessor)
                 }
             }
-            if (source == '01') {
-                if (opcode == '000') {// AccessAck
-                    this.Pout[1].data   = '0'.padStart(32, '0')
-                    this.Pout[1].source = source
+        }
+        if (Abiter == 1) {
+            const dataFromDMA = this.Pin[1].dequeue()
+            if (dataFromDMA instanceof ChannelA) {
+                if (dataFromDMA.opcode == '100') {
+                    if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(dataFromDMA)
+                } else {
+                    if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromDMA)
                 }
-                if (opcode == '001') {// AccessAckData
-                    this.Pout[1].data   = data
-                    this.Pout[1].source = source
+            }
+        }
+        if (Abiter == 2) {
+            const dataFromMem = {...this.Pin[2].dequeue()}
+            // if (dataFromMem instanceof ChannelD) {
+                if (dataFromMem.source == '00') {
+                    if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue(dataFromMem)
+                        //console.log('this.Pout[0].peek()', this.Pout[0].peek())
+                } else {
+                    if (this.Pout[1] instanceof FIFO_ChannelD) this.Pout[1].enqueue(dataFromMem)
                 }
-            }     
+            // } 
+        }
+        if (Abiter == 3) {
+            const dataFromSInterconnect = this.Pin[2].dequeue()
+            if (dataFromSInterconnect instanceof ChannelD) {
+                if (dataFromSInterconnect.source == '00') {
+                    if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue(dataFromSInterconnect)
+                } else {
+                    if (this.Pout[1] instanceof FIFO_ChannelD) this.Pout[1].enqueue(dataFromSInterconnect)
+                }
+            }
         }
     }
 }
-
+//            +-------+                +-------+
+//            |  CPU  |                |  DMA  |
+//            +---+---+                +---+---+
+//             |    ^                    |    ^
+//             v    |                    v    |
+//            +---+---+                +---+---+
+//            |   0   |                |   1   |
+//            +---+---+                +---+---+
+//             |    ^                    |    ^
+//             v    |                    v    |
+//             +--------------------------------+
+//             |         INTERCONNECT           |
+//             +--------------------------------+
+//             |    ^                    |    ^
+//             v    |                    v    |
+//            +---+---+                +---+---+
+//            |   2   |                |   3   |
+//            +---+---+                +---+---+
+//             |    ^                    |    ^
+//             v    |                    v    |                 
+//          +-----+-----+            +-----+-----+      
+//          |  MEMORY   |            |  SubInter |
+//          +-----------+            +-----------+

@@ -1,19 +1,24 @@
-import { Register } from 'C:/Users/LENOVO/Desktop/KLTN/src/soc-frontend/src/types/register'
-import Slave from './Slave'
-import { dec, } from './sub_function'
-import ChannelA from './ChannelA'
+import { Register } from './../../../../types/register'
+import Slave from './../Interconnect/Slave'
+import { dec, } from './../Compile/sub_function'
+import ChannelA from './../Interconnect/ChannelA'
+import ChannelD from './../Interconnect/ChannelD'
+import {Logger } from './../Compile/soc.d'
 
 export default class Memory {
     Memory          : { [key: string]: string }
     active          : boolean
     slaveMemory     : Slave
-    step            : number 
+    state           : number 
     address         : string
     data            : string
     Ins_pointer     : number
+    logger          ?: Logger
+    active_println  : boolean
+    burst           : ChannelD[]
 
     constructor(active: boolean) {
-        this.step               = 0 
+        this.state               = 0 
         this.address            = ''
         this.data               = ''
         
@@ -21,7 +26,29 @@ export default class Memory {
         this.active             = active
         this.slaveMemory        = new Slave('DataMemory', true)
         this.Ins_pointer        = 0
+        this.active_println     = true
+        this.burst              = []
     }
+
+    public setLogger(logger: Logger) {
+        this.logger = logger
+    }
+
+    public println(active: boolean, ...args: string[]) {
+        
+        if (active) {
+            console.log(...args)
+        }
+
+        if (!this.logger) {
+            return
+        }
+
+        if (active) {
+            this.logger.println(...args)
+        }
+    }
+
     public reset(Mem_tb: Register[]){
         // MEMORY AREA OF Kernel
         for (let i = 0; i < 0X1FFFF  + 1; i+=1) 
@@ -60,70 +87,110 @@ export default class Memory {
         , MMU2Memory    : ChannelA
     ) {
 
-        if (this.step == 0) {
+        if (this.state == 0) {
             if (MMU2Memory.valid == '1') {
                 this.slaveMemory.ChannelD.valid = '1'
                 if (MMU2Memory.opcode == '100') {
-                    console.log  (
-                        'Cycle ', 
-                        cycle.toString(),
-                        ': The MEMORY is receiving a GET message from the INTERCONNECT.'
+
+                    this.println (this.active_println,
+                    'Cycle '             +
+                    cycle.toString()     +
+                    ': The MEMORY is receiving a GET message from the INTERCONNECT.'
                     )
-                    //this.println (
-                    // 'Cycle '             ,
-                    // cycle.toString()     , 
-                    // ': The MEMORY is receiving a GET message from the INTERCONNECT.'
-                    //)
-    
                     this.slaveMemory.receive (MMU2Memory)
                     this.address         =   this.slaveMemory.ChannelA.address
 
-                    console.log  (
-                        'Cycle ',
-                        cycle.toString(), 
-                        ': The MEMORY is sending an AccessAckData message to the INTERCONNECT.'
-                    )
-                    this.slaveMemory.send(
-                        'AccessAckData', 
-                        this.slaveMemory.ChannelA.source, 
-                        this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] + 
-                        this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] +
-                        this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
-                        this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
-                    )
 
-                    console.log(this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] , 
-                    this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] ,
-                    this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] ,
-                    this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')])
+                    this.println (this.active_println,
+                    'Cycle '             +
+                    cycle.toString()     +
+                    ': The MEMORY is sending an AccessAckData message to the INTERCONNECT.'
+                    )
+                    if (MMU2Memory.size == '00') {
+                        this.slaveMemory.send(
+                            'AccessAckData', 
+                            this.slaveMemory.ChannelA.source, 
+                            this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
+                        )
+                        this.burst.push (this.slaveMemory.ChannelD)
+                    }
+                    
+                    if (MMU2Memory.size == '10') {
+                        // FIRST BURST
+                        this.slaveMemory.send(
+                            'AccessAckData', 
+                            this.slaveMemory.ChannelA.source, 
+                            this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
+                        )
+                        this.burst.push (this.slaveMemory.ChannelD)
 
-                    this.step   = 1
+                        //SECOND BURST 
+                        this.slaveMemory.send(
+                            'AccessAckData', 
+                            this.slaveMemory.ChannelA.source, 
+                            this.Memory[(parseInt(this.address, 2) + 7).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.address, 2) + 6).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.address, 2) + 5).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.address, 2) + 4).toString(2).padStart(17, '0')]
+                        )
+                        this.burst.push (this.slaveMemory.ChannelD)
+
+                        //THIRD BURST
+                        this.slaveMemory.send(
+                            'AccessAckData', 
+                            this.slaveMemory.ChannelA.source, 
+                            this.Memory[(parseInt(this.address, 2) + 11).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.address, 2) + 10).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.address, 2) + 9 ).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.address, 2) + 8 ).toString(2).padStart(17, '0')]
+                        )
+                        this.burst.push (this.slaveMemory.ChannelD)
+
+                        //FOURTH BURST
+                        this.slaveMemory.send(
+                            'AccessAckData', 
+                            this.slaveMemory.ChannelA.source, 
+                            this.Memory[(parseInt(this.address, 2) + 15).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.address, 2) + 14).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.address, 2) + 13).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.address, 2) + 12).toString(2).padStart(17, '0')]
+                        )
+                        this.burst.push (this.slaveMemory.ChannelD)
+                    }
+
+
+                    // console.log(this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] , 
+                    // this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] ,
+                    // this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] ,
+                    // this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')])
+
+                    this.state   = 1
                     return
                     
                 }
                 if (MMU2Memory.opcode == '000') {
-                    console.log()
-                    console.log(
-                        'Cycle ',
-                        cycle.toString(),
-                        ': The MEMORY is receiving a PUT message from the INTERCONNECT.',
+
+                    this.println (this.active_println,
+                        'Cycle '             +
+                        cycle.toString()     +
+                        ': The MEMORY is receiving a PUT message from the INTERCONNECT.'
                     )
-                    // this.println(
-                    //     'Cycle ',
-                    //     this.cycle.toString(),
-                    //    ': The MEMORY is receiving a PUT message from the INTERCONNECT.',
-                    // )
-                    
                     this.slaveMemory.receive(MMU2Memory)
-                    
                     this.address            = this.slaveMemory.ChannelA.address
                     this.data               = this.slaveMemory.ChannelA.data 
 
-                    console.log  (
-                        'Cycle ',
-                        cycle.toString(), 
+                    this.println (this.active_println,
+                        'Cycle '             +
+                        cycle.toString()     +
                         ': The MEMORY is sending an AccessAck message to the INTERCONNECT.'
                     )
+                    
                     this.slaveMemory.send(
                         'AccessAck', 
                         this.slaveMemory.ChannelA.source,                 
@@ -131,29 +198,24 @@ export default class Memory {
                         this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] +
                         this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
                         this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
-                        )
-                        console.log(this.slaveMemory.ChannelA.address, this.slaveMemory.ChannelA.data.slice(24,32))
+                    )
+                    this.burst.push (this.slaveMemory.ChannelD)
                     this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(0,8)
                     this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(8,16)
                     this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(16,24)
                     this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(24,32)
 
-                    console.log(
-                        this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] , 
-                        this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] ,
-                        this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] ,
-                        this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
-                    )
-                    this.step   = 1
+                    this.state   = 1
                     return
                 }
             }
            
         }
-        if (this.step == 1) 
+        if (this.state == 1) 
             this.slaveMemory.ChannelD.valid = '0'
-            this.step = 0
-            // this.step = 0
+            this.burst = []
+            this.state = 0
+            // this.state = 0
             // console.log  (
             //     'Cycle ',
             //     cycle.toString(), 
@@ -192,7 +254,7 @@ export default class Memory {
             //                         this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
             //                         this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
             //                         )
-            //     this.step   = 0
+            //     this.state   = 0
             //     return
                 
             // }

@@ -1,7 +1,7 @@
-import Slave from './Slave';
-import Master from './Master';
-import ChannelA             from "./ChannelA"
-import ChannelD             from "./ChannelD"
+import Slave from './../Interconnect/Slave'
+import Master from './../Interconnect/Master'
+import ChannelA             from "./../Interconnect/ChannelA"
+import ChannelD             from "./../Interconnect/ChannelD"
 
 export default class DMA {
     sourceAddress       : string
@@ -48,30 +48,30 @@ export default class DMA {
     config(address: string, data: string) {
         // Kiểm tra địa chỉ và dữ liệu có hợp lệ không
         if (address.length !== 17 || data.length !== 32) {
-            console.log("Invalid address or data length");
-            return;
+            console.log("Invalid address or data length")
+            return
         }
 
         // Chuyển địa chỉ từ chuỗi nhị phân sang số nguyên và sau đó sang hex
-        const hexAddress = '0x' + parseInt(address, 2).toString(16).toUpperCase().padStart(8, '0');
+        const hexAddress = '0x' + parseInt(address, 2).toString(16).toUpperCase().padStart(8, '0')
 
         if (this.state == 0) {
             switch (hexAddress) {
                 case '0x0000304C':
-                    this.sourceAddress = data;
-                    break;
+                    this.sourceAddress = data
+                    break
                 case '0x00003050':
-                    this.destinationAddress = data;
-                    break;
+                    this.destinationAddress = data
+                    break
                 case '0x00003054':
-                    this.length = data;
-                    break;
+                    this.length = data
+                    break
                 case '0x00003058':
-                    this.control = data;
-                    break;
+                    this.control = data
+                    break
                 default:
-                    console.log("Invalid address for configuration: " + hexAddress);
-                    return;
+                    console.log("Invalid address for configuration: " + hexAddress)
+                    return
             }
         }
 
@@ -81,7 +81,7 @@ export default class DMA {
             (this.length                != '00000000000000000000000000000000') && 
             (this.control               != '00000000000000000000000000000000')
         ) {
-            this.state += 1;
+            this.state += 1
         }
     }
 
@@ -92,31 +92,31 @@ export default class DMA {
                 'GET',
                 (parseInt(this.sourceAddress.slice(-17), 2)).toString(2).padStart(17, '0'),
                 ''
-            );
-            this.state += 1;
-            return {...this.DMA_Master.ChannelA};
+            )
+            this.state += 1
+            return {...this.DMA_Master.ChannelA}
         }
     
         if (this.state == 2) {
             if (Memory2DMA.valid == '1') {
-                this.DMA_Master.receive(Memory2DMA);
-                this.DMA_buffer[parseInt(this.length, 2)] = this.DMA_Master.ChannelD.data;
-                this.length = (parseInt(this.length, 2) - 4).toString(2).padStart(32, '0');
-                this.state += 1;
+                this.DMA_Master.receive(Memory2DMA)
+                this.DMA_buffer[parseInt(this.length, 2)] = this.DMA_Master.ChannelD.data
+                this.length = (parseInt(this.length, 2) - 4).toString(2).padStart(32, '0')
+                this.state += 1
             }
         }
     }
 
     put(Led2DMA: any) {
         if (this.state == 3 ) {
-            console.log(`Sending data from source address: ${this.sourceAddress}`);
+            console.log(`Sending data from source address: ${this.sourceAddress}`)
             this.DMA_Master.send (
                 'PUT'
                 , (this.destinationAddress).slice(0,18)
                 , this.DMA_buffer [parseInt(this.destinationAddress + this.sendoffset + 0, 2)]
             )
             this.state += 1
-            return {...this.DMA_Master.ChannelA};
+            return {...this.DMA_Master.ChannelA}
         }
 
         if (this.state == 4 ) {

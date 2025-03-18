@@ -1,4 +1,4 @@
-import Soc from "../SoC"
+import Soc from "../SOC/SoC"
 
 export function RunAll(this: Soc) {
     // CHECK PROCESSOR IS ACTIVED OR NOT

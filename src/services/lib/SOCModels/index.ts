@@ -1,11 +1,11 @@
 // import DMA from './DMA'
-import Soc from './SoC'
-import ChannelD from './ChannelD'
-import ChannelA from "./ChannelA";
-import DMA from './DMA';
-import { LayersTwoTone } from '@mui/icons-material';
-import { cyan } from '@mui/material/colors';
-import { Console } from 'console';
+import Soc from './SOC/SoC'
+import ChannelD from './Interconnect/ChannelD'
+import ChannelA from "./Interconnect/ChannelA";
+import DMA from './DMA/DMA';
+// import { LayersTwoTone } from '@mui/icons-material';
+// import { cyan } from '@mui/material/colors';
+// import { Console } from 'console';
 
 const SOC               = new Soc('super SoC')
 const code              = 
@@ -53,6 +53,7 @@ SOC.MMU.active          = true
 SOC.Bus0.active          = true
 SOC.Bus1.active          = true
 SOC.Memory.active       = true
+
 // SOC.DMA.active          = true
 
 SOC.assemble(
@@ -75,7 +76,7 @@ SOC.assemble(
             ,16*32                                  // ,dmaLen             : number
             ,0x17FFF + 1                            // ,dmaDes             : number
 )
-
+console.log(SOC.Processor.active_println)
 SOC.RunAll()
 // SOC.Step()
 // SOC.Step()

@@ -1,14 +1,13 @@
-import MMU from './MMU'
-import { dec, handleRegister } from './sub_function'
-import { mux } from './sub_function'
-import Master from './Master'
-import {Logger } from './soc.d'
-import Ecall from './Ecall/Ecall'
+import MMU from '../Processor/MMU'
+import { dec, handleRegister, mux } from '../Compile/sub_function'
+import Master from '../Interconnect/Master'
+import {Logger } from '../Compile/soc.d'
+import Ecall from '../Ecall/Ecall'
 
-import ChannelD from './ChannelD'
-import { measureMemory } from 'vm'
-import { symlink, write } from 'fs'
-import { Console } from 'console'
+import ChannelD from '../Interconnect/ChannelD'
+// import { measureMemory } from 'vm'
+// import { symlink, write } from 'fs'
+// import { Console } from 'console'
 
 export default class RiscVProcessor {
     name                        : string
@@ -28,6 +27,7 @@ export default class RiscVProcessor {
     state                       = 0
     pre_pc                      = 0
     pc                          = 0
+    active_println              : boolean
     // Ecall                       : Ecall
 
     ALUOp                       : any
@@ -53,12 +53,19 @@ export default class RiscVProcessor {
     stalled                     : any
     logger?: Logger
 
-    public println(...args: string[]) {
+    public println(active: boolean, ...args: string[]) {
+        
+        if (active) {
+            console.log(...args)
+        }
+
         if (!this.logger) {
             return
         }
-        this.logger.println(...args)
-        //console.log(...args)
+
+        if (active) {
+            this.logger.println(...args)
+        }
     }
 
     public setLogger(logger: Logger) {
@@ -76,6 +83,7 @@ export default class RiscVProcessor {
         this.SendAddress                = ''
         this.SendData                   = ''
         this.instruction                = ''
+        this.active_println             = true
 
         // this.Ecall                      = new Ecall
 
@@ -878,7 +886,6 @@ export default class RiscVProcessor {
             this.lineColor['auiOrLui']  = this.auiOrLui     .toString()     
             this.lineColor['wb'      ]  = this.wb           .toString()           
             this.lineColor['imm'     ]  = this.imm          .toString()     
-            console.log('message: ', message)
             return [message, data, address, writeRegister, size]
         } else return ['', '', '', '', '']
     }
@@ -891,9 +898,16 @@ export default class RiscVProcessor {
     ) 
     {
         if (this.state == 0) {
-            // console.log('this.pc: ', (this.pc).toString(2).padStart(17, '0'))
             this.master.ChannelA.valid = '1'
             this.master.send ('GET',  (this.pc).toString(2).padStart(17, '0'), this.SendData)
+            this.master.ChannelA.size  = '00'
+
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The PROCESSOR is sending messeage GET to MEMORY.'
+            )
             // console.log('cpu: ',this.master.ChannelA, this.pc)
             this.state              += 1
             return
@@ -904,19 +918,42 @@ export default class RiscVProcessor {
                 this.master.receive (Memory2CPU)
                 this.instruction = this.master.ChannelD.data
                 this.state +=1
-
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.'
+                )
             }
             return
         }
         if (this.state == 2) {
             let [message, data, logic_address, writeRegister, size] = this.internalProcessing (this.instruction, this.pc, icBusy)
-            console.log(message)
             if (message == 'PUT' || message == 'GET') {
                 this.Processor_messeage = message
                 this.SendData           = data
                 this.SendAddress        = logic_address
                 this.writeReg           = writeRegister
                 this.state              += 1
+
+                if (message == 'PUT') {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The PROCESSOR is sending messeage PUT to MEMORY.'
+                    )
+                }
+
+                if (message == 'GET') {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The PROCESSOR is sending messeage GET to MEMORY.'
+                    )
+                }
+               
             }
             else {
                 // this.master.ChannelA.valid = '1'
@@ -929,13 +966,39 @@ export default class RiscVProcessor {
             this.master.send (this.Processor_messeage,  physical_address, this.SendData)
             this.master.ChannelA.valid = '1'
 
-            if (this.MMU.MMU_message == 'TLB: VPN is missed.') this.state = 5
+            this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +this.MMU.MMU_message
+            )
+
+            if (this.MMU.MMU_message == ' TLB: VPN is missed.') this.state = 5
             else this.state = 4
             return
         }
         if (this.state == 4) {
             this.master.ChannelA.valid = '0'
             if (Memory2CPU.valid == '1') {
+
+                if (Memory2CPU.opcode == '000') {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The PROCESSOR is receiving messeage AccessAck from MEMORY.'
+                    )
+                }
+                if (Memory2CPU.opcode == '001') {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.'
+                    )
+                }
+
+
                 this.master.receive (Memory2CPU)
                 if (Memory2CPU.opcode == '001') this.register[this.writeReg] =  this.master.ChannelD.data
                 this.state = 0
@@ -944,11 +1007,26 @@ export default class RiscVProcessor {
         }
         if (this.state == 5) {
             if (Memory2CPU.valid == '1') {
+
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.'
+                )
+
                 const VPN       = this.SendAddress.slice(0, 20)  
                 this.master.receive (Memory2CPU)
                 const frame     = this.master.ChannelD.data
+
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The TLB is replacing an entry.'
+                )
                 this.MMU.pageReplace ([parseInt(VPN , 2) & 0xf,  dec (frame), 1, cycle])
-                this.state = 0
+                this.state = 2
             }
             return
         }

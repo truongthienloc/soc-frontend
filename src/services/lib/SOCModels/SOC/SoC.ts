@@ -1,30 +1,29 @@
-import RiscVProcessor from './RiscV_processor'
-import InterConnect from './Interconnect'
-import disAssembly from './Disassembly'
-import MMU from './MMU'
-import { dec, stringToAsciiAndBinary, BinToHex } from './convert'
-import Memory from './Memory'
-import { Keyboard, Logger, Monitor } from './soc.d'
+import RiscVProcessor from '../Processor/RiscV_processor'
+import InterConnect from '../Interconnect/Interconnect'
+import disAssembly from '../Compile/Disassembly'
+import MMU from '../Processor/MMU'
+import { dec, stringToAsciiAndBinary, BinToHex } from '../Compile/convert'
+import Memory from '../Memory/Memory'
+import { Keyboard, Logger, Monitor } from '../Compile/soc.d'
 // import {Logger } from './soc.d'
-import Ecall from './Ecall/Ecall'
-import { NCKHBoard } from '../soc/boards'
-import DMA from './DMA'
-import Assembler from './check_syntax'
-import LedMatrix from '../control/LedMatrix'
+import Ecall from '../Ecall/Ecall'
+import { NCKHBoard } from '../../soc/boards'
+import DMA from '../DMA/DMA'
+import Assembler from '../Compile/check_syntax'
+// import LedMatrix from '../control/LedMatrix'
 import { Register } from '~/types/register'
-import { eventNames } from 'process'
-import EventEmitter from '../EventEmitter/EventEmitter'
-import type { TLB, TLBEntries } from './soc.d'
+// import { eventNames } from 'process'
+import EventEmitter from '../../EventEmitter/EventEmitter'
+import type { TLB, TLBEntries } from '../Compile/soc.d'
 import { Disassembly } from '~/components/CodeEditor'
-import { assemble } from './SOC/SOC.assemble'
-import { IO_operate } from './SOC/SOC.ioOperate'
-import { DMA_Get } from './SOC/SOC.dmaOperate'
-import { RunAll } from './SOC/SOC.runAll'
-import { Step } from './SOC/SOC.step'
-import BuddyAllocator from "./BuddyAllocator"
-import sub_InterConnect from './sub_Interconnect'
-import ChannelA from './ChannelA'
-import { Console } from 'console'
+import { assemble } from '../SOC/SOC.assemble'
+
+import { RunAll } from '../SOC/SOC.runAll'
+import { Step } from '../SOC/SOC.step'
+import BuddyAllocator from "../Memory/BuddyAllocator"
+import sub_InterConnect from '../Interconnect/sub_Interconnect'
+import ChannelA from '../Interconnect/ChannelA'
+// import { Console } from 'console'
 // import {Monitor} from './Monitor'
 // import {Keyboard} from './Keyboard'
 
@@ -57,7 +56,7 @@ export default class Soc {
     logger?: Logger
     active_keyboard: any
     active_monitor: any
-    LedMatrix?: LedMatrix
+    // LedMatrix?: LedMatrix
     keyboard?: Keyboard
     monitor?: Monitor
     view?: NCKHBoard
@@ -65,6 +64,8 @@ export default class Soc {
     public setLogger(logger: Logger) {
         this.logger = logger
         this.Processor.setLogger(logger)
+        this.Memory.setLogger(logger)
+        this.Bus0.setLogger(logger)
     }
 
     public setKeyboard(keyboard: Keyboard) {
@@ -81,9 +82,9 @@ export default class Soc {
         this.view = view
     }
 
-    public setLedMatrix (Led_matrix: LedMatrix) {
-        this.LedMatrix = Led_matrix
-    }
+    // public setLedMatrix (Led_matrix: LedMatrix) {
+    //     this.LedMatrix = Led_matrix
+    // }
 
     public println(...args: string[]) {
         if (!this.logger) {
@@ -153,13 +154,13 @@ export default class Soc {
         )
     }
 
-    public IO_operate () {
-        return IO_operate.bind(this)()
-    }
+    // public IO_operate () {
+    //     return IO_operate.bind(this)()
+    // }
     
-    public DMA_operate () {
-        return DMA_Get.bind(this)()
-    }
+    // public DMA_operate () {
+    //     return DMA_Get.bind(this)()
+    // }
 
     public RunAll() {
         return RunAll.bind(this)()
@@ -180,12 +181,13 @@ export default class Soc {
             
         this.Memory.Run(
             this.cycle
-            , this.Bus0.Pout[2].dequeue())
+            , this.Bus0.Pout[2].dequeue()
+        )
 
         this.Bus0.Run (
             this.Processor.master.ChannelA
             ,this.DMA.DMA_Master.ChannelA
-            ,this.Memory.slaveMemory.ChannelD
+            ,this.Memory.burst
             ,this.Bus1.Pout[0].dequeue()
             ,this.Processor.master.ChannelA.valid == '1'
             ,false
@@ -193,14 +195,15 @@ export default class Soc {
             ,false
             ,this.cycle
         )
+
         this.cycle +=1
 
-        console.log('this.Processor.master.ChannelA', this.Processor.master.ChannelA)
-        console.log('this.Memory.slaveMemory.ChannelD', this.Memory.slaveMemory.ChannelD)
-        console.log('this.Processor.state, this.Memory.step, this.Bus0.state', this.Processor.state, this.Memory.step, this.Bus0.state)
-        console.log(this.Bus0.Timming)
-        console.log('pin0',this.Bus0.Pin[0])
-        console.log('********************************')
+        // console.log('this.Processor.master.ChannelA', this.Processor.master.ChannelA)
+        // console.log('this.Memory.slaveMemory.ChannelD', this.Memory.slaveMemory.ChannelD)
+        // console.log('this.Processor.state, this.Memory.step, this.Bus0.state', this.Processor.state, this.Memory.state, this.Bus0.state)
+        // console.log(this.Bus0.Timming)
+        // console.log('pin0',this.Bus0.Pin[0])
+        // console.log('********************************')
         // console.log('this.Processor.state, this.Memory.step, this.Bus0.state', this.Processor.state, this.Memory.step, this.Bus0.state)
         // console.log('pin0',this.Bus0.Pin[0].peek())
 

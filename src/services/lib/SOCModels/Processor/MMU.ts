@@ -87,10 +87,10 @@ export default class MMU {
             );
     
             if (exist) {
-                message = "TLB: VPN is caught.";
+                message = " TLB: VPN is caught.";
                 this.physical_address = physical_addresses[check_pagenum.indexOf(true)];
             } else {
-                message = "TLB: VPN is missed.";
+                message = " TLB: VPN is missed.";
                 this.physical_address = this.stap;
             }
         //}
@@ -145,7 +145,7 @@ export default class MMU {
         console.log  ('Cycle ', cycle.toString()+' : ' + MMU_message)
         //this.println ('Cycle ', this.cycle.toString()+' : ' + MMU_message)
 
-        if (this.MMU_message == 'TLB: VPN is missed.') {
+        if (this.MMU_message == ' TLB: VPN is missed.') {
             const VPN       = logic_address.slice(0, 20)  // 10 bit đầu tiên
             const stap      = this.stap
   

@@ -3,6 +3,7 @@ import ChannelD             from "./ChannelD"
 import { FIFO_ChannelA }    from "./FIFO_ChannelA"
 import { FIFO_ChannelD }    from "./FIFO_ChannelD"
 import { FIFO_timing }      from "./FIFO_timing"
+import {Logger }            from '../Compile/soc.d'
 
 export default class InterConnect {
     active      : boolean
@@ -11,6 +12,27 @@ export default class InterConnect {
     Pout        : (FIFO_ChannelD | FIFO_ChannelA)[]
     Pactived    : boolean[]
     state       : number
+    logger      ?: Logger
+    active_println : boolean 
+
+    public setLogger(logger: Logger) {
+        this.logger = logger
+    }
+
+    public println(active: boolean, ...args: string[]) {
+        
+        if (active) {
+            console.log(...args)
+        }
+
+        if (!this.logger) {
+            return
+        }
+
+        if (active) {
+            this.logger.println(...args)
+        }
+    }
 
     constructor(active: boolean) {
         this.active = active
@@ -36,7 +58,7 @@ export default class InterConnect {
                     ,new FIFO_timing()
                     ,new FIFO_timing()
         ]
-
+        this.active_println = true
         this.Pactived = [true, true, true, true]
 
     }
@@ -44,7 +66,7 @@ export default class InterConnect {
     Run (
         dataFromProcessor           : ChannelA
         ,dataFromDMA                : ChannelA
-        ,dataFromMemory             : ChannelD
+        ,dataFromMemory             : ChannelD[]
         ,dataFromSub                : ChannelD
         ,dataFromProcessor_valid    : boolean
         ,dataFromDMA_valid          : boolean
@@ -68,7 +90,7 @@ export default class InterConnect {
             return
         }
         if (this.state == 1) {
-            this.Route (this.Abiter())
+            this.Route (this.Abiter(), cycle)
             this.state = 0
             return
         }
@@ -77,7 +99,7 @@ export default class InterConnect {
     RecData(
         dataFromProcessor           : ChannelA
         ,dataFromDMA                : ChannelA
-        ,dataFromMemory             : ChannelD
+        ,dataFromMemory             : ChannelD[]
         ,dataFromSub                : ChannelD
         ,dataFromProcessor_valid    : boolean
         ,dataFromDMA_valid          : boolean
@@ -93,11 +115,22 @@ export default class InterConnect {
 
     RecFromProcessor(data: ChannelA, cycle: number, valid: boolean): void {
         if (this.active && this.Pactived[0] && valid && data.valid == '1') {
-            
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The INTERCONNECT is receiving data from PROCESSOR.'
+            )
             if (this.Pin[0] instanceof FIFO_ChannelA) {
                 this.Pin[0].enqueue({...data})
                 this.Timming[0].enqueue(cycle)
             } else {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The DATA from PROCESSOR is invalid!'
+                )
                 console.error("Error: Pin[0] is not FIFO_ChannelA")
             }
         }
@@ -105,21 +138,49 @@ export default class InterConnect {
 
     RecFromDMA(data: ChannelA, cycle: number, valid: boolean): void {
         if (this.active && this.Pactived[1] && valid && data.valid == '1') {
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The INTERCONNECT is receiving data from DMA.'
+            )
             if (this.Pin[1] instanceof FIFO_ChannelA) {
                 this.Pin[1].enqueue({...data})
                 this.Timming[1].enqueue(cycle)
             } else {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The DATA from DMA is invalid!'
+                )
                 console.error("Error: Pin[1] is not FIFO_ChannelA")
             }
         }
     }
 
-    RecFromMem(data: ChannelD, cycle: number, valid: boolean): void {
-        if (this.active && this.Pactived[2] && valid && data.valid == '1') {
+    RecFromMem(data: ChannelD[], cycle: number, valid: boolean): void {
+        if (this.active && this.Pactived[2] && valid) {
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The INTERCONNECT is receiving data from MEMORY.'
+            )
             if (this.Pin[2] instanceof FIFO_ChannelD) {
-                this.Pin[2].enqueue({...data})
-                this.Timming[2].enqueue(cycle)
+                for (let item of data) {
+                    if (item.valid == '1') {
+                        this.Pin[2].enqueue({...item})
+                        this.Timming[2].enqueue(cycle)
+                    }
+                }
             } else {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The DATA from MEMORY is invalid!'
+                )
                 console.error("Error: Pin[2] is not FIFO_ChannelD")
             }
         }
@@ -127,6 +188,12 @@ export default class InterConnect {
 
     RecFromSub(data: ChannelD, cycle: number, valid: boolean): void {
         if (this.active && this.Pactived[3] && valid && data.valid == '1') {
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The INTERCONNECT is receiving data from SUB-INTERCONNECT.'
+            )
             if (this.Pin[3] instanceof FIFO_ChannelD) {
                 this.Pin[3].enqueue({...data})
                 this.Timming[3].enqueue(cycle)
@@ -159,12 +226,9 @@ export default class InterConnect {
         return -1
     }
 
-    Route (Abiter: number) {
-        console.log('route')
+    Route (Abiter: number, cycle: number) {
         if (Abiter == 0) {
-            console.log('pin0',this.Pin[0])
             const dataFromProcessor = {...this.Pin[0].dequeue()}
-            console.log('pin0',this.Pin[0])   
 
             // if (this.Pin[0].dequeue() instanceof ChannelA) {
                 // if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(dataFromProcessor)
@@ -179,13 +243,24 @@ export default class InterConnect {
                     )
                     
                 ) {
-
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The INTERCONNECT is sending data from PROCESSOR to MEMORY.'
+                    )
                     if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(dataFromProcessor)
                 }
                 if (
                     (parseInt('0'+dataFromProcessor.address, 2) > 0x000304C) 
                     && (parseInt('0'+dataFromProcessor.address, 2) <= 0x000305C)
                 ) {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The INTERCONNECT is sending data from PROCESSOR to SUB-INTERCONNECT.'
+                    )
                     if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromProcessor)
                 }
             }
@@ -194,8 +269,20 @@ export default class InterConnect {
             const dataFromDMA = this.Pin[1].dequeue()
             if (dataFromDMA instanceof ChannelA) {
                 if (dataFromDMA.opcode == '100') {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The INTERCONNECT is sending data from DMA to MEMORY.'
+                    )
                     if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(dataFromDMA)
                 } else {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The INTERCONNECT is sending data from DMA to SUB-INTERCONNCET.'
+                    )
                     if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromDMA)
                 }
             }
@@ -205,8 +292,20 @@ export default class InterConnect {
             // if (dataFromMem instanceof ChannelD) {
                 if (dataFromMem.source == '00') {
                     if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue(dataFromMem)
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The INTERCONNECT is sending data from MEMORY to PROCESSOR.'
+                    )
                         //console.log('this.Pout[0].peek()', this.Pout[0].peek())
                 } else {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The INTERCONNECT is sending data from MEMORY to DMA.'
+                    )
                     if (this.Pout[1] instanceof FIFO_ChannelD) this.Pout[1].enqueue(dataFromMem)
                 }
             // } 
@@ -215,8 +314,20 @@ export default class InterConnect {
             const dataFromSInterconnect = this.Pin[2].dequeue()
             if (dataFromSInterconnect instanceof ChannelD) {
                 if (dataFromSInterconnect.source == '00') {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The INTERCONNECT is sending data from SUB-INTERCONNECT to PROCESSOR.'
+                    )
                     if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue(dataFromSInterconnect)
                 } else {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The INTERCONNECT is sending data from SUB-INTERCONNECT to DMA.'
+                    )
                     if (this.Pout[1] instanceof FIFO_ChannelD) this.Pout[1].enqueue(dataFromSInterconnect)
                 }
             }

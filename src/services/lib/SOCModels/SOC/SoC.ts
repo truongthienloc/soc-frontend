@@ -23,6 +23,11 @@ import { Step } from '../SOC/SOC.step'
 import BuddyAllocator from "../Memory/BuddyAllocator"
 import sub_InterConnect from '../Interconnect/sub_Interconnect'
 import ChannelA from '../Interconnect/ChannelA'
+import ChannelD from "./../Interconnect/ChannelD"
+import Bridge from "./../Interconnect/Bridge"
+import { FIFO_ChannelA } from '../Interconnect/FIFO_ChannelA'
+import LEDMatrix from '../DMA/Led_matrix'
+import Cycle from '../Compile/cycle'
 // import { Console } from 'console'
 // import {Monitor} from './Monitor'
 // import {Keyboard} from './Keyboard'
@@ -35,7 +40,8 @@ export default class Soc {
     MMU         : MMU
     Memory      : Memory
     DMA         : DMA
-    Led_matrix  : boolean[][]
+    Bridge      : Bridge
+    Led_matrix  : LEDMatrix
     // Monitor     : Monitor
     // Keyboard    : Keyboard
 
@@ -45,7 +51,7 @@ export default class Soc {
     Assembler   : Assembler
     Disassembly : disAssembly
     Allocator   : BuddyAllocator
-    cycle       : number
+    cycle       : Cycle
     MMU_endAddr : number
     public static SOCEVENT = {DONE_ALL: 'DONE ALL', STEP_END: 'STEP END'}
     event = new EventEmitter ()
@@ -103,7 +109,8 @@ export default class Soc {
         this.DMA            = new DMA()
         this.Assembler      = new Assembler()
         this.Assembly_code  = []
-        this.Led_matrix     = []
+        this.Led_matrix     = new LEDMatrix ()
+        this.Bridge         = new Bridge(false)
         // this.Monitor        = new Monitor        ()
         // this.Keyboard       = new Keyboard       ()
         this.Allocator      = new BuddyAllocator (0x0BFFF, 0X0C000)
@@ -111,12 +118,8 @@ export default class Soc {
         this.arbiter        = false
         // this.Ecall          = new Ecall
         this.Disassembly    = new disAssembly ('')
-        for (let i = 0; i < 96; i++) {
-            let row: boolean[] = [];
-            for (let j = 0; j < 96; j++) row.push(false);
-            this.Led_matrix.push(row);
-        }
-        this.cycle = 0
+        this.cycle = new Cycle (0)
+
         this.name = name
     }
 
@@ -170,7 +173,7 @@ export default class Soc {
         await this.Step()
         this.event.emit(Soc.SOCEVENT.STEP_END)
     }
-    public async Step()  {
+    public async Step()  {      
 
         this.Processor.Run(
             false
@@ -178,6 +181,12 @@ export default class Soc {
             , this.Bus0.Pout[0].dequeue()
             , this.Bus0.state ==0
         )
+
+        // this.DMA.Run (
+        //     this.Bus1.Pout[1].dequeue()
+        //     ,this.Bus0.Pout[2].dequeue()
+        // )
+
             
         this.Memory.Run(
             this.cycle
@@ -196,7 +205,23 @@ export default class Soc {
             ,this.cycle
         )
 
-        this.cycle +=1
+        // this.Bridge.Run (
+        //     this.Bus0.Pout[3]
+        //     , this.Bus1.Pout[0]
+        // )
+
+        // this.Bus1.Run (
+        //     this.Bridge.Bridge_master.ChannelA
+        //     , this.DMA.DMA_Slave.ChannelD
+        //     , this.Led_matrix.Matrix_Slave.ChannelD
+        //     , this.Bridge.Bridge_master.ChannelA.valid == '1'
+        //     , this.DMA.DMA_Slave.ChannelD.valid == '1'
+        //     , this.Led_matrix.Matrix_Slave.ChannelD.valid == '1'
+        //     , this.cycle
+        // )
+
+        this.cycle.incr()
+        
 
         // console.log('this.Processor.master.ChannelA', this.Processor.master.ChannelA)
         // console.log('this.Memory.slaveMemory.ChannelD', this.Memory.slaveMemory.ChannelD)

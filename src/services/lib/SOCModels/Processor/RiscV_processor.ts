@@ -5,6 +5,7 @@ import {Logger } from '../Compile/soc.d'
 import Ecall from '../Ecall/Ecall'
 
 import ChannelD from '../Interconnect/ChannelD'
+import Cycle from '../Compile/cycle'
 // import { measureMemory } from 'vm'
 // import { symlink, write } from 'fs'
 // import { Console } from 'console'
@@ -892,7 +893,7 @@ export default class RiscVProcessor {
 
     Run (
           icBusy            : boolean
-        , cycle             : number
+        , cycle             : Cycle
         , Memory2CPU        : any
         , ready             : boolean
     ) 
@@ -1025,7 +1026,7 @@ export default class RiscVProcessor {
                     + cycle.toString() 
                     +': The TLB is replacing an entry.'
                 )
-                this.MMU.pageReplace ([parseInt(VPN , 2) & 0xf,  dec (frame), 1, cycle])
+                this.MMU.pageReplace ([parseInt(VPN , 2) & 0xf,  dec (frame), 1, cycle.cycle])
                 this.state = 2
             }
             return

@@ -2,6 +2,7 @@ import Slave from './../Interconnect/Slave'
 import Master from './../Interconnect/Master'
 import ChannelA             from "./../Interconnect/ChannelA"
 import ChannelD             from "./../Interconnect/ChannelD"
+import { Interconnect } from '../../soc/components/Interconnect'
 
 export default class DMA {
     sourceAddress       : string
@@ -28,24 +29,26 @@ export default class DMA {
         this.DMA_Slave          = new Slave ('DMA_Slave', true)
         this.DMA_buffer         = Array(288).fill('00000000000000000000000000000000')
     }
-    public run (sub2DMA: ChannelA, Memrory2DMA: any, Led2DMA: any) {
-        //console.log (sub2DMA.address.length, sub2DMA.data.length)
+    public Run (sub2DMA : ChannelA, InterConnect2DMA: ChannelD) {
+
         if (this.state == 0 && sub2DMA.valid == '1') {
             this.DMA_Slave.receive(sub2DMA)
-            this.config (this.DMA_Slave.ChannelA.address, this.DMA_Slave.ChannelA.data)
+            this.config ()
             return
         }
         if (this.state == 1 || this.state == 2) {
-            return this.get    (Memrory2DMA)
+            return this.get    (InterConnect2DMA)
             
         }
         if (this.state == 3 || this.state == 4) {
-            return this.put    (Led2DMA)
+            return this.put    (InterConnect2DMA)
         }
 
     }
 
-    config(address: string, data: string) {
+    config() {
+        const address = this.DMA_Slave.ChannelA.address
+        const data    = this.DMA_Slave.ChannelA.data
         // Kiểm tra địa chỉ và dữ liệu có hợp lệ không
         if (address.length !== 17 || data.length !== 32) {
             console.log("Invalid address or data length")
@@ -73,19 +76,20 @@ export default class DMA {
                     console.log("Invalid address for configuration: " + hexAddress)
                     return
             }
+                    // Kiểm tra xem đã cấu hình đầy đủ chưa
+            if ((this.sourceAddress         != '00000000000000000000000000000000') && 
+                (this.destinationAddress    != '00000000000000000000000000000000') && 
+                (this.length                != '00000000000000000000000000000000') && 
+                (this.control               != '00000000000000000000000000000000')
+                ) {
+                this.state += 1
+            }
         }
 
-        // Kiểm tra xem đã cấu hình đầy đủ chưa
-        if ((this.sourceAddress         != '00000000000000000000000000000000') && 
-            (this.destinationAddress    != '00000000000000000000000000000000') && 
-            (this.length                != '00000000000000000000000000000000') && 
-            (this.control               != '00000000000000000000000000000000')
-        ) {
-            this.state += 1
-        }
+
     }
 
-    get(Memory2DMA: any) {
+    get(InterConnect2DMA: ChannelD) {
         if (this.state == 1) {
             // Get operation for different addresses and store results in beats array
             this.DMA_Master.send(
@@ -98,16 +102,18 @@ export default class DMA {
         }
     
         if (this.state == 2) {
-            if (Memory2DMA.valid == '1') {
-                this.DMA_Master.receive(Memory2DMA)
-                this.DMA_buffer[parseInt(this.length, 2)] = this.DMA_Master.ChannelD.data
-                this.length = (parseInt(this.length, 2) - 4).toString(2).padStart(32, '0')
-                this.state += 1
+            if (InterConnect2DMA.valid == '1'
+                && InterConnect2DMA.sink == '0'
+            ) {
+                    this.DMA_Master.receive(InterConnect2DMA)
+                    this.DMA_buffer[parseInt(this.length, 2)] = this.DMA_Master.ChannelD.data
+                    this.length = (parseInt(this.length, 2) - 4).toString(2).padStart(32, '0')
+                    this.state += 1
             }
         }
     }
 
-    put(Led2DMA: any) {
+    put(InterConnect2DMA: ChannelD) {
         if (this.state == 3 ) {
             console.log(`Sending data from source address: ${this.sourceAddress}`)
             this.DMA_Master.send (
@@ -120,8 +126,10 @@ export default class DMA {
         }
 
         if (this.state == 4 ) {
-            if (Led2DMA.valid == '1') {
-                this.DMA_Master.receive (Led2DMA)
+            if (InterConnect2DMA.valid == '1'
+                && InterConnect2DMA.sink == '1'
+            ) {
+                this.DMA_Master.receive (InterConnect2DMA)
                 this.state = 0
             }
         }

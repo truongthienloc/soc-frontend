@@ -4,6 +4,7 @@ import { FIFO_ChannelA }    from "./FIFO_ChannelA"
 import { FIFO_ChannelD }    from "./FIFO_ChannelD"
 import { FIFO_timing }      from "./FIFO_timing"
 import {Logger }            from '../Compile/soc.d'
+import Cycle from "../Compile/cycle"
 
 export default class InterConnect {
     active      : boolean
@@ -72,7 +73,7 @@ export default class InterConnect {
         ,dataFromDMA_valid          : boolean
         ,dataFromMemory_valid       : boolean
         ,dataFromSub_valid          : boolean
-        ,cycle                      : number
+        ,cycle                      : Cycle
     ) {
         if (this.state == 0) {
             this.RecData (
@@ -86,10 +87,12 @@ export default class InterConnect {
                 ,dataFromSub_valid          
                 ,cycle                      
             )
+
             if (! ((this.Pin[0].isEmpty()) && (this.Pin[1].isEmpty()) && (this.Pin[2].isEmpty()) && (this.Pin[3].isEmpty()))) this.state +=1
             return
         }
         if (this.state == 1) {
+            cycle.incr()
             this.Route (this.Abiter(), cycle)
             this.state = 0
             return
@@ -105,7 +108,7 @@ export default class InterConnect {
         ,dataFromDMA_valid          : boolean
         ,dataFromMemory_valid       : boolean
         ,dataFromSub_valid          : boolean
-        ,cycle                      : number
+        ,cycle                      : Cycle
     ) {
         this.RecFromProcessor(dataFromProcessor, cycle, dataFromProcessor_valid)
         this.RecFromDMA(dataFromDMA, cycle, dataFromDMA_valid)
@@ -113,8 +116,9 @@ export default class InterConnect {
         this.RecFromSub(dataFromSub, cycle, dataFromSub_valid)
     }
 
-    RecFromProcessor(data: ChannelA, cycle: number, valid: boolean): void {
+    RecFromProcessor(data: ChannelA, cycle: Cycle, valid: boolean): void {
         if (this.active && this.Pactived[0] && valid && data.valid == '1') {
+
             this.println (
                 this.active_println
                 ,'Cycle '
@@ -123,7 +127,7 @@ export default class InterConnect {
             )
             if (this.Pin[0] instanceof FIFO_ChannelA) {
                 this.Pin[0].enqueue({...data})
-                this.Timming[0].enqueue(cycle)
+                this.Timming[0].enqueue(cycle.cycle)
             } else {
                 this.println (
                     this.active_println
@@ -133,10 +137,11 @@ export default class InterConnect {
                 )
                 console.error("Error: Pin[0] is not FIFO_ChannelA")
             }
+
         }
     }
 
-    RecFromDMA(data: ChannelA, cycle: number, valid: boolean): void {
+    RecFromDMA(data: ChannelA, cycle: Cycle, valid: boolean): void {
         if (this.active && this.Pactived[1] && valid && data.valid == '1') {
             this.println (
                 this.active_println
@@ -146,7 +151,7 @@ export default class InterConnect {
             )
             if (this.Pin[1] instanceof FIFO_ChannelA) {
                 this.Pin[1].enqueue({...data})
-                this.Timming[1].enqueue(cycle)
+                this.Timming[1].enqueue(cycle.cycle)
             } else {
                 this.println (
                     this.active_println
@@ -159,7 +164,7 @@ export default class InterConnect {
         }
     }
 
-    RecFromMem(data: ChannelD[], cycle: number, valid: boolean): void {
+    RecFromMem(data: ChannelD[], cycle: Cycle, valid: boolean): void {
         if (this.active && this.Pactived[2] && valid) {
             this.println (
                 this.active_println
@@ -171,7 +176,7 @@ export default class InterConnect {
                 for (let item of data) {
                     if (item.valid == '1') {
                         this.Pin[2].enqueue({...item})
-                        this.Timming[2].enqueue(cycle)
+                        this.Timming[2].enqueue(cycle.cycle)
                     }
                 }
             } else {
@@ -186,7 +191,7 @@ export default class InterConnect {
         }
     }
 
-    RecFromSub(data: ChannelD, cycle: number, valid: boolean): void {
+    RecFromSub(data: ChannelD, cycle: Cycle, valid: boolean): void {
         if (this.active && this.Pactived[3] && valid && data.valid == '1') {
             this.println (
                 this.active_println
@@ -196,7 +201,7 @@ export default class InterConnect {
             )
             if (this.Pin[3] instanceof FIFO_ChannelD) {
                 this.Pin[3].enqueue({...data})
-                this.Timming[3].enqueue(cycle)
+                this.Timming[3].enqueue(cycle.cycle)
             } else {
                 console.error("Error: Pin[3] is not FIFO_ChannelD")
             }
@@ -226,7 +231,7 @@ export default class InterConnect {
         return -1
     }
 
-    Route (Abiter: number, cycle: number) {
+    Route (Abiter: number, cycle: Cycle) {
         if (Abiter == 0) {
             const dataFromProcessor = {...this.Pin[0].dequeue()}
 

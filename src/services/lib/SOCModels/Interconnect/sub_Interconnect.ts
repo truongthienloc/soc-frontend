@@ -40,7 +40,7 @@ export default class InterConnect {
 
     Run (
         dataFromBridge           : ChannelA
-        ,dataFromDMA             : ChannelA
+        ,dataFromDMA             : ChannelD
         ,dataFromLed             : ChannelD
         ,dataFromBridge_valid    : boolean
         ,dataFromDMA_valid       : boolean
@@ -67,7 +67,7 @@ export default class InterConnect {
 
     RecData(
         dataFromBridge           : ChannelA
-        ,dataFromDMA             : ChannelA
+        ,dataFromDMA             : ChannelD
         ,dataFromLed             : ChannelD
         ,dataFromBridge_valid    : boolean
         ,dataFromDMA_valid       : boolean
@@ -91,9 +91,9 @@ export default class InterConnect {
         }
     }
 
-    RecFromDMA(data: ChannelA, cycle: number, valid: boolean): void {
+    RecFromDMA(data: ChannelD, cycle: number, valid: boolean): void {
         if (this.active && this.Pactived[1] && valid) {
-            if (this.Pin[1] instanceof FIFO_ChannelA) {
+            if (this.Pin[1] instanceof FIFO_ChannelD) {
                 this.Pin[1].enqueue(data)
                 this.Timming[1].enqueue(cycle)
             } else {

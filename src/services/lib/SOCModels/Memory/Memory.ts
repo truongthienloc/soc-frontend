@@ -4,6 +4,7 @@ import { dec, } from './../Compile/sub_function'
 import ChannelA from './../Interconnect/ChannelA'
 import ChannelD from './../Interconnect/ChannelD'
 import {Logger } from './../Compile/soc.d'
+import Cycle from '../Compile/cycle'
 
 export default class Memory {
     Memory          : { [key: string]: string }
@@ -25,6 +26,7 @@ export default class Memory {
         this.Memory             = {}
         this.active             = active
         this.slaveMemory        = new Slave('DataMemory', true)
+        this.slaveMemory.ChannelD.sink = '0'
         this.Ins_pointer        = 0
         this.active_println     = true
         this.burst              = []
@@ -83,7 +85,7 @@ export default class Memory {
     }
 
     public Run (
-        cycle           : number
+        cycle           : Cycle
         , MMU2Memory    : ChannelA
     ) {
 
@@ -106,6 +108,8 @@ export default class Memory {
                     cycle.toString()     +
                     ': The MEMORY is sending an AccessAckData message to the INTERCONNECT.'
                     )
+
+                    cycle.incr() 
                     if (MMU2Memory.size == '00') {
                         this.slaveMemory.send(
                             'AccessAckData', 

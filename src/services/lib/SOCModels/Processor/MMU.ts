@@ -1,3 +1,4 @@
+import Cycle from "../Compile/cycle"
 
 export default class MMU {
     active              : boolean
@@ -97,46 +98,9 @@ export default class MMU {
         return [this.physical_address.toString(2).padStart(32, '0'), message];
     }
 
-    // public search_in_Memory (
-    //     cycle           : number
-    //     , logic_address : string
-    //     , Memory2MMU    : ChannelD
-    // ) 
-    // {                                                          {
-    //         const VPN       = logic_address.slice(0, 20)  // 10 bit đầu tiên
-    //         const stap      = this.stap
-    //         const PTE       = stap + (parseInt(VPN , 2) & 0xf)* 4
-
-    //         //***************************GET PTE ****************************
-    //         if (this.step == 0) {
-    //             console.log('Cycle ', cycle.toString()+' : '+ 
-    //             'The MMU want to GET data at address '+
-    //             BinToHex((PTE).toString(2).padStart(32,'0'))+' from MEMORY')
-    //             //this.println('Cycle ', cycle.toString()+' : '+ 
-    //             // 'The MMU want to GET data at address '+
-    //             // BinToHex((PTE).toString(2).padStart(32,'0'))+' from MEMORY')
-    //             this.step +=1
-    //         }
-    //         if (this.step == 1) {
-    //             this.master.send('GET', (PTE).toString(2).padStart(17,'0'), '0')
-    //             console.log  ('Cycle ', cycle.toString()+': The MMU is sending a GET message to MEMORY through the INTERCONNECT.')
-    //             //this.println ('Cycle ', cycle.toString()+': The MMU is sending a GET message to MEMORY through the INTERCONNECT.')
-    //             this.step +=1
-    //         }
-    //         if (this.step == 2) {
-    //             let frame      = this.master.receive ('AccessAckData', Memory2MMU)
-    //             console.log  ('Cycle ', cycle.toString()+': The MMU is receiving an AccessAckData message from the INTERCONNECT.')
-    //             //this.println ('Cycle ', cycle.toString()+': The MMU is receiving an AccessAckData message from the INTERCONNECT.')
-    //             this.pageReplace ([parseInt(VPN , 2) & 0xf,  dec (frame), 1, cycle])
-    //             console.log  ('Cycle ', cycle.toString()+': TLB entry is replaced')
-    //             //this.println ('Cycle ', cycle.toString()+': TLB entry is replaced')
-    //             this.step = 0
-    //         }
-    //     } 
-    // }
 
     public run (
-        cycle            : number
+        cycle            : Cycle
         ,logic_address   : string
     ) 
     {
@@ -153,6 +117,9 @@ export default class MMU {
             return (PTE).toString(2).padStart(17,'0')
         } else {
             this.done = true
+            if (parseInt(physical_address,2) > this.end_addr) {
+                this.MMU_message = 'Page fault!!!!'
+            }
             return physical_address
         }
     }

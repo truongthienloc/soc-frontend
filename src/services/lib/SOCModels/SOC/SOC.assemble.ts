@@ -1,7 +1,7 @@
 import { Register } from "~/types/register"
-import Soc from "../SoC"
-import { TLBEntries } from "../soc.d"
-import BuddyAllocator from "../BuddyAllocator"
+import Soc from "../SOC/SoC"
+import { TLBEntries } from "../Compile/soc.d"
+import BuddyAllocator from "../Memory/BuddyAllocator"
 import { ConstructionOutlined, Monitor } from "@mui/icons-material"
 
 
@@ -63,8 +63,8 @@ export function assemble(
     
     this.logger?.clear()
     // this.monitor?.clear()
-    this.LedMatrix?.clear()
-    this.cycle = 0
+    // this.LedMatrix?.clear()
+    // this.cycle = 0
     this.view?.cpu.setIsRunning(false)
     this.view?.mmu.setIsRunning(false)
     // this.view?.monitor.setIsRunning(false)

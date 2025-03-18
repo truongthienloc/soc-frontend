@@ -7,15 +7,12 @@ export function RunAll(this: Soc) {
         this.println('CPU has not been actived!!!')
         return
     }
-    let c = 0 
     while (
         this.Processor.pc <
         this.Memory.Ins_pointer || this.Processor.state != 0
     ) {
-        c++ 
         this.Step()
-        if (c>100) break
     }
-    console.log(this.Processor.pc,  this.Memory.Ins_pointer, c)
+    console.log(this.Processor.pc,  this.Memory.Ins_pointer)
    this.event.emit(Soc.SOCEVENT.DONE_ALL)
 }

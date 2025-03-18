@@ -65,6 +65,7 @@ export default class Soc {
     public setLogger(logger: Logger) {
         this.logger = logger
         this.Processor.setLogger(logger)
+        this.Memory.setLogger(logger)
     }
 
     public setKeyboard(keyboard: Keyboard) {
@@ -180,12 +181,13 @@ export default class Soc {
             
         this.Memory.Run(
             this.cycle
-            , this.Bus0.Pout[2].dequeue())
+            , this.Bus0.Pout[2].dequeue()
+        )
 
         this.Bus0.Run (
             this.Processor.master.ChannelA
             ,this.DMA.DMA_Master.ChannelA
-            ,this.Memory.slaveMemory.ChannelD
+            ,this.Memory.burst
             ,this.Bus1.Pout[0].dequeue()
             ,this.Processor.master.ChannelA.valid == '1'
             ,false
@@ -193,14 +195,15 @@ export default class Soc {
             ,false
             ,this.cycle
         )
+
         this.cycle +=1
 
-        console.log('this.Processor.master.ChannelA', this.Processor.master.ChannelA)
-        console.log('this.Memory.slaveMemory.ChannelD', this.Memory.slaveMemory.ChannelD)
-        console.log('this.Processor.state, this.Memory.step, this.Bus0.state', this.Processor.state, this.Memory.step, this.Bus0.state)
-        console.log(this.Bus0.Timming)
-        console.log('pin0',this.Bus0.Pin[0])
-        console.log('********************************')
+        // console.log('this.Processor.master.ChannelA', this.Processor.master.ChannelA)
+        // console.log('this.Memory.slaveMemory.ChannelD', this.Memory.slaveMemory.ChannelD)
+        // console.log('this.Processor.state, this.Memory.step, this.Bus0.state', this.Processor.state, this.Memory.state, this.Bus0.state)
+        // console.log(this.Bus0.Timming)
+        // console.log('pin0',this.Bus0.Pin[0])
+        // console.log('********************************')
         // console.log('this.Processor.state, this.Memory.step, this.Bus0.state', this.Processor.state, this.Memory.step, this.Bus0.state)
         // console.log('pin0',this.Bus0.Pin[0].peek())
 

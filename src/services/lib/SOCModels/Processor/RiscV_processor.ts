@@ -1,14 +1,13 @@
-import MMU from './MMU'
-import { dec, handleRegister } from './sub_function'
-import { mux } from './sub_function'
-import Master from './Master'
-import {Logger } from './soc.d'
-import Ecall from './Ecall/Ecall'
+import MMU from '../Processor/MMU'
+import { dec, handleRegister, mux } from '../Compile/sub_function'
+import Master from '../Interconnect/Master'
+import {Logger } from '../Compile/soc.d'
+import Ecall from '../Ecall/Ecall'
 
-import ChannelD from './ChannelD'
-import { measureMemory } from 'vm'
-import { symlink, write } from 'fs'
-import { Console } from 'console'
+import ChannelD from '../Interconnect/ChannelD'
+// import { measureMemory } from 'vm'
+// import { symlink, write } from 'fs'
+// import { Console } from 'console'
 
 export default class RiscVProcessor {
     name                        : string

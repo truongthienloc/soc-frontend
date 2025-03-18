@@ -1,8 +1,8 @@
 // import DMA from './DMA'
-import Soc from './SoC'
-import ChannelD from './ChannelD'
-import ChannelA from "./ChannelA";
-import DMA from './DMA';
+import Soc from './SOC/SoC'
+import ChannelD from './Interconnect/ChannelD'
+import ChannelA from "./Interconnect/ChannelA";
+import DMA from './DMA/DMA';
 // import { LayersTwoTone } from '@mui/icons-material';
 // import { cyan } from '@mui/material/colors';
 // import { Console } from 'console';

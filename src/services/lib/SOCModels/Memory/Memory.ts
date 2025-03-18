@@ -1,9 +1,9 @@
-import { Register } from '../../../types/register'
-import Slave from './Slave'
-import { dec, } from './sub_function'
-import ChannelA from './ChannelA'
-import ChannelD from './ChannelD'
-import {Logger } from './soc.d'
+import { Register } from './../../../../types/register'
+import Slave from './../Interconnect/Slave'
+import { dec, } from './../Compile/sub_function'
+import ChannelA from './../Interconnect/ChannelA'
+import ChannelD from './../Interconnect/ChannelD'
+import {Logger } from './../Compile/soc.d'
 
 export default class Memory {
     Memory          : { [key: string]: string }
@@ -13,7 +13,7 @@ export default class Memory {
     address         : string
     data            : string
     Ins_pointer     : number
-    logger          : Logger
+    logger          ?: Logger
     active_println  : boolean
     burst           : ChannelD[]
 

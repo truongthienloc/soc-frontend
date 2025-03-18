@@ -1,7 +1,7 @@
-import Slave from './Slave'
-import Master from './Master'
-import ChannelA             from "./ChannelA"
-import ChannelD             from "./ChannelD"
+import Slave from './../Interconnect/Slave'
+import Master from './../Interconnect/Master'
+import ChannelA             from "./../Interconnect/ChannelA"
+import ChannelD             from "./../Interconnect/ChannelD"
 
 export default class DMA {
     sourceAddress       : string

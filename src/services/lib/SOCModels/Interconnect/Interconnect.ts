@@ -3,7 +3,7 @@ import ChannelD             from "./ChannelD"
 import { FIFO_ChannelA }    from "./FIFO_ChannelA"
 import { FIFO_ChannelD }    from "./FIFO_ChannelD"
 import { FIFO_timing }      from "./FIFO_timing"
-import {Logger }            from './soc.d'
+import {Logger }            from '../Compile/soc.d'
 
 export default class InterConnect {
     active      : boolean
@@ -12,7 +12,7 @@ export default class InterConnect {
     Pout        : (FIFO_ChannelD | FIFO_ChannelA)[]
     Pactived    : boolean[]
     state       : number
-    logger      : Logger
+    logger      ?: Logger
     active_println : boolean 
 
     public setLogger(logger: Logger) {

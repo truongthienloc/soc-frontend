@@ -31,10 +31,17 @@ export default class Bridge {
         }
 
         if (this.state == 1) {
-            this.Bridge_slave.receive(this.fifo_from_Interconnect.dequeue())
-            this.Bridge_master.ChannelA = this.Bridge_slave.ChannelA
-            this.Bridge_master.receive(this.fifo_from_subInterconnect.dequeue())
-            this.Bridge_slave.ChannelD = this.Bridge_master.ChannelD
+            // console.log('this.Bridge_slave.ChannelD1: ', this.fifo_from_Interconnect.dequeue())
+            if (!this.fifo_from_Interconnect.isEmpty()) {
+                this.Bridge_slave.receive(this.fifo_from_Interconnect.dequeue())
+                this.Bridge_master.ChannelA = this.Bridge_slave.ChannelA
+            }
+            if (!this.fifo_from_subInterconnect.isEmpty()) {
+                this.Bridge_master.receive(this.fifo_from_subInterconnect.dequeue())
+                this.Bridge_slave.ChannelD = this.Bridge_master.ChannelD
+            }
+            
+
             this.state = 0
         }
     }

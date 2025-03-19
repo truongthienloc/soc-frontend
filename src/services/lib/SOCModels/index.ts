@@ -50,7 +50,7 @@ SOC.assemble(
 )
 console.log(SOC.Processor.active_println)
 SOC.RunAll()
-console.log(SOC.Bus0.Pout[3])
+console.log(SOC.Bridge.Bridge_slave.ChannelA)
 // SOC.Step()
 // SOC.Step()
 // SOC.Step()

@@ -206,10 +206,11 @@ export default class Soc {
         )
 
 
-        // this.Bridge.Run (
-        //     this.Bus0.Pout[3]
-        //     , this.Bus1.Pout[0]
-        // )
+        this.Bridge.Run (
+            this.Bus0.Pout[3]
+            , this.Bus1.Pout[0]
+        )
+        
 
         // this.Bus1.Run (
         //     this.Bridge.Bridge_master.ChannelA

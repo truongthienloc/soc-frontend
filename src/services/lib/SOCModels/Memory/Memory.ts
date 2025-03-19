@@ -91,6 +91,7 @@ export default class Memory {
 
         if (this.state == 0) {
             if (MMU2Memory.valid == '1') {
+                cycle.incr()
                 this.slaveMemory.ChannelD.valid = '1'
                 if (MMU2Memory.opcode == '100') {
 
@@ -102,14 +103,12 @@ export default class Memory {
                     this.slaveMemory.receive (MMU2Memory)
                     this.address         =   this.slaveMemory.ChannelA.address
 
-
+                    cycle.incr() 
                     this.println (this.active_println,
                     'Cycle '             +
                     cycle.toString()     +
                     ': The MEMORY is sending an AccessAckData message to the INTERCONNECT.'
                     )
-
-                    cycle.incr() 
                     if (MMU2Memory.size == '00') {
                         this.slaveMemory.send(
                             'AccessAckData', 
@@ -173,7 +172,7 @@ export default class Memory {
                     // this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] ,
                     // this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] ,
                     // this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')])
-
+                    cycle.incr() 
                     this.state   = 1
                     return
                     

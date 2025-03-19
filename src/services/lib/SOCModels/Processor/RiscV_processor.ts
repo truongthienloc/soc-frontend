@@ -911,6 +911,7 @@ export default class RiscVProcessor {
             )
             // console.log('cpu: ',this.master.ChannelA, this.pc)
             this.state              += 1
+            cycle.incr()
             return
         }
         if (this.state == 1) {
@@ -918,13 +919,15 @@ export default class RiscVProcessor {
             if (Memory2CPU.valid == '1') {
                 this.master.receive (Memory2CPU)
                 this.instruction = this.master.ChannelD.data
-                this.state +=1
                 this.println (
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
                     +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.'
                 )
+
+                this.state              += 1
+                // cycle.incr()
             }
             return
         }
@@ -935,7 +938,6 @@ export default class RiscVProcessor {
                 this.SendData           = data
                 this.SendAddress        = logic_address
                 this.writeReg           = writeRegister
-                this.state              += 1
 
                 if (message == 'PUT') {
                     this.println (
@@ -954,10 +956,19 @@ export default class RiscVProcessor {
                         +': The PROCESSOR is sending messeage GET to MEMORY.'
                     )
                 }
-               
+
+                this.state              += 1
+                cycle.incr()
             }
             else {
                 // this.master.ChannelA.valid = '1'
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is processing.'
+                )
+                // cycle.incr()
                 this.state = 0
             } 
             return
@@ -974,6 +985,7 @@ export default class RiscVProcessor {
                     +this.MMU.MMU_message
             )
 
+            cycle.incr()
             if (this.MMU.MMU_message == ' TLB: VPN is missed.') this.state = 5
             else this.state = 4
             return
@@ -1001,7 +1013,9 @@ export default class RiscVProcessor {
 
 
                 this.master.receive (Memory2CPU)
+                
                 if (Memory2CPU.opcode == '001') this.register[this.writeReg] =  this.master.ChannelD.data
+                cycle.incr()
                 this.state = 0
             }
             return
@@ -1027,6 +1041,8 @@ export default class RiscVProcessor {
                     +': The TLB is replacing an entry.'
                 )
                 this.MMU.pageReplace ([parseInt(VPN , 2) & 0xf,  dec (frame), 1, cycle.cycle])
+
+                cycle.incr()
                 this.state = 2
             }
             return

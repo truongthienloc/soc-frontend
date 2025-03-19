@@ -220,7 +220,7 @@ export default class Soc {
         //     , this.cycle
         // )
 
-        this.cycle.incr()
+        // this.cycle.incr()
         
 
         // console.log('this.Processor.master.ChannelA', this.Processor.master.ChannelA)

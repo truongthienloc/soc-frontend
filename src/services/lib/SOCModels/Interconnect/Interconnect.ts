@@ -92,7 +92,7 @@ export default class InterConnect {
             return
         }
         if (this.state == 1) {
-            cycle.incr()
+
             this.Route (this.Abiter(), cycle)
             this.state = 0
             return
@@ -114,6 +114,8 @@ export default class InterConnect {
         this.RecFromDMA(dataFromDMA, cycle, dataFromDMA_valid)
         this.RecFromMem(dataFromMemory, cycle, dataFromMemory_valid)
         this.RecFromSub(dataFromSub, cycle, dataFromSub_valid)
+
+        cycle.incr()
     }
 
     RecFromProcessor(data: ChannelA, cycle: Cycle, valid: boolean): void {
@@ -268,6 +270,7 @@ export default class InterConnect {
                     )
                     if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromProcessor)
                 }
+                cycle.incr()
             }
         //}
         if (Abiter == 1) {

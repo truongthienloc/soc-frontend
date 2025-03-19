@@ -380,18 +380,20 @@ export default class RiscVProcessor {
     }
 
     immGen(instruction: string): string {
-        // let imm = '';
+        let imm = '';
         //console.log("instruction: ", instruction);
 
         if (instruction.slice(-7) === '0110011') {
             // R-type
             return '0'
         }
+       
         if (['0010011', '0000011', '1100111'].includes(instruction.slice(-7))) {
             // I-TYPE
             this.imm = instruction.slice(0, 12)
             if (instruction.slice(-15, -12) === '011') return this.imm.padStart(32, '0')
         }
+        
         if (instruction.slice(-7) === '0100011') {
             // S-TYPE
             this.imm = instruction.slice(0, 7) + instruction.slice(20, 25)
@@ -412,10 +414,12 @@ export default class RiscVProcessor {
                 instruction[11] +
                 instruction.slice(1, 11)
         }
+        
         if (['0110111', '0010111'].includes(instruction.slice(-7))) {
             // U-TYPE
             this.imm = instruction.slice(0, 20)
         }
+
         // console.log('imm', this.imm)
         if (['0110111', '0010111'].includes(instruction.slice(-7))) {
             return this.imm.padStart(32, '0')
@@ -731,6 +735,7 @@ export default class RiscVProcessor {
 
     internalProcessing (instruction: string, pc: number, icBusy: boolean): [string, string, string, string, string] {
         if (this.active == true) {
+                   
             this.pre_pc = pc
             this.stalled = false 
             let readData = ''
@@ -748,7 +753,7 @@ export default class RiscVProcessor {
                 return ['ECALL', '', '', '', '']
             }
             this.control(instruction.slice(25, 32), instruction.slice(17, 20))
-
+            
             let size = 'none'
             if (instruction.slice(25, 32) === '0000011')
                 switch (instruction.slice(17, 20)) {
@@ -790,17 +795,20 @@ export default class RiscVProcessor {
             const writeRegister = instruction.slice(20, 25)
             const readData1 = this.register[readRegister1]
             const readData2 = this.register[readRegister2]
-            
+
             const imm = this.immGen(instruction)
             
             this.aluControl(this.ALUOp, instruction.slice(17, 20), instruction.slice(1,2))
+
             const ALUResult = this.ALU(readData1, mux(readData2, imm, this.ALUSrc), this.operation)
+             
 
             this.branchControl(this.jal, this.jalr, this.branch)
 
             let message = 'None'
             let data = '0'
             let address = ''
+           
             
             if (instruction.slice(25, 32) === '0100011') {
                 // SW
@@ -816,6 +824,7 @@ export default class RiscVProcessor {
                 address = ALUResult.padStart(32,'0')
                 if (icBusy) this.stalled = true
             }
+
 
             if (this.stalled == false) {
                 readData = this.dataMemory(ALUResult, this.memRead, this.memWrite, readData2)
@@ -853,7 +862,7 @@ export default class RiscVProcessor {
                 this.register['00000'] = '00000000000000000000000000000000'
             }
             //.log(pc + 4, (dec(imm) << 1) , this.pcSrc1)
-            
+
             if (this.stalled == false) {
                 this.pc     = mux(mux(pc + 4, (dec(imm) << 1) + pc, this.pcSrc1), ALUResult, this.pcSrc2)
             } else this.pc = pc
@@ -894,7 +903,7 @@ export default class RiscVProcessor {
     Run (
           icBusy            : boolean
         , cycle             : Cycle
-        , Memory2CPU        : any
+        , InterConnect2CPU  : any
         , ready             : boolean
     ) 
     {
@@ -902,6 +911,7 @@ export default class RiscVProcessor {
             this.master.ChannelA.valid = '1'
             this.master.send ('GET',  (this.pc).toString(2).padStart(17, '0'), this.SendData)
             this.master.ChannelA.size  = '00'
+            
 
             this.println (
                 this.active_println
@@ -916,22 +926,27 @@ export default class RiscVProcessor {
         }
         if (this.state == 1) {
             this.master.ChannelA.valid = '0'
-            if (Memory2CPU.valid == '1') {
-                this.master.receive (Memory2CPU)
+            if (InterConnect2CPU.valid == '1') {
+                this.master.receive (InterConnect2CPU)
                 this.instruction = this.master.ChannelD.data
+
+                console.log ('ok')
                 this.println (
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.'
+                    +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.21'
                 )
-
+                console.log ('ok')
                 this.state              += 1
-                // cycle.incr()
+
+
+                cycle.incr()
             }
             return
         }
         if (this.state == 2) {
+
             let [message, data, logic_address, writeRegister, size] = this.internalProcessing (this.instruction, this.pc, icBusy)
             if (message == 'PUT' || message == 'GET') {
                 this.Processor_messeage = message
@@ -953,7 +968,7 @@ export default class RiscVProcessor {
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': The PROCESSOR is sending messeage GET to MEMORY.'
+                        +1
                     )
                 }
 
@@ -992,9 +1007,9 @@ export default class RiscVProcessor {
         }
         if (this.state == 4) {
             this.master.ChannelA.valid = '0'
-            if (Memory2CPU.valid == '1') {
+            if (InterConnect2CPU.valid == '1') {
 
-                if (Memory2CPU.opcode == '000') {
+                if (InterConnect2CPU.opcode == '000') {
                     this.println (
                         this.active_println
                         ,'Cycle '
@@ -1002,36 +1017,40 @@ export default class RiscVProcessor {
                         +': The PROCESSOR is receiving messeage AccessAck from MEMORY.'
                     )
                 }
-                if (Memory2CPU.opcode == '001') {
+                if (InterConnect2CPU.opcode == '001') {
                     this.println (
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.'
+                        +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.32'
                     )
+                    
                 }
 
-
-                this.master.receive (Memory2CPU)
                 
-                if (Memory2CPU.opcode == '001') this.register[this.writeReg] =  this.master.ChannelD.data
+                this.master.receive (InterConnect2CPU)
+                
+                if (InterConnect2CPU.opcode == '001') this.register[this.writeReg] =  this.master.ChannelD.data
                 cycle.incr()
                 this.state = 0
             }
             return
         }
         if (this.state == 5) {
-            if (Memory2CPU.valid == '1') {
+            console.log(this.MMU.MMU_message)
+            console.log(InterConnect2CPU)
+            if (InterConnect2CPU.valid == '1') {
 
                 this.println (
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.'
+                    +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.3'
                 )
 
+
                 const VPN       = this.SendAddress.slice(0, 20)  
-                this.master.receive (Memory2CPU)
+                this.master.receive (InterConnect2CPU)
                 const frame     = this.master.ChannelD.data
 
                 this.println (

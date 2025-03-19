@@ -181,18 +181,18 @@ export default class Soc {
             , this.Bus0.Pout[0].dequeue()
             , this.Bus0.state ==0
         )
-
+        
         // this.DMA.Run (
         //     this.Bus1.Pout[1].dequeue()
         //     ,this.Bus0.Pout[2].dequeue()
         // )
-
+        
             
         this.Memory.Run(
             this.cycle
             , this.Bus0.Pout[2].dequeue()
         )
-
+        
         this.Bus0.Run (
             this.Processor.master.ChannelA
             ,this.DMA.DMA_Master.ChannelA
@@ -204,6 +204,7 @@ export default class Soc {
             ,false
             ,this.cycle
         )
+
 
         // this.Bridge.Run (
         //     this.Bus0.Pout[3]

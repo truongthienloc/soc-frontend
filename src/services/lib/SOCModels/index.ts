@@ -11,13 +11,9 @@ const SOC               = new Soc('super SoC')
 const code              = 
 `
 .text
-
-lui x1, 0x3
-addi x1, x1, 0x4C
-addi x2, x0, 1
-
-sw   x2, 0(x1)
-lw   x3, 0(x1)
+addi a7, x0, 1
+addi a0, x0, 22
+ecall
 `
 
 SOC.Processor.active    = true
@@ -48,9 +44,9 @@ SOC.assemble(
             ,16*32                                  // ,dmaLen             : number
             ,0x17FFF + 1                            // ,dmaDes             : number
 )
-console.log(SOC.Processor.active_println)
+// console.log(SOC.Processor.active_println)
 SOC.RunAll()
-console.log(SOC.Bridge.Bridge_slave.ChannelA)
+// console.log(SOC.Bridge.Bridge_slave.ChannelA)
 // SOC.Step()
 // SOC.Step()
 // SOC.Step()

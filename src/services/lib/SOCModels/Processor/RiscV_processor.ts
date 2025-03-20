@@ -2,7 +2,7 @@ import MMU from '../Processor/MMU'
 import { dec, handleRegister, mux } from '../Compile/sub_function'
 import Master from '../Interconnect/Master'
 import {Logger } from '../Compile/soc.d'
-import Ecall from '../Ecall/Ecall'
+// import Ecall from '../Ecall/Ecall'
 
 import ChannelD from '../Interconnect/ChannelD'
 import Cycle from '../Compile/cycle'
@@ -194,6 +194,197 @@ export default class RiscVProcessor {
     public getRegisters() {
         return handleRegister(this.register)
     }
+
+    Run (
+        icBusy            : boolean
+      , cycle             : Cycle
+      , InterConnect2CPU  : any
+      , ready             : boolean
+  ) 
+    {
+      if (this.state == 0) {
+          this.master.ChannelA.valid = '1'
+          this.master.send ('GET',  (this.pc).toString(2).padStart(17, '0'), this.SendData)
+          this.master.ChannelA.size  = '00'
+          
+
+          this.println (
+              this.active_println
+              ,'Cycle '
+              + cycle.toString() 
+              +': The PROCESSOR is sending messeage GET to MEMORY.'
+          )
+          // console.log('cpu: ',this.master.ChannelA, this.pc)
+          this.state              += 1
+          cycle.incr()
+          return
+      }
+      if (this.state == 1) {
+        this.master.ChannelA.valid = '0'
+        if (InterConnect2CPU.valid == '1') {
+            this.master.receive (InterConnect2CPU)
+            this.instruction = this.master.ChannelD.data
+
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.21'
+            )
+            this.state              += 1
+            cycle.incr()
+        }
+        return
+      }
+      if (this.state == 2) {
+
+          let [message, data, logic_address, writeRegister, size] = this.internalProcessing (this.instruction, this.pc, icBusy)
+        //   console.log (message)
+        //   console.log (this.register['10001'])
+            if (message == 'ECALL') {
+                console.log ('Ecall instruction')
+                if (parseInt(this.register['10001'], 2) == 1) {
+                    if (this.register['01010'].slice(0,1) == '1') {
+                        console.log ('Register a0:',(4294967296 - parseInt(this.register['01010'], 2))*-1)
+                    }
+                    else console.log ('Register a0:', parseInt(this.register['01010'], 2))
+                }
+
+                if (parseInt(this.register['10001'], 2) == 1) {
+                    
+                }
+
+                if (parseInt(this.register['10001'], 2) == 34) {
+                    console.log ('Register a0:', '0x'+parseInt(this.register['01010'], 2).toString(16).padStart(8,'0'))
+                }
+
+                if (parseInt(this.register['10001'], 2) == 35) {
+                    console.log ('Register a0:', '0b'+this.register['01010'])
+                }
+
+                if (parseInt(this.register['10001'], 2) == 36) {
+                    console.log ('Register a0:', parseInt(this.register['01010'], 2))
+                }
+
+                if (parseInt(this.register['10001'], 2) == 41) {
+                    this.register['01010'] = (Math.floor(Math.random() * Math.pow(2, 32)) & 0xFFFFFFFF).toString(2).padStart(32, '0')
+                }
+            }
+          if (message == 'PUT' || message == 'GET') {
+              this.Processor_messeage = message
+              this.SendData           = data
+              this.SendAddress        = logic_address
+              this.writeReg           = writeRegister
+
+              if (message == 'PUT') {
+                  this.println (
+                      this.active_println
+                      ,'Cycle '
+                      + cycle.toString() 
+                      +': The PROCESSOR is sending messeage PUT to MEMORY.'
+                  )
+              }
+
+              if (message == 'GET') {
+                  this.println (
+                      this.active_println
+                      ,'Cycle '
+                      + cycle.toString() 
+                      +1
+                  )
+              }
+              this.state              += 1
+              cycle.incr()
+          }
+          else {
+              // this.master.ChannelA.valid = '1'
+              this.println (
+                  this.active_println
+                  ,'Cycle '
+                  + cycle.toString() 
+                  +': The PROCESSOR is processing.'
+              )
+              // cycle.incr()
+              this.state = 0
+          } 
+          return
+      }
+      if (this.state == 3) {
+          let physical_address = this.MMU.run(cycle, this.SendAddress)
+          this.master.send (this.Processor_messeage,  physical_address, this.SendData)
+          this.master.ChannelA.valid = '1'
+
+          this.println (
+                  this.active_println
+                  ,'Cycle '
+                  + cycle.toString() 
+                  +this.MMU.MMU_message
+          )
+
+          cycle.incr()
+          if (this.MMU.MMU_message == ' TLB: VPN is missed.') this.state = 5
+          else this.state = 4
+          return
+      }
+      if (this.state == 4) {
+          this.master.ChannelA.valid = '0'
+          if (InterConnect2CPU.valid == '1') {
+
+              if (InterConnect2CPU.opcode == '000') {
+                  this.println (
+                      this.active_println
+                      ,'Cycle '
+                      + cycle.toString() 
+                      +': The PROCESSOR is receiving messeage AccessAck from MEMORY.'
+                  )
+              }
+              if (InterConnect2CPU.opcode == '001') {
+                  this.println (
+                      this.active_println
+                      ,'Cycle '
+                      + cycle.toString() 
+                      +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.32'
+                  )
+              }
+              
+              this.master.receive (InterConnect2CPU)
+              
+              if (InterConnect2CPU.opcode == '001') this.register[this.writeReg] =  this.master.ChannelD.data
+              cycle.incr()
+              this.state = 0
+          }
+          return
+      }
+      if (this.state == 5) {
+
+          if (InterConnect2CPU.valid == '1') {
+
+              this.println (
+                  this.active_println
+                  ,'Cycle '
+                  + cycle.toString() 
+                  +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.3'
+              )
+
+
+              const VPN       = this.SendAddress.slice(0, 20)  
+              this.master.receive (InterConnect2CPU)
+              const frame     = this.master.ChannelD.data
+
+              this.println (
+                  this.active_println
+                  ,'Cycle '
+                  + cycle.toString() 
+                  +': The TLB is replacing an entry.'
+              )
+              this.MMU.pageReplace ([parseInt(VPN , 2) & 0xf,  dec (frame), 1, cycle.cycle])
+
+              cycle.incr()
+              this.state = 2
+          }
+          return
+      }
+  }
 
     public setImem(binary_code: string[] = []) {
         if (this.active == true) {
@@ -739,7 +930,8 @@ export default class RiscVProcessor {
             this.pre_pc = pc
             this.stalled = false 
             let readData = ''
-            if (instruction == '1'.padStart(32,'1')) {
+
+            if (instruction == '00000000000000000000000001110011') {
                 
                 if (icBusy) {
                     this.stalled = true
@@ -752,6 +944,7 @@ export default class RiscVProcessor {
                     
                 return ['ECALL', '', '', '', '']
             }
+
             this.control(instruction.slice(25, 32), instruction.slice(17, 20))
             
             let size = 'none'
@@ -898,173 +1091,5 @@ export default class RiscVProcessor {
             this.lineColor['imm'     ]  = this.imm          .toString()     
             return [message, data, address, writeRegister, size]
         } else return ['', '', '', '', '']
-    }
-
-    Run (
-          icBusy            : boolean
-        , cycle             : Cycle
-        , InterConnect2CPU  : any
-        , ready             : boolean
-    ) 
-    {
-        if (this.state == 0) {
-            this.master.ChannelA.valid = '1'
-            this.master.send ('GET',  (this.pc).toString(2).padStart(17, '0'), this.SendData)
-            this.master.ChannelA.size  = '00'
-            
-
-            this.println (
-                this.active_println
-                ,'Cycle '
-                + cycle.toString() 
-                +': The PROCESSOR is sending messeage GET to MEMORY.'
-            )
-            // console.log('cpu: ',this.master.ChannelA, this.pc)
-            this.state              += 1
-            cycle.incr()
-            return
-        }
-        if (this.state == 1) {
-            this.master.ChannelA.valid = '0'
-            if (InterConnect2CPU.valid == '1') {
-                this.master.receive (InterConnect2CPU)
-                this.instruction = this.master.ChannelD.data
-
-                console.log ('ok')
-                this.println (
-                    this.active_println
-                    ,'Cycle '
-                    + cycle.toString() 
-                    +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.21'
-                )
-                console.log ('ok')
-                this.state              += 1
-
-
-                cycle.incr()
-            }
-            return
-        }
-        if (this.state == 2) {
-
-            let [message, data, logic_address, writeRegister, size] = this.internalProcessing (this.instruction, this.pc, icBusy)
-            if (message == 'PUT' || message == 'GET') {
-                this.Processor_messeage = message
-                this.SendData           = data
-                this.SendAddress        = logic_address
-                this.writeReg           = writeRegister
-
-                if (message == 'PUT') {
-                    this.println (
-                        this.active_println
-                        ,'Cycle '
-                        + cycle.toString() 
-                        +': The PROCESSOR is sending messeage PUT to MEMORY.'
-                    )
-                }
-
-                if (message == 'GET') {
-                    this.println (
-                        this.active_println
-                        ,'Cycle '
-                        + cycle.toString() 
-                        +1
-                    )
-                }
-
-                this.state              += 1
-                cycle.incr()
-            }
-            else {
-                // this.master.ChannelA.valid = '1'
-                this.println (
-                    this.active_println
-                    ,'Cycle '
-                    + cycle.toString() 
-                    +': The PROCESSOR is processing.'
-                )
-                // cycle.incr()
-                this.state = 0
-            } 
-            return
-        }
-        if (this.state == 3) {
-            let physical_address = this.MMU.run(cycle, this.SendAddress)
-            this.master.send (this.Processor_messeage,  physical_address, this.SendData)
-            this.master.ChannelA.valid = '1'
-
-            this.println (
-                    this.active_println
-                    ,'Cycle '
-                    + cycle.toString() 
-                    +this.MMU.MMU_message
-            )
-
-            cycle.incr()
-            if (this.MMU.MMU_message == ' TLB: VPN is missed.') this.state = 5
-            else this.state = 4
-            return
-        }
-        if (this.state == 4) {
-            this.master.ChannelA.valid = '0'
-            if (InterConnect2CPU.valid == '1') {
-
-                if (InterConnect2CPU.opcode == '000') {
-                    this.println (
-                        this.active_println
-                        ,'Cycle '
-                        + cycle.toString() 
-                        +': The PROCESSOR is receiving messeage AccessAck from MEMORY.'
-                    )
-                }
-                if (InterConnect2CPU.opcode == '001') {
-                    this.println (
-                        this.active_println
-                        ,'Cycle '
-                        + cycle.toString() 
-                        +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.32'
-                    )
-                    
-                }
-
-                
-                this.master.receive (InterConnect2CPU)
-                
-                if (InterConnect2CPU.opcode == '001') this.register[this.writeReg] =  this.master.ChannelD.data
-                cycle.incr()
-                this.state = 0
-            }
-            return
-        }
-        if (this.state == 5) {
-            console.log(this.MMU.MMU_message)
-            console.log(InterConnect2CPU)
-            if (InterConnect2CPU.valid == '1') {
-
-                this.println (
-                    this.active_println
-                    ,'Cycle '
-                    + cycle.toString() 
-                    +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.3'
-                )
-
-
-                const VPN       = this.SendAddress.slice(0, 20)  
-                this.master.receive (InterConnect2CPU)
-                const frame     = this.master.ChannelD.data
-
-                this.println (
-                    this.active_println
-                    ,'Cycle '
-                    + cycle.toString() 
-                    +': The TLB is replacing an entry.'
-                )
-                this.MMU.pageReplace ([parseInt(VPN , 2) & 0xf,  dec (frame), 1, cycle.cycle])
-
-                cycle.incr()
-                this.state = 2
-            }
-            return
-        }
     }
 }

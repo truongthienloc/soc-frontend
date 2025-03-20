@@ -13,6 +13,6 @@ export function RunAll(this: Soc) {
     ) {
         this.Step()
     }
-    console.log(this.Processor.pc,  this.Memory.Ins_pointer)
+
    this.event.emit(Soc.SOCEVENT.DONE_ALL)
 }

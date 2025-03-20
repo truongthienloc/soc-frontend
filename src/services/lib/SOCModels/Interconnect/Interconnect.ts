@@ -245,18 +245,7 @@ export default class InterConnect {
                         if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromDMA)
                         this.Timming[3].dequeue();
                     }
-                
-                console.log ('jj',(
-                    (
-                        (parseInt('0'+dataFromProcessor.address, 2)    > 0x000305C + 1) 
-                    &&  (parseInt('0'+dataFromProcessor.address, 2)    < 0X1BFFF    + 1)
-                    ) || 
-                    (
-                        (parseInt('0'+dataFromProcessor.address, 2)    >= 0)
-                    &&  (parseInt('0'+dataFromProcessor.address, 2)    <= 0x000304C  )
-                    )
-                    
-                ))
+
                 if (
                     (
                         (parseInt('0'+dataFromProcessor.address, 2)    > 0x000305C + 1) 

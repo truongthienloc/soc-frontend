@@ -2,13 +2,13 @@ import { IOModule, Module } from '../soc'
 
 export default class Monitor {
     protected containerQuery: string
-    private monitorIO: IOModule
+    private monitorIO?: IOModule
 
     public getContainerQuery(): string {
         return this.containerQuery
     }
 
-    constructor(containerQuery: string, monitorIO: IOModule) {
+    constructor(containerQuery: string, monitorIO?: IOModule) {
         this.containerQuery = containerQuery
         this.monitorIO = monitorIO
         this.openMonitorBehavior()
@@ -16,8 +16,8 @@ export default class Monitor {
     }
 
     private initIOEvent() {
-        this.monitorIO.getEvent().on(Module.EVENT.ACTIVATE, this.openMonitorBehavior)
-        this.monitorIO.getEvent().on(Module.EVENT.INACTIVATE, this.closeMonitorBehavior)
+        this.monitorIO?.getEvent().on(Module.EVENT.ACTIVATE, this.openMonitorBehavior)
+        this.monitorIO?.getEvent().on(Module.EVENT.INACTIVATE, this.closeMonitorBehavior)
     }
 
     private openMonitorBehavior = () => {
@@ -44,9 +44,9 @@ export default class Monitor {
     }
 
     public print(key: string): void {
-        if (!this.monitorIO.getActivated()) {
-            return
-        }
+        // if (!this.monitorIO?.getActivated()) {
+        //     return
+        // }
 
         const monitor = document.querySelector(this.containerQuery) as HTMLDivElement
 
@@ -131,7 +131,7 @@ export default class Monitor {
         console.log('Monitor destroy')
 
         this.closeMonitorBehavior()
-        this.monitorIO.getEvent().off(Module.EVENT.ACTIVATE, this.openMonitorBehavior)
-        this.monitorIO.getEvent().off(Module.EVENT.INACTIVATE, this.closeMonitorBehavior)
+        this.monitorIO?.getEvent().off(Module.EVENT.ACTIVATE, this.openMonitorBehavior)
+        this.monitorIO?.getEvent().off(Module.EVENT.INACTIVATE, this.closeMonitorBehavior)
     }
 }

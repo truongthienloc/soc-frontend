@@ -1,4 +1,4 @@
-import { Keyboard, Monitor } from "../soc.d" 
+import { Keyboard, Monitor } from "../Compile/soc.d" 
 import Keyboard_ from "../../control/Keyboard"
 import LedMatrix from "../../control/LedMatrix"
 import { CALL_NUMBER } from "./callNumber.constant"

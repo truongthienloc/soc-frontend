@@ -1,4 +1,4 @@
-import Soc from "../SoC"
+import Soc from "../SOC/SoC"
 
 export function RunAll(this: Soc) {
     // CHECK PROCESSOR IS ACTIVED OR NOT
@@ -7,10 +7,9 @@ export function RunAll(this: Soc) {
         this.println('CPU has not been actived!!!')
         return
     }
-
     while (
         this.Processor.pc <
-        (Object.values(this.Processor.Instruction_memory).length - 1) * 4
+        this.Memory.Ins_pointer || this.Processor.state != 0
     ) {
         this.Step()
     }

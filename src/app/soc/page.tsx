@@ -150,12 +150,13 @@ export default function SocPage({}: Props) {
         }
 
         const handleLedMatrixClick = () => {
-          setShowSimulatorType('PERIPHERALS')
+          setShowSimulatorType('DMA')
           setTabIndex(1)
         }
 
         const handleDMAClick = () => {
           setShowSimulatorType('DMA')
+          setTabIndex(0)
         }
 
         const {
@@ -678,7 +679,18 @@ export default function SocPage({}: Props) {
               </Button>
             </div>
 
-            <DMATable configs={dmaConfigs} data={dmaData} />
+            <TabContext index={tabIndex} setIndex={setTabIndex}>
+              <Tabs>
+                <Tab label="DMA" />
+                <Tab label="Led Matrix" />
+              </Tabs>
+              <TabPanel index={0} className="flex flex-col pt-4">
+                <DMATable configs={dmaConfigs} data={dmaData} />
+              </TabPanel>
+              <TabPanel index={1} className="pt-4">
+                <LedMatrix />
+              </TabPanel>
+            </TabContext>
           </div>
 
           {/* Peripherals Section */}
@@ -689,31 +701,10 @@ export default function SocPage({}: Props) {
           >
             <h2 className="text-xl font-bold">Peripherals:</h2>
             {/* Tab Bar */}
-            <TabContext index={tabIndex} setIndex={setTabIndex}>
+            {/* <TabContext index={tabIndex} setIndex={setTabIndex}>
               <Tabs>
-                {/* <Tab label="Monitor & Keyboard" /> */}
                 <Tab label="Led Matrix" />
               </Tabs>
-              {/* Tab index = 0 */}
-              {/* <TabPanel index={0} className="grid grid-cols-[4fr_6fr]">
-                <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
-                  {isStepping ? (
-                    <DisplayStepCode code={stepCode} pc={pc} />
-                  ) : (
-                    <CodeEditor
-                      value={code}
-                      onChange={handleChangeCode}
-                      disable={disableCodeEditor}
-                      hidden={showSimulatorType !== 'PERIPHERALS' || tabIndex != 0}
-                    />
-                  )}
-                </div>
-                <div className="mt-8 min-w-[460px] max-sm:-ml-14 max-sm:-mt-14 max-sm:mb-14 max-sm:scale-75">
-                  <div className="monitor" id="monitor" tabIndex={0}></div>
-                  <Keyboard />
-                </div>
-              </TabPanel> */}
-              {/* Tab index = 1 */}
               <TabPanel index={0} className="grid grid-cols-[4fr_6fr]">
                 <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
                   {isStepping ? (
@@ -729,7 +720,7 @@ export default function SocPage({}: Props) {
                 </div>
                 {showSimulatorType === 'PERIPHERALS' && <LedMatrix />}
               </TabPanel>
-            </TabContext>
+            </TabContext> */}
           </div>
         </div>
         {/* End Section 3 */}

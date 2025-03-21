@@ -590,7 +590,7 @@ export default function SocPage({}: Props) {
                         value={code}
                         onChange={handleChangeCode}
                         disable={disableCodeEditor}
-                        hidden={showSimulatorType !== 'CODE_EDITOR'}
+                        hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex != 1}
                       />
                     )}
                   </div>

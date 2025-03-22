@@ -64,16 +64,16 @@ export default class Memory {
 
     public setPageNumber () {
         let count = 0
-        const PageTablePointer = 0x00030000
+        const PageTablePointer = 0x0003000
         for (let i = PageTablePointer; i < (PageTablePointer + 4 * 16); i+=4) { 
-            this.Memory[i.toString(2).padStart(17,'0')] = (0X0C000 + count*4096 + 1).toString(2).padStart(32,'0') 
+            this.Memory[i.toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0') 
             count ++ 
         }
     }
 
     public getPageNumber (): Register[] {
         const result: Register[]    = []
-        const PageTablePointer0     =   0x00030000
+        const PageTablePointer0     =   0x0003000
         for (let i = PageTablePointer0; i < (PageTablePointer0 + 4 * 16); i+=4) {
             result.push({
                 name: '0x' +  i.toString(16).padStart(8,'0'), 
@@ -90,11 +90,12 @@ export default class Memory {
     ) {
 
         if (this.state == 0) {
+            this.slaveMemory.ChannelD.valid = '0'
             if (MMU2Memory.valid == '1') {
                 cycle.incr()
                 this.slaveMemory.ChannelD.valid = '1'
                 if (MMU2Memory.opcode == '100') {
-
+                    this.slaveMemory.ChannelD.valid = '1'
                     this.println (this.active_println,
                     'Cycle '             +
                     cycle.toString()     +
@@ -178,7 +179,7 @@ export default class Memory {
                     
                 }
                 if (MMU2Memory.opcode == '000') {
-
+                     this.slaveMemory.ChannelD.valid = '1'
                     this.println (this.active_println,
                         'Cycle '             +
                         cycle.toString()     +
@@ -285,25 +286,25 @@ export default class Memory {
     
     
 
-    // public GetMemory(): { [key: string]: string } {
-    //     // Chuyển object sang mảng các cặp [key, value]
-    //     const entries = Object.entries(this.Memory);
+    public GetMemory(): { [key: string]: string } {
+        // Chuyển object sang mảng các cặp [key, value]
+        const entries = Object.entries(this.Memory);
     
-    //     // Sắp xếp mảng dựa trên key, chuyển key từ nhị phân sang thập phân để so sánh
-    //     const sortedEntries = entries.sort((a, b) => {
-    //         const decimalA = parseInt(a[0], 2); // Chuyển key a từ nhị phân sang thập phân
-    //         const decimalB = parseInt(b[0], 2); // Chuyển key b từ nhị phân sang thập phân
-    //         return decimalA - decimalB;
-    //     });
+        // Sắp xếp mảng dựa trên key, chuyển key từ nhị phân sang thập phân để so sánh
+        const sortedEntries = entries.sort((a, b) => {
+            const decimalA = parseInt(a[0], 2); // Chuyển key a từ nhị phân sang thập phân
+            const decimalB = parseInt(b[0], 2); // Chuyển key b từ nhị phân sang thập phân
+            return decimalA - decimalB;
+        });
     
-    //     // Chuyển mảng đã sắp xếp trở lại object
-    //     const sortedObj: { [key: string]: string } = {};
-    //     for (const [key, value] of sortedEntries) {
-    //         sortedObj[dec('0'+key)] = value;
-    //     }
+        // Chuyển mảng đã sắp xếp trở lại object
+        const sortedObj: { [key: string]: string } = {};
+        for (const [key, value] of sortedEntries) {
+            sortedObj[dec('0'+key)] = value;
+        }
     
-    //     return sortedObj;
-    // }
+        return sortedObj;
+    }
     
     // public setMemoryFromString(input: string): { beforeColon: string; afterColon: string }[] {
     //     // Split the input into sections using regex that considers new lines and colons

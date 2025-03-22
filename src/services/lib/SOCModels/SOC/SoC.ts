@@ -76,12 +76,12 @@ export default class Soc {
 
     public setKeyboard(keyboard: Keyboard) {
         this.keyboard       = keyboard
-        // this.Processor.Ecall.keyboard = keyboard
+        this.Processor.setKeyboard (keyboard)
     }
 
     public setMonitor(monitor: Monitor) {
         this.monitor        = monitor
-        // this.Processor.Ecall.monitor  = monitor
+        this.Processor.setMonitor (monitor)
     }
 
     public setView(view: NCKHBoard) {
@@ -173,14 +173,16 @@ export default class Soc {
         await this.Step()
         this.event.emit(Soc.SOCEVENT.STEP_END)
     }
-    public async Step()  {      
 
-        this.Processor.Run(
+    public async Step()  {      
+        console.log ('1')
+        await this.Processor.Run(
             false
             , this.cycle
             , this.Bus0.Pout[0].dequeue()
             , this.Bus0.state ==0
         )
+        console.log ('2')
         
         // this.DMA.Run (
         //     this.Bus1.Pout[1].dequeue()

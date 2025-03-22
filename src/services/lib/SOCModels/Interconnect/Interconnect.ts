@@ -75,6 +75,7 @@ export default class InterConnect {
         ,dataFromSub_valid          : boolean
         ,cycle                      : Cycle
     ) {
+        // console.log('this.state, this.Pin, this.Pout, this.Timming',this.state, this.Pin, this.Pout, this.Timming)
         if (this.state == 0) {
             this.RecData (
                 dataFromProcessor           
@@ -119,6 +120,7 @@ export default class InterConnect {
     }
 
     RecFromProcessor(data: ChannelA, cycle: Cycle, valid: boolean): void {
+
         if (this.active && this.Pactived[0] && valid && data.valid == '1') {
 
             this.println (

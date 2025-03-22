@@ -1,11 +1,14 @@
 import MMU from '../Processor/MMU'
 import { dec, handleRegister, mux } from '../Compile/sub_function'
 import Master from '../Interconnect/Master'
-import {Logger } from '../Compile/soc.d'
+// import {Logger } from '../Compile/soc.d'
+import { Keyboard, Logger, Monitor } from '../Compile/soc.d'
 // import Ecall from '../Ecall/Ecall'
 
 import ChannelD from '../Interconnect/ChannelD'
 import Cycle from '../Compile/cycle'
+import { Key } from 'react'
+import { read } from 'fs'
 // import { measureMemory } from 'vm'
 // import { symlink, write } from 'fs'
 // import { Console } from 'console'
@@ -52,7 +55,10 @@ export default class RiscVProcessor {
     wb                          : any
     imm                         : any
     stalled                     : any
-    logger?: Logger
+
+    logger                     ?: Logger
+    monitor                    ?: Monitor
+    keyboard                   ?: Keyboard
 
     public println(active: boolean, ...args: string[]) {
         
@@ -72,6 +78,16 @@ export default class RiscVProcessor {
     public setLogger(logger: Logger) {
         this.logger = logger
     }
+
+    public setKeyboard(keyboard: Keyboard) {
+        this.keyboard       = keyboard
+        // this.Processor.Ecall.keyboard = keyboard
+    }
+
+    public setMonitor(monitor: Monitor) {
+        this.monitor        = monitor
+        // this.Processor.Ecall.monitor  = monitor
+    } 
     
 
     constructor(name: string, source: string, active: boolean) {
@@ -195,13 +211,14 @@ export default class RiscVProcessor {
         return handleRegister(this.register)
     }
 
-    Run (
+    async Run  (
         icBusy            : boolean
       , cycle             : Cycle
       , InterConnect2CPU  : any
       , ready             : boolean
   ) 
     {
+        // console.log('processor state', this.state)
       if (this.state == 0) {
           this.master.ChannelA.valid = '1'
           this.master.send ('GET',  (this.pc).toString(2).padStart(17, '0'), this.SendData)
@@ -229,41 +246,68 @@ export default class RiscVProcessor {
                 this.active_println
                 ,'Cycle '
                 + cycle.toString() 
-                +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.21'
+                +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.'
             )
             this.state              += 1
-            cycle.incr()
+            // cycle.incr()
         }
         return
       }
       if (this.state == 2) {
-
+        
+        this.println (
+            this.active_println
+            ,'Cycle '
+            + cycle.toString() 
+            +': The PROCESSOR is processing.'
+        )
           let [message, data, logic_address, writeRegister, size] = this.internalProcessing (this.instruction, this.pc, icBusy)
         //   console.log (message)
         //   console.log (this.register['10001'])
+
             if (message == 'ECALL') {
-                console.log ('Ecall instruction')
+
+                this.println (this.active_println, 'Ecall instruction')
                 if (parseInt(this.register['10001'], 2) == 1) {
                     if (this.register['01010'].slice(0,1) == '1') {
-                        console.log ('Register a0:',(4294967296 - parseInt(this.register['01010'], 2))*-1)
+                        this.println (this.active_println, 'Register a0:'+ ((4294967296 - parseInt(this.register['01010'], 2))*-1).toString())
+                        this.monitor?.println (((4294967296 - parseInt(this.register['01010'], 2))*-1).toString())
                     }
-                    else console.log ('Register a0:', parseInt(this.register['01010'], 2))
+                    else {
+                        this.println (this.active_println, 'Register a0:'+ parseInt(this.register['01010'], 2).toString())
+                        this.monitor?.println (parseInt(this.register['01010'], 2).toString())
+                    }
                 }
 
-                if (parseInt(this.register['10001'], 2) == 1) {
-                    
+                if (parseInt(this.register['10001'], 2) == 5) {
+                    const ecall_read = new Promise((resolve) => {
+                                    this.keyboard?.getEvent().on('line-down', (line: string) => {
+                                        this.register['01010'] = parseInt(line).toString(2)
+                                        resolve(parseInt(line))
+                                        // TODO: Store number to register
+                                    })
+                                })
+                    await ecall_read
                 }
+
+                if (parseInt(this.register['10001'], 2) == 12) {
+
+                }
+
 
                 if (parseInt(this.register['10001'], 2) == 34) {
                     console.log ('Register a0:', '0x'+parseInt(this.register['01010'], 2).toString(16).padStart(8,'0'))
+                    this.monitor?.println ('0x'+parseInt(this.register['01010'], 2).toString(16).padStart(8,'0').toString())
                 }
 
                 if (parseInt(this.register['10001'], 2) == 35) {
                     console.log ('Register a0:', '0b'+this.register['01010'])
+                    this.monitor?.println (this.register['01010'].toString())
                 }
 
                 if (parseInt(this.register['10001'], 2) == 36) {
                     console.log ('Register a0:', parseInt(this.register['01010'], 2))
+                    this.monitor?.println (parseInt(this.register['01010'], 2).toString())
                 }
 
                 if (parseInt(this.register['10001'], 2) == 41) {
@@ -289,8 +333,9 @@ export default class RiscVProcessor {
                   this.println (
                       this.active_println
                       ,'Cycle '
-                      + cycle.toString() 
-                      +1
+                      +cycle.toString() 
+                      +': The PROCESSOR is sending messeage GET to MEMORY.'
+
                   )
               }
               this.state              += 1
@@ -298,38 +343,69 @@ export default class RiscVProcessor {
           }
           else {
               // this.master.ChannelA.valid = '1'
-              this.println (
-                  this.active_println
-                  ,'Cycle '
-                  + cycle.toString() 
-                  +': The PROCESSOR is processing.'
-              )
+
               // cycle.incr()
               this.state = 0
           } 
           return
       }
       if (this.state == 3) {
-          let physical_address = this.MMU.run(cycle, this.SendAddress)
-          this.master.send (this.Processor_messeage,  physical_address, this.SendData)
+          this.MMU.run(this.SendAddress)
+
+            if (this.Processor_messeage == 'PUT') {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is sending messeage PUT to MEMORY.'
+                )
+            }
+
+            if (this.Processor_messeage == 'GET') {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    +cycle.toString() 
+                    +': The PROCESSOR is sending messeage GET to MEMORY.'
+
+                )
+            }
+            
+          this.master.send (this.Processor_messeage,  this.MMU.physical_address, this.SendData)
+        //   console.log(this.master.ChannelA.size, 'this.master.ChannelA.size')
           this.master.ChannelA.valid = '1'
+          
 
           this.println (
                   this.active_println
                   ,'Cycle '
                   + cycle.toString() 
-                  +this.MMU.MMU_message
+                  +':'+this.MMU.MMU_message
           )
+        //   console.log( this.master.ChannelA)
 
           cycle.incr()
-          if (this.MMU.MMU_message == ' TLB: VPN is missed.') this.state = 5
-          else this.state = 4
+          if (this.MMU.MMU_message == ' TLB: VPN is missed.') {
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The PROCESSOR is sending messeage GET to MEMORY.'
+            )
+            
+            this.master.send ('GET',   this.MMU.physical_address, this.SendData)
+            this.master.ChannelA.valid = '1'
+            // console.log(this.MMU)
+            this.state = 5
+          }
+          else this.state = 6
+
+          
           return
       }
       if (this.state == 4) {
           this.master.ChannelA.valid = '0'
           if (InterConnect2CPU.valid == '1') {
-
               if (InterConnect2CPU.opcode == '000') {
                   this.println (
                       this.active_println
@@ -343,20 +419,28 @@ export default class RiscVProcessor {
                       this.active_println
                       ,'Cycle '
                       + cycle.toString() 
-                      +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.32'
+                      +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.'
                   )
               }
               
               this.master.receive (InterConnect2CPU)
               
               if (InterConnect2CPU.opcode == '001') this.register[this.writeReg] =  this.master.ChannelD.data
-              cycle.incr()
+            //   cycle.incr()
               this.state = 0
           }
           return
       }
-      if (this.state == 5) {
 
+      if (this.state == 6) {
+            this.master.ChannelA.valid = '0'
+            if (ready) this.state = 4 
+            else this.state = 6
+            return
+      }
+      
+      if (this.state == 5) {
+        this.master.ChannelA.valid = '0'
           if (InterConnect2CPU.valid == '1') {
 
               this.println (
@@ -365,7 +449,6 @@ export default class RiscVProcessor {
                   + cycle.toString() 
                   +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.3'
               )
-
 
               const VPN       = this.SendAddress.slice(0, 20)  
               this.master.receive (InterConnect2CPU)
@@ -378,9 +461,11 @@ export default class RiscVProcessor {
                   +': The TLB is replacing an entry.'
               )
               this.MMU.pageReplace ([parseInt(VPN , 2) & 0xf,  dec (frame), 1, cycle.cycle])
-
+              this.master.ChannelA.valid = '0'
+            //   console.log(this.master.ChannelD.data)
+            //   console.log(this.MMU)
               cycle.incr()
-              this.state = 2
+              this.state = 3
           }
           return
       }

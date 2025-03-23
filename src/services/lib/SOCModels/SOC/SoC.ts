@@ -175,14 +175,12 @@ export default class Soc {
     }
 
     public async Step()  {      
-        console.log ('1')
         await this.Processor.Run(
             false
             , this.cycle
             , this.Bus0.Pout[0].dequeue()
-            , this.Bus0.state ==0
+            , this.Bus0.state == 0
         )
-        console.log ('2')
         
         // this.DMA.Run (
         //     this.Bus1.Pout[1].dequeue()
@@ -193,6 +191,7 @@ export default class Soc {
         this.Memory.Run(
             this.cycle
             , this.Bus0.Pout[2].dequeue()
+            , this.Bus0.state == 0
         )
         
         this.Bus0.Run (

@@ -1,6 +1,7 @@
 import MMU from '../Processor/MMU'
-import { dec, handleRegister, mux } from '../Compile/sub_function'
+import {handleRegister, mux } from '../Compile/sub_function'
 import Master from '../Interconnect/Master'
+import { dec, stringToAsciiAndBinary, BinToHex } from '../Compile/convert'
 // import {Logger } from '../Compile/soc.d'
 import { Keyboard, Logger, Monitor } from '../Compile/soc.d'
 // import Ecall from '../Ecall/Ecall'
@@ -231,6 +232,13 @@ export default class RiscVProcessor {
               + cycle.toString() 
               +': The PROCESSOR is sending messeage GET to MEMORY.'
           )
+
+          this.println (
+            this.active_println
+            ,'Cycle '
+            + cycle.toString() 
+            +': MMU is bypassed'
+            )
           // console.log('cpu: ',this.master.ChannelA, this.pc)
           this.state              += 1
           cycle.incr()
@@ -319,34 +327,13 @@ export default class RiscVProcessor {
               this.SendData           = data
               this.SendAddress        = logic_address
               this.writeReg           = writeRegister
-
-              if (message == 'PUT') {
-                  this.println (
-                      this.active_println
-                      ,'Cycle '
-                      + cycle.toString() 
-                      +': The PROCESSOR is sending messeage PUT to MEMORY.'
-                  )
-              }
-
-              if (message == 'GET') {
-                  this.println (
-                      this.active_println
-                      ,'Cycle '
-                      +cycle.toString() 
-                      +': The PROCESSOR is sending messeage GET to MEMORY.'
-
-                  )
-              }
               this.state              += 1
-              cycle.incr()
+              
           }
           else {
-              // this.master.ChannelA.valid = '1'
-
-              // cycle.incr()
               this.state = 0
           } 
+          cycle.incr()
           return
       }
       if (this.state == 3) {
@@ -372,19 +359,15 @@ export default class RiscVProcessor {
             }
             
           this.master.send (this.Processor_messeage,  this.MMU.physical_address, this.SendData)
-        //   console.log(this.master.ChannelA.size, 'this.master.ChannelA.size')
           this.master.ChannelA.valid = '1'
-          
-
           this.println (
                   this.active_println
                   ,'Cycle '
                   + cycle.toString() 
                   +':'+this.MMU.MMU_message
           )
-        //   console.log( this.master.ChannelA)
 
-          cycle.incr()
+          
           if (this.MMU.MMU_message == ' TLB: VPN is missed.') {
             this.println (
                 this.active_println
@@ -393,14 +376,20 @@ export default class RiscVProcessor {
                 +': The PROCESSOR is sending messeage GET to MEMORY.'
             )
             
-            this.master.send ('GET',   this.MMU.physical_address, this.SendData)
             this.master.ChannelA.valid = '1'
-            // console.log(this.MMU)
             this.state = 5
           }
-          else this.state = 6
-
-          
+          else {
+            this.state = 6
+            this.println(this.active_println,
+                                'Cycle ' 
+                                + cycle.toString()  
+                                +': Logical_address: ' 
+                                +BinToHex(this.SendAddress) 
+                                +' Physical address: ' 
+                                +BinToHex(this.MMU.physical_address)
+                            )
+          }
           return
       }
       if (this.state == 4) {
@@ -426,7 +415,6 @@ export default class RiscVProcessor {
               this.master.receive (InterConnect2CPU)
               
               if (InterConnect2CPU.opcode == '001') this.register[this.writeReg] =  this.master.ChannelD.data
-            //   cycle.incr()
               this.state = 0
           }
           return

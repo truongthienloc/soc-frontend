@@ -92,7 +92,7 @@ export default class MMU {
                 this.physical_address = (physical_addresses[check_pagenum.indexOf(true)]).toString(2).padStart(17, '0')
             } else {
                 this.MMU_message = " TLB: VPN is missed.";
-                this.physical_address = (this.stap + vpn_dec).toString(2).padStart(17, '0')
+                this.physical_address = (this.stap + vpn_dec*4).toString(2).padStart(17, '0')
             }
 
     }

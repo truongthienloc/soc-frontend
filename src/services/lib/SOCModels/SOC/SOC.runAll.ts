@@ -13,9 +13,10 @@ export async function RunAll(this: Soc) {
         this.Memory.Ins_pointer || this.Processor.state != 0
     ) {
         await this.Step()
-        // if (bre > 100) break
-        // bre ++ 
+        if (bre > 50) break
+        bre ++ 
     }
-
+    console.log(this.Processor.getRegisters())
+    console.log(this.Memory.Memory['01111000000000100'])
    this.event.emit(Soc.SOCEVENT.DONE_ALL)
 }

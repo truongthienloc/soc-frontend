@@ -12,7 +12,9 @@ const code              =
 `
 .text
 lui x1, 0xc 
+addi x2, x0, 1
 sw x2, 4(x1)
+lw x3, 4(x1)
 `
 
 SOC.Processor.active    = true
@@ -43,8 +45,12 @@ SOC.assemble(
             ,16*32                                  // ,dmaLen             : number
             ,0x17FFF + 1                            // ,dmaDes             : number
 )
+
+// console.log (SOC.Memory.GetInstructionMemory())
+// console.log (SOC.Memory.GetMemory())
 // console.log(SOC.Processor.active_println)
 SOC.RunAll()
+
 // console.log(SOC.Bridge.Bridge_slave.ChannelA)
 // SOC.Step()
 // SOC.Step()
@@ -57,7 +63,7 @@ SOC.RunAll()
 // console.log(SOC.Bus0.Pin[0].peek())
 // SOC.Step()
 // console.log(SOC.Bus0.Pout[2].peek())
-console.log(SOC.Processor.getRegisters())
+// console.log(SOC.Processor.getRegisters())
 // SOC.Step()
 // SOC.Step()
 // SOC.Step()

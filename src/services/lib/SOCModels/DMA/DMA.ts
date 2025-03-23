@@ -30,25 +30,34 @@ export default class DMA {
         this.DMA_buffer         = Array(288).fill('00000000000000000000000000000000')
     }
     public Run (sub2DMA : ChannelA, InterConnect2DMA: ChannelD) {
-
+        
         if (this.state == 0 && sub2DMA.valid == '1') {
             this.DMA_Slave.receive(sub2DMA)
             this.config ()
+            this.DMA_Slave.send ('AccessAck', '00', '')
             return
         }
-        if (this.state == 1 || this.state == 2) {
-            return this.get    (InterConnect2DMA)
+
+        if (this.state == 1) {
+            this.DMA_Slave.ChannelD.valid = '0'
+            this.state = 0
+            console.log ('this.DMA_Slave', this.DMA_Slave)
+            return
+        }
+        // if (this.state == 2 || this.state == 3) {
+        //     return this.get    (InterConnect2DMA)
             
-        }
-        if (this.state == 3 || this.state == 4) {
-            return this.put    (InterConnect2DMA)
-        }
+        // }
+        // if (this.state == 4 || this.state == 5) {
+        //     return this.put    (InterConnect2DMA)
+        // }
 
     }
 
     config() {
         const address = this.DMA_Slave.ChannelA.address
         const data    = this.DMA_Slave.ChannelA.data
+        console.log (data, address)
         // Kiểm tra địa chỉ và dữ liệu có hợp lệ không
         if (address.length !== 17 || data.length !== 32) {
             console.log("Invalid address or data length")
@@ -57,6 +66,7 @@ export default class DMA {
 
         // Chuyển địa chỉ từ chuỗi nhị phân sang số nguyên và sau đó sang hex
         const hexAddress = '0x' + parseInt(address, 2).toString(16).toUpperCase().padStart(8, '0')
+        console.log(hexAddress)
 
         if (this.state == 0) {
             switch (hexAddress) {
@@ -82,15 +92,13 @@ export default class DMA {
                 (this.length                != '00000000000000000000000000000000') && 
                 (this.control               != '00000000000000000000000000000000')
                 ) {
-                this.state += 1
-            }
+                this.state    = 2
+            } else this.state = 1
         }
-
-
     }
 
     get(InterConnect2DMA: ChannelD) {
-        if (this.state == 1) {
+        if (this.state == 2) {
             // Get operation for different addresses and store results in beats array
             this.DMA_Master.send(
                 'GET',
@@ -101,7 +109,7 @@ export default class DMA {
             return {...this.DMA_Master.ChannelA}
         }
     
-        if (this.state == 2) {
+        if (this.state == 3) {
             if (InterConnect2DMA.valid == '1'
                 && InterConnect2DMA.sink == '0'
             ) {
@@ -114,7 +122,7 @@ export default class DMA {
     }
 
     put(InterConnect2DMA: ChannelD) {
-        if (this.state == 3 ) {
+        if (this.state == 4 ) {
             console.log(`Sending data from source address: ${this.sourceAddress}`)
             this.DMA_Master.send (
                 'PUT'
@@ -125,7 +133,7 @@ export default class DMA {
             return {...this.DMA_Master.ChannelA}
         }
 
-        if (this.state == 4 ) {
+        if (this.state == 5 ) {
             if (InterConnect2DMA.valid == '1'
                 && InterConnect2DMA.sink == '1'
             ) {

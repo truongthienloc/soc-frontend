@@ -105,6 +105,8 @@ export default class MMU {
 
         if (parseInt(logic_address, 2) < 0X04000) {
             this.MMU_message = ' MMU is bypassed'
+            this.physical_address = logic_address.slice(-17)
+
             return
         } else {
             this.search_in_TLB(logic_address)

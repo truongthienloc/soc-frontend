@@ -16,7 +16,9 @@ export async function RunAll(this: Soc) {
         if (bre > 50) break
         bre ++ 
     }
-    console.log(this.Processor.getRegisters())
-    console.log(this.Memory.Memory['01111000000000100'])
+    // console.log(this.Processor.getRegisters(), this.Processor.state)
+    // // console.log(this.Bridge)
+    // console.log(this.Bus1.Pout[1].dequeue())
+    console.log(this.Bus1.Pout[0])
    this.event.emit(Soc.SOCEVENT.DONE_ALL)
 }

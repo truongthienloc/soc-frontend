@@ -11,10 +11,11 @@ const SOC               = new Soc('super SoC')
 const code              = 
 `
 .text
-lui x1, 0xc 
+lui  x1, 0x3
+ori  x1, x1, 0x04c
+
 addi x2, x0, 1
-sw x2, 4(x1)
-lw x3, 4(x1)
+sw   x2, 0(x1)
 `
 
 SOC.Processor.active    = true

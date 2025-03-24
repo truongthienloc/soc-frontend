@@ -125,7 +125,6 @@ export default class InterConnect {
     RecFromProcessor(data: ChannelA, cycle: Cycle, valid: boolean): void {
 
         if (this.active && this.Pactived[0] && valid && data.valid == '1') {
-            console.log ('RecFromProcessor', data   )
             this.println (
                 this.active_println
                 ,'Cycle '
@@ -242,8 +241,8 @@ export default class InterConnect {
         if (Abiter == 0) {
             const dataFromProcessor = {...this.Pin[0].dequeue()}
             const dataFromDMA       = {...this.Pin[1].dequeue()}
-            console.log ('dataFromProcessor',dataFromProcessor)
-            // console.log(parseInt('0'+dataFromProcessor.address, 2))
+            // console.log ('dataFromProcessor',dataFromProcessor)
+            // // console.log(parseInt('0'+dataFromProcessor.address, 2))
             // if (this.Pin[0].dequeue() instanceof ChannelA) {
                 // if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(dataFromProcessor)
                 if (parseInt('0'+dataFromDMA.address, 2) >= 0x0003064

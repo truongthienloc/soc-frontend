@@ -13,8 +13,8 @@ export async function RunAll(this: Soc) {
         this.Memory.Ins_pointer || this.Processor.state != 0
     ) {
         await this.Step()
-        if (bre > 50) break
-        bre ++ 
+        // if (bre > 50) break
+        // bre ++ 
     }
     // console.log(this.Processor.getRegisters(), this.Processor.state)
     // // console.log(this.Bridge)

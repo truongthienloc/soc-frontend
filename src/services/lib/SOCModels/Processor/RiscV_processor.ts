@@ -10,6 +10,7 @@ import ChannelD from '../Interconnect/ChannelD'
 import Cycle from '../Compile/cycle'
 import { Key } from 'react'
 import { read } from 'fs'
+import { hexToBinary } from '~/helpers/converts/Hextobin'
 // import { measureMemory } from 'vm'
 // import { symlink, write } from 'fs'
 // import { Console } from 'console'
@@ -227,10 +228,12 @@ export default class RiscVProcessor {
           
 
           this.println (
-              this.active_println
-              ,'Cycle '
-              + cycle.toString() 
-              +': The PROCESSOR is sending messeage GET to MEMORY.'
+            this.active_println
+            ,'Cycle '
+            + cycle.toString() 
+            +': The PROCESSOR is sending messeage GET to MEMORY. (at address: '
+            + BinToHex((this.pc).toString(2)) 
+            +')'
           )
 
           this.println (
@@ -254,7 +257,9 @@ export default class RiscVProcessor {
                 this.active_println
                 ,'Cycle '
                 + cycle.toString() 
-                +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.'
+                +': The PROCESSOR is receiving messeage AccessAckData from MEMORY. ('
+                +BinToHex (this.master.ChannelD.data)
+                +').'
             )
             this.state              += 1
             // cycle.incr()
@@ -336,6 +341,7 @@ export default class RiscVProcessor {
           cycle.incr()
           return
       }
+
       if (this.state == 3) {
           this.MMU.run(this.SendAddress)
 
@@ -392,6 +398,7 @@ export default class RiscVProcessor {
           }
           return
       }
+
       if (this.state == 4) {
           this.master.ChannelA.valid = '0'
           if (InterConnect2CPU.valid == '1') {

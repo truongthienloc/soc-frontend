@@ -5,6 +5,8 @@ import ChannelA from './../Interconnect/ChannelA'
 import ChannelD from './../Interconnect/ChannelD'
 import {Logger } from './../Compile/soc.d'
 import Cycle from '../Compile/cycle'
+import { Rock_3D } from 'next/font/google'
+import { BinToHex } from '../Compile/convert'
 
 export default class Memory {
     Memory          : { [key: string]: string }
@@ -64,16 +66,16 @@ export default class Memory {
 
     public setPageNumber () {
         let count = 0
-        const PageTablePointer = 0x00030000
+        const PageTablePointer = 0x0003000
         for (let i = PageTablePointer; i < (PageTablePointer + 4 * 16); i+=4) { 
-            this.Memory[i.toString(2).padStart(17,'0')] = (0X0C000 + count*4096 + 1).toString(2).padStart(32,'0') 
+            this.Memory[i.toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0') 
             count ++ 
         }
     }
 
     public getPageNumber (): Register[] {
         const result: Register[]    = []
-        const PageTablePointer0     =   0x00030000
+        const PageTablePointer0     =   0x0003000
         for (let i = PageTablePointer0; i < (PageTablePointer0 + 4 * 16); i+=4) {
             result.push({
                 name: '0x' +  i.toString(16).padStart(8,'0'), 
@@ -87,14 +89,16 @@ export default class Memory {
     public Run (
         cycle           : Cycle
         , MMU2Memory    : ChannelA
+        , ready         : boolean
     ) {
 
         if (this.state == 0) {
+            this.slaveMemory.ChannelD.valid = '0'
             if (MMU2Memory.valid == '1') {
-                cycle.incr()
+
                 this.slaveMemory.ChannelD.valid = '1'
                 if (MMU2Memory.opcode == '100') {
-
+                    this.slaveMemory.ChannelD.valid = '1'
                     this.println (this.active_println,
                     'Cycle '             +
                     cycle.toString()     +
@@ -104,81 +108,83 @@ export default class Memory {
                     this.address         =   this.slaveMemory.ChannelA.address
 
                     cycle.incr() 
-                    this.println (this.active_println,
-                    'Cycle '             +
-                    cycle.toString()     +
-                    ': The MEMORY is sending an AccessAckData message to the INTERCONNECT.'
-                    )
-                    if (MMU2Memory.size == '00') {
-                        this.slaveMemory.send(
-                            'AccessAckData', 
-                            this.slaveMemory.ChannelA.source, 
-                            this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] + 
-                            this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] +
-                            this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
-                            this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
+                    if (ready) {
+                        
+
+                        if (MMU2Memory.size == '00') {
+                            this.slaveMemory.send(
+                                'AccessAckData', 
+                                this.slaveMemory.ChannelA.source, 
+                                this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                                this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] +
+                                this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
+                                this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
+                            )
+                            this.burst.push (this.slaveMemory.ChannelD)
+                        }
+                        this.println (this.active_println,
+                            'Cycle '             +
+                            cycle.toString()     +
+                            ': The MEMORY is sending an AccessAckData message to the INTERCONNECT. (' 
+                            + BinToHex (this.slaveMemory.ChannelD.data) 
+                            +')'
                         )
-                        this.burst.push (this.slaveMemory.ChannelD)
+
+                        if (MMU2Memory.size == '10') {
+                            // FIRST BURST
+                            this.slaveMemory.send(
+                                'AccessAckData', 
+                                this.slaveMemory.ChannelA.source, 
+                                this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                                this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] +
+                                this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
+                                this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
+                            )
+                            this.burst.push (this.slaveMemory.ChannelD)
+    
+                            //SECOND BURST 
+                            this.slaveMemory.send(
+                                'AccessAckData', 
+                                this.slaveMemory.ChannelA.source, 
+                                this.Memory[(parseInt(this.address, 2) + 7).toString(2).padStart(17, '0')] + 
+                                this.Memory[(parseInt(this.address, 2) + 6).toString(2).padStart(17, '0')] +
+                                this.Memory[(parseInt(this.address, 2) + 5).toString(2).padStart(17, '0')] +
+                                this.Memory[(parseInt(this.address, 2) + 4).toString(2).padStart(17, '0')]
+                            )
+                            this.burst.push (this.slaveMemory.ChannelD)
+    
+                            //THIRD BURST
+                            this.slaveMemory.send(
+                                'AccessAckData', 
+                                this.slaveMemory.ChannelA.source, 
+                                this.Memory[(parseInt(this.address, 2) + 11).toString(2).padStart(17, '0')] + 
+                                this.Memory[(parseInt(this.address, 2) + 10).toString(2).padStart(17, '0')] +
+                                this.Memory[(parseInt(this.address, 2) + 9 ).toString(2).padStart(17, '0')] +
+                                this.Memory[(parseInt(this.address, 2) + 8 ).toString(2).padStart(17, '0')]
+                            )
+                            this.burst.push (this.slaveMemory.ChannelD)
+    
+                            //FOURTH BURST
+                            this.slaveMemory.send(
+                                'AccessAckData', 
+                                this.slaveMemory.ChannelA.source, 
+                                this.Memory[(parseInt(this.address, 2) + 15).toString(2).padStart(17, '0')] + 
+                                this.Memory[(parseInt(this.address, 2) + 14).toString(2).padStart(17, '0')] +
+                                this.Memory[(parseInt(this.address, 2) + 13).toString(2).padStart(17, '0')] +
+                                this.Memory[(parseInt(this.address, 2) + 12).toString(2).padStart(17, '0')]
+                            )
+                            this.burst.push (this.slaveMemory.ChannelD)
+                        }
+                         
+                        this.state   = 1
+                        cycle.incr()
                     }
-                    
-                    if (MMU2Memory.size == '10') {
-                        // FIRST BURST
-                        this.slaveMemory.send(
-                            'AccessAckData', 
-                            this.slaveMemory.ChannelA.source, 
-                            this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] + 
-                            this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] +
-                            this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
-                            this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
-                        )
-                        this.burst.push (this.slaveMemory.ChannelD)
 
-                        //SECOND BURST 
-                        this.slaveMemory.send(
-                            'AccessAckData', 
-                            this.slaveMemory.ChannelA.source, 
-                            this.Memory[(parseInt(this.address, 2) + 7).toString(2).padStart(17, '0')] + 
-                            this.Memory[(parseInt(this.address, 2) + 6).toString(2).padStart(17, '0')] +
-                            this.Memory[(parseInt(this.address, 2) + 5).toString(2).padStart(17, '0')] +
-                            this.Memory[(parseInt(this.address, 2) + 4).toString(2).padStart(17, '0')]
-                        )
-                        this.burst.push (this.slaveMemory.ChannelD)
-
-                        //THIRD BURST
-                        this.slaveMemory.send(
-                            'AccessAckData', 
-                            this.slaveMemory.ChannelA.source, 
-                            this.Memory[(parseInt(this.address, 2) + 11).toString(2).padStart(17, '0')] + 
-                            this.Memory[(parseInt(this.address, 2) + 10).toString(2).padStart(17, '0')] +
-                            this.Memory[(parseInt(this.address, 2) + 9 ).toString(2).padStart(17, '0')] +
-                            this.Memory[(parseInt(this.address, 2) + 8 ).toString(2).padStart(17, '0')]
-                        )
-                        this.burst.push (this.slaveMemory.ChannelD)
-
-                        //FOURTH BURST
-                        this.slaveMemory.send(
-                            'AccessAckData', 
-                            this.slaveMemory.ChannelA.source, 
-                            this.Memory[(parseInt(this.address, 2) + 15).toString(2).padStart(17, '0')] + 
-                            this.Memory[(parseInt(this.address, 2) + 14).toString(2).padStart(17, '0')] +
-                            this.Memory[(parseInt(this.address, 2) + 13).toString(2).padStart(17, '0')] +
-                            this.Memory[(parseInt(this.address, 2) + 12).toString(2).padStart(17, '0')]
-                        )
-                        this.burst.push (this.slaveMemory.ChannelD)
-                    }
-
-
-                    // console.log(this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] , 
-                    // this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] ,
-                    // this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] ,
-                    // this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')])
-                    cycle.incr() 
-                    this.state   = 1
                     return
                     
                 }
                 if (MMU2Memory.opcode == '000') {
-
+                    this.slaveMemory.ChannelD.valid = '1'
                     this.println (this.active_println,
                         'Cycle '             +
                         cycle.toString()     +
@@ -188,84 +194,54 @@ export default class Memory {
                     this.address            = this.slaveMemory.ChannelA.address
                     this.data               = this.slaveMemory.ChannelA.data 
 
-                    this.println (this.active_println,
-                        'Cycle '             +
-                        cycle.toString()     +
-                        ': The MEMORY is sending an AccessAck message to the INTERCONNECT.'
-                    )
+                    cycle.incr() 
+                    if (ready) {
+                        this.println (this.active_println,
+                            'Cycle '             +
+                            cycle.toString()     +
+                            ': The MEMORY is sending an AccessAck message to the INTERCONNECT.'
+                        )
+                        
+                        this.slaveMemory.send(
+                            'AccessAck', 
+                            this.slaveMemory.ChannelA.source,                 
+                            this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
+                        )
+                        this.burst.push (this.slaveMemory.ChannelD)
+                        this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(0,8)
+                        this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(8,16)
+                        this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(16,24)
+                        this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(24,32)
+                         
+                        this.state   = 1
+                        cycle.incr()
+                    }
                     
-                    this.slaveMemory.send(
-                        'AccessAck', 
-                        this.slaveMemory.ChannelA.source,                 
-                        this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] + 
-                        this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] +
-                        this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
-                        this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
-                    )
-                    this.burst.push (this.slaveMemory.ChannelD)
-                    this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(0,8)
-                    this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(8,16)
-                    this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(16,24)
-                    this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(24,32)
-
-                    this.state   = 1
                     return
                 }
             }
            
         }
-        if (this.state == 1) 
+        if (this.state == 1) {
             this.slaveMemory.ChannelD.valid = '0'
             this.burst = []
             this.state = 0
-            // this.state = 0
-            // console.log  (
-            //     'Cycle ',
-            //     cycle.toString(), 
-            //     ': The MEMORY is sending an AccessAckData message to the INTERCONNECT.'
-            // )
-            // // this.println  (
-            // //     'Cycle ',
-            // //     cycle.toString(), 
-            // //     ': The MEMORY is sending an AccessAckData message to the INTERCONNECT.'
-            // // )
-            // if (this.slaveMemory.ChannelD.opcode == '000') {
-            //     this.slaveMemory.send(
-            //                         'AccessAck', 
-            //                         this.slaveMemory.ChannelA.source, 
-            //                         this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] + 
-            //                         this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] +
-            //                         this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
-            //                         this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
-            //                         )
-            //     console.log(this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] , 
-            //     this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] ,
-            //     this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] ,
-            //     this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')])
-            //     this.Memory[(parseInt(this.address, 2) + 3).toString(2)] = this.slaveMemory.ChannelD.data.slice(0,8)
-            //     this.Memory[(parseInt(this.address, 2) + 2).toString(2)] = this.slaveMemory.ChannelD.data.slice(8,16)
-            //     this.Memory[(parseInt(this.address, 2) + 1).toString(2)] = this.slaveMemory.ChannelD.data.slice(16,24)
-            //     this.Memory[(parseInt(this.address, 2) + 0).toString(2)] = this.slaveMemory.ChannelD.data.slice(24,32)
-            // }
-
-            // if (this.slaveMemory.ChannelD.opcode == '001')
-            //     this.slaveMemory.send(
-            //                         'AccessAckData', 
-            //                         this.slaveMemory.ChannelA.source,                 
-            //                         this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] + 
-            //                         this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] +
-            //                         this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
-            //                         this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
-            //                         )
-            //     this.state   = 0
-            //     return
-                
-            // }
+        }
             
+    }
+
+    public GetInstructionMemory () {
+        for (let i = 0; i<0X00FFF; i+=1 ){
+            console.log(i.toString(2).padStart(17,'0'),this.Memory[i.toString(2).padStart(17,'0')])
+        }
     }
 
     public SetInstructionMemory(Instruction_memory: string[] = []) {
         let count = 0
+        console.log('ins',Instruction_memory)
 
         this.Ins_pointer = (Object.values(Instruction_memory).length - 1) * 4
 
@@ -285,25 +261,46 @@ export default class Memory {
     
     
 
-    // public GetMemory(): { [key: string]: string } {
-    //     // Chuyển object sang mảng các cặp [key, value]
-    //     const entries = Object.entries(this.Memory);
+    public GetMemory() {
+        // Chuyển object sang mảng các cặp [key, value]
+        const entries = Object.entries(this.Memory)
+        const littleEndianMemory: { [key: string]: string } = {};
+        
+        // Sắp xếp mảng dựa trên key, giữ nguyên dạng số thập phân
+        const sortedMemory = entries.sort((a, b) => parseInt(a[0], 10) - parseInt(b[0], 10));
+        for (let i = 0; i < sortedMemory.length; i += 4) {
+            let element = ''
+            for (let j = 3; j>=0 ; j--) {
+                element += sortedMemory[i+j][1]
+            }
+            littleEndianMemory [i.toString(2).padStart(17, '0')] = element
+
+        }
+
+        return littleEndianMemory
     
-    //     // Sắp xếp mảng dựa trên key, chuyển key từ nhị phân sang thập phân để so sánh
-    //     const sortedEntries = entries.sort((a, b) => {
-    //         const decimalA = parseInt(a[0], 2); // Chuyển key a từ nhị phân sang thập phân
-    //         const decimalB = parseInt(b[0], 2); // Chuyển key b từ nhị phân sang thập phân
-    //         return decimalA - decimalB;
-    //     });
+        // // Tạo một object mới để lưu trữ các giá trị được chuyển đổi theo Little Endian
+        // const littleEndianMemory: { [key: string]: string } = {};
     
-    //     // Chuyển mảng đã sắp xếp trở lại object
-    //     const sortedObj: { [key: string]: string } = {};
-    //     for (const [key, value] of sortedEntries) {
-    //         sortedObj[dec('0'+key)] = value;
-    //     }
+        // // Duyệt qua mỗi nhóm 4 entries, gộp và đảo ngược byte
+        // for (let i = 0; i < sortedEntries.length / 4; i += 4) {
+        //     const keyBase = parseInt(sortedEntries[i][0], 10); // Lấy key cơ sở là địa chỉ đầu tiên của mỗi nhóm 4 bytes
+        //     let littleEndianValue = '';
     
-    //     return sortedObj;
-    // }
+        //     // Đảo ngược thứ tự các bytes và gộp lại thành một giá trị nhị phân duy nhất
+        //     for (let j = 3; j >= 0; j--) {
+        //         if (i + j < sortedEntries.length) {
+        //             littleEndianValue += sortedEntries[i + j][1];
+        //         }
+        //     }
+    
+        //     // Lưu trữ vào object mới với key là địa chỉ cơ sở
+        //     littleEndianMemory[keyBase.toString()] = littleEndianValue;
+        // }
+    
+        // return littleEndianMemory;
+    }
+    
     
     // public setMemoryFromString(input: string): { beforeColon: string; afterColon: string }[] {
     //     // Split the input into sections using regex that considers new lines and colons

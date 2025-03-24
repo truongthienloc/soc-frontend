@@ -11,41 +11,11 @@ const SOC               = new Soc('super SoC')
 const code              = 
 `
 .text
+lui  x1, 0x3
+ori  x1, x1, 0x04c
 
-#The program finds the value of fibonacci 
-
-Fibo:
-		addi    x21 , x0 , 6 // 0 
-		addi    x24 , x0 , 1 // 4
-		addi    x26 , x0 , 1 // 8
-		addi    x12 , x0 , 3 //12
-		beq     x21 , x0 , Result0 // 16
-		beq     x21 , x26 , Result1 //20
-Loop: 
-		blt     x21 , x12 , Result // 24	
-		add     x1 , x24 , x26 // 28
-		addi    x24 , x26 , 0 //32
-		addi    x26 , x1 , 0 //36
-		addi    x12 , x12 , 1 //40
-		jal     x0 , Loop //44
-Result0:
-		addi    x1 , x0 , 0 //48
-		addi    x18 , x0 , 0 //52
-		bne     x1 , x18 , Fail // 56
-Result1:
-		addi    x1 , x0 , 1 // 60 
-		addi    x5 , x0 , 1 // 64
-		bne     x1 , x5 , Fail // 68
-Result:
-		addi    x10 , x0 , 8 // 72
-		bne     x1 , x10 , Result1 // 76 
-
-Pass: 
-		addi    x1 , x0 , 084 //80
-		jal     x0 , End // 	
-Fail: 
-		addi    x1 , x0 , 070 // 88 
-End: 
+addi x2, x0, 1
+sw   x2, 0(x1)
 `
 
 SOC.Processor.active    = true
@@ -62,22 +32,27 @@ SOC.assemble(
             ,[]                                      // ,Mem_tb             : Register[]
             ,[
                  //[0, (0x07FFF + 1 ) + 4096*0, 1, 0]
-                 [8, 49152, 1, 6 ]
-                ,[0, (0x07FFF + 1 ) + 4096*1, 1, 1]
-                ,[0, (0x07FFF + 1 ) + 4096*2, 1, 0]
-                ,[0, (0x07FFF + 1 ) + 4096*3, 1, 1]
-                ,[0, (0x07FFF + 1 ) + 4096*4, 1, 1]
-                ,[0, (0x07FFF + 1 ) + 4096*5, 1, 1]
-                ,[0, (0x07FFF + 1 ) + 4096*6, 1, 1]
-                ,[0, (0x07FFF + 1 ) + 4096*7, 1, 1]
+                 [8, 49152, 0, 6 ]
+                ,[0, (131072 ) + 4096*1, 0, 1]
+                ,[0, (131072 ) + 4096*2, 0, 1]
+                ,[0, (131072 ) + 4096*3, 0, 1]
+                ,[0, (131072 ) + 4096*4, 0, 1]
+                ,[0, (131072 ) + 4096*5, 0, 1]
+                ,[0, (131072 ) + 4096*6, 0, 1]
+                ,[0, (131072 ) + 4096*7, 0, 1]
             ]                                       // ,TLB                : TLBEntries[]
-            ,0x1FFFF + 1                            // ,stap               : number
-            ,0x1BFFF + 1                            // ,dmaSrc             : number
+            ,0x0003000                             // ,stap               : number
+            ,0x0003000                          // ,dmaSrc             : number
             ,16*32                                  // ,dmaLen             : number
             ,0x17FFF + 1                            // ,dmaDes             : number
 )
-console.log(SOC.Processor.active_println)
+
+// console.log (SOC.Memory.GetInstructionMemory())
+// console.log (SOC.Memory.GetMemory())
+// console.log(SOC.Processor.active_println)
 SOC.RunAll()
+
+// console.log(SOC.Bridge.Bridge_slave.ChannelA)
 // SOC.Step()
 // SOC.Step()
 // SOC.Step()
@@ -89,7 +64,7 @@ SOC.RunAll()
 // console.log(SOC.Bus0.Pin[0].peek())
 // SOC.Step()
 // console.log(SOC.Bus0.Pout[2].peek())
-console.log(SOC.Processor.getRegisters())
+// console.log(SOC.Processor.getRegisters())
 // SOC.Step()
 // SOC.Step()
 // SOC.Step()

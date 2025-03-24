@@ -1,14 +1,11 @@
-import React from 'react'
+import React, { memo } from 'react'
 
 type Props = {
   rowCount?: number
   colCount?: number
 }
 
-export default function LedMatrix({ rowCount = 96, colCount = 96 }: Props) {
-  // const array = Array.from(Array(10).keys())
-  // console.log('array: ', array);
-
+const LedMatrix = memo(function LedMatrix({ rowCount = 96, colCount = 96 }: Props) {
   return (
     <div
       className="led-matrix grid h-fit grid-cols-[repeat(var(--col-count),_0.25rem)] justify-center gap-[1px]"
@@ -27,4 +24,6 @@ export default function LedMatrix({ rowCount = 96, colCount = 96 }: Props) {
       )}
     </div>
   )
-}
+})
+
+export default LedMatrix

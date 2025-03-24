@@ -2,7 +2,7 @@ import Cycle from "../Compile/cycle"
 
 export default class MMU {
     active              : boolean
-    physical_address    : number
+    physical_address    : string
     TLB                 : [ number, number, number, number][]
     stap                : number
     start_addr          : number
@@ -23,7 +23,7 @@ export default class MMU {
         this.kernel_point       = 0
         this.IO_point           = 0
 
-        this.physical_address   = 0  // Initialized with a number
+        this.physical_address   = '' // Initialized with a number
         this.stap               = 0
         this.TLB                = new Array(8).fill([0, 0, 0, 0]) // Initialized as 8 rows of [0, 0, 0, 0]
         this.MMU_message        = ''
@@ -62,7 +62,7 @@ export default class MMU {
         this.IO_point          = IO_point
     }
 
-    public search_in_TLB(logic_address: string): [string, string] {
+    public search_in_TLB(logic_address: string) {
         let message: string;
         
         const VPN               = logic_address.slice(0, 20)// 10 bit đầu tiên
@@ -88,40 +88,53 @@ export default class MMU {
             );
     
             if (exist) {
-                message = " TLB: VPN is caught.";
-                this.physical_address = physical_addresses[check_pagenum.indexOf(true)];
+                this.MMU_message = " TLB: VPN is caught.";
+                this.physical_address = (physical_addresses[check_pagenum.indexOf(true)]).toString(2).padStart(17, '0')
             } else {
-                message = " TLB: VPN is missed.";
-                this.physical_address = this.stap;
+                this.MMU_message = " TLB: VPN is missed.";
+                this.physical_address = (this.stap + vpn_dec*4).toString(2).padStart(17, '0')
             }
-        //}
-        return [this.physical_address.toString(2).padStart(32, '0'), message];
+
     }
 
 
     public run (
-        cycle            : Cycle
-        ,logic_address   : string
+        logic_address   : string
     ) 
     {
-        let [physical_address, MMU_message] = this.search_in_TLB (logic_address)
-        console.log('stap', this.stap)
-        console.log  ('Cycle ', cycle.toString()+' : ' + MMU_message)
+
+        if (parseInt(logic_address, 2) < 0X04000) {
+            this.MMU_message = ' MMU is bypassed'
+            this.physical_address = logic_address.slice(-17)
+
+            return
+        } else {
+            this.search_in_TLB(logic_address)
+        }
+
+        // if (parseInt( this.physical_address,2) > this.end_addr) {
+        //     this.MMU_message = 'Page fault!!!!'
+        //     return
+        // }
+
+        // return this.physical_address
+        
+        // console.log('stap', this.stap)
+        // console.log  ('Cycle ', cycle.toString()+' : ' + this.MMU_message)
         //this.println ('Cycle ', this.cycle.toString()+' : ' + MMU_message)
 
-        if (this.MMU_message == ' TLB: VPN is missed.') {
-            const VPN       = logic_address.slice(0, 20)  // 10 bit đầu tiên
-            const stap      = this.stap
+        // if (this.MMU_message == ' TLB: VPN is missed.') {
+        //     const VPN       = logic_address.slice(0, 20)  // 10 bit đầu tiên
+        //     const stap      = this.stap
   
-            const PTE       = stap + (parseInt(VPN , 2) & 0xf)* 4
-            return (PTE).toString(2).padStart(17,'0')
-        } else {
-            this.done = true
-            if (parseInt(physical_address,2) > this.end_addr) {
-                this.MMU_message = 'Page fault!!!!'
-            }
-            return physical_address
-        }
+        //     const PTE       = stap + (parseInt(VPN , 2) & 0xf)* 4
+        //     return this.physical_address
+        // } else {
+        //     if (parseInt(physical_address,2) > this.end_addr) {
+        //         this.MMU_message = 'Page fault!!!!'
+        //     }
+        //     return physical_address
+        // }
     }
 }
 

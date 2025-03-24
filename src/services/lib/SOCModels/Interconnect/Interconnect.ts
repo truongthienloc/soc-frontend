@@ -250,6 +250,10 @@ export default class InterConnect {
                     )
                     
                 ) {
+                    const dataFromDMA = {...this.Pin[1].dequeue()}
+                    if (parseInt('0'+dataFromDMA.address, 2)    > 0x000305C + 1) {
+                        
+                    }
                     this.println (
                         this.active_println
                         ,'Cycle '

@@ -110,7 +110,7 @@ export default class Soc {
         this.Assembler      = new Assembler()
         this.Assembly_code  = []
         this.Led_matrix     = new LEDMatrix ()
-        this.Bridge         = new Bridge(false)
+        this.Bridge         = new Bridge()
         // this.Monitor        = new Monitor        ()
         // this.Keyboard       = new Keyboard       ()
         this.Allocator      = new BuddyAllocator (0x0BFFF, 0X0C000)
@@ -183,10 +183,11 @@ export default class Soc {
             , this.Bus0.state == 0
         )
         
-        // this.DMA.Run (
-        //     this.Bus1.Pout[1].dequeue()
-        //     ,this.Bus0.Pout[1].dequeue()
-        // )
+        this.DMA.Run (
+            this.Bus1.Pout[1].dequeue()
+            ,this.Bus0.Pout[1].dequeue()
+            , this.cycle
+        )
             
         this.Memory.Run(
             this.cycle
@@ -202,25 +203,27 @@ export default class Soc {
             ,this.Processor.master.ChannelA.valid == '1'
             ,false
             ,this.Memory.slaveMemory.ChannelD.valid == '1'
-            ,false
+            ,this.Bridge.Bridge_slave.ChannelD.valid == '1'
             ,this.cycle
         )
 
-        // this.Bridge.Run (
-        //     this.Bus0.Pout[3]
-        //     , this.Bus1.Pout[0].dequeue()
-        //     , this.Bus1.state == 0
-        // )
+        this.Bridge.Run (
+            this.Bus0.Pout[3]
+            , this.Bus1.Pout[0].dequeue()
+            , this.Bus0.state == 0
+            , this.Bus1.state == 0
+            , this.cycle
+        )
         
-        // this.Bus1.Run (
-        //     this.Bridge.Bridge_master.ChannelA
-        //     , this.DMA.DMA_Slave.ChannelD
-        //     , this.Led_matrix.Matrix_Slave.ChannelD
-        //     , this.Bridge.Bridge_master.ChannelA.valid == '1'
-        //     , this.DMA.DMA_Slave.ChannelD.valid == '1'
-        //     , this.Led_matrix.Matrix_Slave.ChannelD.valid == '1'
-        //     , this.cycle
-        // )
+        this.Bus1.Run (
+            this.Bridge.Bridge_master.ChannelA
+            , this.DMA.DMA_Slave.ChannelD
+            , this.Led_matrix.Matrix_Slave.ChannelD
+            , this.Bridge.Bridge_master.ChannelA.valid == '1'
+            , this.DMA.DMA_Slave.ChannelD.valid == '1'
+            , this.Led_matrix.Matrix_Slave.ChannelD.valid == '1'
+            , this.cycle
+        )
 
         // this.cycle.incr()
         

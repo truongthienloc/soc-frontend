@@ -3,7 +3,8 @@ import ChannelD             from "./ChannelD"
 import { FIFO_ChannelA }    from "./FIFO_ChannelA"
 import { FIFO_ChannelD }    from "./FIFO_ChannelD"
 import { FIFO_timing }      from "./FIFO_timing"
-import Cycle from "../Compile/cycle"
+import Cycle                from "../Compile/cycle"
+import {Logger }            from '../Compile/soc.d'
 
 export default class InterConnect {
     active      : boolean
@@ -12,6 +13,7 @@ export default class InterConnect {
     Pout        : (FIFO_ChannelD | FIFO_ChannelA)[]
     Pactived    : boolean[]
     state       : number
+    logger     ?: Logger
 
     constructor(active: boolean) {
         this.active = active
@@ -39,6 +41,21 @@ export default class InterConnect {
 
     }
 
+    public println(active: boolean, ...args: string[]) {
+        
+        if (active) {
+            console.log(...args)
+        }
+
+        if (!this.logger) {
+            return
+        }
+
+        if (active) {
+            this.logger.println(...args)
+        }
+    }
+
     Run (
         dataFromBridge           : ChannelA
         ,dataFromDMA             : ChannelD
@@ -60,7 +77,7 @@ export default class InterConnect {
                 ,cycle                      
             )
             if (! ((this.Pin[0].isEmpty()) && (this.Pin[1].isEmpty()) && (this.Pin[2].isEmpty()))) {
-                console.log('this.state, this.Pin, this.Pout, this.Timming',this.state, this.Pin, this.Pout, this.Timming)
+                // console.log('this.state, this.Pin, this.Pout, this.Timming',this.state, this.Pin, this.Pout, this.Timming)
                 this.state +=1
                 cycle.incr()
             }
@@ -145,14 +162,14 @@ export default class InterConnect {
     }
 
     Route (Abiter: number) {
-        console.log('abiute',Abiter)
+        // console.log('abiute',Abiter)
         if (Abiter == 0) {
             const dataFromBridge = {...this.Pin[0].dequeue()}
-            console.log ('dataFromBridge', dataFromBridge)
-            console.log ((
-                (parseInt('0'+dataFromBridge.address, 2) >= 0x000304C  ) 
-            &&  (parseInt('0'+dataFromBridge.address, 2) <= 0x000305C )
-        ))
+        //     console.log ('dataFromBridge', dataFromBridge)
+        //     console.log ((
+        //         (parseInt('0'+dataFromBridge.address, 2) >= 0x000304C  ) 
+        //     &&  (parseInt('0'+dataFromBridge.address, 2) <= 0x000305C )
+        // ))
             // if (dataFromBridge instanceof ChannelA) {
                 // if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(dataFromBridge)
                 if (
@@ -165,7 +182,6 @@ export default class InterConnect {
                     (parseInt('0'+dataFromBridge.address, 2) >= 0x000304C  ) 
                 &&  (parseInt('0'+dataFromBridge.address, 2) <= 0x000305C )
                 ) {
-                console.log ('h')
                     if (this.Pout[1] instanceof FIFO_ChannelA) this.Pout[1].enqueue(dataFromBridge)
                 }
             //}
@@ -174,7 +190,7 @@ export default class InterConnect {
             const dataFromDMA = {...this.Pin[1].dequeue()}
             // if (dataFromDMA instanceof ChannelD) {
                 if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue(dataFromDMA)
-                console.log ('dataFromDMA sub', dataFromDMA, this.Pout[0] instanceof FIFO_ChannelD, this.Pout[0])
+                // console.log ('dataFromDMA sub', dataFromDMA, this.Pout[0] instanceof FIFO_ChannelD, this.Pout[0])
             
         }
         if (Abiter == 2) {

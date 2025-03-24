@@ -3,6 +3,8 @@ import Master from './../Interconnect/Master'
 import ChannelA             from "./../Interconnect/ChannelA"
 import ChannelD             from "./../Interconnect/ChannelD"
 import { Interconnect } from '../../soc/components/Interconnect'
+import Cycle from "../Compile/cycle"
+import {Logger }            from '../Compile/soc.d'
 
 export default class DMA {
     sourceAddress       : string
@@ -15,6 +17,7 @@ export default class DMA {
     DMA_Master          : Master
     DMA_Slave           : Slave
     DMA_buffer          : string[]
+    logger             ?: Logger
 
     constructor() {
         this.sourceAddress      = '00000000000000000000000000000000'
@@ -28,8 +31,29 @@ export default class DMA {
         this.DMA_Master.ChannelA.size = '10'
         this.DMA_Slave          = new Slave ('DMA_Slave', true)
         this.DMA_buffer         = Array(288).fill('00000000000000000000000000000000')
+
     }
-    public Run (sub2DMA : ChannelA, InterConnect2DMA: ChannelD) {
+
+    public println(active: boolean, ...args: string[]) {
+        
+        if (active) {
+            console.log(...args)
+        }
+
+        if (!this.logger) {
+            return
+        }
+
+        if (active) {
+            this.logger.println(...args)
+        }
+    }
+
+    public Run (
+        sub2DMA             : ChannelA
+        , InterConnect2DMA  : ChannelD
+        , Cycle             : Cycle
+    ) {
         
         if (this.state == 0 && sub2DMA.valid == '1') {
             this.DMA_Slave.receive(sub2DMA)
@@ -41,7 +65,7 @@ export default class DMA {
         if (this.state == 1) {
             this.DMA_Slave.ChannelD.valid = '0'
             this.state = 0
-            console.log ('this.DMA_Slave', this.DMA_Slave)
+            // console.log ('this.DMA_Slave', this.DMA_Slave)
             return
         }
         // if (this.state == 2 || this.state == 3) {
@@ -57,7 +81,6 @@ export default class DMA {
     config() {
         const address = this.DMA_Slave.ChannelA.address
         const data    = this.DMA_Slave.ChannelA.data
-        console.log (data, address)
         // Kiểm tra địa chỉ và dữ liệu có hợp lệ không
         if (address.length !== 17 || data.length !== 32) {
             console.log("Invalid address or data length")
@@ -66,7 +89,6 @@ export default class DMA {
 
         // Chuyển địa chỉ từ chuỗi nhị phân sang số nguyên và sau đó sang hex
         const hexAddress = '0x' + parseInt(address, 2).toString(16).toUpperCase().padStart(8, '0')
-        console.log(hexAddress)
 
         if (this.state == 0) {
             switch (hexAddress) {

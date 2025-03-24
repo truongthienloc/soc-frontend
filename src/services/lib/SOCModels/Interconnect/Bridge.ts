@@ -4,6 +4,8 @@ import Master               from "./Master"
 import Slave                from "./Slave"
 import { FIFO_ChannelA }    from "./FIFO_ChannelA"
 import { FIFO_ChannelD }    from "./FIFO_ChannelD"
+import Cycle                from "../Compile/cycle"
+import {Logger }            from '../Compile/soc.d'
 import { read } from "fs"
 
 export default class Bridge {
@@ -12,53 +14,87 @@ export default class Bridge {
     fifo_from_Interconnect      : FIFO_ChannelA
     fifo_from_subInterconnect   : FIFO_ChannelD
     state                       : number
+    active_println              : boolean
+    logger                     ?: Logger
 
-    constructor (active: boolean) {
-        this.Bridge_master =  new Master('Bridge_master', true, '00') //tmp_src
-        this.Bridge_slave  =  new Slave ('Bridge_slave', true)
-        this.fifo_from_Interconnect = new FIFO_ChannelA ()
-        this.fifo_from_subInterconnect = new FIFO_ChannelD ()
+    constructor () {
+        this.Bridge_master              =  new Master('Bridge_master', true, '00') //tmp_src
+        this.Bridge_slave               =  new Slave ('Bridge_slave', true)
+        this.fifo_from_Interconnect     = new FIFO_ChannelA ()
+        this.fifo_from_subInterconnect  = new FIFO_ChannelD ()
         this.state                      = 0
+        this.active_println             = true
+    }
+
+    public println(active: boolean, ...args: string[]) {
+        
+        if (active) {
+            console.log(...args)
+        }
+
+        if (!this.logger) {
+            return
+        }
+
+        if (active) {
+            this.logger.println(...args)
+        }
     }
 
     public Run (
-        dataFrInterconnect: any//FIFO_ChannelA
-        ,dataFrsubInterconnect: any//ChannelD
-        ,ready                  : boolean
+        dataFrInterconnect          : any//FIFO_ChannelA
+        ,dataFrsubInterconnect      : any//ChannelD
+        ,ready0                     : boolean  // interconncet ready
+        ,ready1                     : boolean // sub-interconnect ready
+        ,cycle                      : Cycle
     ) {
 
-        this.fifo_from_Interconnect = dataFrInterconnect
-        this.fifo_from_subInterconnect.enqueue({...dataFrsubInterconnect})
-        if (this.state == 0) {
-            this.Bridge_master.ChannelA.valid = '0'
+        if (this.state == 0)    {
+            if (!dataFrInterconnect.isEmpty()) {
+                while (!dataFrInterconnect.isEmpty()) {
+                    if (dataFrInterconnect.peek().valid == '1') {
+                        this.fifo_from_Interconnect.enqueue (dataFrInterconnect.dequeue())
+                    }
+                }
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The INTERCONNECT is receiving data from SUB-INTERCONNECT.'
+                )   
+            this.state += 1
+           }
+           return
+        }
 
-            if (!dataFrInterconnect.isEmpty () || dataFrsubInterconnect.valid=='1') {
-                if (!dataFrInterconnect.isEmpty ()) {
-                    if (dataFrInterconnect.peek().valid == '1' ) this.fifo_from_Interconnect = dataFrInterconnect
-                }               
-                    this.state += 1
-                    console.log ('dataFrInterconnect dataFrsubInterconnect', dataFrInterconnect, dataFrsubInterconnect)
-                    this.fifo_from_subInterconnect.enqueue({...dataFrsubInterconnect})
+        if (this.state == 1)    {
+
+            if (!this.fifo_from_Interconnect.isEmpty() && ready1) {
+                this.Bridge_slave.receive(this.fifo_from_Interconnect.dequeue())
+                this.Bridge_master.ChannelA = this.Bridge_slave.ChannelA
+                this.Bridge_master.ChannelA.valid = '1'
+                this.state += 1
             }
             return
         }
 
-        if (this.state == 1) {
-            // console.log('this.Bridge_slave.ChannelD1: ', this.fifo_from_Interconnect.dequeue())
-            if (!this.fifo_from_Interconnect.isEmpty() && ready) {
-                this.Bridge_slave.receive(this.fifo_from_Interconnect.dequeue())
-                this.Bridge_master.ChannelA = this.Bridge_slave.ChannelA
-                this.Bridge_master.ChannelA.valid = '1'
-                console.log(' this.Bridge_master.ChannelA',  this.Bridge_master.ChannelA)
-            }
-            if (!this.fifo_from_subInterconnect.isEmpty() && ready) {
-                this.Bridge_master.receive(this.fifo_from_subInterconnect.dequeue())
+        if (this.state == 2)   {
+            this.Bridge_master.ChannelA.valid = '0'
+            if (dataFrsubInterconnect.valid == '1'&& ready0) {
+                this.Bridge_master.receive(dataFrsubInterconnect)
                 this.Bridge_slave.ChannelD = this.Bridge_master.ChannelD
-                this.Bridge_master.ChannelD.valid = '1'
+                this.Bridge_slave.ChannelD.valid = '1'
+                this.state += 1
             }
+            return
+        }
+
+        if (this.state == 3)    {
+            this.Bridge_slave.ChannelD.valid = '0'
             this.state = 0
             return 
         }
+        
     }
 }
 

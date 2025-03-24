@@ -13,12 +13,17 @@ export async function RunAll(this: Soc) {
         this.Memory.Ins_pointer || this.Processor.state != 0
     ) {
         await this.Step()
-        // if (bre > 50) break
+        // if (bre > 60) break
         // bre ++ 
     }
     // console.log(this.Processor.getRegisters(), this.Processor.state)
-    // // console.log(this.Bridge)
-    // console.log(this.Bus1.Pout[1].dequeue())
-    console.log(this.Bus1.Pout[0])
+    // console.log(this.Bridge)
+    // console.log(this.Bus0.Pout[0], this.Processor.state)
+    console.log(this.DMA.sourceAddress
+        , this.DMA.destinationAddress
+        , this.DMA.length
+        , this.DMA.control
+    )
+    // console.log(this.Bus1.Pout[0])
    this.event.emit(Soc.SOCEVENT.DONE_ALL)
 }

@@ -238,6 +238,7 @@ export default class InterConnect {
     }
 
     Route (Abiter: number, cycle: Cycle) {
+        // console.log('arbiter', Abiter)
         if (Abiter == 0) {
             const dataFromProcessor = {...this.Pin[0].dequeue()}
             const dataFromDMA       = {...this.Pin[1].dequeue()}
@@ -347,8 +348,10 @@ export default class InterConnect {
         }
 
         if (Abiter == 3) {
-            const dataFromSInterconnect = this.Pin[2].dequeue()
-            if (dataFromSInterconnect instanceof ChannelD) {
+            // console.log ('dataFromSInterconnect', this.Pin[3])
+            const dataFromSInterconnect = {...this.Pin[3].dequeue()}
+            
+            // if (dataFromSInterconnect instanceof ChannelD) {
                 if (dataFromSInterconnect.source == '00') {
                     this.println (
                         this.active_println
@@ -357,6 +360,7 @@ export default class InterConnect {
                         +': The INTERCONNECT is sending data from SUB-INTERCONNECT to PROCESSOR.'
                     )
                     if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue(dataFromSInterconnect)
+                    // console.log('this.Pout[0]', this.Pout[0])
                 } else {
                     this.println (
                         this.active_println
@@ -366,7 +370,7 @@ export default class InterConnect {
                     )
                     if (this.Pout[1] instanceof FIFO_ChannelD) this.Pout[1].enqueue(dataFromSInterconnect)
                 }
-            }
+            //}
         }
         cycle.incr()
     }

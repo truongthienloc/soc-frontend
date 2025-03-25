@@ -60,8 +60,9 @@ export default class Bridge {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The INTERCONNECT is receiving data from SUB-INTERCONNECT.'
-                )   
+                    +': The BRIDGE is receiving data from INTERCONNECT.'
+                )  
+                cycle.incr() 
             this.state += 1
            }
            return
@@ -73,17 +74,40 @@ export default class Bridge {
                 this.Bridge_slave.receive(this.fifo_from_Interconnect.dequeue())
                 this.Bridge_master.ChannelA = this.Bridge_slave.ChannelA
                 this.Bridge_master.ChannelA.valid = '1'
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The BRIDGE is sending data to SUB-INTERCONNECT.'
+                )  
+                cycle.incr() 
                 this.state += 1
             }
             return
         }
 
         if (this.state == 2)   {
-            this.Bridge_master.ChannelA.valid = '0'
-            if (dataFrsubInterconnect.valid == '1'&& ready0) {
+            this.Bridge_master.ChannelA.valid   = '0'
+            if (dataFrsubInterconnect.valid     == '1'&& ready0) {
                 this.Bridge_master.receive(dataFrsubInterconnect)
-                this.Bridge_slave.ChannelD = this.Bridge_master.ChannelD
-                this.Bridge_slave.ChannelD.valid = '1'
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The BRIDGE is receiving data from SUB-INTERCONNECT.'
+                )  
+                cycle.incr() 
+
+                this.Bridge_slave.ChannelD          = this.Bridge_master.ChannelD
+                this.Bridge_slave.ChannelD.valid    = '1'
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The BRIDGE is sending data to INTERCONNECT.'
+                )
+                cycle.incr()
+
                 this.state += 1
             }
             return

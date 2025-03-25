@@ -403,12 +403,23 @@ export default class RiscVProcessor {
           this.master.ChannelA.valid = '0'
           if (InterConnect2CPU.valid == '1') {
               if (InterConnect2CPU.opcode == '000') {
-                  this.println (
-                      this.active_println
-                      ,'Cycle '
-                      + cycle.toString() 
-                      +': The PROCESSOR is receiving messeage AccessAck from MEMORY.'
-                  )
+                if (InterConnect2CPU.sink == '01') {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The PROCESSOR is receiving messeage AccessAck from DMA.'
+                    )
+                }
+                else {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The PROCESSOR is receiving messeage AccessAck from MEMORY.'
+                    )
+                }
+                  
               }
               if (InterConnect2CPU.opcode == '001') {
                   this.println (

@@ -120,6 +120,7 @@ export default class Memory {
                                 this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
                                 this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
                             )
+                            
                             this.burst.push (this.slaveMemory.ChannelD)
                         }
                         this.println (this.active_println,
@@ -140,6 +141,7 @@ export default class Memory {
                                 this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
                                 this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
                             )
+
                             this.burst.push (this.slaveMemory.ChannelD)
     
                             //SECOND BURST 

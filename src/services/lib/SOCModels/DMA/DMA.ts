@@ -18,6 +18,7 @@ export default class DMA {
     DMA_Slave           : Slave
     DMA_buffer          : string[]
     logger             ?: Logger
+    active_println      : boolean
 
     constructor() {
         this.sourceAddress      = '00000000000000000000000000000000'
@@ -31,6 +32,7 @@ export default class DMA {
         this.DMA_Master.ChannelA.size = '10'
         this.DMA_Slave          = new Slave ('DMA_Slave', true)
         this.DMA_buffer         = Array(288).fill('00000000000000000000000000000000')
+        this.active_println     = true
 
     }
 
@@ -52,13 +54,36 @@ export default class DMA {
     public Run (
         sub2DMA             : ChannelA
         , InterConnect2DMA  : ChannelD
-        , Cycle             : Cycle
+        , cycle             : Cycle
+        , ready0            : boolean
+        , ready1            : boolean
     ) {
         
         if (this.state == 0 && sub2DMA.valid == '1') {
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The DMA is receiving messeage AccessAckData from SUB-INTERCONNETC.'
+            )
+            cycle.incr()
+
             this.DMA_Slave.receive(sub2DMA)
-            this.config ()
-            this.DMA_Slave.send ('AccessAck', '00', '')
+            this.config (ready0)
+            if (ready1) {
+                this.DMA_Slave.send ('AccessAck', '00', '')
+                this.DMA_Slave.ChannelD.sink = '01'
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The DMA is sending messeage AccessAck to SUB-INTERCONNETC.'
+                )
+                cycle.incr()
+            }
+            else {
+                this.state = 0
+            }
             return
         }
 
@@ -68,17 +93,50 @@ export default class DMA {
             // console.log ('this.DMA_Slave', this.DMA_Slave)
             return
         }
-        // if (this.state == 2 || this.state == 3) {
-        //     return this.get    (InterConnect2DMA)
-            
-        // }
+
+        if (this.state == 2) {
+            // Get operation for different addresses and store results in beats array
+
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The DMA is sending messeage GET to INTERCONNET.'
+            )
+
+            this.DMA_Master.send(
+                'GET',
+                (parseInt(this.sourceAddress.slice(-17), 2)).toString(2).padStart(17, '0'),
+                ''
+            )
+            this.DMA_Master.ChannelA.size = '10'
+            this.DMA_Slave.ChannelD.valid = '0'
+            this.DMA_Master.ChannelA.valid = '1'
+
+            // console.log(this.DMA_Master, ready0)
+            this.state += 1
+            return 
+        }
+
+        if (this.state == 3) {
+            this.DMA_Master.ChannelA.valid = '0'
+            if (InterConnect2DMA.valid == '1'
+                && InterConnect2DMA.sink == '0'
+            ) {
+                    this.DMA_Master.ChannelA.valid = '0'
+                    this.DMA_Master.receive(InterConnect2DMA)
+                    this.DMA_buffer[parseInt(this.length, 2)] = this.DMA_Master.ChannelD.data
+                    this.length = (parseInt(this.length, 2) - 4).toString(2).padStart(32, '0')
+                    this.state += 1
+            }
+        }
         // if (this.state == 4 || this.state == 5) {
         //     return this.put    (InterConnect2DMA)
         // }
 
     }
 
-    config() {
+    config( ready0            : boolean) {
         const address = this.DMA_Slave.ChannelA.address
         const data    = this.DMA_Slave.ChannelA.data
         // Kiểm tra địa chỉ và dữ liệu có hợp lệ không
@@ -114,8 +172,10 @@ export default class DMA {
                 (this.length                != '00000000000000000000000000000000') && 
                 (this.control               != '00000000000000000000000000000000')
                 ) {
-                this.state    = 2
-            } else this.state = 1
+                if (ready0) this.state    = 2
+            } else {
+                if (ready0) this.state = 1
+            }
         }
     }
 

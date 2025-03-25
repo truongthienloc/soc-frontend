@@ -98,7 +98,7 @@ export default class InterConnect {
         if (this.state == 1) {
 
             this.Route (this.Abiter(), cycle)
-            this.state = 0
+            // this.state = 0
             return
         }
 
@@ -148,7 +148,7 @@ export default class InterConnect {
     }
 
     RecFromDMA(data: ChannelA, cycle: Cycle, valid: boolean): void {
-        if (this.active && this.Pactived[1] && valid && data.valid == '1') {
+        if (this.active && this.Pactived[1] && valid) {
             this.println (
                 this.active_println
                 ,'Cycle '
@@ -290,6 +290,7 @@ export default class InterConnect {
                         if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromProcessor)
                     }
                 }
+            this.state = 0
 
         }
 
@@ -302,7 +303,7 @@ export default class InterConnect {
                 if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromProcessor)
             }
 
-            if (dataFromDMA instanceof ChannelA) {
+            // if (dataFromDMA instanceof ChannelA) {
                 if (dataFromDMA.opcode == '100') {
                     this.println (
                         this.active_println
@@ -320,11 +321,13 @@ export default class InterConnect {
                     )
                     if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromDMA)
                 }
-            }
+            // }
+            this.state = 0
         }
 
         if (Abiter == 2) {
             const dataFromMem = {...this.Pin[2].dequeue()}
+            
             // if (dataFromMem instanceof ChannelD) {
                 if (dataFromMem.source == '00') {
                     if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue(dataFromMem)
@@ -342,8 +345,11 @@ export default class InterConnect {
                         + cycle.toString() 
                         +': The INTERCONNECT is sending data from MEMORY to DMA.'
                     )
+                    
                     if (this.Pout[1] instanceof FIFO_ChannelD) this.Pout[1].enqueue(dataFromMem)
                 }
+            if (this.Pin[2].isEmpty()) this.state = 0
+            else this.state = 1
             // } 
         }
 
@@ -371,6 +377,7 @@ export default class InterConnect {
                     if (this.Pout[1] instanceof FIFO_ChannelD) this.Pout[1].enqueue(dataFromSInterconnect)
                 }
             //}
+            this.state = 0
         }
         cycle.incr()
     }

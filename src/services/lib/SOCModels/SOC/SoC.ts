@@ -187,6 +187,8 @@ export default class Soc {
             this.Bus1.Pout[1].dequeue()
             ,this.Bus0.Pout[1].dequeue()
             , this.cycle
+            , this.Bus0.state == 0
+            , this.Bus1.state == 0
         )
             
         this.Memory.Run(
@@ -201,7 +203,7 @@ export default class Soc {
             ,this.Memory.burst
             ,this.Bridge.Bridge_slave.ChannelD
             ,this.Processor.master.ChannelA.valid == '1'
-            ,false
+            ,this.DMA.DMA_Master.ChannelA.valid == '1'
             ,this.Memory.slaveMemory.ChannelD.valid == '1'
             ,this.Bridge.Bridge_slave.ChannelD.valid == '1'
             ,this.cycle

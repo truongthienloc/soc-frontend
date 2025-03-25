@@ -115,7 +115,7 @@ export default class InterConnect {
                 this.active_println
                 ,'Cycle '
                 + cycle.toString() 
-                +': The INTERCONNECT is receiving data from BRIDGE.'
+                +': The SUB-INTERCONNECT is receiving data from BRIDGE.'
             )
 
             if (this.Pin[0] instanceof FIFO_ChannelA) {
@@ -134,7 +134,7 @@ export default class InterConnect {
                 this.active_println
                 ,'Cycle '
                 + cycle.toString() 
-                +': The INTERCONNECT is receiving data from DMA.'
+                +': The SUB-INTERCONNECT is receiving data from DMA.'
             )
 
             if (this.Pin[1] instanceof FIFO_ChannelD) {
@@ -153,7 +153,7 @@ export default class InterConnect {
                 this.active_println
                 ,'Cycle '
                 + cycle.toString() 
-                +': The INTERCONNECT is receiving data from LED-MATRIX.'
+                +': The SUB-INTERCONNECT is receiving data from LED-MATRIX.'
             )
 
             if (this.Pin[2] instanceof FIFO_ChannelD) {

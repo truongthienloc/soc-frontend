@@ -68,6 +68,7 @@ export default class InterConnect {
         ,cycle                   : Cycle
     ) {
 
+
         if (this.state == 0) {
             this.RecData (
                 dataFromBridge           

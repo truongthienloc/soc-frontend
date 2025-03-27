@@ -5,11 +5,14 @@ import { FIFO_ChannelD }    from "./FIFO_ChannelD"
 import { FIFO_timing }      from "./FIFO_timing"
 import {Logger }            from '../Compile/soc.d'
 import Cycle from "../Compile/cycle"
+import { constrainedMemory } from "process"
+import { Concert_One } from "next/font/google"
+import { Buffer_01 } from "../../datapath/Block/Buffer"
 
 export default class InterConnect {
     active      : boolean
     Pin         : (FIFO_ChannelD | FIFO_ChannelA)[]
-    Timming     : FIFO_timing[]
+    Timing     : FIFO_timing[]
     Pout        : (FIFO_ChannelD | FIFO_ChannelA)[]
     Pactived    : boolean[]
     state       : number
@@ -53,7 +56,7 @@ export default class InterConnect {
                     ,new FIFO_ChannelA()
         ]
 
-        this.Timming = [
+        this.Timing = [
                     new FIFO_timing()
                     ,new FIFO_timing()
                     ,new FIFO_timing()
@@ -75,7 +78,7 @@ export default class InterConnect {
         ,dataFromSub_valid          : boolean
         ,cycle                      : Cycle
     ) {
-        // console.log('this.state, this.Pin, this.Pout, this.Timming',this.state, this.Pin, this.Pout, this.Timming)
+        console.log('this.state, this.Pin, this.Pout, this.Timing',this.state, this.Pin, this.Pout, this.Timing)
         if (this.state == 0) {
             this.RecData (
                 dataFromProcessor           
@@ -97,7 +100,7 @@ export default class InterConnect {
 
         if (this.state == 1) {
 
-            this.Route (this.Abiter(), cycle)
+            this.Abiter(cycle)
             // this.state = 0
             return
         }
@@ -133,7 +136,7 @@ export default class InterConnect {
             )
             if (this.Pin[0] instanceof FIFO_ChannelA) {
                 this.Pin[0].enqueue({...data})
-                this.Timming[0].enqueue(cycle.cycle)
+                this.Timing[0].enqueue(cycle.cycle)
             } else {
                 this.println (
                     this.active_println
@@ -157,7 +160,7 @@ export default class InterConnect {
             )
             if (this.Pin[1] instanceof FIFO_ChannelA) {
                 this.Pin[1].enqueue({...data})
-                this.Timming[1].enqueue(cycle.cycle)
+                this.Timing[1].enqueue(cycle.cycle)
             } else {
                 this.println (
                     this.active_println
@@ -182,7 +185,7 @@ export default class InterConnect {
                 for (let item of data) {
                     if (item.valid == '1') {
                         this.Pin[2].enqueue({...item})
-                        this.Timming[2].enqueue(cycle.cycle)
+                        this.Timing[2].enqueue(cycle.cycle)
                     }
                 }
             } else {
@@ -207,130 +210,206 @@ export default class InterConnect {
             )
             if (this.Pin[3] instanceof FIFO_ChannelD) {
                 this.Pin[3].enqueue({...data})
-                this.Timming[3].enqueue(cycle.cycle)
+                this.Timing[3].enqueue(cycle.cycle)
             } else {
                 console.error("Error: Pin[3] is not FIFO_ChannelD")
             }
         }
     }
 
-    Abiter()  {
+    Abiter(cycle: Cycle)  {
 
-        const Processor_timming       = this.Timming[0].peek()
-        const DMA_timming             = this.Timming[1].peek()
-        const Memory_timming          = this.Timming[2].peek()
-        const SInterconnect_timming   = this.Timming[3].peek()
+        const Processor_Timing       = this.Timing[0].peek()
+        const DMA_Timing             = this.Timing[1].peek()
+        const Memory_Timing          = this.Timing[2].peek()
+        const SInterconnect_Timing   = this.Timing[3].peek()
+        const dataFromProcessor      = {...this.Pin[0].peek()}
+        const dataFromDMA            = {...this.Pin[1].peek()}
+        const dataFromMem            = {...this.Pin[2].peek()}
+        const dataFromSInterconnect  = {...this.Pin[3].peek()}
 
-        const firstTimming =  Math.min(...[
-            Processor_timming           // Processor
-            ,DMA_timming                // DMA
-            ,Memory_timming             // Memory
-            ,SInterconnect_timming      // Sub-Interconnect
+        const Pro2Memory             = 
+        (
+            (
+                (parseInt('0'+dataFromProcessor.address, 2)    > 0x000305C + 1) 
+            &&  (parseInt('0'+dataFromProcessor.address, 2)    < 0X1BFFF    + 1)
+            ) || 
+            (
+                (parseInt('0'+dataFromProcessor.address, 2)    >= 0)
+            &&  (parseInt('0'+dataFromProcessor.address, 2)    < 0x000304C  )
+            )
+            
+        )
+
+        const Pro2Sub               = 
+        (
+            (parseInt('0'+dataFromProcessor.address, 2) >= 0x000304C) 
+            && (parseInt('0'+dataFromProcessor.address, 2) <= 0x000305C)
+        )
+
+        const DMA2Mem               = dataFromDMA.opcode == '100'
+        const DMA2Sub               = !DMA2Mem
+
+        const Mem2Pro               = dataFromMem.source == '00'
+        const Mem2DMA               = !Mem2Pro
+
+        const Sub2Pro               = dataFromSInterconnect.source == '00'
+        const Sub2DMA               = !Sub2Pro
+
+
+        const firstTiming =  Math.min(...[
+            Processor_Timing           // Processor
+            ,DMA_Timing                // DMA
+            ,Memory_Timing             // Memory
+            ,SInterconnect_Timing      // Sub-Interconnect
         ]) 
 
-        for (let i = 0; i < this.Timming.length; i++) {
-            if (this.Timming[i].peek() === firstTimming) {
-                this.Timming[i].dequeue();
-                return i;
+        let minIndices = [];
+
+        for (let i = 0; i < this.Timing.length; i++) {
+            if (this.Timing[i].peek() === firstTiming) {
+            minIndices.push(i); // Lưu chỉ số
             }
         }
-        return -1
+
+        for (let i = 0; i < minIndices.length; i++) {
+            if ( minIndices[i] == 0) {
+                if (Pro2Memory && DMA2Mem && minIndices.includes(1)) {
+                    this.Route (0, cycle)
+                    this.Timing[0].dequeue()
+                }
+                else if (Pro2Sub && DMA2Sub && minIndices.includes(1)) {
+                    this.Route (0, cycle)
+                    this.Timing[0].dequeue()
+                }
+                else {
+                    this.Route (0, cycle)
+                    this.Route (1, cycle)
+                    this.Timing[0].dequeue()
+                    this.Timing[1].dequeue()
+                }
+            }
+
+            if ( minIndices[i] == 1) {
+                if (Pro2Memory && DMA2Mem && minIndices.includes(0)) {
+                    this.Route (0, cycle)
+                    this.Timing[1].dequeue()
+                }
+                else if (Pro2Sub && DMA2Sub) {
+                    this.Route (0, cycle)
+                    this.Timing[1].dequeue()
+                }
+                else {
+                    this.Route (0, cycle)
+                    this.Route (1, cycle)
+                    this.Timing[0].dequeue()
+                    this.Timing[1].dequeue()
+                }
+            }
+
+            if ( minIndices[i] == 2) {
+                if (Mem2Pro && Sub2Pro && minIndices.includes(3)) {
+                    this.Route (3, cycle)
+                    this.Timing[3].dequeue()
+                }
+                else if (Mem2DMA && Sub2DMA && minIndices.includes(3)) {
+                    this.Route (3, cycle)
+                    this.Timing[3].dequeue()
+                }
+                else {
+                    this.Route (3, cycle)
+                    this.Route (2, cycle)
+                    this.Timing[3].dequeue()
+                    this.Timing[2].dequeue()
+                }
+            }
+
+            if ( minIndices[i] == 3) {
+                if (Mem2Pro && Sub2Pro && minIndices.includes(2)) {
+                    this.Route (3, cycle)
+                    this.Timing[3].dequeue()
+                }
+                else if (Mem2DMA && Sub2DMA && minIndices.includes(2)) {
+                    this.Route (3, cycle)
+                    this.Timing[3].dequeue()
+                }
+                else {
+                    this.Route (3, cycle)
+                    this.Route (3, cycle)
+                    this.Timing[3].dequeue()
+                    this.Timing[2].dequeue()
+                }
+            }
+        }
+        this.state = 0
     }
 
     Route (Abiter: number, cycle: Cycle) {
-        // console.log('arbiter', Abiter)
-        if (Abiter == 0) {
+
+        if (Abiter == 0 && !this.Pin[0].isEmpty()) {
             const dataFromProcessor = {...this.Pin[0].dequeue()}
-            const dataFromDMA       = {...this.Pin[1].dequeue()}
-            // console.log ('dataFromProcessor',dataFromProcessor)
-            // // console.log(parseInt('0'+dataFromProcessor.address, 2))
-            // if (this.Pin[0].dequeue() instanceof ChannelA) {
-                // if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(dataFromProcessor)
-                if (parseInt('0'+dataFromDMA.address, 2) >= 0x0003064
-                    && parseInt('0'+dataFromDMA.address, 2) <= 0x0003964
-                    ) {
-                        if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromDMA)
-                        this.Timming[3].dequeue();
-                    }
-
-                if (
-                    (
-                        (parseInt('0'+dataFromProcessor.address, 2)    > 0x000305C + 1) 
-                    &&  (parseInt('0'+dataFromProcessor.address, 2)    < 0X1BFFF    + 1)
-                    ) || 
-                    (
-                        (parseInt('0'+dataFromProcessor.address, 2)    >= 0)
-                    &&  (parseInt('0'+dataFromProcessor.address, 2)    < 0x000304C  )
-                    )
-                    
-                ) {
-                    const dataFromDMA = {...this.Pin[1].dequeue()}
-                    if (parseInt('0'+dataFromDMA.address, 2)    > 0x000305C + 1) {
-                        
-                    }
-                    this.println (
-                        this.active_println
-                        ,'Cycle '
-                        + cycle.toString() 
-                        +': The INTERCONNECT is sending data from PROCESSOR to MEMORY.'
-                    )
-                    if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(dataFromProcessor)
-                }
-                if (
-                    (parseInt('0'+dataFromProcessor.address, 2) >= 0x000304C) 
-                    && (parseInt('0'+dataFromProcessor.address, 2) <= 0x000305C)
-                ) {
-                    if (dataFromProcessor.opcode == '000') {
-                        this.println (
-                            this.active_println
-                            ,'Cycle '
-                            + cycle.toString() 
-                            +': The INTERCONNECT is sending data from PROCESSOR to SUB-INTERCONNECT.'
-                        )
-                        if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromProcessor)
-                    }
-                }
-            this.state = 0
-
-        }
-
-        if (Abiter == 1) {
-            const dataFromProcessor = {...this.Pin[0].dequeue()}
-            const dataFromDMA       = {...this.Pin[1].dequeue()}
-            if (parseInt('0'+dataFromProcessor.address, 2) >= 0x0003064
-            && parseInt('0'+dataFromProcessor.address, 2) <= 0x0003964
+            if (
+                (
+                    (parseInt('0'+dataFromProcessor.address, 2)    > 0x000305C + 1) 
+                &&  (parseInt('0'+dataFromProcessor.address, 2)    < 0X1BFFF    + 1)
+                ) || 
+                (
+                    (parseInt('0'+dataFromProcessor.address, 2)    >= 0)
+                &&  (parseInt('0'+dataFromProcessor.address, 2)    < 0x000304C  )
+                )
+                
             ) {
-                if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromProcessor)
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The INTERCONNECT is sending data from PROCESSOR to MEMORY.'
+                )
+                if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(dataFromProcessor)
             }
-
-            // if (dataFromDMA instanceof ChannelA) {
-                if (dataFromDMA.opcode == '100') {
+            if (
+                (parseInt('0'+dataFromProcessor.address, 2) >= 0x000304C) 
+                && (parseInt('0'+dataFromProcessor.address, 2) <= 0x000305C)
+            ) {
+                if (dataFromProcessor.opcode == '000') {
                     this.println (
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': The INTERCONNECT is sending data from DMA to MEMORY.'
+                        +': The INTERCONNECT is sending data from PROCESSOR to SUB-INTERCONNECT.'
                     )
-                    if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(dataFromDMA)
-                } else {
-                    this.println (
-                        this.active_println
-                        ,'Cycle '
-                        + cycle.toString() 
-                        +': The INTERCONNECT is sending data from DMA to SUB-INTERCONNCET.'
-                    )
-                    if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromDMA)
+                    if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromProcessor)
                 }
-            // }
-            this.state = 0
+            }
         }
 
-        if (Abiter == 2) {
-            const dataFromMem = {...this.Pin[2].dequeue()}
+        if (Abiter == 1 && !this.Pin[1].isEmpty()) {
+            const dataFromDMA       = {...this.Pin[1].dequeue()}
+            if (dataFromDMA.opcode == '100') {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The INTERCONNECT is sending data from DMA to MEMORY.'
+                )
+                if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(dataFromDMA)
+            } else {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The INTERCONNECT is sending data from DMA to SUB-INTERCONNCET.'
+                )
+                if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromDMA)
+            }
+        }
+
+        if (Abiter == 2 && !this.Pin[2].isEmpty()) {
+            const dataFromMem = {...this.Pin[2].peek()}
             
             // if (dataFromMem instanceof ChannelD) {
                 if (dataFromMem.source == '00') {
-                    if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue(dataFromMem)
+                    if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue({...this.Pin[2].dequeue()})
                     this.println (
                         this.active_println
                         ,'Cycle '
@@ -339,46 +418,41 @@ export default class InterConnect {
                     )
                         //console.log('this.Pout[0].peek()', this.Pout[0].peek())
                 } else {
-                    this.println (
-                        this.active_println
-                        ,'Cycle '
-                        + cycle.toString() 
-                        +': The INTERCONNECT is sending data from MEMORY to DMA.'
-                    )
-                    
-                    if (this.Pout[1] instanceof FIFO_ChannelD) this.Pout[1].enqueue(dataFromMem)
+                    while (!this.Pin[2].isEmpty()) {
+                        this.println (
+                            this.active_println
+                            ,'Cycle '
+                            + cycle.toString() 
+                            +': The INTERCONNECT is sending data from MEMORY to DMA.'
+                        )
+                        if (this.Pout[1] instanceof FIFO_ChannelD) this.Pout[1].enqueue({...this.Pin[2].dequeue()})
+                        cycle.incr()
+                    }
                 }
-            if (this.Pin[2].isEmpty()) this.state = 0
-            else this.state = 1
-            // } 
         }
 
-        if (Abiter == 3) {
-            // console.log ('dataFromSInterconnect', this.Pin[3])
+        if (Abiter == 3 && !this.Pin[3].isEmpty()) {
             const dataFromSInterconnect = {...this.Pin[3].dequeue()}
-            
-            // if (dataFromSInterconnect instanceof ChannelD) {
-                if (dataFromSInterconnect.source == '00') {
-                    this.println (
-                        this.active_println
-                        ,'Cycle '
-                        + cycle.toString() 
-                        +': The INTERCONNECT is sending data from SUB-INTERCONNECT to PROCESSOR.'
-                    )
-                    if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue(dataFromSInterconnect)
-                    // console.log('this.Pout[0]', this.Pout[0])
-                } else {
-                    this.println (
-                        this.active_println
-                        ,'Cycle '
-                        + cycle.toString() 
-                        +': The INTERCONNECT is sending data from SUB-INTERCONNECT to DMA.'
-                    )
-                    if (this.Pout[1] instanceof FIFO_ChannelD) this.Pout[1].enqueue(dataFromSInterconnect)
-                }
-            //}
-            this.state = 0
+            if (dataFromSInterconnect.source == '00') {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The INTERCONNECT is sending data from SUB-INTERCONNECT to PROCESSOR.'
+                )
+                if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue(dataFromSInterconnect)
+                // console.log('this.Pout[0]', this.Pout[0])
+            } else {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The INTERCONNECT is sending data from SUB-INTERCONNECT to DMA.'
+                )
+                if (this.Pout[1] instanceof FIFO_ChannelD) this.Pout[1].enqueue(dataFromSInterconnect)
+            }
         }
+
         cycle.incr()
     }
 }

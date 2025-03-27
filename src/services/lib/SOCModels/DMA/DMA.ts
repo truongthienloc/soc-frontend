@@ -20,6 +20,8 @@ export default class DMA {
     logger             ?: Logger
     active_println      : boolean
 
+    count               : number
+
     constructor() {
         this.sourceAddress      = '00000000000000000000000000000000'
         this.destinationAddress = '00000000000000000000000000000000'
@@ -33,22 +35,8 @@ export default class DMA {
         this.DMA_Slave          = new Slave ('DMA_Slave', true)
         this.DMA_buffer         = Array(288).fill('00000000000000000000000000000000')
         this.active_println     = true
+        this.count              = 0
 
-    }
-
-    public println(active: boolean, ...args: string[]) {
-        
-        if (active) {
-            console.log(...args)
-        }
-
-        if (!this.logger) {
-            return
-        }
-
-        if (active) {
-            this.logger.println(...args)
-        }
     }
 
     public Run (
@@ -64,7 +52,7 @@ export default class DMA {
                 this.active_println
                 ,'Cycle '
                 + cycle.toString() 
-                +': The DMA is receiving messeage AccessAckData from SUB-INTERCONNETC.'
+                +': The DMA is receiving messeage PUT from SUB-INTERCONNETC.'
             )
             cycle.incr()
 
@@ -128,13 +116,37 @@ export default class DMA {
                     this.DMA_buffer[parseInt(this.length, 2)] = this.DMA_Master.ChannelD.data
                     this.length = (parseInt(this.length, 2) - 4).toString(2).padStart(32, '0')
                     this.state += 1
+                    this.count +=1
+                    if (this.count == parseInt (this.length, 2)) this.state +=1
+                    else this.state = 3
             }
+        }
+
+        if (this.state == 4) {
+            
         }
         // if (this.state == 4 || this.state == 5) {
         //     return this.put    (InterConnect2DMA)
         // }
 
     }
+    
+    public println(active: boolean, ...args: string[]) {
+        
+        if (active) {
+            console.log(...args)
+        }
+
+        if (!this.logger) {
+            return
+        }
+
+        if (active) {
+            this.logger.println(...args)
+        }
+    }
+
+    
 
     config( ready0            : boolean) {
         const address = this.DMA_Slave.ChannelA.address

@@ -78,7 +78,7 @@ export default class InterConnect {
         ,dataFromSub_valid          : boolean
         ,cycle                      : Cycle
     ) {
-        console.log('this.state, this.Pin, this.Pout, this.Timing',this.state, this.Pin, this.Pout, this.Timing)
+        // console.log('this.state, this.Pin, this.Pout, this.Timming',this.state, this.Pin, this.Pout, this.Timing)
         if (this.state == 0) {
             this.RecData (
                 dataFromProcessor           
@@ -284,9 +284,13 @@ export default class InterConnect {
                 }
                 else {
                     this.Route (0, cycle)
-                    this.Route (1, cycle)
                     this.Timing[0].dequeue()
-                    this.Timing[1].dequeue()
+
+                    if (minIndices.includes(1)) {
+                        this.Route (1, cycle)
+                        minIndices [minIndices.indexOf(1)] = -1
+                        this.Timing[1].dequeue()
+                    }
                 }
             }
 
@@ -300,10 +304,14 @@ export default class InterConnect {
                     this.Timing[1].dequeue()
                 }
                 else {
-                    this.Route (0, cycle)
                     this.Route (1, cycle)
-                    this.Timing[0].dequeue()
                     this.Timing[1].dequeue()
+
+                    if (minIndices.includes(1)) {
+                        this.Route (0, cycle)
+                        minIndices [minIndices.indexOf(0)] = -1
+                        this.Timing[0].dequeue()
+                    }
                 }
             }
 
@@ -317,10 +325,14 @@ export default class InterConnect {
                     this.Timing[3].dequeue()
                 }
                 else {
-                    this.Route (3, cycle)
                     this.Route (2, cycle)
-                    this.Timing[3].dequeue()
                     this.Timing[2].dequeue()
+
+                    if (minIndices.includes(3)) {
+                        this.Route (3, cycle)
+                        minIndices [minIndices.indexOf(3)] = -1
+                        this.Timing[3].dequeue()
+                    }
                 }
             }
 
@@ -335,13 +347,18 @@ export default class InterConnect {
                 }
                 else {
                     this.Route (3, cycle)
-                    this.Route (3, cycle)
                     this.Timing[3].dequeue()
-                    this.Timing[2].dequeue()
+
+                    if (minIndices.includes(3)) {
+                        this.Route (2, cycle)
+                        minIndices [minIndices.indexOf(2)] = -1
+                        this.Timing[2].dequeue()
+                    }
                 }
             }
         }
         this.state = 0
+        cycle.incr()
     }
 
     Route (Abiter: number, cycle: Cycle) {
@@ -418,16 +435,19 @@ export default class InterConnect {
                     )
                         //console.log('this.Pout[0].peek()', this.Pout[0].peek())
                 } else {
-                    while (!this.Pin[2].isEmpty()) {
+                    // while (!this.Pin[2].isEmpty()) {
                         this.println (
                             this.active_println
                             ,'Cycle '
                             + cycle.toString() 
                             +': The INTERCONNECT is sending data from MEMORY to DMA.'
                         )
-                        if (this.Pout[1] instanceof FIFO_ChannelD) this.Pout[1].enqueue({...this.Pin[2].dequeue()})
-                        cycle.incr()
-                    }
+                        if (this.Pout[1] instanceof FIFO_ChannelD) {
+                            this.Pout[1].enqueue({...this.Pin[2].dequeue()})
+                            console.log(' this.Pout[1]',  this.Pout[1])
+                        }
+                        // cycle.incr()
+                    // }
                 }
         }
 
@@ -452,8 +472,6 @@ export default class InterConnect {
                 if (this.Pout[1] instanceof FIFO_ChannelD) this.Pout[1].enqueue(dataFromSInterconnect)
             }
         }
-
-        cycle.incr()
     }
 }
 //            +-------+                +-------+

@@ -227,6 +227,11 @@ export default class Soc {
             , this.cycle
         )
 
+        this.Led_matrix.Run(
+            this.Bus1.Pout[2].dequeue()
+            , this.cycle
+        )
+
         // this.cycle.incr()
         
 

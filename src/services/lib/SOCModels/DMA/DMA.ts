@@ -57,7 +57,7 @@ export default class DMA {
             cycle.incr()
 
             this.DMA_Slave.receive(sub2DMA)
-            this.config (ready0)
+            this.config (ready0, cycle)
             if (ready1) {
                 this.DMA_Slave.send ('AccessAck', '00', '')
                 this.DMA_Slave.ChannelD.sink = '01'
@@ -107,24 +107,73 @@ export default class DMA {
         }
 
         if (this.state == 3) {
+            
             this.DMA_Master.ChannelA.valid = '0'
             if (InterConnect2DMA.valid == '1'
                 && InterConnect2DMA.sink == '0'
             ) {
-                    this.DMA_Master.ChannelA.valid = '0'
-                    this.DMA_Master.receive(InterConnect2DMA)
-                    this.DMA_buffer[parseInt(this.length, 2)] = this.DMA_Master.ChannelD.data
-                    this.length = (parseInt(this.length, 2) - 4).toString(2).padStart(32, '0')
-                    this.state += 1
-                    this.count +=1
-                    if (this.count == parseInt (this.length, 2)) this.state +=1
-                    else this.state = 3
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The DMA is receiving messeage AccessAckData from INTERCONNET.'
+                )
+                this.DMA_Master.ChannelA.valid = '0'
+                this.DMA_Master.receive(InterConnect2DMA)
+                this.DMA_buffer[this.count] = this.DMA_Master.ChannelD.data
+                this.count +=1
+                if (this.count == parseInt (this.length, 2) * 4) this.state +=1
+                else this.state = 3
             }
+            return
         }
 
         if (this.state == 4) {
             
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The DMA is sending messeage PUT to SUB-INTERCONNET.'
+            )
+
+            this.DMA_Master.send(
+                'PUT',
+                (parseInt(this.destinationAddress.slice(-17), 2)).toString(2).padStart(17, '0'),
+                ''
+            )
+            this.DMA_Master.ChannelA.size = '10'
+            this.DMA_Slave.ChannelD.valid = '0'
+            this.DMA_Master.ChannelA.valid = '1'
+
+            // console.log(this.DMA_Master, ready0)
+            this.state += 1
+            return 
         }
+
+        if (this.state == 5) {
+            
+            
+            this.DMA_Master.ChannelA.valid = '0'
+            if (InterConnect2DMA.valid == '1'
+                && InterConnect2DMA.sink == '0'
+            ) {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The DMA is receiving messeage AccessAck to SUB-INTERCONNET.'
+                )
+                this.DMA_Master.ChannelA.valid = '0'
+                this.DMA_Master.receive(InterConnect2DMA)
+                this.DMA_buffer[this.count] = this.DMA_Master.ChannelD.data
+                this.count +=1
+                if (this.count == parseInt (this.length, 2)) this.state +=1
+                else this.state = 2
+            }
+            return
+        }
+        
         // if (this.state == 4 || this.state == 5) {
         //     return this.put    (InterConnect2DMA)
         // }
@@ -148,7 +197,9 @@ export default class DMA {
 
     
 
-    config( ready0            : boolean) {
+    config( ready0            : boolean
+        ,cycle             : Cycle
+    ) {
         const address = this.DMA_Slave.ChannelA.address
         const data    = this.DMA_Slave.ChannelA.data
         // Kiểm tra địa chỉ và dữ liệu có hợp lệ không
@@ -184,6 +235,12 @@ export default class DMA {
                 (this.length                != '00000000000000000000000000000000') && 
                 (this.control               != '00000000000000000000000000000000')
                 ) {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The DMA is actived.'
+                    )
                 if (ready0) this.state    = 2
             } else {
                 if (ready0) this.state = 1

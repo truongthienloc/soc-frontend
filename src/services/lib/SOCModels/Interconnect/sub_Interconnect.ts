@@ -80,7 +80,7 @@ export default class InterConnect {
                 ,cycle                      
             )
             if (! ((this.Pin[0].isEmpty()) && (this.Pin[1].isEmpty()) && (this.Pin[2].isEmpty()))) {
-                // console.log('this.state, this.Pin, this.Pout, this.Timming',this.state, this.Pin, this.Pout, this.Timming)
+                console.log('this.state, this.Pin, this.Pout, this.Timming',this.state, this.Pin, this.Pout, this.Timming)
                 this.state +=1
                 cycle.incr()
             }
@@ -190,10 +190,10 @@ export default class InterConnect {
 
     Route (Abiter: number
         , cycle: Cycle) {
-        // console.log('abiute',Abiter)
+        console.log('abiute',Abiter)
         if (Abiter == 0) {
             const dataFromBridge = {...this.Pin[0].dequeue()}
-        //     console.log ('dataFromBridge', dataFromBridge)
+            console.log ('dataFromBridge', dataFromBridge)
         //     console.log ((
         //         (parseInt('0'+dataFromBridge.address, 2) >= 0x000304C  ) 
         //     &&  (parseInt('0'+dataFromBridge.address, 2) <= 0x000305C )
@@ -201,8 +201,8 @@ export default class InterConnect {
             // if (dataFromBridge instanceof ChannelA) {
                 // if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(dataFromBridge)
                 if (
-                    (parseInt('0'+dataFromBridge.address, 16)    >= 0X1C000     ) 
-                &&  (parseInt('0'+dataFromBridge.address, 16)    <= 0X1FFFF     )
+                    (parseInt('0'+dataFromBridge.address, 16)    >= 0X00000     ) 
+                &&  (parseInt('0'+dataFromBridge.address, 16)    <= 0X00060     )
                 ) {
 
                     this.println (

@@ -30,6 +30,7 @@ export default class RiscVProcessor {
     SendAddress                 : string
     SendData                    : string
     instruction                 : string
+    InsLength                   : number
     state                       = 0
     pre_pc                      = 0
     pc                          = 0
@@ -103,6 +104,7 @@ export default class RiscVProcessor {
         this.SendData                   = ''
         this.instruction                = ''
         this.active_println             = true
+        this.InsLength                  = 0x1C
 
         // this.Ecall                      = new Ecall
 
@@ -222,10 +224,23 @@ export default class RiscVProcessor {
     {
         // console.log('processor state', this.state)
       if (this.state == 0) {
+
+        if (this.pc >= this.InsLength) {
+            this.state = 0
+            
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.'
+              )
+
+            return
+        }
+
           this.master.ChannelA.valid = '1'
           this.master.send ('GET',  (this.pc).toString(2).padStart(17, '0'), this.SendData)
           this.master.ChannelA.size  = '00'
-          
 
           this.println (
             this.active_println

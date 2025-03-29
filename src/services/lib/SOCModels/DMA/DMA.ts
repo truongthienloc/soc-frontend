@@ -133,8 +133,15 @@ export default class DMA {
         }
 
         if (this.state == 4) {
+
             
-           
+            if (this.count == parseInt (this.length, 2) * 4) {
+                this.state = 0
+                console.log('**************** DMA DONE ****************')
+                this.status = '00000000000000000000000000000001'
+                return
+            }
+
             this.println (
                 this.active_println
                 ,'Cycle '
@@ -144,15 +151,15 @@ export default class DMA {
 
             this.DMA_Master.send(
                 'PUT',
-                (parseInt(this.destinationAddress.slice(-17), 2) * 4).toString(2).padStart(17, '0'),
-                ''
+                ((parseInt(this.destinationAddress.slice(-17), 2) + this.count)  * 4).toString(2).padStart(17, '0'),
+                this.DMA_buffer[this.count]
             )
-            this.DMA_Master.ChannelA.size = '10'
-            this.DMA_Slave.ChannelD.valid = '0'
+            this.DMA_Master.ChannelA.size  = '10'
+            this.DMA_Slave.ChannelD.valid  = '0'
             this.DMA_Master.ChannelA.valid = '1'
 
-            // console.log(this.DMA_Master, ready0)
             this.state += 1
+            this.count +=1
             return 
         }
 
@@ -160,7 +167,7 @@ export default class DMA {
             
             
             this.DMA_Master.ChannelA.valid = '0'
-            console.log ('InterConnect2DMA.sink', InterConnect2DMA)
+
             if (InterConnect2DMA.valid == '1'
                 && InterConnect2DMA.sink == '10'
             ) {
@@ -170,17 +177,8 @@ export default class DMA {
                     + cycle.toString() 
                     +': The DMA is receiving messeage AccessAck from SUB-INTERCONNET.'
                 )
-                this.DMA_Master.ChannelA.valid = '0'
                 this.DMA_Master.receive(InterConnect2DMA)
-                this.DMA_buffer[this.count] = this.DMA_Master.ChannelD.data
-                this.count +=1
-                if (this.count == parseInt (this.length, 2) * 4) {
-                    this.state = 0
-                    console.log('**************** DMA DONE ****************')
-                    return
-                }
-                else this.state = 4
-                console.log ('this.count == parseInt (this.length, 2) * 4', this.count, parseInt (this.length, 2) * 4)
+                this.state = 4
             }
 
             return

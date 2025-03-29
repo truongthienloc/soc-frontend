@@ -84,7 +84,6 @@ export default class InterConnect {
                 ,cycle                      
             )
             if (! ((this.Pin[0].isEmpty()) && (this.Pin[1].isEmpty()) && (this.Pin[2].isEmpty()))) {
-                console.log('this.state, this.Pin, this.Pout, this.Timming',this.state, this.Pin, this.Pout, this.Timming)
                 this.state +=1
                 cycle.incr()
             }
@@ -93,7 +92,6 @@ export default class InterConnect {
         if (this.state == 1) {
             this.Route (this.Abiter(), cycle)
             this.state = 0
-            console.log ('state',this.state)
             return
         }
     }
@@ -195,7 +193,6 @@ export default class InterConnect {
 
     Route (Abiter: number
         , cycle: Cycle) {
-        console.log('abiute',Abiter)
         if (Abiter == 0 ) {
             const dataFromBridge = {...this.Pin[0].peek()}
             // console.log ('dataFromBridge', dataFromBridge)

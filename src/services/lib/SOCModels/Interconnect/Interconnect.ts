@@ -471,7 +471,6 @@ export default class InterConnect {
                 )
                 
                 if (this.Pout[1] instanceof FIFO_ChannelD) this.Pout[1].enqueue(dataFromSInterconnect)
-                console.log ('dataFromSInterconnect', this.Pout[1].peek())
             }
         }
     }

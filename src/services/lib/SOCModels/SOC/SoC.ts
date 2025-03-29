@@ -143,19 +143,13 @@ export default class Soc {
         ,Mem_tb             : Register[]
         ,TLB                : TLBEntries[]
         ,stap               : number
-        ,dmaSrc             : number
-        ,dmaLen             : number
-        ,dmaDes             : number
         ) {
         return assemble.bind(this) (
             code                 
             ,required_mem                
             ,Mem_tb             
             ,TLB                
-            ,stap               
-            ,dmaSrc             
-            ,dmaLen             
-            ,dmaDes                               
+            ,stap                                          
         )
     }
 

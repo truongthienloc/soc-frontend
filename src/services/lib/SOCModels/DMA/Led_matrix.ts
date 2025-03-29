@@ -53,10 +53,6 @@ export default class LEDMatrix {
 
         if (this.state == 0) {
             if  (ChannelA.valid == '1' && ChannelA.source == '00') {
-                console.log (
-                    'ChannelA'
-                    , ChannelA
-                )
                 this.println (
                     this.active_println
                     , 'Cycle '+ cycle.toString() + ': The LED matrix is being configured.'
@@ -65,18 +61,14 @@ export default class LEDMatrix {
                 this.Matrix_Slave.receive (ChannelA)
                 this.controlRegister = this.Matrix_Slave.ChannelA.data
                 this.active          = true
-                this.state          +=1
+                this.state          += 1
                 
                 return
             }
         }
 
         if (this.state == 1 && ready) {
-            this.println 
-            // this.println   (
-            //     this.active_println
-            //     ,'Cycle ' + cycle.toString() + ': The LED matrix is operating.'
-            // )
+
             this.println (this.active_println,
                 'Cycle '             +
                 cycle.toString()     +

@@ -104,7 +104,7 @@ export default class RiscVProcessor {
         this.SendData                   = ''
         this.instruction                = ''
         this.active_println             = true
-        this.InsLength                  = 0x1C + 4
+        this.InsLength                  = 0
 
         // this.Ecall                      = new Ecall
 

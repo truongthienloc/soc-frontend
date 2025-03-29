@@ -20,7 +20,7 @@ export default class Keyboard {
         return this.event
     }
 
-    constructor(containerQuery: string, monitorManagement: Monitor,  keyboardIO?: IOModule) {
+    constructor(containerQuery: string, monitorManagement: Monitor, keyboardIO?: IOModule) {
         this.containerQuery = containerQuery
         this.keyboardIO = keyboardIO
         this.monitorManagement = monitorManagement
@@ -46,12 +46,9 @@ export default class Keyboard {
 
         const buttons = keyboard.querySelectorAll('.btn') as NodeListOf<HTMLButtonElement>
 
-
         const monitor = document.querySelector(
             this.monitorManagement.getContainerQuery(),
         ) as HTMLDivElement
-        
-
 
         const delete_btn = keyboard.querySelector('.delete') as HTMLButtonElement
         const shift_btn = keyboard.querySelector('.shift') as HTMLButtonElement

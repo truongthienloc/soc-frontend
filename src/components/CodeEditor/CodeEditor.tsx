@@ -108,7 +108,14 @@ function CodeEditor({ value = '', onChange, disable = false, hidden }: CodeEdito
       className="h-full min-h-[300px] min-w-[250px] flex-1 text-base"
       onResize={handleContainerResize}
     >
-      <textarea ref={textareaRef} name="code-editor" id="code-editor" value={value} onChange={e => onChange?.(e.target.value)} disabled={disable}></textarea>
+      <textarea
+        ref={textareaRef}
+        name="code-editor"
+        id="code-editor"
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
+        disabled={disable}
+      ></textarea>
     </div>
   )
 }

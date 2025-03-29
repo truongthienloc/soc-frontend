@@ -40,6 +40,7 @@ import useDMAConfig from '~/components/DMATable/useDMAConfig'
 import { convertToDMAStandard } from '~/helpers/converts/dma.convert'
 import { TopFunctionButton } from './_components/CodeEditorSection'
 import { DecToHex } from '~/services/lib/SOCModels/Compile/convert'
+import { Separator } from '~/components/Separator'
 
 type Props = {}
 
@@ -634,8 +635,8 @@ export default function SocPage({}: Props) {
                 <CloseIcon />
               </Button>
             </div>
-            <div className="grid grid-cols-2 gap-2 pr-4">
-              <div className="flex items-start">
+            <div className="grid grid-cols-1 gap-2 pr-4">
+              <div className="flex justify-center">
                 <MemoryMap className="" memoryMap={memoryMap} disabled={isStepping} />
               </div>
               <MemoryTable
@@ -670,29 +671,20 @@ export default function SocPage({}: Props) {
 
           {/* DMA SECTION */}
           <div
-            className={cn('flex h-full flex-col', {
+            className={cn('relative flex h-full flex-col', {
               hidden: showSimulatorType !== 'DMA',
             })}
           >
-            <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
-              {/* <h2 className="text-xl font-bold text-red-500">MMU View:</h2> */}
-              <Button className="ml-auto" onClick={() => setShowSimulatorType('SOC')}>
-                <CloseIcon />
-              </Button>
-            </div>
-
-            <TabContext index={tabIndex} setIndex={setTabIndex}>
-              <Tabs>
-                <Tab label="DMA" />
-                <Tab label="Led Matrix" />
-              </Tabs>
-              <TabPanel index={0} className="flex flex-col pt-4">
+            <div className="flex flex-1 gap-4 pr-4">
+              <div className="pt-8">
                 <DMATable configs={dmaConfigs} data={dmaData} />
-              </TabPanel>
-              <TabPanel index={1} className="pt-4">
+              </div>
+              <div className="mx-auto h-full w-1 bg-gray-400"></div>
+              <div className="flex flex-col gap-2 pt-8">
+                <h2 className="text-lg font-bold">Led Matrix</h2>
                 <LedMatrix />
-              </TabPanel>
-            </TabContext>
+              </div>
+            </div>
           </div>
 
           {/* Peripherals Section */}
@@ -725,8 +717,8 @@ export default function SocPage({}: Props) {
                   <Keyboard />
                 </div>
               </TabPanel> */}
-              {/* Tab index = 1 */}
-              {/* <TabPanel index={0} className="grid grid-cols-[4fr_6fr]">
+            {/* Tab index = 1 */}
+            {/* <TabPanel index={0} className="grid grid-cols-[4fr_6fr]">
                 <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
                   {isStepping ? (
                     <DisplayStepCode code={stepCode} pc={pc} />

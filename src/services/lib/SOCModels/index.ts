@@ -15,11 +15,11 @@ lui  x1, 0x3
 ori  x1, x1, 0x04c
 
 addi x2, x0, 1
-sw   x2, 16(x1)
-sw   x2, 0(x1)
-sw   x2, 4(x1)
-sw   x2, 12(x1)
-sw   x2, 8(x1)
+sw   x2, 16(x1) // Led control register
+sw   x2, 0(x1)  // DMA source register
+sw   x2, 4(x1)  // DMA destination register
+sw   x2, 8(x1)  // DMA length register
+sw   x2, 12(x1) // DMA control register
 
 `
 
@@ -29,14 +29,11 @@ SOC.Bus0.active         = true
 SOC.Bus1.active         = true
 SOC.Memory.active       = true
 
-// SOC.DMA.active          = true
-
 SOC.assemble(
             code                                     // ,code               : string 
             ,3 * 4096                               // ,required_mem       : number
             ,[]                                      // ,Mem_tb             : Register[]
             ,[
-                 //[0, (0x07FFF + 1 ) + 4096*0, 1, 0]
                  [8, 49152, 0, 6 ]
                 ,[0, (131072 ) + 4096*1, 0, 1]
                 ,[0, (131072 ) + 4096*2, 0, 1]
@@ -48,24 +45,5 @@ SOC.assemble(
             ]                                       // ,TLB                : TLBEntries[]
             ,0x0003000                             // ,stap               : number
         )
-// console.log (SOC.Memory.GetInstructionMemory())
-// console.log (SOC.Memory.GetMemory())
-// console.log(SOC.Processor.active_println)
-SOC.RunAll()
 
-// console.log(SOC.Bridge.Bridge_slave.ChannelA)
-// SOC.Step()
-// SOC.Step()
-// SOC.Step()
-// SOC.Step()
-// SOC.Step()
-// SOC.Step()
-// SOC.Step()
-// console.log(SOC.Bus0.Timming)
-// console.log(SOC.Bus0.Pin[0].peek())
-// SOC.Step()
-// console.log(SOC.Bus0.Pout[2].peek())
-// console.log(SOC.Processor.getRegisters())
-// SOC.Step()
-// SOC.Step()
-// SOC.Step()
+SOC.RunAll()

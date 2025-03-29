@@ -4,7 +4,7 @@ import Master from '../Interconnect/Master'
 import { dec, stringToAsciiAndBinary, BinToHex } from '../Compile/convert'
 // import {Logger } from '../Compile/soc.d'
 import { Keyboard, Logger, Monitor } from '../Compile/soc.d'
-// import Ecall from '../Ecall/Ecall'
+import Ecall from '../Ecall/Ecall'
 
 import ChannelD from '../Interconnect/ChannelD'
 import Cycle from '../Compile/cycle'
@@ -35,7 +35,7 @@ export default class RiscVProcessor {
     pre_pc                      = 0
     pc                          = 0
     active_println              : boolean
-    // Ecall                       : Ecall
+    Ecall                       : Ecall
 
     ALUOp                       : any
     zero                        : any
@@ -106,7 +106,7 @@ export default class RiscVProcessor {
         this.active_println             = true
         this.InsLength                  = 0
 
-        // this.Ecall                      = new Ecall
+        this.Ecall                      = new Ecall ()
 
         this.colorCode = {
         'orange'  : 'FF8000',

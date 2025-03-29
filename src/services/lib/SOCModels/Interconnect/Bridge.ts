@@ -18,8 +18,8 @@ export default class Bridge {
     logger                     ?: Logger
 
     constructor () {
-        this.Bridge_master              =  new Master('Bridge_master', true, '00') //tmp_src
-        this.Bridge_slave               =  new Slave ('Bridge_slave', true)
+        this.Bridge_master              = new Master('Bridge_master', true, '00') //tmp_src
+        this.Bridge_slave               = new Slave ('Bridge_slave', true)
         this.fifo_from_Interconnect     = new FIFO_ChannelA ()
         this.fifo_from_subInterconnect  = new FIFO_ChannelD ()
         this.state                      = 0

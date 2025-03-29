@@ -42,6 +42,7 @@ export function assemble(
 
     // const endaddr = this.Allocator.allocate(required_mem)
     this.Processor.reset()
+    this.cycle.cycle = 0
     //this.Processor.setImem(this.Assembler.binary_code)                 // LOAD INTUCTIONS INTO PROCESSOR
     this.Memory.reset (Mem_tb)
     this.Memory.SetInstructionMemory(this.Assembler.binary_code) // LOAD INTUCTIONS INTO MAIN MEMORY

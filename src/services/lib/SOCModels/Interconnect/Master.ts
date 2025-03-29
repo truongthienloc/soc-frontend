@@ -48,7 +48,7 @@ export default class Master {
         if (message === 'GET') {
             this.ChannelA.opcode   = '100'   
             this.ChannelA.param    = '000'   
-            this.ChannelA.size     = '10'    
+            this.ChannelA.size     = '00'    
             this.ChannelA.source   = this.source  
             this.ChannelA.address  = address.padStart(17, '0') 
             this.ChannelA.mask     = '1111'     
@@ -59,7 +59,7 @@ export default class Master {
         if (message === 'PUT') {
             this.ChannelA.opcode   = '000'   
             this.ChannelA.param    = '000'   
-            this.ChannelA.size     = '10'    
+            this.ChannelA.size     = '00'    
             this.ChannelA.source   = this.source  
             this.ChannelA.address  = address.padStart(17, '0') 
             this.ChannelA.mask     = '1111'   

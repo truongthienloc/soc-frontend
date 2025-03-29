@@ -45,7 +45,7 @@ export default class Slave {
                                     , '000'
                                     , '10'
                                     , source
-                                    , '0'.padStart(17, '0')
+                                    , '0'
                                     , '0000'
                                     , data
                                     , '0'

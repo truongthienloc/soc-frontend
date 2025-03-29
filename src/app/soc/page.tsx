@@ -182,8 +182,8 @@ export default function SocPage({}: Props) {
         logRef.current = logs
         socModel.setLogger(logs)
         socModel.setView(soc)
-        // socModel.setKeyboard(keyboard)
-        // socModel.setMonitor(monitor)
+        socModel.setKeyboard(keyboard)
+        socModel.setMonitor(monitor)
         // TODO: fix this error
         // socModel.setLedMatrix(ledMatrix)
 

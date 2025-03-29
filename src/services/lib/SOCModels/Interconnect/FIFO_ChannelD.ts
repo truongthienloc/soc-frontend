@@ -28,7 +28,7 @@ export class FIFO_ChannelD {
         return this.queue.shift();
     }
     
-    peek(): ChannelD | undefined {
+    peek(): any {
         return this.queue[0];
     }
     

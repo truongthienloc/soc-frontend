@@ -469,7 +469,9 @@ export default class InterConnect {
                     + cycle.toString() 
                     +': The INTERCONNECT is sending data from SUB-INTERCONNECT to DMA.'
                 )
+                
                 if (this.Pout[1] instanceof FIFO_ChannelD) this.Pout[1].enqueue(dataFromSInterconnect)
+                console.log ('dataFromSInterconnect', this.Pout[1].peek())
             }
         }
     }

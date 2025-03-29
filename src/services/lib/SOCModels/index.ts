@@ -15,10 +15,12 @@ lui  x1, 0x3
 ori  x1, x1, 0x04c
 
 addi x2, x0, 1
+sw   x2, 16(x1)
 sw   x2, 0(x1)
 sw   x2, 4(x1)
 sw   x2, 8(x1)
 sw   x2, 12(x1)
+
 `
 
 SOC.Processor.active    = true

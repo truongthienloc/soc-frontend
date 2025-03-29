@@ -104,7 +104,7 @@ export default class RiscVProcessor {
         this.SendData                   = ''
         this.instruction                = ''
         this.active_println             = true
-        this.InsLength                  = 0x1C
+        this.InsLength                  = 0x1C + 4
 
         // this.Ecall                      = new Ecall
 
@@ -426,7 +426,14 @@ export default class RiscVProcessor {
                         +': The PROCESSOR is receiving messeage AccessAck from DMA.'
                     )
                 }
-                else {
+                else if (InterConnect2CPU.sink == '10') {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The PROCESSOR is receiving messeage AccessAck from LED-MATRIX.'
+                    )
+                } else {
                     this.println (
                         this.active_println
                         ,'Cycle '

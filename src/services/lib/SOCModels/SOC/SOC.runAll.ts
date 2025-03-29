@@ -13,13 +13,17 @@ export async function RunAll(this: Soc) {
         this.Memory.Ins_pointer || this.Processor.state != 0 || this.DMA.state !=0
     ) {
         await this.Step()
-        if (bre > 100) break
-        bre ++ 
+        // if (bre > 150) break
+        // bre ++ 
     }
+
+    console.log (this.Led_matrix.controlRegister)
+
     // console.log(this.Processor.getRegisters(), this.Processor.state)
     // console.log(this.Bridge)
     // console.log(this.Bus0.Pout[0], this.Processor.state)
-    console.log(this.DMA.sourceAddress
+    console.log(
+        this.DMA.sourceAddress
         , this.DMA.destinationAddress
         , this.DMA.length
         , this.DMA.control
@@ -27,11 +31,17 @@ export async function RunAll(this: Soc) {
         , this.DMA.DMA_Master
     )
 
-    // console.log(
-    //     this.Processor.state
+    // console.log (
+    //     this.Processor.pc < this.Memory.Ins_pointer,
+    //     this.Processor.state != 0,
+    //     this.DMA.state !=0
     // )
-    console.log(this.Bus0.Timing
-                , this.Bus0.Pout
-    )
+
+    // // console.log(
+    // //     this.Processor.state
+    // // )
+    // console.log(this.Bus0.Timing
+    //             , this.Bus0.Pout
+    // )
    this.event.emit(Soc.SOCEVENT.DONE_ALL)
 }

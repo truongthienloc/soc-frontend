@@ -69,9 +69,11 @@ export default class Soc {
 
     public setLogger(logger: Logger) {
         this.logger = logger
-        this.Processor.setLogger(logger)
-        this.Memory.setLogger(logger)
-        this.Bus0.setLogger(logger)
+        this.Processor.setLogger    (logger)
+        this.Memory.setLogger       (logger)
+        this.Bus0.setLogger         (logger)
+        this.Bus1.setLogger         (logger)
+        this.Led_matrix.setLogger   (logger)
     }
 
     public setKeyboard(keyboard: Keyboard) {
@@ -230,6 +232,7 @@ export default class Soc {
         this.Led_matrix.Run(
             this.Bus1.Pout[2].dequeue()
             , this.cycle
+            , this.Bus1.state == 0
         )
 
         // this.cycle.incr()

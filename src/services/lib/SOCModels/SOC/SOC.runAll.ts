@@ -17,10 +17,10 @@ export async function RunAll(this: Soc) {
         // bre ++ 
     }
 
-    console.log (this.Led_matrix.matrix_buffer)
+    // console.log (this.Led_matrix.matrix_buffer)
     // console.log(
     //     this.DMA
     // )
-    // console.log (this.Processor)
+    console.log (this.Processor.getRegisters())
    this.event.emit(Soc.SOCEVENT.DONE_ALL)
 }

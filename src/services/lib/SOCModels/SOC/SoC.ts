@@ -195,7 +195,7 @@ export default class Soc {
         
         this.Bus0.Run (
             this.Processor.master.ChannelA
-            ,this.DMA.DMA_Master.ChannelA
+            ,this.DMA.burst
             ,this.Memory.burst
             ,this.Bridge.Bridge_slave.ChannelD
             ,this.Processor.master.ChannelA.valid == '1'

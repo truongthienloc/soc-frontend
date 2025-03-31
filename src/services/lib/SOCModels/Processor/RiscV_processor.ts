@@ -72,6 +72,8 @@ export default class RiscVProcessor {
     STATE_Wait4Interconncet_DATA    = 6
     STATE_ReplaceMMUEntry           = 7
 
+    Warnning                        = 0
+
     async Run  (
         icBusy            : boolean
       , cycle             : Cycle
@@ -84,13 +86,16 @@ export default class RiscVProcessor {
 
         if (this.pc >= this.InsLength) {
             this.state = this.STATE_GetInstructions
+            if (this.Warnning == 0) {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': **********THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.**********'
+                )
+                this.Warnning = 1
+            }
             
-            this.println (
-                this.active_println
-                ,'Cycle '
-                + cycle.toString() 
-                +': THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.'
-              )
 
             return
         }

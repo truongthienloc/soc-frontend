@@ -128,6 +128,7 @@ export default class LEDMatrix {
 
         let index = addr / 4  // Tính toán chỉ số của thành ghi
         if (index >= 288) {
+            console.log (addr)
             throw new Error("Address out of range")
         }
         this.dataRegisters[index] = data  // Gán giá trị vào thành ghi

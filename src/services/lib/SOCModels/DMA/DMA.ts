@@ -17,10 +17,12 @@ export default class DMA {
     DMA_Master          : Master
     DMA_Slave           : Slave
     DMA_buffer          : string[]
+    burst               : ChannelA[]
     logger             ?: Logger
     active_println      : boolean
 
-    count               : number
+    count_burst        = 0
+    count_beats        = 0 
 
     STATE_RecPutFrSub = 0
 
@@ -71,7 +73,15 @@ export default class DMA {
         }
 
         if (this.state == 2) {
-            // Get operation for different addresses and store results in beats array
+            this.burst = []
+            if (this.count_burst == parseInt (this.length, 2)) {
+                this.state = 0
+                this.count_burst = 0
+                this.count_beats = 0
+                console.log('**************** DMA DONE ****************')
+                this.status = '00000000000000000000000000000001'
+                return
+            }
 
             this.println (
                 this.active_println
@@ -89,8 +99,9 @@ export default class DMA {
             this.DMA_Slave.ChannelD.valid = '0'
             this.DMA_Master.ChannelA.valid = '1'
 
-            // console.log(this.DMA_Master, ready0)
+            this.burst.push ( {...this.DMA_Master.ChannelA})
             this.state += 1
+
             return 
         }
 
@@ -108,11 +119,10 @@ export default class DMA {
                 )
                 this.DMA_Master.ChannelA.valid = '0'
                 this.DMA_Master.receive(InterConnect2DMA)
-                this.DMA_buffer[this.count] = this.DMA_Master.ChannelD.data
-                this.count +=1
-                if (this.count == parseInt (this.length, 2) * 4) {
+                this.DMA_buffer[this.count_beats] = this.DMA_Master.ChannelD.data
+                this.count_beats +=1
+                if (this.count_beats == 4 * (this.count_burst + 1)) {
                     this.state +=1
-                    this.count = 0
                 }
                 else this.state = 3
             }
@@ -120,14 +130,7 @@ export default class DMA {
         }
 
         if (this.state == 4) {
-
-            
-            if (this.count == parseInt (this.length, 2) * 4) {
-                this.state = 0
-                console.log('**************** DMA DONE ****************')
-                this.status = '00000000000000000000000000000001'
-                return
-            }
+            this.burst = []
 
             this.println (
                 this.active_println
@@ -135,26 +138,71 @@ export default class DMA {
                 + cycle.toString() 
                 +': The DMA is sending messeage PUT to SUB-INTERCONNET.'
             )
-
             this.DMA_Master.send(
                 'PUT',
-                ((parseInt(this.destinationAddress.slice(-17), 2) + this.count)  * 4).toString(2).padStart(17, '0'),
-                this.DMA_buffer[this.count]
+                ((parseInt(this.destinationAddress.slice(-17), 2) + 0)  * 4).toString(2).padStart(17, '0'),
+                this.DMA_buffer[0]
             )
+            this.DMA_Master.ChannelA.valid = '1'
             this.DMA_Master.ChannelA.size  = '10'
             this.DMA_Slave.ChannelD.valid  = '0'
-            this.DMA_Master.ChannelA.valid = '1'
+            this.burst.push ( {...this.DMA_Master.ChannelA})
 
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The DMA is sending messeage PUT to SUB-INTERCONNET.'
+            )
+            this.DMA_Master.send(
+                'PUT',
+                ((parseInt(this.destinationAddress.slice(-17), 2) + 1)  * 4).toString(2).padStart(17, '0'),
+                this.DMA_buffer[1]
+            )
+            this.DMA_Master.ChannelA.valid = '1'
+            this.DMA_Master.ChannelA.size  = '10'
+            this.DMA_Slave.ChannelD.valid  = '0'
+            this.burst.push ( {...this.DMA_Master.ChannelA})
+
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The DMA is sending messeage PUT to SUB-INTERCONNET.'
+            )
+            this.DMA_Master.send(
+                'PUT',
+                ((parseInt(this.destinationAddress.slice(-17), 2) + 2)  * 4).toString(2).padStart(17, '0'),
+                this.DMA_buffer[2]
+            )
+            this.DMA_Master.ChannelA.valid = '1'
+            this.DMA_Master.ChannelA.size  = '10'
+            this.DMA_Slave.ChannelD.valid  = '0'
+            this.burst.push ( {...this.DMA_Master.ChannelA})
+
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The DMA is sending messeage PUT to SUB-INTERCONNET.'
+            )
+            this.DMA_Master.send(
+                'PUT',
+                ((parseInt(this.destinationAddress.slice(-17), 2) + 3)  * 4).toString(2).padStart(17, '0'),
+                this.DMA_buffer[3]
+            )
+            this.DMA_Master.ChannelA.valid = '1'
+            this.DMA_Master.ChannelA.size  = '10'
+            this.DMA_Slave.ChannelD.valid  = '0'
+            this.burst.push ( {...this.DMA_Master.ChannelA})
             this.state += 1
-            this.count +=1
+            
             return 
         }
 
         if (this.state == 5) {
             
-            
-            this.DMA_Master.ChannelA.valid = '0'
-
+            this.DMA_Master.ChannelA.valid = '0'    
             if (InterConnect2DMA.valid == '1'
                 && InterConnect2DMA.sink == '10'
             ) {
@@ -164,8 +212,16 @@ export default class DMA {
                     + cycle.toString() 
                     +': The DMA is receiving messeage AccessAck from SUB-INTERCONNET.'
                 )
+                
                 this.DMA_Master.receive(InterConnect2DMA)
-                this.state = 4
+                this.count_burst +=1
+                // console.log (this.count)
+                // if (this.count == 4) {
+                //     this.state = 2
+                //     this.count = 0
+                    
+                // }
+                this.state = 2
             }
 
             return
@@ -186,7 +242,7 @@ export default class DMA {
         this.DMA_Slave          = new Slave ('DMA_Slave', true)
         this.DMA_buffer         = Array(288).fill('00000000000000000000000000000000')
         this.active_println     = true
-        this.count              = 0
+        this.burst              = []
 
     }
     

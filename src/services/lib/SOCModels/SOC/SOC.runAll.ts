@@ -13,14 +13,15 @@ export async function RunAll(this: Soc) {
         this.Memory.Ins_pointer || this.Processor.state != 0 || this.DMA.state !=0
     ) {
         await this.Step()
-        // if (bre > 115) break
-        // bre ++ 
+        if (bre > 130) break
+        bre ++ 
     }
 
+    console.log (this.Bridge.fifo_from_Interconnect, this.Bridge.state)
     // console.log (this.Led_matrix.matrix_buffer)
     // console.log(
     //     this.DMA
     // )
-    console.log (this.Processor.getRegisters())
+    // console.log (this.Processor.getRegisters())
    this.event.emit(Soc.SOCEVENT.DONE_ALL)
 }

@@ -64,6 +64,8 @@ export default class Bridge {
                 )  
                 cycle.incr() 
             this.state += 1
+           } else {
+            console.log('1')
            }
            return
         }
@@ -82,7 +84,7 @@ export default class Bridge {
                 )  
                 cycle.incr() 
                 this.state += 1
-            }
+            } 
             return
         }
 
@@ -118,6 +120,26 @@ export default class Bridge {
             this.state = 0
             return 
         }
+
+        // if (this.state == 4) {
+        //     if (!this.fifo_from_Interconnect.isEmpty()) {
+        //         if (ready1) {
+        //             this.Bridge_slave.receive(this.fifo_from_Interconnect.dequeue())
+        //             this.Bridge_master.ChannelA = this.Bridge_slave.ChannelA
+        //             this.Bridge_master.ChannelA.valid = '1'
+        //             this.println (
+        //                 this.active_println
+        //                 ,'Cycle '
+        //                 + cycle.toString() 
+        //                 +': The BRIDGE is sending data to SUB-INTERCONNECT.'
+        //             )  
+        //             cycle.incr() 
+        //         }
+        //         else this.state = 4
+        //     } else {
+        //         this.state = 0
+        //     }
+        // }
         
     }
 }

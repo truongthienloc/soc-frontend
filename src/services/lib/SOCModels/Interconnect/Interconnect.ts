@@ -160,6 +160,7 @@ export default class InterConnect {
                 +': The INTERCONNECT is receiving data from DMA.'
             )
             if (this.Pin[1] instanceof FIFO_ChannelA) {
+                // console.log('data', data)
                 for (let item of data) {
                     if (item.valid == '1') {
                         this.Pin[1].enqueue({...item})

@@ -83,7 +83,6 @@ export default class RiscVProcessor {
     {
 
       if (this.state == this.STATE_GetInstructions)         {
-
         if (this.pc >= this.InsLength) {
             this.state = this.STATE_GetInstructions
             if (this.Warnning == 0) {
@@ -108,7 +107,7 @@ export default class RiscVProcessor {
             this.active_println
             ,'Cycle '
             + cycle.toString() 
-            +': The PROCESSOR is sending messeage GET to MEMORY. (at address: '
+            +': The PROCESSOR is sending messeage GET to INTERCONNCET. (at address: '
             + BinToHex((this.pc).toString(2)) 
             +')'
           )
@@ -135,7 +134,7 @@ export default class RiscVProcessor {
                 this.active_println
                 ,'Cycle '
                 + cycle.toString() 
-                +': The PROCESSOR is receiving messeage AccessAckData from MEMORY. ('
+                +': The PROCESSOR is receiving messeage AccessAckData from INTERCONNECT. ('
                 +BinToHex (this.master.ChannelD.data)
                 +').'
             )
@@ -214,7 +213,23 @@ export default class RiscVProcessor {
           }
           else {
               this.state = this.STATE_GetInstructions
+              if (this.pc >= this.InsLength) {
+                this.state = this.STATE_GetInstructions
+                if (this.Warnning == 0) {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': **********THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.**********'
+                    )
+                    this.Warnning = 1
+                }
+                this.state = 0
           } 
+          
+        
+            return
+        }
           cycle.incr()
           return
       }
@@ -227,7 +242,7 @@ export default class RiscVProcessor {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The PROCESSOR is sending messeage PUT to MEMORY.'
+                    +': The PROCESSOR is sending messeage PUT to INTERCONNCET.'
                 )
             }
 
@@ -236,7 +251,7 @@ export default class RiscVProcessor {
                     this.active_println
                     ,'Cycle '
                     +cycle.toString() 
-                    +': The PROCESSOR is sending messeage GET to MEMORY.'
+                    +': The PROCESSOR is sending messeage GET to INTERCONNCET.'
 
                 )
             }
@@ -255,7 +270,7 @@ export default class RiscVProcessor {
                 this.active_println
                 ,'Cycle '
                 + cycle.toString() 
-                +': The PROCESSOR is sending messeage GET to MEMORY.'
+                +': The PROCESSOR is sending messeage GET to INTERCONNCET.'
             )
             
             this.master.ChannelA.valid = '1'
@@ -304,7 +319,7 @@ export default class RiscVProcessor {
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': The PROCESSOR is receiving messeage AccessAck from MEMORY.'
+                        +': The PROCESSOR is receiving messeage AccessAck from INTERCONNECT.'
                     )
                 }
                   
@@ -314,7 +329,7 @@ export default class RiscVProcessor {
                       this.active_println
                       ,'Cycle '
                       + cycle.toString() 
-                      +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.'
+                      +': The PROCESSOR is receiving messeage AccessAckData from INTERCONNECT.'
                   )
               }
               
@@ -355,7 +370,7 @@ export default class RiscVProcessor {
                   this.active_println
                   ,'Cycle '
                   + cycle.toString() 
-                  +': The PROCESSOR is receiving messeage AccessAckData from MEMORY.'
+                  +': The PROCESSOR is receiving messeage AccessAckData from INTERCONNECT.'
               )
 
               const VPN       = this.SendAddress.slice(0, 20)  

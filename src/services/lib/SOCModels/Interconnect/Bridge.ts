@@ -16,6 +16,8 @@ export default class Bridge {
     state                       : number
     active_println              : boolean
     logger                     ?: Logger
+    STATE_RECEIVE               = 0
+    STATE_SEND                  = 1
 
     constructor () {
         this.Bridge_master              = new Master('Bridge_master', true, '00') //tmp_src
@@ -48,34 +50,51 @@ export default class Bridge {
         ,ready1                     : boolean // sub-interconnect ready
         ,cycle                      : Cycle
     ) {
-
-        if (this.state == 0)    {
+        // console.log ('this.dataFrsubInterconnect', dataFrsubInterconnect)
+        if (this.state == this.STATE_RECEIVE)    {
+            this.Bridge_master.ChannelA.valid = '0'
+            this.Bridge_master.ChannelD.valid = '0'
             if (!dataFrInterconnect.isEmpty()) {
                 while (!dataFrInterconnect.isEmpty()) {
                     if (dataFrInterconnect.peek().valid == '1') {
                         this.fifo_from_Interconnect.enqueue (dataFrInterconnect.dequeue())
                     }
                 }
+                
                 this.println (
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
                     +': The BRIDGE is receiving data from INTERCONNECT.'
                 )  
-                cycle.incr() 
-            this.state += 1
-           } else {
-            console.log('1')
+           } 
+           if (!dataFrsubInterconnect.isEmpty()) {
+                dataFrsubInterconnect.peek()
+                if (dataFrsubInterconnect.peek().valid     == '1') {
+                    this.Bridge_master.receive(dataFrsubInterconnect.dequeue())
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The BRIDGE is receiving data from SUB-INTERCONNECT.'
+                    ) 
+                }
            }
+
+
+            
+
+            this.state = this.STATE_SEND 
+
            return
         }
 
-        if (this.state == 1)    {
-
+        if (this.state == this.STATE_SEND) {
             if (!this.fifo_from_Interconnect.isEmpty() && ready1) {
+                console.log (this.fifo_from_Interconnect)
                 this.Bridge_slave.receive(this.fifo_from_Interconnect.dequeue())
                 this.Bridge_master.ChannelA = this.Bridge_slave.ChannelA
-                this.Bridge_master.ChannelA.valid = '1'
+
                 this.println (
                     this.active_println
                     ,'Cycle '
@@ -83,43 +102,70 @@ export default class Bridge {
                     +': The BRIDGE is sending data to SUB-INTERCONNECT.'
                 )  
                 cycle.incr() 
-                this.state += 1
             } 
-            return
-        }
-
-        if (this.state == 2)   {
-            this.Bridge_master.ChannelA.valid   = '0'
-            if (dataFrsubInterconnect.valid     == '1'&& ready0) {
-                this.Bridge_master.receive(dataFrsubInterconnect)
-                this.println (
-                    this.active_println
-                    ,'Cycle '
-                    + cycle.toString() 
-                    +': The BRIDGE is receiving data from SUB-INTERCONNECT.'
-                )  
-                cycle.incr() 
-
+            if (ready0 && this.Bridge_master.ChannelD.valid == '1') {
                 this.Bridge_slave.ChannelD          = this.Bridge_master.ChannelD
-                this.Bridge_slave.ChannelD.valid    = '1'
                 this.println (
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
                     +': The BRIDGE is sending data to INTERCONNECT.'
                 )
-                cycle.incr()
-
-                this.state += 1
             }
-            return
-        }
-
-        if (this.state == 3)    {
-            this.Bridge_slave.ChannelD.valid = '0'
-            this.state = 0
+            this.state = this.STATE_RECEIVE
             return 
         }
+
+        // if (this.state == 1)    {
+
+        //     if (!this.fifo_from_Interconnect.isEmpty() && ready1) {
+        //         this.Bridge_slave.receive(this.fifo_from_Interconnect.dequeue())
+        //         this.Bridge_master.ChannelA = this.Bridge_slave.ChannelA
+        //         this.Bridge_master.ChannelA.valid = '1'
+        //         this.println (
+        //             this.active_println
+        //             ,'Cycle '
+        //             + cycle.toString() 
+        //             +': The BRIDGE is sending data to SUB-INTERCONNECT.'
+        //         )  
+        //         cycle.incr() 
+        //         this.state += 1
+        //     } 
+        //     return
+        // }
+
+        // if (this.state == 2)   {
+        //     this.Bridge_master.ChannelA.valid   = '0'
+        //     if (dataFrsubInterconnect.valid     == '1'&& ready0) {
+        //         this.Bridge_master.receive(dataFrsubInterconnect)
+        //         this.println (
+        //             this.active_println
+        //             ,'Cycle '
+        //             + cycle.toString() 
+        //             +': The BRIDGE is receiving data from SUB-INTERCONNECT.'
+        //         )  
+        //         cycle.incr() 
+
+        //         this.Bridge_slave.ChannelD          = this.Bridge_master.ChannelD
+        //         this.Bridge_slave.ChannelD.valid    = '1'
+        //         this.println (
+        //             this.active_println
+        //             ,'Cycle '
+        //             + cycle.toString() 
+        //             +': The BRIDGE is sending data to INTERCONNECT.'
+        //         )
+        //         cycle.incr()
+
+        //         this.state += 1
+        //     }
+        //     return
+        // }
+
+        // if (this.state == 3)    {
+        //     this.Bridge_slave.ChannelD.valid = '0'
+        //     this.state = 0
+        //     return 
+        // }
 
         // if (this.state == 4) {
         //     if (!this.fifo_from_Interconnect.isEmpty()) {

@@ -112,7 +112,6 @@ export default class InterConnect {
     }
 
     RecFromBridge(data: ChannelA, cycle : Cycle, valid: boolean): void {
-        // console.log (data)
         if (this.active && this.Pactived[0] && valid) {
 
             this.println (
@@ -195,12 +194,6 @@ export default class InterConnect {
         , cycle: Cycle) {
         if (Abiter == 0 ) {
             const dataFromBridge = {...this.Pin[0].peek()}
-            // console.log ('dataFromBridge', dataFromBridge)
-
-            // console.log (parseInt('0'+dataFromBridge.address, 2)    == 0X0305C     )
-            
-            // console.log (this.Pin[0].isEmpty())
-
                 if (
                     (
                     (
@@ -248,8 +241,9 @@ export default class InterConnect {
                     + cycle.toString() 
                     +': The SUB-INTERCONNECT is sending data from DMA to BRIDGE.'
                 )
-
+                
                 if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue(this.Pin[1].dequeue())
+                // console.log ('dataFromDMA', this.Pout[0])
             }
         }
 

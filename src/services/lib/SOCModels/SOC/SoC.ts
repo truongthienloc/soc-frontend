@@ -207,7 +207,7 @@ export default class Soc {
 
         this.Bridge.Run (
             this.Bus0.Pout[3]
-            , this.Bus1.Pout[0].dequeue()
+            , this.Bus1.Pout[0]
             , this.Bus0.state == 0
             , this.Bus1.state == 0
             , this.cycle

@@ -278,6 +278,7 @@ export default class InterConnect {
             }
         }
 
+
         for (let i = 0; i < minIndices.length; i++) {
             if ( minIndices[i] == 0) {
                 if (Pro2Memory && DMA2Mem && minIndices.includes(1)) {
@@ -368,7 +369,6 @@ export default class InterConnect {
     }
 
     Route (Abiter: number, cycle: Cycle) {
-
         if (Abiter == 0 && !this.Pin[0].isEmpty()) {
             const dataFromProcessor = {...this.Pin[0].dequeue()}
             if (
@@ -427,6 +427,7 @@ export default class InterConnect {
                         +': The INTERCONNECT is sending data from DMA to SUB-INTERCONNCET.'
                     )
                     if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue({...this.Pin[1].dequeue()})
+                    this.Timing[1].dequeue()
                 }
                 
             }

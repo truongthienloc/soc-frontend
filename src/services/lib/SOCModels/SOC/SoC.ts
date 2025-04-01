@@ -218,6 +218,7 @@ export default class Soc {
             , this.DMA.DMA_Slave.ChannelD
             , this.Led_matrix.Matrix_Slave.ChannelD
             , this.Bridge.Bridge_master.ChannelA.valid == '1'
+            , this.Bridge.state == 0
             , this.DMA.DMA_Slave.ChannelD.valid == '1'
             , this.Led_matrix.Matrix_Slave.ChannelD.valid == '1'
             , this.cycle

@@ -55,6 +55,7 @@ export default class Bridge {
             this.Bridge_master.ChannelA.valid = '0'
             this.Bridge_master.ChannelD.valid = '0'
             if (!dataFrInterconnect.isEmpty()) {
+
                 while (!dataFrInterconnect.isEmpty()) {
                     if (dataFrInterconnect.peek().valid == '1') {
                         this.fifo_from_Interconnect.enqueue (dataFrInterconnect.dequeue())
@@ -66,7 +67,9 @@ export default class Bridge {
                     ,'Cycle '
                     + cycle.toString() 
                     +': The BRIDGE is receiving data from INTERCONNECT.'
-                )  
+                )
+                
+                this.state = this.STATE_SEND 
            } 
            if (!dataFrsubInterconnect.isEmpty()) {
                 dataFrsubInterconnect.peek()
@@ -79,19 +82,13 @@ export default class Bridge {
                         +': The BRIDGE is receiving data from SUB-INTERCONNECT.'
                     ) 
                 }
+                this.state = this.STATE_SEND 
            }
-
-
-            
-
-            this.state = this.STATE_SEND 
-
            return
         }
 
         if (this.state == this.STATE_SEND) {
             if (!this.fifo_from_Interconnect.isEmpty() && ready1) {
-                console.log (this.fifo_from_Interconnect)
                 this.Bridge_slave.receive(this.fifo_from_Interconnect.dequeue())
                 this.Bridge_master.ChannelA = this.Bridge_slave.ChannelA
 
@@ -101,7 +98,8 @@ export default class Bridge {
                     + cycle.toString() 
                     +': The BRIDGE is sending data to SUB-INTERCONNECT.'
                 )  
-                cycle.incr() 
+                this.state = this.STATE_RECEIVE
+
             } 
             if (ready0 && this.Bridge_master.ChannelD.valid == '1') {
                 this.Bridge_slave.ChannelD          = this.Bridge_master.ChannelD
@@ -111,8 +109,10 @@ export default class Bridge {
                     + cycle.toString() 
                     +': The BRIDGE is sending data to INTERCONNECT.'
                 )
+                this.state = this.STATE_RECEIVE
             }
-            this.state = this.STATE_RECEIVE
+            
+
             return 
         }
 

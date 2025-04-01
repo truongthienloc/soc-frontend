@@ -67,6 +67,7 @@ export default class InterConnect {
         ,dataFromDMA             : ChannelD
         ,dataFromLed             : ChannelD
         ,dataFromBridge_valid    : boolean
+        ,Bridge_ready            : boolean
         ,dataFromDMA_valid       : boolean
         ,dataFromLed_valid       : boolean
         ,cycle                   : Cycle
@@ -90,7 +91,7 @@ export default class InterConnect {
             return
         }
         if (this.state == 1) {
-            this.Route (this.Abiter(), cycle)
+            this.Route (this.Abiter(), cycle, Bridge_ready)
             this.state = 0
             return
         }
@@ -101,6 +102,7 @@ export default class InterConnect {
         ,dataFromDMA             : ChannelD
         ,dataFromLed             : ChannelD
         ,dataFromBridge_valid    : boolean
+
         ,dataFromDMA_valid       : boolean
         ,dataFromLed_valid       : boolean
         ,cycle                   : Cycle
@@ -191,7 +193,9 @@ export default class InterConnect {
     }
 
     Route (Abiter: number
-        , cycle: Cycle) {
+        , cycle: Cycle
+        , Bridge_ready: boolean
+    ) {
         if (Abiter == 0 ) {
             const dataFromBridge = {...this.Pin[0].peek()}
                 if (
@@ -249,7 +253,8 @@ export default class InterConnect {
 
         if (Abiter == 2) {
             const dataFromLED = {...this.Pin[2].peek()}
-            if (!this.Pin[2].isEmpty()) {
+
+            if (!this.Pin[2].isEmpty() && Bridge_ready) {
                 this.println (
                     this.active_println
                     ,'Cycle '

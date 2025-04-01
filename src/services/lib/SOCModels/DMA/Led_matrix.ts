@@ -14,6 +14,7 @@ export default class LEDMatrix {
     state           : number
     logger         ?: Logger
     active_println              : boolean
+    count_beats      = 0
 
     constructor() {
         this.controlRegister            = '00000000000000000000000000000000'
@@ -24,6 +25,7 @@ export default class LEDMatrix {
         this.state                      = 0
         this.active                     = false
         this.active_println             = true
+
     }
 
     public setLogger(logger: Logger) {
@@ -91,23 +93,41 @@ export default class LEDMatrix {
                 )
                 this.Matrix_Slave.receive (ChannelA)
                 this.writeData (this.Matrix_Slave.ChannelA.address, this.Matrix_Slave.ChannelA.data)
-                this.state +=1
+                if (this.count_beats == 3) {
+                    this.state +=1
+                    this.count_beats = 0
+                    return
+                }
+                else {
+                    this.state = 2
+                    this.count_beats += 1
+                }
             }
             this.display ()
             return
         }
 
         if (this.state == 3 && ready) {
-            this.println   (
-                this.active_println
-                ,'Cycle ' 
-                + cycle.toString() 
-                + ': The LED-MATRIX is sending an AccessAck message to the SUB-INTERCONNECT.'
-            )
-            this.Matrix_Slave.send ('AccessAck', this.Matrix_Slave.ChannelA.source, '')
-            this.Matrix_Slave.ChannelD.valid = '1'
-            this.Matrix_Slave.ChannelD.sink  = '10'
-            this.state = 2
+
+                this.println   (
+                    this.active_println
+                    ,'Cycle ' 
+                    + cycle.toString() 
+                    + ': The LED-MATRIX is sending an AccessAck message to the SUB-INTERCONNECT.'
+                )
+                this.Matrix_Slave.send ('AccessAck', this.Matrix_Slave.ChannelA.source, '')
+                this.Matrix_Slave.ChannelD.valid = '1'
+                this.Matrix_Slave.ChannelD.sink  = '10'
+
+                if (this.count_beats == 4) {
+                    this.state = 2
+                    this.count_beats = 0
+                }
+                else {
+                    this.state =3
+                    this.count_beats +=1
+                }
+
             return
         }
 

@@ -13,7 +13,7 @@ export async function RunAll(this: Soc) {
         this.Memory.Ins_pointer || this.Processor.state != 0 || this.DMA.state !=0
     ) {
         await this.Step()
-        // if (bre > 120) break
+        // if (bre > 369) break
         // bre ++   
     }
 
@@ -29,7 +29,8 @@ export async function RunAll(this: Soc) {
     // )
     // console.log (this.Processor.state)
     // console.log(this.DMA.DMA_Master.ChannelA)
-    // console.log(this.Bus1.Pin[2])
+    // console.log(this.Bus1.Pin[0])
+    // console.log(this.Bus1)
     // console.log(this.Bus0.Pin[1])
     // console.log (this.Bridge.state)
     // console.log (this.Bridge)

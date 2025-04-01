@@ -196,19 +196,21 @@ export default class InterConnect {
         , cycle: Cycle
         , Bridge_ready: boolean
     ) {
+
         if (Abiter == 0 ) {
             const dataFromBridge = {...this.Pin[0].peek()}
+                // console.log ('dataFromBridge', dataFromBridge)
                 if (
                     (
                     (
                         (parseInt('0'+dataFromBridge.address, 2)    >= 0X00000     ) 
-                    &&  (parseInt('0'+dataFromBridge.address, 2)    <= 0X00060     ) 
+                    &&  (parseInt('0'+dataFromBridge.address, 2)    <= 0X00060 * 3 *4) 
                     )
                     ||  (parseInt('0'+dataFromBridge.address, 2)    == 0X0305C     )
                     )
                 &&  !this.Pin[0].isEmpty ()
                 ) {
-
+                   
                     this.println (
                         this.active_println
                         ,'Cycle '

@@ -67,8 +67,11 @@ export default class Memory {
     public setPageNumber () {
         let count = 0
         const PageTablePointer = 0x0003000
-        for (let i = PageTablePointer; i < (PageTablePointer + 4 * 16); i+=4) { 
-            this.Memory[i.toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(4,'0') 
+        for (let i = PageTablePointer; i < (PageTablePointer + 64); i+=4) { 
+            this.Memory[(i+3).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(0,8)
+            this.Memory[(i+2).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(8,16)
+            this.Memory[(i+1).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(16,24)
+            this.Memory[(i+0).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(24,32)
             count ++ 
         }
     }

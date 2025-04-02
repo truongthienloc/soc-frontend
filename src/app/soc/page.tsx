@@ -250,7 +250,8 @@ export default function SocPage({}: Props) {
         return
       }
 
-      const newMemoryTable = convertMemoryCoreToRegisterType(socModelRef.current.Memory.Memory)
+      
+      const newMemoryTable = convertMemoryCoreToRegisterType(socModelRef.current.Memory.GetMemory())
       const newTLB = array2TLB(socModelRef.current.MMU.TLB)
       setMemoryData(newMemoryTable)
       tlb.setTLBEntries(newTLB)
@@ -393,9 +394,9 @@ export default function SocPage({}: Props) {
         memoryData.map((mem) => ({ name: hexToBinary(mem.name), value: hexToBinary(mem.value) })),
         tlbEntries,
         parseInt(tlb.pointer, 16),
-        parseInt(dmaConfigs.src, 16),
-        parseInt(dmaConfigs.len, 16),
-        parseInt(dmaConfigs.des, 16),
+        // parseInt(dmaConfigs.src, 16),
+        // parseInt(dmaConfigs.len, 16),
+        // parseInt(dmaConfigs.des, 16),
       )
     ) {
       toast.error('Syntax error')
@@ -679,10 +680,10 @@ export default function SocPage({}: Props) {
               <div className="pt-8">
                 <DMATable configs={dmaConfigs} data={dmaData} />
               </div>
-              <div className="mx-auto h-full w-1 bg-gray-400"></div>
-              <div className="flex flex-col gap-2 pt-8">
+              <div className="h-full w-1 bg-gray-400"></div>
+              <div className="flex flex-col flex-1 gap-2 pt-8">
                 <h2 className="text-lg font-bold">Led Matrix</h2>
-                <LedMatrix />
+                <div className= "flex justify-center"><LedMatrix /></div>
               </div>
             </div>
           </div>

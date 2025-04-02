@@ -68,7 +68,7 @@ export default class Memory {
         let count = 0
         const PageTablePointer = 0x0003000
         for (let i = PageTablePointer; i < (PageTablePointer + 4 * 16); i+=4) { 
-            this.Memory[i.toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0') 
+            this.Memory[i.toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(4,'0') 
             count ++ 
         }
     }
@@ -259,9 +259,6 @@ export default class Memory {
             }
         }
     }
-    
-    
-    
 
     public GetMemory() {
         // Chuyển object sang mảng các cặp [key, value]
@@ -280,27 +277,6 @@ export default class Memory {
         }
 
         return littleEndianMemory
-    
-        // // Tạo một object mới để lưu trữ các giá trị được chuyển đổi theo Little Endian
-        // const littleEndianMemory: { [key: string]: string } = {};
-    
-        // // Duyệt qua mỗi nhóm 4 entries, gộp và đảo ngược byte
-        // for (let i = 0; i < sortedEntries.length / 4; i += 4) {
-        //     const keyBase = parseInt(sortedEntries[i][0], 10); // Lấy key cơ sở là địa chỉ đầu tiên của mỗi nhóm 4 bytes
-        //     let littleEndianValue = '';
-    
-        //     // Đảo ngược thứ tự các bytes và gộp lại thành một giá trị nhị phân duy nhất
-        //     for (let j = 3; j >= 0; j--) {
-        //         if (i + j < sortedEntries.length) {
-        //             littleEndianValue += sortedEntries[i + j][1];
-        //         }
-        //     }
-    
-        //     // Lưu trữ vào object mới với key là địa chỉ cơ sở
-        //     littleEndianMemory[keyBase.toString()] = littleEndianValue;
-        // }
-    
-        // return littleEndianMemory;
     }
     
     

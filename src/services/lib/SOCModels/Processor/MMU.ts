@@ -1,4 +1,6 @@
-import Cycle from "../Compile/cycle"
+import Cycle                                        from "../Compile/cycle"
+import {Logger }                                    from '../Compile/soc.d'
+import { dec, stringToAsciiAndBinary, BinToHex }    from '../Compile/convert'
 
 export default class MMU {
     active              : boolean
@@ -13,6 +15,8 @@ export default class MMU {
     MMU_message         : string
     step                : number
     done                : boolean
+    logger              ?: Logger
+    active_println      = true
 
 
     constructor(active: boolean) {
@@ -29,6 +33,43 @@ export default class MMU {
         this.MMU_message        = ''
         this.step               = 0
         this.done               = false
+
+    }
+
+    public setLogger(logger: Logger) {
+        this.logger = logger
+    }
+
+    public println(active: boolean, ...args: string[]) {
+        
+        if (active) {
+            console.log(...args)
+        }
+
+        if (!this.logger) {
+            return
+        }
+
+        if (active) {
+            this.logger.println(...args)
+        }
+    }
+
+    public run (
+        logic_address   : string
+        ,cycle           : Cycle
+    ) 
+    {
+
+        if (parseInt(logic_address, 2) < 0X04000) {
+            this.MMU_message = ' MMU is bypassed'
+            this.physical_address = logic_address.slice(-17)
+            return
+        } else {
+            this.search_in_TLB(logic_address)
+
+            return
+        }
     }
 
     public pageReplace(Replacement_page: [number, number, number, number]) {
@@ -63,78 +104,28 @@ export default class MMU {
     }
 
     public search_in_TLB(logic_address: string) {
-        let message: string;
-        
         const VPN               = logic_address.slice(0, 20)// 10 bit đầu tiên
         const OFFSET            = logic_address.slice(20, 32) // 12 bit cuối cùng
         const vpn_dec           = parseInt(VPN, 2) & 0b1111
         const offset_dec        = parseInt(OFFSET, 2);
-        const logic_address_dec = parseInt(logic_address, 2);
+        const check_pagenum = this.TLB.map(
+            (tlbEntry) => vpn_dec === tlbEntry[0] && tlbEntry[2] === 1 
+        );
 
-        // if ( (logic_address_dec >= 0 && logic_address_dec <= this.kernel_point) || 
-        //      (logic_address_dec >= this.user_point && logic_address_dec <= this.IO_point)){
-        //     this.physical_address = logic_address_dec;
-        //     message = 'MMU is passed!';
-        // } else {
-            // Kiểm tra trong TLB xem có VPN1 hay không và giá trị cột thứ 2 có bằng 1 không
-            const check_pagenum = this.TLB.map(
-                (tlbEntry) => vpn_dec === tlbEntry[0] && tlbEntry[2] === 1 
-            );
-    
-            const exist = check_pagenum.some(Boolean);
-            
-            const physical_addresses = this.TLB.map(
-                (tlbEntry) => offset_dec + tlbEntry[1]
-            );
-    
-            if (exist) {
-                this.MMU_message = " TLB: VPN is caught.";
-                this.physical_address = (physical_addresses[check_pagenum.indexOf(true)]).toString(2).padStart(17, '0')
-            } else {
-                this.MMU_message = " TLB: VPN is missed.";
-                this.physical_address = (this.stap + vpn_dec*4).toString(2).padStart(17, '0')
-            }
+        const exist = check_pagenum.some(Boolean);
+        
+        const physical_addresses = this.TLB.map(
+            (tlbEntry) => offset_dec + tlbEntry[1]
+        );
 
-    }
-
-
-    public run (
-        logic_address   : string
-    ) 
-    {
-
-        if (parseInt(logic_address, 2) < 0X04000) {
-            this.MMU_message = ' MMU is bypassed'
-            this.physical_address = logic_address.slice(-17)
-
-            return
+        if (exist) {
+            this.MMU_message = " TLB: VPN is caught.";
+            this.physical_address = (physical_addresses[check_pagenum.indexOf(true)]).toString(2).padStart(17, '0')
         } else {
-            this.search_in_TLB(logic_address)
+            this.MMU_message = " TLB: VPN is missed.";
+            this.physical_address = (this.stap + vpn_dec*4).toString(2).padStart(17, '0')
         }
 
-        // if (parseInt( this.physical_address,2) > this.end_addr) {
-        //     this.MMU_message = 'Page fault!!!!'
-        //     return
-        // }
-
-        // return this.physical_address
-        
-        // console.log('stap', this.stap)
-        // console.log  ('Cycle ', cycle.toString()+' : ' + this.MMU_message)
-        //this.println ('Cycle ', this.cycle.toString()+' : ' + MMU_message)
-
-        // if (this.MMU_message == ' TLB: VPN is missed.') {
-        //     const VPN       = logic_address.slice(0, 20)  // 10 bit đầu tiên
-        //     const stap      = this.stap
-  
-        //     const PTE       = stap + (parseInt(VPN , 2) & 0xf)* 4
-        //     return this.physical_address
-        // } else {
-        //     if (parseInt(physical_address,2) > this.end_addr) {
-        //         this.MMU_message = 'Page fault!!!!'
-        //     }
-        //     return physical_address
-        // }
     }
 }
 

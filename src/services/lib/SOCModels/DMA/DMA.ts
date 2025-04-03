@@ -44,7 +44,6 @@ export default class DMA {
                 + cycle.toString() 
                 +': The DMA is receiving messeage PUT from SUB-INTERCONNETC.'
             )
-            cycle.incr()
 
             this.DMA_Slave.receive(sub2DMA)
             this.config (ready0, cycle)
@@ -57,8 +56,8 @@ export default class DMA {
                     + cycle.toString() 
                     +': The DMA is sending messeage AccessAck to SUB-INTERCONNETC.'
                 )
-                console.log (this.DMA_Slave.ChannelD)
-                cycle.incr()
+
+
             }
             else {
                 this.state = this.STATE_RecPutFrSub
@@ -79,7 +78,13 @@ export default class DMA {
                 this.state = 0
                 this.count_burst = 0
                 this.count_beats = 0
-                console.log('**************** DMA DONE ****************')
+
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': **************** DMA DONE ****************'
+                )
                 this.status = '00000000000000000000000000000001'
                 return
             }
@@ -150,6 +155,7 @@ export default class DMA {
             this.DMA_Master.ChannelA.size  = '10'
             this.DMA_Slave.ChannelD.valid  = '0'
             this.burst.push ( {...this.DMA_Master.ChannelA})
+            cycle.incr()
 
             this.println (
                 this.active_println
@@ -166,6 +172,7 @@ export default class DMA {
             this.DMA_Master.ChannelA.size  = '10'
             this.DMA_Slave.ChannelD.valid  = '0'
             this.burst.push ( {...this.DMA_Master.ChannelA})
+            cycle.incr()
 
             this.println (
                 this.active_println
@@ -182,6 +189,7 @@ export default class DMA {
             this.DMA_Master.ChannelA.size  = '10'
             this.DMA_Slave.ChannelD.valid  = '0'
             this.burst.push ( {...this.DMA_Master.ChannelA})
+            cycle.incr()
 
             this.println (
                 this.active_println
@@ -198,8 +206,8 @@ export default class DMA {
             this.DMA_Master.ChannelA.size  = '10'
             this.DMA_Slave.ChannelD.valid  = '0'
             this.burst.push ( {...this.DMA_Master.ChannelA})
+            cycle.incr()
 
-            // console.log(this.burst)
             this.state += 1
             
             return 

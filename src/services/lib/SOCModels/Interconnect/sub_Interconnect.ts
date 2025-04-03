@@ -86,7 +86,6 @@ export default class InterConnect {
             )
             if (! ((this.Pin[0].isEmpty()) && (this.Pin[1].isEmpty()) && (this.Pin[2].isEmpty()))) {
                 this.state +=1
-                cycle.incr()
             }
             return
         }
@@ -268,8 +267,6 @@ export default class InterConnect {
             }
             
         } 
-
-        cycle.incr()
 
     }
 }

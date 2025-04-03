@@ -13,13 +13,17 @@ export async function RunAll(this: Soc) {
         this.Memory.Ins_pointer || this.Processor.state != 0 || this.DMA.state !=0
     ) {
         await this.Step()
-        if (bre > 1) break
-        bre ++   
+        // if (bre > 22) break
+        // bre ++   
     }
 
+    // console.log (this.Memory.Memory['10001000000010011'])
+    // console.log (this.Memory.Memory['10001000000010010'])
+    // console.log (this.Memory.Memory['10001000000010001'])
+    // console.log (this.Memory.Memory['10001000000010000'])
     // console.log (this.Bridge)
     // console.log (this.Bus1.Pout[0])
-    // console.log (this.Led_matrix.state, this.Led_matrix.matrix_buffer)
+    console.log (this.Led_matrix.state, this.Led_matrix.matrix_buffer)
     // console.log(
     //     this.DMA
     // )
@@ -27,10 +31,10 @@ export async function RunAll(this: Soc) {
     //     this.Processor.pc <
     //     this.Memory.Ins_pointer, this.Processor.state != 0, this.DMA.state !=0
     // )
-    console.log (this.Memory.Memory['00011000000000000'])    
-    console.log (this.Memory.Memory['00000000000000000'])
-    console.log (this.Memory.GetMemory()['00011000000000000'])
-    console.log (this.Memory.GetMemory()['00000000000000000'])
+    // console.log (this.Memory.Memory['00011000000000000'])    
+    // console.log (this.Memory.Memory['00000000000000000'])
+    // console.log (this.Memory.GetMemory()['00011000000000000'])
+    // console.log (this.Memory.GetMemory()['00000000000000000'])
     // console.log(this.DMA.DMA_Master.ChannelA)
     // console.log(this.Bus1.Pin[0])
     // console.log(this.Bus1)

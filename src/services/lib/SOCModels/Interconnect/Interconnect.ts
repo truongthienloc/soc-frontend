@@ -93,7 +93,6 @@ export default class InterConnect {
             )
             if (! ((this.Pin[0].isEmpty()) && (this.Pin[1].isEmpty()) && (this.Pin[2].isEmpty()) && (this.Pin[3].isEmpty()))) {
                 this.state +=1
-                cycle.incr()
             }
             return
         }
@@ -181,17 +180,19 @@ export default class InterConnect {
 
     RecFromMem(data: ChannelD[], cycle: Cycle, valid: boolean): void {
         if (this.active && this.Pactived[2] && valid) {
-            this.println (
-                this.active_println
-                ,'Cycle '
-                + cycle.toString() 
-                +': The INTERCONNECT is receiving data from MEMORY.'
-            )
+
             if (this.Pin[2] instanceof FIFO_ChannelD) {
                 for (let item of data) {
                     if (item.valid == '1') {
                         this.Pin[2].enqueue({...item})
                         this.Timing[2].enqueue(cycle.cycle)
+                        this.println (
+                            this.active_println
+                            ,'Cycle '
+                            + cycle.toString() 
+                            +': The INTERCONNECT is receiving data from MEMORY.'
+                        )
+                        cycle.incr()
                     }
                 }
             } else {
@@ -365,7 +366,6 @@ export default class InterConnect {
             }
         }
         this.state = 0
-        cycle.incr()
     }
 
     Route (Abiter: number, cycle: Cycle) {
@@ -457,8 +457,6 @@ export default class InterConnect {
                         if (this.Pout[1] instanceof FIFO_ChannelD) {
                             this.Pout[1].enqueue({...this.Pin[2].dequeue()})
                         }
-                        // cycle.incr()
-                    // }
                 }
         }
 

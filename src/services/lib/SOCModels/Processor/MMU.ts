@@ -7,25 +7,18 @@ export default class MMU {
     physical_address    : string
     TLB                 : [ number, number, number, number][]
     stap                : number
-    start_addr          : number
-    end_addr            : number
-    user_point          : number
-    kernel_point        : number
-    IO_point            : number
     MMU_message         : string
+
     step                : number
+    endAddress          : number
     done                : boolean
-    logger              ?: Logger
+    logger             ?: Logger
     active_println      = true
 
 
     constructor(active: boolean) {
         this.active             = active
-        this.start_addr         = 0
-        this.end_addr           = 0
-        this.user_point         = 0
-        this.kernel_point       = 0
-        this.IO_point           = 0
+        this.endAddress         = 0
 
         this.physical_address   = '' // Initialized with a number
         this.stap               = 0
@@ -57,19 +50,22 @@ export default class MMU {
 
     public run (
         logic_address   : string
-        ,cycle           : Cycle
     ) 
     {
 
         if (parseInt(logic_address, 2) < 0X04000) {
             this.MMU_message = ' MMU is bypassed'
             this.physical_address = logic_address.slice(-17)
-            return
         } else {
             this.search_in_TLB(logic_address)
-
-            return
         }
+
+        if (this.MMU_message == " TLB: VPN is caught.") {
+            if (parseInt ('0'+this.physical_address) > parseInt ('0'+this.endAddress)) {
+                this.MMU_message = ' ERROR: Page fault!!!!'
+            }
+        }
+        return
     }
 
     public pageReplace(Replacement_page: [number, number, number, number]) {
@@ -86,21 +82,20 @@ export default class MMU {
     }
 
     public Set(
-        P: [number, number, number, number][]
+        P            : [
+        number
+        , number
+        , number
+        , number
+        ][]
         , stap       : number
-        , end_addr      : number
-        , start_addr    : number
-        , user_point    : number
-        , kernel_point  : number
-        , IO_point      : number
+        , endAddress : number 
+
     ){
         this.TLB               = P
         this.stap              = stap
-        this.user_point        = user_point
-        this.end_addr          = end_addr
-        this.start_addr        = start_addr 
-        this.kernel_point      = kernel_point
-        this.IO_point          = IO_point
+        this.endAddress        = endAddress
+    
     }
 
     public search_in_TLB(logic_address: string) {
@@ -119,10 +114,10 @@ export default class MMU {
         );
 
         if (exist) {
-            this.MMU_message = " TLB: VPN is caught.";
+            this.MMU_message = " TLB: VPN is caught."
             this.physical_address = (physical_addresses[check_pagenum.indexOf(true)]).toString(2).padStart(17, '0')
         } else {
-            this.MMU_message = " TLB: VPN is missed.";
+            this.MMU_message = " TLB: VPN is missed."
             this.physical_address = (this.stap + vpn_dec*4).toString(2).padStart(17, '0')
         }
 

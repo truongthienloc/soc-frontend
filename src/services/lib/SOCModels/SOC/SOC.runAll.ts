@@ -17,6 +17,7 @@ export async function RunAll(this: Soc) {
         // bre ++   
     }
 
+    // console.log (this.MMU.endAddress)
     // console.log (this.Memory.Memory['10001000000010011'])
     // console.log (this.Memory.Memory['10001000000010010'])
     // console.log (this.Memory.Memory['10001000000010001'])

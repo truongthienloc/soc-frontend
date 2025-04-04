@@ -44,14 +44,13 @@ export function assemble(
     this.Processor.InsLength = this.Memory.Ins_pointer
 
     this.Processor.MMU.Set(
-        TLB                 // P: [number, number, number, number][]
-        , stap              // , pointer       : number
-        , this.Allocator.allocate(required_mem)           // , end_addr      : number
-        , 0x07FFF + 1  // , start_addr    : number
-        , 0x1BFFF        // , 0x1BFFF    : number
-        , 0x07FFF      // , 0x07FFF  : number
-        , 0x1FFFF          // , 0x1FFFF      : number
+        TLB                 
+        , stap              
+        , this.Allocator.allocate(required_mem)                  
     )
+
+    // console.log (this.Allocator.allocate(required_mem))
+    // console.log (this.Processor.MMU.endAddress)
 
     for (let i of this.Assembler.Instructions)
         if (i != '.text' && i != '') this.Assembly_code.push(i)

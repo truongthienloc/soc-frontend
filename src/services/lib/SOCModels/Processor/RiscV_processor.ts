@@ -103,7 +103,7 @@ export default class RiscVProcessor {
                 + cycle.toString() 
                 +': The PROCESSOR is sending messeage GET to INTERCONNCET.'
             )
-            this.MMU.run ((this.pc).toString(2).padStart(17, '0'), cycle)
+            this.MMU.run ((this.pc).toString(2).padStart(17, '0'))
 
             this.println(this.active_println,
                 'Cycle ' 
@@ -231,7 +231,7 @@ export default class RiscVProcessor {
 
     if (this.state == this.STATE_AccessInterconnect)      {
 
-        this.MMU.run(this.SendAddress, cycle)
+        this.MMU.run(this.SendAddress)
 
         if (this.Processor_messeage == 'PUT') {
             this.println (
@@ -300,6 +300,18 @@ export default class RiscVProcessor {
             this.master.send ('GET',  this.MMU.physical_address, this.SendData)
             this.master.ChannelA.valid = '1'
             this.state = this.STATE_ReplaceMMUEntry
+        }
+        else if (this.MMU.MMU_message == ' ERROR: Page fault!!!!') {
+
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString()
+                + this.MMU.MMU_message
+            )
+
+            this.state = this.STATE_GetInstructions
+
         }
         else {
             this.state =  this.STATE_Wait4Interconncet_DATA

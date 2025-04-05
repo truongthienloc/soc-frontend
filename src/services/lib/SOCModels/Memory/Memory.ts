@@ -86,7 +86,6 @@ export default class Memory {
             })
         }
         return result
-        // console.log i, dec (this.Memory[i.toString(2).padStart(32,'0')]))
     }
 
     public Run (
@@ -132,10 +131,7 @@ export default class Memory {
                                 this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
                                 this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
                             )
-                            
                             this.burst.push (this.slaveMemory.ChannelD)
-
-                            
                         }
 
 

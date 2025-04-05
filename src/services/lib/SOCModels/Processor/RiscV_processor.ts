@@ -1107,10 +1107,6 @@ export default class RiscVProcessor {
             this.pre_pc = pc
             this.stalled = false 
             let readData = ''
-<<<<<<< HEAD:src/services/lib/SOCModels/RiscV_processor.ts
-=======
-
->>>>>>> 818de6461e4dae295b3a0990bdead82eb7480e6e:src/services/lib/SOCModels/Processor/RiscV_processor.ts
             if (instruction == '00000000000000000000000001110011') {
                 
                 if (icBusy) {

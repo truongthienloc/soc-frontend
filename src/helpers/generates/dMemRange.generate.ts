@@ -21,12 +21,11 @@ export function createRangeDmemData(data: Register[], start: string, end?: strin
     const startDec = parseInt(start, 16)
     const res = []
 
-    console.log ('data', data)
+    console.log('data', data)
 
     for (let i = 0; i < LENGTH_OF_DMEM; i++) {
         const addressDec = startDec + 4 * i
         const addressHex = '0x' + addressDec.toString(16).padStart(5, '0')
-
 
         if (end && parseInt(end, 16) < addressDec) {
             break
@@ -44,7 +43,7 @@ export function createRangeDmemData(data: Register[], start: string, end?: strin
         })
     }
 
-    console.log ('res', res)
+    console.log('res', res)
 
     return res
 }

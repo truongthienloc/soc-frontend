@@ -40,6 +40,7 @@ import useDMAConfig from '~/components/DMATable/useDMAConfig'
 import { convertToDMAStandard } from '~/helpers/converts/dma.convert'
 import { TopFunctionButton } from './_components/CodeEditorSection'
 import { DecToHex } from '~/services/lib/SOCModels/Compile/convert'
+import TextField from '@mui/material/TextField'
 import { Separator } from '~/components/Separator'
 
 type Props = {}
@@ -56,18 +57,7 @@ export default function SocPage({}: Props) {
     initial: 430,
     // initial: window ? window.innerWidth / 3 - 10 : 455,
   })
-  // const {
-  //   position: position2,
-  //   separatorProps: separatorProps2,
-  //   isDragging: isDragging2,
-  //   setPosition: setPosition2,
-  // } = useResizable({
-  //   axis: 'x',
-  //   min: 50,
-  //   initial: 500,
-  //   // initial: window ? window.innerWidth / 3 - 10 : 500,
-  //   reverse: true,
-  // })
+
   const isStart = useRef(true)
   const socModelRef = useRef<Soc>()
   const [socModel, setSocModel] = useState<Soc>()
@@ -250,7 +240,6 @@ export default function SocPage({}: Props) {
         return
       }
 
-      
       const newMemoryTable = convertMemoryCoreToRegisterType(socModelRef.current.Memory.GetMemory())
       const newTLB = array2TLB(socModelRef.current.MMU.TLB)
       setMemoryData(newMemoryTable)
@@ -681,9 +670,21 @@ export default function SocPage({}: Props) {
                 <DMATable configs={dmaConfigs} data={dmaData} />
               </div>
               <div className="h-full w-1 bg-gray-400"></div>
-              <div className="flex flex-col flex-1 gap-2 pt-8">
+              <div className="flex flex-1 flex-col gap-2 pt-8">
                 <h2 className="text-lg font-bold">Led Matrix</h2>
-                <div className= "flex justify-center"><LedMatrix /></div>
+                <div className="flex flex-col gap-4">
+                  <div className="flex justify-center">
+                    <LedMatrix />
+                  </div>
+                  <TextField
+                    label="Control"
+                    autoComplete="off"
+                    InputProps={{
+                      startAdornment: '0x',
+                    }}
+                    disabled
+                  />
+                </div>
               </div>
             </div>
           </div>

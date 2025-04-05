@@ -1,24 +1,12 @@
 import Adapter from '../../components/Adapter/Adapter'
-import {
-    CPU,
-    DMA,
-    LedMatrix,
-    MMU,
-    Memory
-} from '../../components/Agent'
+import { CPU, DMA, LedMatrix, MMU, Memory } from '../../components/Agent'
 import Bridge from '../../components/Agent/Bridge'
 import {
     Interconnect,
     SingleMasterInterconnect,
     SubInterconnect,
 } from '../../components/Interconnect'
-import {
-    CPUModule,
-    IOModule,
-    MMUModule,
-    MemoryModule,
-    Module
-} from '../../components/Module'
+import { CPUModule, IOModule, MMUModule, MemoryModule, Module } from '../../components/Module'
 import { Scene } from '../../components/Scene'
 
 export default class NCKHBoard {
@@ -86,13 +74,11 @@ export default class NCKHBoard {
         const subInterTopAdapter2 = subInterconnect.getAdapter('t002') as Adapter
         const subInterBottomAdapter2 = subInterconnect.getAdapter('b002') as Adapter
 
-
         const ioModule3 = scene.createModuleWithC(
             IOModule,
             interconnect.x + 5.75 + 5.75 + 5.75,
             subInterconnect.y + 6.5,
         )
-
 
         memoryModule1
             .getShape()
@@ -141,7 +127,6 @@ export default class NCKHBoard {
         this.interconnect = interconnect
         this.ledMatrix = ledMatrix
         this.bridge = bridge1
-
     }
 
     public destroy() {}

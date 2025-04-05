@@ -101,7 +101,7 @@ export default class Monitor {
 
     public println(...args: string[]): void {
         const monitor = document.querySelector(this.containerQuery) as HTMLDivElement
-        console.log ('monitor')
+        console.log('monitor')
         const line = monitor.getElementsByClassName('line')
         let currentLine = line[line.length - 1]
         let userSpan = currentLine.getElementsByTagName('span')[0]

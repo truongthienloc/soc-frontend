@@ -1,12 +1,10 @@
 'use client'
+import { Button } from '@mui/material'
 import { Roboto } from 'next/font/google'
 import { ChangeEvent, useState } from 'react'
-import { Button } from '@mui/material'
-import Link from 'next/link'
-import CodeEditor from './CodeEditor'
-import { toast } from 'react-toastify'
-import Soc from '~/services/lib/SOCModels/SoC'
 import { cn } from '~/helpers/cn'
+import Soc from '~/services/lib/SOCModels/SOC/SoC'
+import CodeEditor from './CodeEditor'
 
 const roboto = Roboto({ weight: '400', subsets: ['latin'] })
 

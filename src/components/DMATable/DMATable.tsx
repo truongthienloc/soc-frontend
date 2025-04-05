@@ -1,20 +1,10 @@
 'use client'
 
 import TextField from '@mui/material/TextField'
-import Paper from '@mui/material/Paper'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
 import type { SxProps, Theme } from '@mui/material/styles'
-import React, { useState } from 'react'
-import { createRangeDmemData } from '~/helpers/generates/dMemRange.generate'
+import { useState } from 'react'
 import { Register } from '~/types/register'
 import { ReturnUseDMAConfig } from './useDMAConfig'
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 
 const styles: { [key: string]: SxProps<Theme> } = {
   table: {
@@ -57,6 +47,7 @@ export default function DMATable({ data, configs }: Props) {
           InputProps={{
             startAdornment: '0x',
           }}
+          disabled
         />
         <TextField
           label="DES"
@@ -66,6 +57,7 @@ export default function DMATable({ data, configs }: Props) {
           InputProps={{
             startAdornment: '0x',
           }}
+          disabled
         />
         <div className="relative flex flex-col">
           <TextField
@@ -77,8 +69,9 @@ export default function DMATable({ data, configs }: Props) {
               startAdornment: '0x',
               readOnly: true,
             }}
+            disabled
           />
-          <div className="absolute right-1 flex flex-col gap-1 p-1">
+          {/* <div className="absolute right-1 flex flex-col gap-1 p-1">
             <button
               className="flex h-[22px] w-[22px] justify-center rounded bg-gray-50 shadow transition-colors hover:bg-gray-200"
               onClick={() => configs?.setLen(add(configs?.len, 1))}
@@ -91,8 +84,16 @@ export default function DMATable({ data, configs }: Props) {
             >
               <ArrowDropDownIcon />
             </button>
-          </div>
+          </div> */}
         </div>
+        <TextField
+          label="STATUS"
+          autoComplete="off"
+          InputProps={{
+            startAdornment: '0x',
+          }}
+          disabled
+        />
       </div>
     </div>
   )

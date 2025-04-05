@@ -24,13 +24,6 @@ export function assemble(
         this.Bus1.active        = this.view.interconnect.getActivated()
         // this.DMA.active         = this.view.dmaModule.getActivated()
         this.Memory.active      = this.view.memoryModule.getActivated()
-<<<<<<< HEAD
-        // this.active_keyboard    = this.view.keyboardModule.getActivated()
-        this.active_monitor     = true
-        
-=======
-
->>>>>>> 818de6461e4dae295b3a0990bdead82eb7480e6e
     }
     
     //****************CHECK SYNTAX ERROR****************
@@ -65,11 +58,6 @@ export function assemble(
     this.logger?.clear()
     this.view?.cpu.setIsRunning(false)
     this.view?.mmu.setIsRunning(false)
-<<<<<<< HEAD
-    // this.view?.monitor.setIsRunning(false)
-    // this.view?.keyboard.setIsRunning(false)
-=======
->>>>>>> 818de6461e4dae295b3a0990bdead82eb7480e6e
     this.view?.memory.setIsRunning(false)
     this.view?.dma.setIsRunning(false)
     this.view?.interconnect.setIsRunning(false)

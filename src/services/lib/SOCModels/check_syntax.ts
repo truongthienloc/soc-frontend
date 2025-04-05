@@ -95,7 +95,7 @@ export default class Assembler {
         lb: 'I',
         auipc: 'U',
         addw: 'R',
-        // ecall: 'I',
+        ecall: 'I',
         lh: 'I',
         addiw: 'I',
         subw: 'R',
@@ -400,7 +400,7 @@ export default class Assembler {
 
     private IType(input: string): string {
         const mlist = this.handlerString(input).split(' ')
-        if (mlist.length != 5) {
+        if (mlist.length != 5 && String (mlist[0]).toUpperCase() !== 'ECALL') {
             this.syntax_error = true
             return ''
         }
@@ -440,17 +440,16 @@ export default class Assembler {
             if (values.some((value) => value === undefined)) this.syntax_error = true
             return funct7 + imm + rs1 + funct3 + rd + opcode
         }
-
         if (['ecall', 'ebreak'].includes(mlist[0])) {
-            const opcode = this.OPCODE[mlist[0]]
-            const funct3 = this.FUNCT3[mlist[0]]
-            const rd = this.register[mlist[1]]
-            const funct7 = this.FUNCT7[mlist[0]]
+            // const opcode = this.OPCODE[mlist[0]]
+            // const funct3 = this.FUNCT3[mlist[0]]
+            // const rd = this.register[mlist[1]]
+            // const funct7 = this.FUNCT7[mlist[0]]
 
-            const values = [funct7, funct3, rd, opcode]
-            if (values.some((value) => value === undefined)) this.syntax_error = true
+            // const values = [funct7, funct3, rd, opcode]
+            // if (values.some((value) => value === undefined)) this.syntax_error = true
 
-            return funct7 + rd + funct3 + rd + opcode
+            return '00000000000000000000000001110011'
         }
 
         const opcode = this.OPCODE[mlist[0]]
@@ -626,8 +625,8 @@ export default class Assembler {
             if (ins[i] === ' ' || ins[i] === '' || ins[i] === '\n') {
                 continue
             }
-
             const li = ins[i].split(' ')
+
             if (li.length === 1 && String (li[0]).toUpperCase() !== 'ECALL') {
                 if (ins[i].charAt(ins[i].length - 1) !== ':') this.syntax_error = true
                 while (ins[i].includes(':')) {
@@ -651,6 +650,7 @@ export default class Assembler {
         }
 
         this.Instructions = ins
+        console.log('this.Instructions: ', this.Instructions)
 
         for (let i = pos + 1; i < ins.length; i++) {
 
@@ -663,6 +663,7 @@ export default class Assembler {
                     continue;
                 }
             }
+
             let string = ''
             if (this.FMT[t[0]] === 'R') {
                 string = this.RType(ins[i])

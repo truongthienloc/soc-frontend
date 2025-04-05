@@ -691,7 +691,7 @@ export default class RiscVProcessor {
             this.pre_pc = pc
             this.stalled = false 
             let readData = ''
-            if (instruction == '1'.padStart(32,'1')) {
+            if (instruction == '00000000000000000000000001110011') {
                 
                 if (icBusy) {
                     this.stalled = true

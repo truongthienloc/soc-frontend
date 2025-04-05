@@ -24,8 +24,9 @@ import { Step } from './SOC/SOC.step'
 import BuddyAllocator from "./BuddyAllocator"
 import sub_InterConnect from './sub_Interconnect'
 import ChannelA from './ChannelA'
-import {Monitor} from './Monitor'
-import {Keyboard} from './Keyboard'
+// import {Monitor} from './Monitor'
+// import {Keyboard} from './Keyboard'
+import { Keyboard, Monitor } from "./soc.d" 
 
 export default class Soc {
     name        : string
@@ -36,8 +37,8 @@ export default class Soc {
     Memory      : Memory
     DMA         : DMA
     Led_matrix  : boolean[][]
-    Monitor     : Monitor
-    Keyboard    : Keyboard
+    // Monitor     : Monitor
+    // Keyboard    : Keyboard
 
     arbiter     : boolean
 
@@ -101,8 +102,8 @@ export default class Soc {
         this.Assembler      = new Assembler()
         this.Assembly_code  = []
         this.Led_matrix     = []
-        this.Monitor        = new Monitor        ()
-        this.Keyboard       = new Keyboard       ()
+        // this.Monitor        = new Monitor        ()
+        // this.Keyboard       = new Keyboard       ()
         this.Allocator      = new BuddyAllocator (0x0BFFF, 0X0C000)
         this.MMU_endAddr    = 0
         this.arbiter        = false
@@ -173,6 +174,7 @@ export default class Soc {
         // ****************RUN SYSTEM ****************
         this.cycle+=1
         let  [CPU_message, CPU_data, logical_address, rd, size] = this.Processor_run (this.arbiter)
+        this.Ecall (CPU_message)
 
         const CPU_access = (CPU_message == 'PUT') || (CPU_message == 'GET') 
         if (CPU_access && this.arbiter == false) {
@@ -220,15 +222,19 @@ export default class Soc {
             this.arbiter = true
         }
         else {
-            if (this.DMA.phase == false) {
-                this.DMA_Get()
-                this.DMA.phase = true
+            if (this.DMA.active == true) {
+                if (this.DMA.phase == false) {
+                    this.DMA_Get()
+                    this.DMA.phase = true
+                }
+                else {
+                    this.DMA_Put ()
+                    this.DMA.phase = false
+                }
+                this.arbiter = false
             }
-            else {
-                this.DMA_Put ()
-                this.DMA.phase = false
-            }
-            this.arbiter = false
+            
+            
         }
 }        
         // } else {
@@ -277,6 +283,11 @@ export default class Soc {
         if (CPU_message == 'ECALL') {
             this.println('Cycle ', this.cycle.toString(), ': Ecall instruction')
             console.log('Cycle ', this.cycle.toString(), ': Ecall instruction')
+            if (this.Processor.register['01010'] == '00000000000000000000000000000001') {
+                const value = parseInt(this.Processor.register['10001'], 2)
+                this.monitor?.println(value.toString())
+            }
+            
             
             // await this.Ecall.execute (this.Processor.register)
             return 
@@ -692,253 +703,253 @@ export default class Soc {
         return this.Bus1.Port_out(3)
 
     }
-    public CPU_acces_monitor  ( CPU_message :string, physical_address  : string, CPU_data  :string, rd: string) {
-        this.println('Cycle '       , 
-            this.cycle.toString()   , 
-            ': The CPU is sending a PUT message to MONITOR through the INTERCONNECT.'
-        )
-        console.log ('Cycle '       , 
-            this.cycle.toString()   , 
-            ': The CPU is sending a PUT message to MONITOR through the INTERCONNECT.'
-        )
+    // public CPU_acces_monitor  ( CPU_message :string, physical_address  : string, CPU_data  :string, rd: string) {
+    //     this.println('Cycle '       , 
+    //         this.cycle.toString()   , 
+    //         ': The CPU is sending a PUT message to MONITOR through the INTERCONNECT.'
+    //     )
+    //     console.log ('Cycle '       , 
+    //         this.cycle.toString()   , 
+    //         ': The CPU is sending a PUT message to MONITOR through the INTERCONNECT.'
+    //     )
             
-        // PROCESSOR is sending PUT
-        this.Processor.master.send(
-            CPU_message         ,
-            physical_address    ,
-            CPU_data            ,
-        )
-        this.Bus0.Port_in(this.Processor.master.ChannelA, 0) // CPU IS LOADING DATA INTO PORT[1]
+    //     // PROCESSOR is sending PUT
+    //     this.Processor.master.send(
+    //         CPU_message         ,
+    //         physical_address    ,
+    //         CPU_data            ,
+    //     )
+    //     this.Bus0.Port_in(this.Processor.master.ChannelA, 0) // CPU IS LOADING DATA INTO PORT[1]
 
-        //INTERCONNCET RUN
-        this.cycle += 1
-        this.view?.interconnect.setIsRunning(this.Bus0.active)
-        this.Bus0.Transmit() // INTERCONNECT IS TRANSMITTING
-        this.println(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The INTERCONNECT is forwarding the message to SUB-INTERCONNECT.',
-        )
-        console.log(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The INTERCONNECT is forwarding the message to SUB-INTERCONNECT.',
-        )
+    //     //INTERCONNCET RUN
+    //     this.cycle += 1
+    //     this.view?.interconnect.setIsRunning(this.Bus0.active)
+    //     this.Bus0.Transmit() // INTERCONNECT IS TRANSMITTING
+    //     this.println(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The INTERCONNECT is forwarding the message to SUB-INTERCONNECT.',
+    //     )
+    //     console.log(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The INTERCONNECT is forwarding the message to SUB-INTERCONNECT.',
+    //     )
         
-        //MEMORY RUN
-        this.cycle      += 1
-        // this.view?.memory.setIsRunning(this.Memory.active)
-        this.println(
-            'Cycle ',
-            this.cycle.toString(),
-           ': The SUB-INTERCONNECT is receiving a PUT message from the INTERCONNECT.',
-        )
-        console.log(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The SUB-INTERCONNECT is receiving a PUT message from the INTERCONNECT.',
-        )
-        this.SubInterconncet (this.Bus0.Port_out(3))
+    //     //MEMORY RUN
+    //     this.cycle      += 1
+    //     // this.view?.memory.setIsRunning(this.Memory.active)
+    //     this.println(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //        ': The SUB-INTERCONNECT is receiving a PUT message from the INTERCONNECT.',
+    //     )
+    //     console.log(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The SUB-INTERCONNECT is receiving a PUT message from the INTERCONNECT.',
+    //     )
+    //     this.SubInterconncet (this.Bus0.Port_out(3))
 
-        this.Monitor.setData (this.Bus1.Port_out(2))
+    //     this.Monitor.setData (this.Bus1.Port_out(2))
         
-        this.cycle += 1
-        this.Monitor.slave.send('AccessAck','00', '')
-        this.println(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The MONITOR is sending an AccessAck message to the CPU.',
-        )
-        console.log(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The MONITOR is sending an AccessAck message to the CPU.',
-        )
+    //     this.cycle += 1
+    //     this.Monitor.slave.send('AccessAck','00', '')
+    //     this.println(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The MONITOR is sending an AccessAck message to the CPU.',
+    //     )
+    //     console.log(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The MONITOR is sending an AccessAck message to the CPU.',
+    //     )
         
-        this.cycle += 1
-        this.Bus1.Port_in(this.Monitor.slave.ChannelD, 2)
-        this.println(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The MONITOR is sending an AccessAck message to the SUB-INTERCONNECT.',
-        )
-        console.log(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The MONITOR is sending an AccessAck message to the SUB-INTERCONNECT.',
-        )
+    //     this.cycle += 1
+    //     this.Bus1.Port_in(this.Monitor.slave.ChannelD, 2)
+    //     this.println(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The MONITOR is sending an AccessAck message to the SUB-INTERCONNECT.',
+    //     )
+    //     console.log(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The MONITOR is sending an AccessAck message to the SUB-INTERCONNECT.',
+    //     )
 
-        this.cycle += 1
-        this.Bus1.Transmit ()
-        this.println(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The SUB-INTERCONNECT is forwarding the message to INTERCONNECT.',
-        )
-        console.log(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The SUB-INTERCONNECT is forwarding the message to INTERCONNECT.',
-        )
+    //     this.cycle += 1
+    //     this.Bus1.Transmit ()
+    //     this.println(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The SUB-INTERCONNECT is forwarding the message to INTERCONNECT.',
+    //     )
+    //     console.log(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The SUB-INTERCONNECT is forwarding the message to INTERCONNECT.',
+    //     )
 
-        this.cycle += 1
-        this.Bus0.Port_in(this.Bus1.Port_out(0), 3)
-        this.println(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The INTERCONNECT is receiving a PUT message from the SUB-INTERCONNECT.',
-        )
-        console.log(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The INTERCONNECT is receiving a PUT message from the SUB-INTERCONNECT.',
-        )
+    //     this.cycle += 1
+    //     this.Bus0.Port_in(this.Bus1.Port_out(0), 3)
+    //     this.println(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The INTERCONNECT is receiving a PUT message from the SUB-INTERCONNECT.',
+    //     )
+    //     console.log(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The INTERCONNECT is receiving a PUT message from the SUB-INTERCONNECT.',
+    //     )
 
-        this.cycle += 1
-        this.Bus0.Transmit()
-        this.println(
-            'Cycle ',
-            this.cycle.toString(),
-           ': The INTERCONNECT is forwarding the message to CPU.',
-        )
-        console.log(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The INTERCONNECT is forwarding the message to CPU.',
-        )
+    //     this.cycle += 1
+    //     this.Bus0.Transmit()
+    //     this.println(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //        ': The INTERCONNECT is forwarding the message to CPU.',
+    //     )
+    //     console.log(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The INTERCONNECT is forwarding the message to CPU.',
+    //     )
 
-        this.cycle += 1
-        this.Bus0.Port_out(0)
-        this.println(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The CPU is receiving an AccessAck message from the INTERCONNECT.',
-        )
-        console.log(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The CPU is receiving an AccessAck message from the INTERCONNECT.',
-        )
-        this.cycle += 1
-    }
-    public CPU_acces_keyboard ( CPU_message :string, physical_address  : string, CPU_data  :string, rd: string) {
-        this.println(
-            'Cycle ', 
-            this.cycle.toString(), 
-            ': The CPU is sending a GET message to KEYBOARD through the INTERCONNECT.'
-        )
-        console.log (
-            'Cycle ', 
-            this.cycle.toString(), 
-            ': The CPU is sending a GET message to KEYBOARD through the INTERCONNECT.'
-        )
-        // PROCESSOT is sending GET
-        this.Processor.master.send(
-            CPU_message,
-            physical_address,
-            CPU_data,
-        )
-        this.Bus0.Port_in(this.Processor.master.ChannelA, 0)
-        //INTERCONNCET RUN
+    //     this.cycle += 1
+    //     this.Bus0.Port_out(0)
+    //     this.println(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The CPU is receiving an AccessAck message from the INTERCONNECT.',
+    //     )
+    //     console.log(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The CPU is receiving an AccessAck message from the INTERCONNECT.',
+    //     )
+    //     this.cycle += 1
+    // }
+    // public CPU_acces_keyboard ( CPU_message :string, physical_address  : string, CPU_data  :string, rd: string) {
+    //     this.println(
+    //         'Cycle ', 
+    //         this.cycle.toString(), 
+    //         ': The CPU is sending a GET message to KEYBOARD through the INTERCONNECT.'
+    //     )
+    //     console.log (
+    //         'Cycle ', 
+    //         this.cycle.toString(), 
+    //         ': The CPU is sending a GET message to KEYBOARD through the INTERCONNECT.'
+    //     )
+    //     // PROCESSOT is sending GET
+    //     this.Processor.master.send(
+    //         CPU_message,
+    //         physical_address,
+    //         CPU_data,
+    //     )
+    //     this.Bus0.Port_in(this.Processor.master.ChannelA, 0)
+    //     //INTERCONNCET RUN
         
-        this.cycle += 1
-        this.println(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The INTERCONNECT is forwarding the message to SUB-INTERCONNECT..',
-        )
-        console.log(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The INTERCONNECT is forwarding the message to SUB-INTERCONNECT.',
-        )
-        this.view?.interconnect.setIsRunning(this.Bus0.active)
-        this.Bus0.Transmit() // INTERCONNECT IS TRANSMITTING
+    //     this.cycle += 1
+    //     this.println(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The INTERCONNECT is forwarding the message to SUB-INTERCONNECT..',
+    //     )
+    //     console.log(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The INTERCONNECT is forwarding the message to SUB-INTERCONNECT.',
+    //     )
+    //     this.view?.interconnect.setIsRunning(this.Bus0.active)
+    //     this.Bus0.Transmit() // INTERCONNECT IS TRANSMITTING
 
-        //MEMORY RUN
-        this.cycle += 1
-        this.println(
-            'Cycle ',
-            this.cycle.toString(),
-            ': SUB-INTERCONNECT is receiving message from INTERCONNECT.',
-        )
-        console.log(
-            'Cycle ',
-            this.cycle.toString(),
-            ': SUB-INTERCONNECT is receiving message from INTERCONNECT.',
-        )
+    //     //MEMORY RUN
+    //     this.cycle += 1
+    //     this.println(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': SUB-INTERCONNECT is receiving message from INTERCONNECT.',
+    //     )
+    //     console.log(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': SUB-INTERCONNECT is receiving message from INTERCONNECT.',
+    //     )
 
-        this.SubInterconncet (this.Bus0.Port_out(3))
+    //     this.SubInterconncet (this.Bus0.Port_out(3))
 
-        this.cycle += 1
-        this.Bus1.Port_in(this.Keyboard.getData(), 1)
-        this.println(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The KEYBOARD is sending an AccessAck message to the SUB-INTERCONNECT.',
-        )
-        console.log(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The KEYBOARD is sending an AccessAck message to the SUB-INTERCONNECT.',
-        )
+    //     this.cycle += 1
+    //     this.Bus1.Port_in(this.Keyboard.getData(), 1)
+    //     this.println(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The KEYBOARD is sending an AccessAck message to the SUB-INTERCONNECT.',
+    //     )
+    //     console.log(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The KEYBOARD is sending an AccessAck message to the SUB-INTERCONNECT.',
+    //     )
 
-        this.cycle += 1
-        this.Bus1.Transmit ()
-        this.println(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The SUB-INTERCONNECT is forwarding the message to INTERCONNECT.',
-        )
-        console.log(
-            'Cycle ',
-            this.cycle.toString(),
-            ': The SUB-INTERCONNECT is forwarding the message to INTERCONNECT.',
-        )
+    //     this.cycle += 1
+    //     this.Bus1.Transmit ()
+    //     this.println(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The SUB-INTERCONNECT is forwarding the message to INTERCONNECT.',
+    //     )
+    //     console.log(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': The SUB-INTERCONNECT is forwarding the message to INTERCONNECT.',
+    //     )
         
-        // MEMORY RESPONSE
-        this.cycle += 1
-        this.println(
-            'Cycle ',
-            this.cycle.toString(),
-            ': MEMORY is sending ACCESS_ACK message to CPU',
-        )
-        console.log(
-            'Cycle ',
-            this.cycle.toString(),
-            ': MEMORY is sending ACCESS_ACK message to CPU',
-        )
-        this.Bus0.Port_in(this.Bus1.Port_out(0), 2) //FIX ME
+    //     // MEMORY RESPONSE
+    //     this.cycle += 1
+    //     this.println(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': MEMORY is sending ACCESS_ACK message to CPU',
+    //     )
+    //     console.log(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': MEMORY is sending ACCESS_ACK message to CPU',
+    //     )
+    //     this.Bus0.Port_in(this.Bus1.Port_out(0), 2) //FIX ME
 
-        this.cycle += 1
-        this.println(
-            'Cycle ',
-            this.cycle.toString(),
-            ': INTERCONNECT is sending message to CPU',
-        )
-        console.log(
-            'Cycle ',
-            this.cycle.toString(),
-            ': INTERCONNECT is sending message to CPU',
-        )
-        this.Bus0.Transmit()
+    //     this.cycle += 1
+    //     this.println(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': INTERCONNECT is sending message to CPU',
+    //     )
+    //     console.log(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': INTERCONNECT is sending message to CPU',
+    //     )
+    //     this.Bus0.Transmit()
 
-        this.cycle += 1
-        const di2m = this.Bus0.Port_out(0).data
-        if (di2m === 'undefined' || di2m === undefined) this.Processor.register[rd] = '0'.padStart(32, '0')
-        if (di2m !== 'undefined' && di2m !== undefined) this.Processor.register[rd] = (di2m.slice(-34)).slice(0,32)
-        this.println(
-            'Cycle ',
-            this.cycle.toString(),
-            ': CPU is receiving ACCESS_ACK_DATA message from INTERCONNECT',
-        )
-        console.log(
-            'Cycle ',
-            this.cycle.toString(),
-            ': CPU is receiving ACCESS_ACK_DATA message from INTERCONNECT',
-        )
-        this.cycle = this.cycle + 1
-    }
+    //     this.cycle += 1
+    //     const di2m = this.Bus0.Port_out(0).data
+    //     if (di2m === 'undefined' || di2m === undefined) this.Processor.register[rd] = '0'.padStart(32, '0')
+    //     if (di2m !== 'undefined' && di2m !== undefined) this.Processor.register[rd] = (di2m.slice(-34)).slice(0,32)
+    //     this.println(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': CPU is receiving ACCESS_ACK_DATA message from INTERCONNECT',
+    //     )
+    //     console.log(
+    //         'Cycle ',
+    //         this.cycle.toString(),
+    //         ': CPU is receiving ACCESS_ACK_DATA message from INTERCONNECT',
+    //     )
+    //     this.cycle = this.cycle + 1
+    // }
     public setImem            () {
         let instruction = ''
         let pc_addr = 0

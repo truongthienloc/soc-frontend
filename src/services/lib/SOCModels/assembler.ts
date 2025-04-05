@@ -13,7 +13,7 @@ interface Funct3 {
 }
 
 interface Funct7 {
-    [key: string]: string
+    [key: string]: string 
 }
 
 let address: { [key: string]: number } = {}
@@ -572,6 +572,8 @@ export function assemblerFromIns(code: string): string[] {
         }
     }
 
+
+
     for (let i = pos + 1; i < ins.length; i++) {
         ins[i] = handler_string(ins[i])
         const t = ins[i].split(' ')
@@ -579,7 +581,6 @@ export function assemblerFromIns(code: string): string[] {
             continue
         }
         let string = ''
-        console.log ('FMT[t[0]]', FMT[t[0]] )
         if (FMT[t[0]] === 'R') {
             string = RType(ins[i])
         }

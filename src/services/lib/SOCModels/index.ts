@@ -26,42 +26,39 @@ SOC.Memory.Memory['100'.padStart(17, '0')] = '0'.padStart(32, '01')
 // console.log (SOC.DMA.buffer)
 // console.log (SOC.DMA.SENDtoLED())
 // console.log (SOC.DMA.SENDtoLED())
+const code              = 
+`
+.text 
+addi x10, x0, 1
+addi x17, x0, 11
+ecall
+`
 // const code              = 
 // `
 // .text  
-// lui  x2 , 0x00017
-// addi x2, x0, 32
-// addi x1, x0, 1
+// lui  x2 , 0x00008  
+// lui  x3 , 0x00009 
+// lui  x4 , 0x0000A 
+// lui  x5 , 0x0000B
+// lui  x6 , 0x0000C 
+// lui  x8 , 0x0001D 
+
+// addi x1 , x0, 1
 // sw   x1 , 0(x2)
-// lw   x1 , 0(x2)
-
+// sw   x1 , 0(x3)
+// sw   x1 , 0(x4)
+// sw   x1 , 0(x5)
+// sw   x1 , 0(x6)
+// sw   x1 , 4(x7)
+// sw   x1 , 4(x8)
 // `
-const code              = 
-`
-.text  
-lui  x2 , 0x00008  
-lui  x3 , 0x00009 
-lui  x4 , 0x0000A 
-lui  x5 , 0x0000B
-lui  x6 , 0x0000C 
-lui  x8 , 0x0001D 
-
-addi x1 , x0, 1
-sw   x1 , 0(x2)
-sw   x1 , 0(x3)
-sw   x1 , 0(x4)
-sw   x1 , 0(x5)
-sw   x1 , 0(x6)
-sw   x1 , 4(x7)
-sw   x1 , 4(x8)
-`
 
 SOC.Processor.active    = true
 SOC.MMU.active          = true
 SOC.Bus0.active          = true
 SOC.Bus1.active          = true
 SOC.Memory.active       = true
-SOC.DMA.active          = true
+SOC.DMA.active          = false
 
 SOC.assemble(
             code                                     // ,code               : string 
@@ -83,10 +80,10 @@ SOC.assemble(
             ,16*32                                  // ,dmaLen             : number
             ,0x17FFF + 1                            // ,dmaDes             : number
 ) 
-SOC.Memory.Memory['11100000000000000'] = '1'.padStart(32, '1')
+// SOC.Memory.Memory['11100000000000000'] = '1'.padStart(32, '1')
 SOC.RunAll()
 console.log(SOC.Processor.getRegisters())
-console.log(SOC.Memory.getPageNumber())
+// console.log(SOC.Memory.getPageNumber())
 // console.log(SOC.Memory.Memory)
 // console.log(SOC.Memory.Memory['01100000000000000'])
 // console.log(SOC.Memory.Memory['01101000000000000'])

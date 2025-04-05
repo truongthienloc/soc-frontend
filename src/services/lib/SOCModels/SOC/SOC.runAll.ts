@@ -1,19 +1,48 @@
-import Soc from "../SoC"
+import Soc from "../SOC/SoC"
 
-export function RunAll(this: Soc) {
+export async function RunAll(this: Soc) {
     // CHECK PROCESSOR IS ACTIVED OR NOT
     if (this.Processor.active == false) {
         console.log('CPU has not been actived!!!')
         this.println('CPU has not been actived!!!')
         return
     }
-
+    let bre = 0
     while (
         this.Processor.pc <
-        (Object.values(this.Processor.Instruction_memory).length - 1) * 4
+        this.Memory.Ins_pointer || this.Processor.state != 0 || this.DMA.state !=0
     ) {
-        this.Step()
+        await this.Step()
+        // if (bre > 22) break
+        // bre ++   
     }
 
+    // console.log (this.MMU.endAddress)
+    // console.log (this.Memory.Memory['10001000000010011'])
+    // console.log (this.Memory.Memory['10001000000010010'])
+    // console.log (this.Memory.Memory['10001000000010001'])
+    // console.log (this.Memory.Memory['10001000000010000'])
+    // console.log (this.Bridge)
+    // console.log (this.Bus1.Pout[0])
+    console.log (this.Led_matrix.state, this.Led_matrix.matrix_buffer)
+    // console.log(
+    //     this.DMA
+    // )
+    // console.log (
+    //     this.Processor.pc <
+    //     this.Memory.Ins_pointer, this.Processor.state != 0, this.DMA.state !=0
+    // )
+    // console.log (this.Memory.Memory['00011000000000000'])    
+    // console.log (this.Memory.Memory['00000000000000000'])
+    // console.log (this.Memory.GetMemory()['00011000000000000'])
+    // console.log (this.Memory.GetMemory()['00000000000000000'])
+    // console.log(this.DMA.DMA_Master.ChannelA)
+    // console.log(this.Bus1.Pin[0])
+    // console.log(this.Bus1)
+    // console.log(this.Bus0.Pin[1])
+    // console.log (this.Bridge.state)
+    // console.log (this.Bridge)
+    // console.log(this.Bridge.fifo_from_subInterconnect)
+    // console.log (this.Processor.getRegisters())
    this.event.emit(Soc.SOCEVENT.DONE_ALL)
 }

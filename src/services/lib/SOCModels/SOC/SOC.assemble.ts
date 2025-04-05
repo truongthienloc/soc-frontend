@@ -1,7 +1,7 @@
 import { Register } from "~/types/register"
-import Soc from "../SoC"
-import { TLBEntries } from "../soc.d"
-import BuddyAllocator from "../BuddyAllocator"
+import Soc from "../SOC/SoC"
+import { TLBEntries } from "../Compile/soc.d"
+import BuddyAllocator from "../Memory/BuddyAllocator"
 import { ConstructionOutlined, Monitor } from "@mui/icons-material"
 
 
@@ -12,9 +12,6 @@ export function assemble(
                 ,Mem_tb             : Register[]
                 ,TLB                : TLBEntries[]
                 ,stap               : number
-                ,dmaSrc             : number
-                ,dmaLen             : number
-                ,dmaDes             : number
     ) {
     this.println('Cycle ', this.cycle.toString(), ': System is setting up')
     console.log('Cycle ', this.cycle.toString(), ': System is setting up')
@@ -25,11 +22,15 @@ export function assemble(
         this.MMU.active         = this.view.mmuModule.getActivated()
         this.Bus0.active        = this.view.interconnect.getActivated()
         this.Bus1.active        = this.view.interconnect.getActivated()
-        this.DMA.active         = this.view.dmaModule.getActivated()
+        // this.DMA.active         = this.view.dmaModule.getActivated()
         this.Memory.active      = this.view.memoryModule.getActivated()
+<<<<<<< HEAD
         // this.active_keyboard    = this.view.keyboardModule.getActivated()
         this.active_monitor     = true
         
+=======
+
+>>>>>>> 818de6461e4dae295b3a0990bdead82eb7480e6e
     }
     
     //****************CHECK SYNTAX ERROR****************
@@ -39,36 +40,36 @@ export function assemble(
     
     //****************SET INITIAL STATUS****************
     // SET INITIAL DATA
-
-    // const endaddr = this.Allocator.allocate(required_mem)
     this.Processor.reset()
-    this.Processor.setImem(this.Assembler.binary_code)                 // LOAD INTUCTIONS INTO PROCESSOR
-    this.Memory.reset (Mem_tb, 0x07FFF, 0x1BFFF, 0x1FFFF)
-    this.Memory.SetInstuctionMemory(this.Processor.Instruction_memory) // LOAD INTUCTIONS INTO MAIN MEMORY
+    this.cycle.cycle = 0
+
+    this.Memory.reset (Mem_tb)
+    this.Memory.SetInstructionMemory(this.Assembler.binary_code) 
     this.Memory.setPageNumber()
-    this.DMA.config(dmaDes, dmaSrc, dmaLen)
-    this.MMU.Set(
-        TLB                 // P: [number, number, number, number][]
-        , stap              // , pointer       : number
-        , this.Allocator.allocate(required_mem)           // , end_addr      : number
-        , 0x07FFF + 1  // , start_addr    : number
-        , 0x1BFFF        // , 0x1BFFF    : number
-        , 0x07FFF      // , 0x07FFF  : number
-        , 0x1FFFF          // , 0x1FFFF      : number
+
+    this.Processor.InsLength = this.Memory.Ins_pointer
+
+    this.Processor.MMU.Set(
+        TLB                 
+        , stap              
+        , this.Allocator.allocate(required_mem)                  
     )
-    this.Bus0.setaddress (0x07FFF , 0x1BFFF)
+
+    // console.log (this.Allocator.allocate(required_mem))
+    // console.log (this.Processor.MMU.endAddress)
+
     for (let i of this.Assembler.Instructions)
         if (i != '.text' && i != '') this.Assembly_code.push(i)
     //SET INITIAL ANIMATION'STATUS
     
     this.logger?.clear()
-    // this.monitor?.clear()
-    this.LedMatrix?.clear()
-    this.cycle = 0
     this.view?.cpu.setIsRunning(false)
     this.view?.mmu.setIsRunning(false)
+<<<<<<< HEAD
     // this.view?.monitor.setIsRunning(false)
     // this.view?.keyboard.setIsRunning(false)
+=======
+>>>>>>> 818de6461e4dae295b3a0990bdead82eb7480e6e
     this.view?.memory.setIsRunning(false)
     this.view?.dma.setIsRunning(false)
     this.view?.interconnect.setIsRunning(false)

@@ -21,7 +21,7 @@ export default class SubInterconnect extends Interconnect {
         const text = new Konva.Text({
             width: toPixel(w),
             height: toPixel(h),
-            text: 'Sub-Interconnect',
+            text: 'TileLink - UL',
             verticalAlign: 'middle',
             align: 'center',
             fill: Scene.FILL_COLOR,

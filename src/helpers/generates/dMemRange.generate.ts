@@ -20,9 +20,13 @@ export function convertBinary2Hex(binary: string): string {
 export function createRangeDmemData(data: Register[], start: string, end?: string): Register[] {
     const startDec = parseInt(start, 16)
     const res = []
+
+    console.log ('data', data)
+
     for (let i = 0; i < LENGTH_OF_DMEM; i++) {
         const addressDec = startDec + 4 * i
-        const addressHex = '0x' + addressDec.toString(16).padStart(8, '0')
+        const addressHex = '0x' + addressDec.toString(16).padStart(5, '0')
+
 
         if (end && parseInt(end, 16) < addressDec) {
             break
@@ -39,6 +43,8 @@ export function createRangeDmemData(data: Register[], start: string, end?: strin
             value: value,
         })
     }
+
+    console.log ('res', res)
 
     return res
 }

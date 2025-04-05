@@ -1,7 +1,14 @@
-import DMA from './DMA'
-import Soc from './SoC'
-import ChannalD from './ChannelD'
+// import DMA from './DMA'
+import Soc from './SOC/SoC'
+import ChannelD from './Interconnect/ChannelD'
+import ChannelA from "./Interconnect/ChannelA";
+import DMA from './DMA/DMA';
+// import { LayersTwoTone } from '@mui/icons-material';
+// import { cyan } from '@mui/material/colors';
+// import { Console } from 'console';
+
 const SOC               = new Soc('super SoC')
+<<<<<<< HEAD
 const channelD          = new ChannalD( '001'                   ,                       //opcode
                                         '00'                    ,                       //param
                                         '10'                    ,                       //size
@@ -52,29 +59,51 @@ ecall
 // sw   x1 , 4(x7)
 // sw   x1 , 4(x8)
 // `
+=======
+const code              = 
+`
+.text
+lui  x1, 0x3
+ori  x1, x1, 0x04c
+
+addi x2, x0, 1
+//sw   x1, 16(x1)
+//lw   x3, 16(x1)
+sw   x2, 16(x1) // Led control register
+sw   x2, 0(x1)  // DMA source register
+sw   x2, 4(x1)  // DMA destination register
+addi x2, x0, 1
+sw   x2, 8(x1)  // DMA length register
+sw   x2, 12(x1) // DMA control register
+
+`
+>>>>>>> 818de6461e4dae295b3a0990bdead82eb7480e6e
 
 SOC.Processor.active    = true
 SOC.MMU.active          = true
-SOC.Bus0.active          = true
-SOC.Bus1.active          = true
+SOC.Bus0.active         = true
+SOC.Bus1.active         = true
 SOC.Memory.active       = true
+<<<<<<< HEAD
 SOC.DMA.active          = false
+=======
+>>>>>>> 818de6461e4dae295b3a0990bdead82eb7480e6e
 
 SOC.assemble(
             code                                     // ,code               : string 
             ,3 * 4096                               // ,required_mem       : number
             ,[]                                      // ,Mem_tb             : Register[]
             ,[
-                 //[0, (0x07FFF + 1 ) + 4096*0, 1, 0]
-                 [8, 49152, 1, 6 ]
-                ,[0, (0x07FFF + 1 ) + 4096*1, 1, 1]
-                ,[0, (0x07FFF + 1 ) + 4096*2, 1, 0]
-                ,[0, (0x07FFF + 1 ) + 4096*3, 1, 1]
-                ,[0, (0x07FFF + 1 ) + 4096*4, 1, 1]
-                ,[0, (0x07FFF + 1 ) + 4096*5, 1, 1]
-                ,[0, (0x07FFF + 1 ) + 4096*6, 1, 1]
-                ,[0, (0x07FFF + 1 ) + 4096*7, 1, 1]
+                 [8, 49152, 0, 6 ]
+                ,[0, (131072 ) + 4096*1, 0, 1]
+                ,[0, (131072 ) + 4096*2, 0, 1]
+                ,[0, (131072 ) + 4096*3, 0, 1]
+                ,[0, (131072 ) + 4096*4, 0, 1]
+                ,[0, (131072 ) + 4096*5, 0, 1]
+                ,[0, (131072 ) + 4096*6, 0, 1]
+                ,[0, (131072 ) + 4096*7, 0, 1]
             ]                                       // ,TLB                : TLBEntries[]
+<<<<<<< HEAD
             ,0x1FFFF + 1                            // ,stap               : number
             ,0x1BFFF + 1                            // ,dmaSrc             : number
             ,16*32                                  // ,dmaLen             : number
@@ -91,3 +120,9 @@ console.log(SOC.Processor.getRegisters())
 // console.log(SOC.Memory.Memory['01111000000000000'])
 // console.log(SOC.Memory.Memory['11011000000000000'])
 // console.log(SOC.DMA.buffer)
+=======
+            ,0x0003000                             // ,stap               : number
+        )
+
+SOC.RunAll()
+>>>>>>> 818de6461e4dae295b3a0990bdead82eb7480e6e

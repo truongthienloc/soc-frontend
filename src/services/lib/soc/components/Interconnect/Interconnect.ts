@@ -84,7 +84,7 @@ export default class Interconnect extends TileLinkObject {
         const text = new Konva.Text({
             width: toPixel(w),
             height: toPixel(h),
-            text: 'Interconnect',
+            text: 'TileLink - UH',
             verticalAlign: 'middle',
             align: 'center',
             fill: 'white',

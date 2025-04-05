@@ -34,6 +34,7 @@ function CodeEditor({ value = '', onChange, disable = false, hidden }: CodeEdito
   }, [])
 
   const createCodeEditor = useCallback(async () => {
+    await import('codemirror/addon/mode/simple')
     if (codeRef.current) {
       return
     }
@@ -47,6 +48,16 @@ function CodeEditor({ value = '', onChange, disable = false, hidden }: CodeEdito
       return
     }
 
+    // const interval = setInterval(() => {
+    //   console.log('textarea display: ', textareaRef.current?.style.display);
+
+    //   if (textareaRef.current?.style.display === 'none') {
+    //     // debugger
+    //     clearInterval(interval)
+    //     codeRef.current?.setValue(value)
+    //   }
+    // }, 1000)
+
     const code = CodeMirror.fromTextArea(textareaRef.current, {
       mode: 'risc-v',
       // mode: 'javascript',
@@ -55,12 +66,9 @@ function CodeEditor({ value = '', onChange, disable = false, hidden }: CodeEdito
     })
     codeRef.current = code
 
-    code.setOption('readOnly', disable)
+    // code.setOption('readOnly', disable)
 
-    code.setValue(value)
     code.setSize('100%', '100%')
-
-    // console.log('container size: ', containerRef.current.clientWidth, containerRef.current.clientHeight);
 
     code.on('change', (ins) => {
       onChange?.(ins.getValue())
@@ -68,10 +76,8 @@ function CodeEditor({ value = '', onChange, disable = false, hidden }: CodeEdito
   }, [value])
 
   useEffect(() => {
-    import('codemirror/addon/mode/simple')
     if (isStart.current && !hidden) {
       isStart.current = false
-      // import('codemirror')
       createCodeEditor()
     }
 
@@ -82,15 +88,17 @@ function CodeEditor({ value = '', onChange, disable = false, hidden }: CodeEdito
     }
   }, [handleContainerResize, createCodeEditor, hidden])
 
-  useEffect(() => {
-    if (codeRef.current) {
-      codeRef.current.setOption('readOnly', disable)
-    }
-  }, [disable])
+  // useEffect(() => {
+  //   if (codeRef.current) {
+  //     codeRef.current.setOption('readOnly', disable)
+  //   }
+  // }, [disable])
 
   useEffect(() => {
     if (codeRef.current && disable) {
-      codeRef.current.setValue(value)
+      if (textareaRef.current?.style.display === 'none') {
+        codeRef.current.setValue(value)
+      }
     }
   }, [value])
 
@@ -100,7 +108,14 @@ function CodeEditor({ value = '', onChange, disable = false, hidden }: CodeEdito
       className="h-full min-h-[300px] min-w-[250px] flex-1 text-base"
       onResize={handleContainerResize}
     >
-      <textarea ref={textareaRef} name="code-editor" id="code-editor"></textarea>
+      <textarea
+        ref={textareaRef}
+        name="code-editor"
+        id="code-editor"
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
+        disabled={disable}
+      ></textarea>
     </div>
   )
 }

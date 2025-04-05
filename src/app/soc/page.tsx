@@ -15,7 +15,7 @@ import { MemoryTable } from '~/components/MemoryTable'
 import { Tab, TabContext, TabPanel, Tabs } from '~/components/Tabs'
 import { cn } from '~/helpers/cn'
 import Logs from '~/services/lib/Logs/Logs'
-import Soc from '~/services/lib/SOCModels/SoC'
+import Soc from '~/services/lib/SOCModels/SOC/SoC'
 import '~/styles/soc.scss'
 import { Register } from '~/types/register'
 import { SimulatorType } from '~/types/simulator'
@@ -39,7 +39,8 @@ import { modelColors2ViewColors } from '~/helpers/converts/color.convert'
 import useDMAConfig from '~/components/DMATable/useDMAConfig'
 import { convertToDMAStandard } from '~/helpers/converts/dma.convert'
 import { TopFunctionButton } from './_components/CodeEditorSection'
-import { DecToHex } from '~/services/lib/SOCModels/convert'
+import { DecToHex } from '~/services/lib/SOCModels/Compile/convert'
+import { Separator } from '~/components/Separator'
 
 type Props = {}
 
@@ -127,8 +128,8 @@ export default function SocPage({}: Props) {
         const LedMatrix = (await import('~/services/lib/control/LedMatrix')).default
 
         const soc = new NCKHBoard('simulation')
-        // const monitor = new Monitor('#monitor', soc.monitorModule)
-        // const keyboard = new Keyboard('#keyboard', soc.keyboardModule, monitor)
+        const monitor = new Monitor('#monitor')
+        const keyboard = new Keyboard('#keyboard', monitor)
         const ledMatrix = new LedMatrix('.led-matrix')
         const logs = new Logs('#logs')
 
@@ -150,12 +151,13 @@ export default function SocPage({}: Props) {
         }
 
         const handleLedMatrixClick = () => {
-          setShowSimulatorType('PERIPHERALS')
+          setShowSimulatorType('DMA')
           setTabIndex(1)
         }
 
         const handleDMAClick = () => {
           setShowSimulatorType('DMA')
+          setTabIndex(0)
         }
 
         const {
@@ -180,9 +182,10 @@ export default function SocPage({}: Props) {
         logRef.current = logs
         socModel.setLogger(logs)
         socModel.setView(soc)
-        // socModel.setKeyboard(keyboard)
-        // socModel.setMonitor(monitor)
-        socModel.setLedMatrix(ledMatrix)
+        socModel.setKeyboard(keyboard)
+        socModel.setMonitor(monitor)
+        // TODO: fix this error
+        // socModel.setLedMatrix(ledMatrix)
 
         setPosition1(430)
         setRegisters([
@@ -215,9 +218,11 @@ export default function SocPage({}: Props) {
 
   const handleChangeCode = (code: string) => {
     setCode(code)
-    startTransition(() => {
-      setAllowRun(false)
-    })
+    // if (allowRun) {
+    //   startTransition(() => {
+    //     setAllowRun(false)
+    //   })
+    // }
   }
 
   const handleChangeMemoryData = (address: string, data: string) => {
@@ -245,7 +250,8 @@ export default function SocPage({}: Props) {
         return
       }
 
-      const newMemoryTable = convertMemoryCoreToRegisterType(socModelRef.current.Memory.Memory)
+      
+      const newMemoryTable = convertMemoryCoreToRegisterType(socModelRef.current.Memory.GetMemory())
       const newTLB = array2TLB(socModelRef.current.MMU.TLB)
       setMemoryData(newMemoryTable)
       tlb.setTLBEntries(newTLB)
@@ -388,9 +394,9 @@ export default function SocPage({}: Props) {
         memoryData.map((mem) => ({ name: hexToBinary(mem.name), value: hexToBinary(mem.value) })),
         tlbEntries,
         parseInt(tlb.pointer, 16),
-        parseInt(dmaConfigs.src, 16),
-        parseInt(dmaConfigs.len, 16),
-        parseInt(dmaConfigs.des, 16),
+        // parseInt(dmaConfigs.src, 16),
+        // parseInt(dmaConfigs.len, 16),
+        // parseInt(dmaConfigs.des, 16),
       )
     ) {
       toast.error('Syntax error')
@@ -431,7 +437,8 @@ export default function SocPage({}: Props) {
         if (!socModelRef.current) {
           return
         }
-        socModelRef.current.Memory.setMemoryFromString(text)
+        // TODO: Fix this error
+        // socModelRef.current.Memory.setMemoryFromString(text)
         setMemoryData(convertMemoryCoreToRegisterType(socModelRef.current.Memory.Memory))
         setAllowRun(false)
         toast.success('Import memory table successfully')
@@ -508,7 +515,6 @@ export default function SocPage({}: Props) {
                     Trương Thiên Lộc
                   </a>
                 </p>
-                
               </div>
               <div id="simulation"></div>
             </div>
@@ -586,7 +592,7 @@ export default function SocPage({}: Props) {
                         value={code}
                         onChange={handleChangeCode}
                         disable={disableCodeEditor}
-                        hidden={showSimulatorType !== 'CODE_EDITOR'}
+                        hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex != 1}
                       />
                     )}
                   </div>
@@ -610,7 +616,7 @@ export default function SocPage({}: Props) {
                       value={code}
                       onChange={handleChangeCode}
                       disable={disableCodeEditor}
-                      hidden={showSimulatorType !== 'PERIPHERALS' || tabIndex != 0}
+                      hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex != 3}
                     />
                   )}
                 </div>
@@ -630,8 +636,8 @@ export default function SocPage({}: Props) {
                 <CloseIcon />
               </Button>
             </div>
-            <div className="grid grid-cols-2 gap-2 pr-4">
-              <div className="flex items-start">
+            <div className="grid grid-cols-1 gap-2 pr-4">
+              <div className="flex justify-center">
                 <MemoryMap className="" memoryMap={memoryMap} disabled={isStepping} />
               </div>
               <MemoryTable
@@ -666,18 +672,20 @@ export default function SocPage({}: Props) {
 
           {/* DMA SECTION */}
           <div
-            className={cn('flex h-full flex-col', {
+            className={cn('relative flex h-full flex-col', {
               hidden: showSimulatorType !== 'DMA',
             })}
           >
-            <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
-              {/* <h2 className="text-xl font-bold text-red-500">MMU View:</h2> */}
-              <Button className="ml-auto" onClick={() => setShowSimulatorType('SOC')}>
-                <CloseIcon />
-              </Button>
+            <div className="flex flex-1 gap-4 pr-4">
+              <div className="pt-8">
+                <DMATable configs={dmaConfigs} data={dmaData} />
+              </div>
+              <div className="h-full w-1 bg-gray-400"></div>
+              <div className="flex flex-col flex-1 gap-2 pt-8">
+                <h2 className="text-lg font-bold">Led Matrix</h2>
+                <div className= "flex justify-center"><LedMatrix /></div>
+              </div>
             </div>
-
-            <DMATable configs={dmaConfigs} data={dmaData} />
           </div>
 
           {/* Peripherals Section */}
@@ -688,13 +696,11 @@ export default function SocPage({}: Props) {
           >
             <h2 className="text-xl font-bold">Peripherals:</h2>
             {/* Tab Bar */}
-            <TabContext index={tabIndex} setIndex={setTabIndex}>
+            {/* <TabContext index={tabIndex} setIndex={setTabIndex}>
               <Tabs>
-                {/* <Tab label="Monitor & Keyboard" /> */}
                 <Tab label="Led Matrix" />
               </Tabs>
-              {/* Tab index = 0 */}
-              {/* <TabPanel index={0} className="grid grid-cols-[4fr_6fr]">
+              <TabPanel index={0} className="grid grid-cols-[4fr_6fr]">
                 <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
                   {isStepping ? (
                     <DisplayStepCode code={stepCode} pc={pc} />
@@ -712,8 +718,8 @@ export default function SocPage({}: Props) {
                   <Keyboard />
                 </div>
               </TabPanel> */}
-              {/* Tab index = 1 */}
-              <TabPanel index={0} className="grid grid-cols-[4fr_6fr]">
+            {/* Tab index = 1 */}
+            {/* <TabPanel index={0} className="grid grid-cols-[4fr_6fr]">
                 <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
                   {isStepping ? (
                     <DisplayStepCode code={stepCode} pc={pc} />
@@ -726,9 +732,9 @@ export default function SocPage({}: Props) {
                     />
                   )}
                 </div>
-                <LedMatrix />
+                {showSimulatorType === 'PERIPHERALS' && <LedMatrix />}
               </TabPanel>
-            </TabContext>
+            </TabContext> */}
           </div>
         </div>
         {/* End Section 3 */}

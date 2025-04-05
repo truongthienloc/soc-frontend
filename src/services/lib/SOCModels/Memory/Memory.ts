@@ -20,6 +20,9 @@ export default class Memory {
     active_println  : boolean
     burst           : ChannelD[]
 
+    RECEIVE_GET_STATE = 0
+    RECEIVE_PUT_STATA = 1
+
     constructor(active: boolean) {
         this.state               = 0 
         this.address            = ''
@@ -34,65 +37,13 @@ export default class Memory {
         this.burst              = []
     }
 
-    public setLogger(logger: Logger) {
-        this.logger = logger
-    }
-
-    public println(active: boolean, ...args: string[]) {
-        
-        if (active) {
-            console.log(...args)
-        }
-
-        if (!this.logger) {
-            return
-        }
-
-        if (active) {
-            this.logger.println(...args)
-        }
-    }
-
-    public reset(Mem_tb: Register[]){
-        // MEMORY AREA OF Kernel
-        for (let i = 0; i < 0X1FFFF  + 1; i+=1) 
-            this.Memory[i.toString(2).padStart(17,'0')] = '0'.padStart(8,'0')
-        
-        for (const element of Mem_tb) 
-            this.Memory[element.name] = element.value   
-
-        this.setPageNumber ()
-    }
-
-    public setPageNumber () {
-        let count = 0
-        const PageTablePointer = 0x0003000
-        for (let i = PageTablePointer; i < (PageTablePointer + 4 * 16); i+=4) { 
-            this.Memory[i.toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0') 
-            count ++ 
-        }
-    }
-
-    public getPageNumber (): Register[] {
-        const result: Register[]    = []
-        const PageTablePointer0     =   0x0003000
-        for (let i = PageTablePointer0; i < (PageTablePointer0 + 4 * 16); i+=4) {
-            result.push({
-                name: '0x' +  i.toString(16).padStart(8,'0'), 
-                value: '0x' + dec('0' + this.Memory[i.toString(2).padStart(17,'0')]).toString(16).padStart(8,'0')
-            })
-        }
-        return result
-        // console.log i, dec (this.Memory[i.toString(2).padStart(32,'0')]))
-    }
-
     public Run (
         cycle           : Cycle
         , MMU2Memory    : ChannelA
         , ready         : boolean
     ) {
 
-        if (this.state == 0) {
+        if (this.state == this.RECEIVE_GET_STATE) {
             this.slaveMemory.ChannelD.valid = '0'
             if (MMU2Memory.valid == '1') {
 
@@ -102,7 +53,7 @@ export default class Memory {
                     this.println (this.active_println,
                     'Cycle '             +
                     cycle.toString()     +
-                    ': The MEMORY is receiving a GET message from the INTERCONNECT.'
+                    ': The MEMORY is receiving GET message from the INTERCONNECT.'
                     )
                     this.slaveMemory.receive (MMU2Memory)
                     this.address         =   this.slaveMemory.ChannelA.address
@@ -112,6 +63,15 @@ export default class Memory {
                         
 
                         if (MMU2Memory.size == '00') {
+                            this.println (this.active_println,
+                                'Cycle '             +
+                                cycle.toString()     +
+                                ': The MEMORY is sending an AccessAckData message to the INTERCONNECT. (' 
+                                + BinToHex (this.slaveMemory.ChannelD.data) 
+                                +')'
+                            )
+                            cycle.incr() 
+
                             this.slaveMemory.send(
                                 'AccessAckData', 
                                 this.slaveMemory.ChannelA.source, 
@@ -120,19 +80,21 @@ export default class Memory {
                                 this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
                                 this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
                             )
-                            
                             this.burst.push (this.slaveMemory.ChannelD)
                         }
-                        this.println (this.active_println,
-                            'Cycle '             +
-                            cycle.toString()     +
-                            ': The MEMORY is sending an AccessAckData message to the INTERCONNECT. (' 
-                            + BinToHex (this.slaveMemory.ChannelD.data) 
-                            +')'
-                        )
+
 
                         if (MMU2Memory.size == '10') {
                             // FIRST BURST
+                            this.println (this.active_println,
+                                'Cycle '             +
+                                cycle.toString()     +
+                                ': The MEMORY is sending an AccessAckData message to the INTERCONNECT (' 
+                                + BinToHex (this.slaveMemory.ChannelD.data) 
+                                +').'
+                            )
+                            cycle.incr()
+                            
                             this.slaveMemory.send(
                                 'AccessAckData', 
                                 this.slaveMemory.ChannelA.source, 
@@ -144,7 +106,16 @@ export default class Memory {
 
                             this.burst.push (this.slaveMemory.ChannelD)
     
-                            //SECOND BURST 
+                            //SECOND BURST
+                            this.println (this.active_println,
+                                'Cycle '             +
+                                cycle.toString()     +
+                                ': The MEMORY is sending an AccessAckData message to the INTERCONNECT (' 
+                                + BinToHex (this.slaveMemory.ChannelD.data) 
+                                +').'
+                            )
+                            cycle.incr()
+
                             this.slaveMemory.send(
                                 'AccessAckData', 
                                 this.slaveMemory.ChannelA.source, 
@@ -156,6 +127,15 @@ export default class Memory {
                             this.burst.push (this.slaveMemory.ChannelD)
     
                             //THIRD BURST
+                            this.println (this.active_println,
+                                'Cycle '             +
+                                cycle.toString()     +
+                                ': The MEMORY is sending an AccessAckData message to the INTERCONNECT (' 
+                                + BinToHex (this.slaveMemory.ChannelD.data) 
+                                +').'
+                            )
+                            cycle.incr()
+
                             this.slaveMemory.send(
                                 'AccessAckData', 
                                 this.slaveMemory.ChannelA.source, 
@@ -167,6 +147,15 @@ export default class Memory {
                             this.burst.push (this.slaveMemory.ChannelD)
     
                             //FOURTH BURST
+                            this.println (this.active_println,
+                                'Cycle '             +
+                                cycle.toString()     +
+                                ': The MEMORY is sending an AccessAckData message to the INTERCONNECT (' 
+                                + BinToHex (this.slaveMemory.ChannelD.data) 
+                                +').'
+                            )
+                            cycle.incr()
+
                             this.slaveMemory.send(
                                 'AccessAckData', 
                                 this.slaveMemory.ChannelA.source, 
@@ -217,7 +206,7 @@ export default class Memory {
                         this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(8,16)
                         this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(16,24)
                         this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(24,32)
-                         
+
                         this.state   = 1
                         cycle.incr()
                     }
@@ -227,13 +216,69 @@ export default class Memory {
             }
            
         }
-        if (this.state == 1) {
+        if (this.state == this.RECEIVE_PUT_STATA) {
             this.slaveMemory.ChannelD.valid = '0'
             this.burst = []
             this.state = 0
         }
             
     }
+
+    public setLogger(logger: Logger) {
+        this.logger = logger
+    }
+
+    public println(active: boolean, ...args: string[]) {
+        
+        if (active) {
+            console.log(...args)
+        }
+
+        if (!this.logger) {
+            return
+        }
+
+        if (active) {
+            this.logger.println(...args)
+        }
+    }
+
+    public reset(Mem_tb: Register[]){
+        // MEMORY AREA OF Kernel
+        for (let i = 0; i < 0X1FFFF  + 1; i+=1) 
+            this.Memory[i.toString(2).padStart(17,'0')] = '0'.padStart(8,'0')
+        
+        for (const element of Mem_tb) 
+            this.Memory[element.name] = element.value   
+
+        this.setPageNumber ()
+    }
+
+    public setPageNumber () {
+        let count = 0
+        const PageTablePointer = 0x0003000
+        for (let i = PageTablePointer; i < (PageTablePointer + 64); i+=4) { 
+            this.Memory[(i+3).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(0,8)
+            this.Memory[(i+2).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(8,16)
+            this.Memory[(i+1).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(16,24)
+            this.Memory[(i+0).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(24,32)
+            count ++ 
+        }
+    }
+
+    public getPageNumber (): Register[] {
+        const result: Register[]    = []
+        const PageTablePointer0     =   0x0003000
+        for (let i = PageTablePointer0; i < (PageTablePointer0 + 4 * 16); i+=4) {
+            result.push({
+                name: '0x' +  i.toString(16).padStart(8,'0'), 
+                value: '0x' + dec('0' + this.Memory[i.toString(2).padStart(17,'0')]).toString(16).padStart(8,'0')
+            })
+        }
+        return result
+    }
+
+
 
     public GetInstructionMemory () {
         for (let i = 0; i<0X00FFF; i+=1 ){
@@ -259,9 +304,6 @@ export default class Memory {
             }
         }
     }
-    
-    
-    
 
     public GetMemory() {
         // Chuyển object sang mảng các cặp [key, value]
@@ -280,27 +322,6 @@ export default class Memory {
         }
 
         return littleEndianMemory
-    
-        // // Tạo một object mới để lưu trữ các giá trị được chuyển đổi theo Little Endian
-        // const littleEndianMemory: { [key: string]: string } = {};
-    
-        // // Duyệt qua mỗi nhóm 4 entries, gộp và đảo ngược byte
-        // for (let i = 0; i < sortedEntries.length / 4; i += 4) {
-        //     const keyBase = parseInt(sortedEntries[i][0], 10); // Lấy key cơ sở là địa chỉ đầu tiên của mỗi nhóm 4 bytes
-        //     let littleEndianValue = '';
-    
-        //     // Đảo ngược thứ tự các bytes và gộp lại thành một giá trị nhị phân duy nhất
-        //     for (let j = 3; j >= 0; j--) {
-        //         if (i + j < sortedEntries.length) {
-        //             littleEndianValue += sortedEntries[i + j][1];
-        //         }
-        //     }
-    
-        //     // Lưu trữ vào object mới với key là địa chỉ cơ sở
-        //     littleEndianMemory[keyBase.toString()] = littleEndianValue;
-        // }
-    
-        // return littleEndianMemory;
     }
     
     

@@ -1,6 +1,5 @@
 import Konva from 'konva'
 import Agent, { AgentOptions } from './Agent'
-import { Scene } from '../Scene'
 import { Interface } from '../Interface'
 import { AgentType } from '../../types/agent.type'
 
@@ -28,17 +27,4 @@ export default class MMU extends Agent {
         this.shape.add(topInterface.getShape())
         this.shape.add(bottomInterface.getShape())
     }
-
-    // protected initText(): void {
-    //     const toPixel = Scene.toPixel
-    //     const text = new Konva.Text({
-    //         width: toPixel(this.w),
-    //         height: toPixel(this.h),
-    //         align: 'center',
-    //         verticalAlign: 'middle',
-    //         text: 'MMU',
-    //     })
-
-    //     this.shape.add(text)
-    // }
 }

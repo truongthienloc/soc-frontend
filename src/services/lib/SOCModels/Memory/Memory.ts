@@ -20,6 +20,9 @@ export default class Memory {
     active_println  : boolean
     burst           : ChannelD[]
 
+    RECEIVE_GET_STATE = 0
+    RECEIVE_PUT_STATA = 1
+
     constructor(active: boolean) {
         this.state               = 0 
         this.address            = ''
@@ -34,67 +37,13 @@ export default class Memory {
         this.burst              = []
     }
 
-    public setLogger(logger: Logger) {
-        this.logger = logger
-    }
-
-    public println(active: boolean, ...args: string[]) {
-        
-        if (active) {
-            console.log(...args)
-        }
-
-        if (!this.logger) {
-            return
-        }
-
-        if (active) {
-            this.logger.println(...args)
-        }
-    }
-
-    public reset(Mem_tb: Register[]){
-        // MEMORY AREA OF Kernel
-        for (let i = 0; i < 0X1FFFF  + 1; i+=1) 
-            this.Memory[i.toString(2).padStart(17,'0')] = '0'.padStart(8,'0')
-        
-        for (const element of Mem_tb) 
-            this.Memory[element.name] = element.value   
-
-        this.setPageNumber ()
-    }
-
-    public setPageNumber () {
-        let count = 0
-        const PageTablePointer = 0x0003000
-        for (let i = PageTablePointer; i < (PageTablePointer + 64); i+=4) { 
-            this.Memory[(i+3).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(0,8)
-            this.Memory[(i+2).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(8,16)
-            this.Memory[(i+1).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(16,24)
-            this.Memory[(i+0).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(24,32)
-            count ++ 
-        }
-    }
-
-    public getPageNumber (): Register[] {
-        const result: Register[]    = []
-        const PageTablePointer0     =   0x0003000
-        for (let i = PageTablePointer0; i < (PageTablePointer0 + 4 * 16); i+=4) {
-            result.push({
-                name: '0x' +  i.toString(16).padStart(8,'0'), 
-                value: '0x' + dec('0' + this.Memory[i.toString(2).padStart(17,'0')]).toString(16).padStart(8,'0')
-            })
-        }
-        return result
-    }
-
     public Run (
         cycle           : Cycle
         , MMU2Memory    : ChannelA
         , ready         : boolean
     ) {
 
-        if (this.state == 0) {
+        if (this.state == this.RECEIVE_GET_STATE) {
             this.slaveMemory.ChannelD.valid = '0'
             if (MMU2Memory.valid == '1') {
 
@@ -267,13 +216,69 @@ export default class Memory {
             }
            
         }
-        if (this.state == 1) {
+        if (this.state == this.RECEIVE_PUT_STATA) {
             this.slaveMemory.ChannelD.valid = '0'
             this.burst = []
             this.state = 0
         }
             
     }
+
+    public setLogger(logger: Logger) {
+        this.logger = logger
+    }
+
+    public println(active: boolean, ...args: string[]) {
+        
+        if (active) {
+            console.log(...args)
+        }
+
+        if (!this.logger) {
+            return
+        }
+
+        if (active) {
+            this.logger.println(...args)
+        }
+    }
+
+    public reset(Mem_tb: Register[]){
+        // MEMORY AREA OF Kernel
+        for (let i = 0; i < 0X1FFFF  + 1; i+=1) 
+            this.Memory[i.toString(2).padStart(17,'0')] = '0'.padStart(8,'0')
+        
+        for (const element of Mem_tb) 
+            this.Memory[element.name] = element.value   
+
+        this.setPageNumber ()
+    }
+
+    public setPageNumber () {
+        let count = 0
+        const PageTablePointer = 0x0003000
+        for (let i = PageTablePointer; i < (PageTablePointer + 64); i+=4) { 
+            this.Memory[(i+3).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(0,8)
+            this.Memory[(i+2).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(8,16)
+            this.Memory[(i+1).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(16,24)
+            this.Memory[(i+0).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(24,32)
+            count ++ 
+        }
+    }
+
+    public getPageNumber (): Register[] {
+        const result: Register[]    = []
+        const PageTablePointer0     =   0x0003000
+        for (let i = PageTablePointer0; i < (PageTablePointer0 + 4 * 16); i+=4) {
+            result.push({
+                name: '0x' +  i.toString(16).padStart(8,'0'), 
+                value: '0x' + dec('0' + this.Memory[i.toString(2).padStart(17,'0')]).toString(16).padStart(8,'0')
+            })
+        }
+        return result
+    }
+
+
 
     public GetInstructionMemory () {
         for (let i = 0; i<0X00FFF; i+=1 ){

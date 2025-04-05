@@ -16,6 +16,7 @@ export default class Bridge {
     state                       : number
     active_println              : boolean
     logger                     ?: Logger
+    
     STATE_RECEIVE               = 0
     STATE_SEND                  = 1
 

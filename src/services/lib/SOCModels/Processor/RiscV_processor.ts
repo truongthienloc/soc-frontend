@@ -62,14 +62,12 @@ export default class RiscVProcessor {
     monitor                    ?: Monitor
     keyboard                   ?: Keyboard
 
-    STATE_GetInstructions           = 0
-    STATE_RecInstructions           = 1
-    STATE_InternalProcessing        = 2
-    STATE_AccessInterconnect        = 3
-    STATE_RecInterconnect           = 4
-    STATE_Wait4Interconncet_PTE     = 5
-    STATE_Wait4Interconncet_DATA    = 6
-    STATE_ReplaceMMUEntry           = 7
+    GET_INSTRUCTION_STATE           = 0
+    RECEIVE_INSTRUCTION_STATE       = 1
+    PROCESSING_STATE                = 2
+    ACESS_INTERCONNECT_STATE        = 3
+    RECEIVE_INTERCONNECT_STATE      = 4
+    REPLACE_TLBE_STATE              = 5
 
     Warnning                        = 0
     keyBoard_waiting        : boolean
@@ -82,9 +80,19 @@ export default class RiscVProcessor {
   ) 
     {
 
-      if (this.state == this.STATE_GetInstructions)         {
+
+    if (this.state == this.GET_INSTRUCTION_STATE)       {
+
+        //########################################################################################
+        //#                                                                                      #
+        //#This state is an idle state and is used to retrieve instruction data from memory.     #
+        //#The address is the Program Counter.                                                   #
+        //#This state also checks the available values of the Program Counter.                   #
+        //#                                                                                      #
+        //########################################################################################
+
         if (this.pc >= this.InsLength) {
-            this.state = this.STATE_GetInstructions
+            this.state = this.GET_INSTRUCTION_STATE
             if (this.Warnning == 0) {
                 this.println (
                     this.active_println
@@ -117,11 +125,21 @@ export default class RiscVProcessor {
             this.master.ChannelA.valid = '1'
             this.master.send ('GET',  (this.MMU.physical_address), this.SendData)
             this.master.ChannelA.size  = '00'
-            this.state              = this.STATE_RecInstructions
+            this.state              = this.RECEIVE_INSTRUCTION_STATE
             return
-      }
+    }
 
-      if (this.state == this.STATE_RecInstructions)         {
+    if (this.state == this.RECEIVE_INSTRUCTION_STATE)   {
+
+        //#######################################################
+        //#                                                     #
+        //#This state is the 'Receive Instructions' state.      #
+        //#Only when data from the Interconnect is valid,       #
+        //#is the processor's instruction register accepted.    #
+        //#Next state is Internal Processing state.             #
+        //#                                                     #
+        //#######################################################
+
         this.master.ChannelA.valid = '0'
         if (InterConnect2CPU.valid == '1') {
             this.master.receive (InterConnect2CPU)
@@ -135,13 +153,22 @@ export default class RiscVProcessor {
                 +BinToHex (this.master.ChannelD.data)
                 +').'
             )
-            this.state              = this.STATE_InternalProcessing
+            this.state              = this.PROCESSING_STATE
         }
         return
-      }
+    }
 
-    if (this.state == this.STATE_InternalProcessing)      {
-        
+    if (this.state == this.PROCESSING_STATE)            {
+        //#######################################################
+        //#                                                     #
+        //#This state is the 'Receive Instructions' state.      #
+        //#Only when data from the Interconnect is valid,       #
+        //#is the processor's instruction register accepted.    #
+        //#Next state is Internal Processing state.             #
+        //#                                                     #
+        //#######################################################
+
+
         this.println (
             this.active_println
             ,'Cycle '
@@ -204,13 +231,13 @@ export default class RiscVProcessor {
                 this.SendData           = data
                 this.SendAddress        = logic_address
                 this.writeReg           = writeRegister
-                this.state              = this.STATE_AccessInterconnect
+                this.state              = this.ACESS_INTERCONNECT_STATE
                 
             }
             else {
-                this.state = this.STATE_GetInstructions
+                this.state = this.GET_INSTRUCTION_STATE
                 if (this.pc >= this.InsLength) {
-                this.state = this.STATE_GetInstructions
+                this.state = this.GET_INSTRUCTION_STATE
                 if (this.Warnning == 0) {
                     this.println (
                         this.active_println
@@ -227,9 +254,9 @@ export default class RiscVProcessor {
             return
         }
             return
-      }
+    }
 
-    if (this.state == this.STATE_AccessInterconnect)      {
+    if (this.state == this.ACESS_INTERCONNECT_STATE)    {
 
         this.MMU.run(this.SendAddress)
 
@@ -299,7 +326,7 @@ export default class RiscVProcessor {
             this.master.ChannelA.valid = '1'
             this.master.send ('GET',  this.MMU.physical_address, this.SendData)
             this.master.ChannelA.valid = '1'
-            this.state = this.STATE_ReplaceMMUEntry
+            this.state = this.REPLACE_TLBE_STATE
         }
         else if (this.MMU.MMU_message == ' ERROR: Page fault!!!!') {
 
@@ -310,19 +337,19 @@ export default class RiscVProcessor {
                 + this.MMU.MMU_message
             )
 
-            this.state = this.STATE_GetInstructions
+            this.state = this.GET_INSTRUCTION_STATE
 
         }
         else {
-            this.state =  this.STATE_Wait4Interconncet_DATA
+            this.state =  this.RECEIVE_INTERCONNECT_STATE 
             this.master.send (this.Processor_messeage,  this.MMU.physical_address, this.SendData)
-            this.master.ChannelA.valid = '0'
+            this.master.ChannelA.valid = '1'
         }
 
         return
     }
 
-    if (this.state == this.STATE_RecInterconnect)         {
+    if (this.state == this.RECEIVE_INTERCONNECT_STATE)  {
         this.master.ChannelA.valid = '0'
         if (InterConnect2CPU.valid == '1') {
             if (InterConnect2CPU.opcode == '000') {
@@ -350,62 +377,42 @@ export default class RiscVProcessor {
             
             this.master.receive (InterConnect2CPU)
             
-            this.state =  this.STATE_GetInstructions
+            this.state =  this.GET_INSTRUCTION_STATE
         }
         return
     }
-
-      if (this.state == this.STATE_Wait4Interconncet_PTE)   {
-        this.master.ChannelA.valid = '0'
-        if (ready) {
-            this.state = this.STATE_ReplaceMMUEntry 
-            this.master.ChannelA.valid = '1'
-        }
-        else this.state =  this.STATE_Wait4Interconncet_PTE
-        return
-      }
-
-      if (this.state == this.STATE_Wait4Interconncet_DATA)  {
-        this.master.ChannelA.valid = '0'
-        if (ready) {
-            this.state = this.STATE_RecInterconnect 
-            this.master.ChannelA.valid = '1'
-        }
-        else this.state = this.STATE_Wait4Interconncet_DATA
-        return
-      }
       
-      if (this.state == this.STATE_ReplaceMMUEntry)         {
+    if (this.state == this.REPLACE_TLBE_STATE)          {
+    this.master.ChannelA.valid = '0'
+
+    if (InterConnect2CPU.valid == '1') {
+
+        this.println (
+            this.active_println
+            ,'Cycle '
+            + cycle.toString() 
+            +': The PROCESSOR is receiving messeage AccessAckData from INTERCONNECT.'
+        )
+
+        const VPN       = this.SendAddress.slice(0, 20)  
+        this.master.receive (InterConnect2CPU)
+        const frame     = this.master.ChannelD.data
+
+        this.println (
+            this.active_println
+            ,'Cycle '
+            + cycle.toString() 
+            +': The TLB is replacing an entry.'
+        )
+        
+        this.MMU.pageReplace ([parseInt(VPN , 2) & 0xf,  dec (frame), 1, cycle.cycle])
+
         this.master.ChannelA.valid = '0'
 
-        if (InterConnect2CPU.valid == '1') {
-
-            this.println (
-                this.active_println
-                ,'Cycle '
-                + cycle.toString() 
-                +': The PROCESSOR is receiving messeage AccessAckData from INTERCONNECT.'
-            )
-
-            const VPN       = this.SendAddress.slice(0, 20)  
-            this.master.receive (InterConnect2CPU)
-            const frame     = this.master.ChannelD.data
-
-            this.println (
-                this.active_println
-                ,'Cycle '
-                + cycle.toString() 
-                +': The TLB is replacing an entry.'
-            )
-            
-            this.MMU.pageReplace ([parseInt(VPN , 2) & 0xf,  dec (frame), 1, cycle.cycle])
-
-            this.master.ChannelA.valid = '0'
-
-            this.state = 3
-        }
-        return
-      }
+        this.state = 3
+    }
+    return
+    }
   }
 
 

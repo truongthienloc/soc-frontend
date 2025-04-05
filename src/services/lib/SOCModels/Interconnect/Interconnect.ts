@@ -10,14 +10,17 @@ import { Concert_One } from "next/font/google"
 import { Buffer_01 } from "../../datapath/Block/Buffer"
 
 export default class InterConnect {
-    active      : boolean
-    Pin         : (FIFO_ChannelD | FIFO_ChannelA)[]
-    Timing     : FIFO_timing[]
-    Pout        : (FIFO_ChannelD | FIFO_ChannelA)[]
-    Pactived    : boolean[]
-    state       : number
-    logger      ?: Logger
-    active_println : boolean 
+    active              : boolean
+    Pin                 : (FIFO_ChannelD | FIFO_ChannelA)[]
+    Timing              : FIFO_timing[]
+    Pout                : (FIFO_ChannelD | FIFO_ChannelA)[]
+    Pactived            : boolean[]
+    state               : number
+    logger             ?: Logger
+    active_println      : boolean 
+
+    RECEIVE_STATE       = 0
+    SEND_STATE          = 1
 
     public setLogger(logger: Logger) {
         this.logger = logger
@@ -78,8 +81,8 @@ export default class InterConnect {
         ,dataFromSub_valid          : boolean
         ,cycle                      : Cycle
     ) {
-        // console.log('this.state, this.Pin, this.Pout, this.Timming',this.state, this.Pin, this.Pout, this.Timing)
-        if (this.state == 0) {
+
+        if (this.state == this.RECEIVE_STATE)   {
             this.RecData (
                 dataFromProcessor           
                 ,dataFromDMA                
@@ -97,7 +100,7 @@ export default class InterConnect {
             return
         }
 
-        if (this.state == 1) {
+        if (this.state == this.SEND_STATE)      {
 
             this.Abiter(cycle)
             

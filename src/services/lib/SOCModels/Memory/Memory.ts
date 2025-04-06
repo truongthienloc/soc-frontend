@@ -20,11 +20,14 @@ export default class Memory {
     active_println  : boolean
     burst           : ChannelD[]
 
-    RECEIVE_GET_STATE = 0
-    RECEIVE_PUT_STATA = 1
+    IDLE_STATE                  = 0
+    RECEIVE_GET_STATE           = 1
+    RECEIVE_PUT_STATA           = 2
+    SEND_ACCESSACKDATA_STATE    = 3
+    SEND_ACCESSACK_STAT         = 4
 
     constructor(active: boolean) {
-        this.state               = 0 
+        this.state              = 0 
         this.address            = ''
         this.data               = ''
         
@@ -43,183 +46,181 @@ export default class Memory {
         , ready         : boolean
     ) {
 
-        if (this.state == this.RECEIVE_GET_STATE) {
+        if (this.state == this.IDLE_STATE)                          {
+            this.burst              = []
             this.slaveMemory.ChannelD.valid = '0'
             if (MMU2Memory.valid == '1') {
-
                 this.slaveMemory.ChannelD.valid = '1'
-                if (MMU2Memory.opcode == '100') {
-                    this.slaveMemory.ChannelD.valid = '1'
-                    this.println (this.active_println,
-                    'Cycle '             +
-                    cycle.toString()     +
-                    ': The MEMORY is receiving GET message from the INTERCONNECT.'
-                    )
-                    this.slaveMemory.receive (MMU2Memory)
-                    this.address         =   this.slaveMemory.ChannelA.address
+                if (MMU2Memory.opcode == '100') this.state = this.RECEIVE_GET_STATE
+                if (MMU2Memory.opcode == '000') this.state = this.RECEIVE_PUT_STATA
+            }
+        }
 
-                    cycle.incr() 
-                    if (ready) {
-                        
-
-                        if (MMU2Memory.size == '00') {
-                            this.println (this.active_println,
-                                'Cycle '             +
-                                cycle.toString()     +
-                                ': The MEMORY is sending an AccessAckData message to the INTERCONNECT. (' 
-                                + BinToHex (this.slaveMemory.ChannelD.data) 
-                                +')'
-                            )
-                            cycle.incr() 
-
-                            this.slaveMemory.send(
-                                'AccessAckData', 
-                                this.slaveMemory.ChannelA.source, 
-                                this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] + 
-                                this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] +
-                                this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
-                                this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
-                            )
-                            this.burst.push (this.slaveMemory.ChannelD)
-                        }
-
-
-                        if (MMU2Memory.size == '10') {
-                            // FIRST BURST
-                            this.println (this.active_println,
-                                'Cycle '             +
-                                cycle.toString()     +
-                                ': The MEMORY is sending an AccessAckData message to the INTERCONNECT (' 
-                                + BinToHex (this.slaveMemory.ChannelD.data) 
-                                +').'
-                            )
-                            cycle.incr()
-                            
-                            this.slaveMemory.send(
-                                'AccessAckData', 
-                                this.slaveMemory.ChannelA.source, 
-                                this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] + 
-                                this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] +
-                                this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
-                                this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
-                            )
-
-                            this.burst.push (this.slaveMemory.ChannelD)
-    
-                            //SECOND BURST
-                            this.println (this.active_println,
-                                'Cycle '             +
-                                cycle.toString()     +
-                                ': The MEMORY is sending an AccessAckData message to the INTERCONNECT (' 
-                                + BinToHex (this.slaveMemory.ChannelD.data) 
-                                +').'
-                            )
-                            cycle.incr()
-
-                            this.slaveMemory.send(
-                                'AccessAckData', 
-                                this.slaveMemory.ChannelA.source, 
-                                this.Memory[(parseInt(this.address, 2) + 7).toString(2).padStart(17, '0')] + 
-                                this.Memory[(parseInt(this.address, 2) + 6).toString(2).padStart(17, '0')] +
-                                this.Memory[(parseInt(this.address, 2) + 5).toString(2).padStart(17, '0')] +
-                                this.Memory[(parseInt(this.address, 2) + 4).toString(2).padStart(17, '0')]
-                            )
-                            this.burst.push (this.slaveMemory.ChannelD)
-    
-                            //THIRD BURST
-                            this.println (this.active_println,
-                                'Cycle '             +
-                                cycle.toString()     +
-                                ': The MEMORY is sending an AccessAckData message to the INTERCONNECT (' 
-                                + BinToHex (this.slaveMemory.ChannelD.data) 
-                                +').'
-                            )
-                            cycle.incr()
-
-                            this.slaveMemory.send(
-                                'AccessAckData', 
-                                this.slaveMemory.ChannelA.source, 
-                                this.Memory[(parseInt(this.address, 2) + 11).toString(2).padStart(17, '0')] + 
-                                this.Memory[(parseInt(this.address, 2) + 10).toString(2).padStart(17, '0')] +
-                                this.Memory[(parseInt(this.address, 2) + 9 ).toString(2).padStart(17, '0')] +
-                                this.Memory[(parseInt(this.address, 2) + 8 ).toString(2).padStart(17, '0')]
-                            )
-                            this.burst.push (this.slaveMemory.ChannelD)
-    
-                            //FOURTH BURST
-                            this.println (this.active_println,
-                                'Cycle '             +
-                                cycle.toString()     +
-                                ': The MEMORY is sending an AccessAckData message to the INTERCONNECT (' 
-                                + BinToHex (this.slaveMemory.ChannelD.data) 
-                                +').'
-                            )
-                            cycle.incr()
-
-                            this.slaveMemory.send(
-                                'AccessAckData', 
-                                this.slaveMemory.ChannelA.source, 
-                                this.Memory[(parseInt(this.address, 2) + 15).toString(2).padStart(17, '0')] + 
-                                this.Memory[(parseInt(this.address, 2) + 14).toString(2).padStart(17, '0')] +
-                                this.Memory[(parseInt(this.address, 2) + 13).toString(2).padStart(17, '0')] +
-                                this.Memory[(parseInt(this.address, 2) + 12).toString(2).padStart(17, '0')]
-                            )
-                            this.burst.push (this.slaveMemory.ChannelD)
-                        }
-                         
-                        this.state   = 1
-                        cycle.incr()
-                    }
-
-                    return
-                    
-                }
-                if (MMU2Memory.opcode == '000') {
-                    this.slaveMemory.ChannelD.valid = '1'
-                    this.println (this.active_println,
-                        'Cycle '             +
-                        cycle.toString()     +
-                        ': The MEMORY is receiving a PUT message from the INTERCONNECT.'
-                    )
-                    this.slaveMemory.receive(MMU2Memory)
-                    this.address            = this.slaveMemory.ChannelA.address
-                    this.data               = this.slaveMemory.ChannelA.data 
-
-                    cycle.incr() 
-                    if (ready) {
-                        this.println (this.active_println,
+        if (this.state == this.RECEIVE_GET_STATE)                   {
+            this.slaveMemory.ChannelD.valid = '0'
+            this.slaveMemory.receive (MMU2Memory)
+            this.println (this.active_println,
                             'Cycle '             +
                             cycle.toString()     +
-                            ': The MEMORY is sending an AccessAck message to the INTERCONNECT.'
-                        )
-                        
-                        this.slaveMemory.send(
-                            'AccessAck', 
-                            this.slaveMemory.ChannelA.source,                 
-                            this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] + 
-                            this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] +
-                            this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] +
-                            this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')]
-                        )
-                        this.burst.push (this.slaveMemory.ChannelD)
-                        this.Memory[(parseInt(this.address, 2) + 3).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(0,8)
-                        this.Memory[(parseInt(this.address, 2) + 2).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(8,16)
-                        this.Memory[(parseInt(this.address, 2) + 1).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(16,24)
-                        this.Memory[(parseInt(this.address, 2) + 0).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(24,32)
+                            ': The MEMORY is receiving GET message from the INTERCONNECT.'
+                            )
+            this.slaveMemory.receive (MMU2Memory)
 
-                        this.state   = 1
-                        cycle.incr()
-                    }
-                    
-                    return
-                }
-            }
-           
+            cycle.incr()
+            this.state = this.SEND_ACCESSACKDATA_STATE
+
+            return 
         }
-        if (this.state == this.RECEIVE_PUT_STATA) {
-            this.slaveMemory.ChannelD.valid = '0'
-            this.burst = []
-            this.state = 0
+
+        if (ready && this.state == this.SEND_ACCESSACKDATA_STATE)   {
+            if (this.slaveMemory.ChannelA.size == '00') {
+                this.slaveMemory.ChannelD.valid = '1'
+                cycle.incr() 
+
+                this.slaveMemory.send(
+                    'AccessAckData', 
+                    this.slaveMemory.ChannelA.source, 
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+                )
+                this.burst.push (this.slaveMemory.ChannelD)
+
+                this.println (this.active_println,
+                    'Cycle '             +
+                    cycle.toString()     +
+                    ': The MEMORY is sending an AccessAckData message to the INTERCONNECT. (' 
+                    + BinToHex (this.slaveMemory.ChannelD.data) 
+                    +')'
+                )
+            }
+
+            if (this.slaveMemory.ChannelA.size == '10') {
+                // FIRST BURST
+                this.println (this.active_println,
+                    'Cycle '             +
+                    cycle.toString()     +
+                    ': The MEMORY is sending an AccessAckData message to the INTERCONNECT (' 
+                    + BinToHex (this.slaveMemory.ChannelD.data) 
+                    +').'
+                )
+                cycle.incr()
+                
+                this.slaveMemory.send(
+                    'AccessAckData', 
+                    this.slaveMemory.ChannelA.source, 
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+                )
+
+                this.burst.push (this.slaveMemory.ChannelD)
+
+                //SECOND BURST
+                this.println (this.active_println,
+                    'Cycle '             +
+                    cycle.toString()     +
+                    ': The MEMORY is sending an AccessAckData message to the INTERCONNECT (' 
+                    + BinToHex (this.slaveMemory.ChannelD.data) 
+                    +').'
+                )
+                cycle.incr()
+
+                this.slaveMemory.send(
+                    'AccessAckData', 
+                    this.slaveMemory.ChannelA.source, 
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 7).toString(2).padStart(17, '0')] + 
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 6).toString(2).padStart(17, '0')] +
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 5).toString(2).padStart(17, '0')] +
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 4).toString(2).padStart(17, '0')]
+                )
+                this.burst.push (this.slaveMemory.ChannelD)
+
+                //THIRD BURST
+                this.println (this.active_println,
+                    'Cycle '             +
+                    cycle.toString()     +
+                    ': The MEMORY is sending an AccessAckData message to the INTERCONNECT (' 
+                    + BinToHex (this.slaveMemory.ChannelD.data) 
+                    +').'
+                )
+                cycle.incr()
+
+                this.slaveMemory.send(
+                    'AccessAckData', 
+                    this.slaveMemory.ChannelA.source, 
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 11).toString(2).padStart(17, '0')] + 
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 10).toString(2).padStart(17, '0')] +
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 9 ).toString(2).padStart(17, '0')] +
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 8 ).toString(2).padStart(17, '0')]
+                )
+                this.burst.push (this.slaveMemory.ChannelD)
+
+                //FOURTH BURST
+                this.println (this.active_println,
+                    'Cycle '             +
+                    cycle.toString()     +
+                    ': The MEMORY is sending an AccessAckData message to the INTERCONNECT (' 
+                    + BinToHex (this.slaveMemory.ChannelD.data) 
+                    +').'
+                )
+                cycle.incr()
+
+                this.slaveMemory.send(
+                    'AccessAckData', 
+                    this.slaveMemory.ChannelA.source, 
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 15).toString(2).padStart(17, '0')] + 
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 14).toString(2).padStart(17, '0')] +
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 13).toString(2).padStart(17, '0')] +
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 12).toString(2).padStart(17, '0')]
+                )
+                this.burst.push (this.slaveMemory.ChannelD)
+            }
+                         
+            this.state   = this.IDLE_STATE
+            cycle.incr()
+            return
+        }   
+        
+        if (this.state == this.RECEIVE_PUT_STATA)                   {
+            if (MMU2Memory.opcode == '000') {
+                this.slaveMemory.ChannelD.valid = '0'
+                this.slaveMemory.receive (MMU2Memory)
+                this.println (this.active_println,
+                    'Cycle '             +
+                    cycle.toString()     +
+                    ': The MEMORY is receiving a PUT message from the INTERCONNECT.'
+                )
+                this.state = this.SEND_ACCESSACK_STAT
+            }
+        }
+
+        if (ready && this.state ==  this.SEND_ACCESSACK_STAT)       {
+            this.println (this.active_println,
+                'Cycle '             +
+                cycle.toString()     +
+                ': The MEMORY is sending an AccessAck message to the INTERCONNECT.'
+            )
+            this.slaveMemory.ChannelD.valid = '1'
+            
+            this.slaveMemory.send(
+                'AccessAck', 
+                this.slaveMemory.ChannelA.source,                 
+                this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+            )
+            this.burst.push (this.slaveMemory.ChannelD)
+            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(0,8)
+            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(8,16)
+            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(16,24)
+            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(24,32)
+
+            this.state   = this.IDLE_STATE
+            cycle.incr()
         }
             
     }

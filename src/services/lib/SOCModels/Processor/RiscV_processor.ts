@@ -352,6 +352,7 @@ export default class RiscVProcessor {
     if (this.state == this.RECEIVE_INTERCONNECT_STATE)  {
         this.master.ChannelA.valid = '0'
         if (InterConnect2CPU.valid == '1') {
+            this.master.receive (InterConnect2CPU)
             if (InterConnect2CPU.opcode == '000') {
 
                 this.println (
@@ -371,7 +372,7 @@ export default class RiscVProcessor {
                     + cycle.toString() 
                     +': The PROCESSOR is receiving messeage AccessAckData from INTERCONNECT.'
                 )
-
+                console.log ()
                 this.register[this.writeReg] =  this.master.ChannelD.data
             }
             

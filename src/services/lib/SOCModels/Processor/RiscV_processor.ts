@@ -10,6 +10,7 @@ import Cycle from '../Compile/cycle'
 import { Key } from 'react'
 import { read } from 'fs'
 import { hexToBinary } from '~/helpers/converts/Hextobin'
+import EventEmitter from '../../EventEmitter/EventEmitter'
 // import { measureMemory } from 'vm'
 // import { symlink, write } from 'fs'
 // import { Console } from 'console'
@@ -34,6 +35,9 @@ export default class RiscVProcessor {
     pre_pc                      = 0
     pc                          = 0
     active_println              : boolean
+
+    public static PROCESSOR_EVENT = {KEY_WAITING: 'KEY_WAITING', KEY_FREE: 'KEY_FREE'}
+    event = new EventEmitter ()
     // Ecall                       : Ecall
 
     ALUOp                       : any
@@ -192,13 +196,16 @@ export default class RiscVProcessor {
 
                 if (parseInt(this.register['10001'], 2) == 5) {
                     this.keyBoard_waiting = true
+                    this.event.emit(RiscVProcessor.PROCESSOR_EVENT.KEY_WAITING)
                     const ecall_read = new Promise((resolve) => {
                                     this.keyboard?.getEvent().on('line-down', (line: string) => {
-                                        this.register['01010']  = parseInt(line).toString(2)
-                                        this.keyBoard_waiting   = false
-                                        resolve(parseInt(line))
+                                    this.register['01010']  = parseInt(line).toString(2)
+                                    this.keyBoard_waiting   = false
+                                    this.event.emit(RiscVProcessor.PROCESSOR_EVENT.KEY_FREE)
+                                    resolve(parseInt(line))
                                     })
                                 })
+
                     await ecall_read
                 }
 

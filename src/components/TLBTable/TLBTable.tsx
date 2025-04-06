@@ -100,7 +100,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
           <RestartAltIcon />
         </Button> */}
       </div>
-      <div className="flex w-[263px] flex-row items-center gap-1">
+      {/* <div className="flex w-[263px] flex-row items-center gap-1">
         <TextField
           value={editingLength}
           onChange={(e) => setEditingLength(e.target.value)}
@@ -125,7 +125,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
             <SaveIcon />
           </Button>
         )}
-      </div>
+      </div> */}
 
       <TableContainer component={Paper}>
         <Table sx={styles.table}>

@@ -1,6 +1,7 @@
 import { Register } from "~/types/register"
 import Soc from "../SOC/SoC"
 import { TLBEntries } from "../Compile/soc.d"
+import LedMatrix from '../../control/LedMatrix'
 import BuddyAllocator from "../Memory/BuddyAllocator"
 import { ConstructionOutlined, Monitor } from "@mui/icons-material"
 
@@ -35,6 +36,8 @@ export function assemble(
     // SET INITIAL DATA
     this.Processor.reset()
     this.cycle.cycle = 0
+    this.Led_matrix.reset ()
+    this.Led_matrix.led = new LedMatrix ('.led-matrix')
 
     this.Memory.reset (Mem_tb)
     this.Memory.SetInstructionMemory(this.Assembler.binary_code) 
@@ -72,5 +75,6 @@ export function assemble(
     }
 
     // console.log("MMU: ", this.MMU);
+    this.Processor.keyBoard_waiting = false
     return !this.Assembler.syntax_error
 }

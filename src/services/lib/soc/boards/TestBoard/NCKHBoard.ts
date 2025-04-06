@@ -34,7 +34,7 @@ export default class NCKHBoard {
 
         const cpuModule1 = scene.createModuleWithC(CPUModule, X + 9.25, Y + 3)
 
-        const mmuModule1 = scene.createModuleWithC(MMUModule, cpuModule1.x, cpuModule1.y + 5.5)
+        const mmuModule1 = scene.createModuleWithC(MMUModule, cpuModule1.x, cpuModule1.y + 3.5)
 
         const interconnect = scene.createInterconnectWithC(
             SingleMasterInterconnect,
@@ -104,7 +104,7 @@ export default class NCKHBoard {
         // Get Interconnect Adapters
 
         // Create Links
-        scene.createLink(cpuModule1.getAdapter('b001').shape, mmuModule1.getAdapter('t001').shape)
+        // scene.createLink(cpuModule1.getAdapter('b001').shape, mmuModule1.getAdapter('t001').shape)
         scene.createLink(mmuModule1.getAdapter('b001').shape, interTopAdapter1.shape)
 
         scene.createLink(interBottomAdapter1.shape, memoryModule1.getAdapter().shape)

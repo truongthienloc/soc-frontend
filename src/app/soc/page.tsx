@@ -39,9 +39,10 @@ import { modelColors2ViewColors } from '~/helpers/converts/color.convert'
 import useDMAConfig from '~/components/DMATable/useDMAConfig'
 import { convertToDMAStandard } from '~/helpers/converts/dma.convert'
 import { TopFunctionButton } from './_components/CodeEditorSection'
-import { DecToHex } from '~/services/lib/SOCModels/Compile/convert'
+import { BinToHex, BinToHex_without0x, DecToHex } from '~/services/lib/SOCModels/Compile/convert'
 import TextField from '@mui/material/TextField'
 import { Separator } from '~/components/Separator'
+import RiscVProcessor from '~/services/lib/SOCModels/Processor/RiscV_processor'
 
 type Props = {}
 
@@ -252,6 +253,11 @@ export default function SocPage({}: Props) {
         },
       ])
       setPageTable(socModelRef.current.Memory.getPageNumber())
+      dmaConfigs.setDes (BinToHex_without0x (socModelRef.current.DMA.destinationAddress))
+      dmaConfigs.setSrc (BinToHex_without0x (socModelRef.current.DMA.sourceAddress))
+      dmaConfigs.setLen (BinToHex_without0x (socModelRef.current.DMA.length))
+      dmaConfigs.setSta (BinToHex_without0x (socModelRef.current.DMA.status))
+      dmaConfigs.setLedCtrl (BinToHex_without0x (socModelRef.current.Led_matrix.controlRegister))
       // setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
     })
     socModelRef.current.RunAll()
@@ -312,7 +318,11 @@ export default function SocPage({}: Props) {
       }
 
       setPc(socModelRef.current.Processor.pc)
+      socModelRef.current.Processor.event.once(RiscVProcessor.PROCESSOR_EVENT.KEY_WAITING, () => {
+          console.log ('keyboard is waiting')
+      })
       socModelRef.current.event.once(Soc.SOCEVENT.STEP_END, () => {
+        
         if (!socModelRef.current) {
           return
         }
@@ -330,6 +340,11 @@ export default function SocPage({}: Props) {
         ])
         setPageTable(socModelRef.current.Memory.getPageNumber())
         setStepColors(modelColors2ViewColors(socModelRef.current.Processor.lineColor))
+        dmaConfigs.setDes (BinToHex_without0x (socModelRef.current.DMA.destinationAddress))
+        dmaConfigs.setSrc (BinToHex_without0x (socModelRef.current.DMA.sourceAddress))
+        dmaConfigs.setLen (BinToHex_without0x (socModelRef.current.DMA.length))
+        dmaConfigs.setSta (BinToHex_without0x (socModelRef.current.DMA.status))
+        dmaConfigs.setLedCtrl (BinToHex_without0x (socModelRef.current.Led_matrix.controlRegister))
         // setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
       })
       socModelRef.current.stepWithEvent()
@@ -367,11 +382,7 @@ export default function SocPage({}: Props) {
 
     const { lmPoint, ioPoint, iMemPoint, dMemPoint, stackPoint } = memoryMap
 
-    const decLM_point = parseInt(lmPoint, 16)
     const decIO_point = parseInt(ioPoint, 16)
-    const decImem_point = parseInt(iMemPoint, 16)
-    const decDmem_point = parseInt(dMemPoint, 16)
-    const decStack_point = parseInt(stackPoint, 16)
 
     const tlbEntries = tlb2Array(tlb.tlbData)
     const requirementMem = decIO_point
@@ -401,6 +412,12 @@ export default function SocPage({}: Props) {
           value: DecToHex(socModelRef.current.Processor.pc),
         },
       ])
+
+      dmaConfigs.setDes (BinToHex_without0x (socModelRef.current.DMA.destinationAddress))
+      dmaConfigs.setSrc (BinToHex_without0x (socModelRef.current.DMA.sourceAddress))
+      dmaConfigs.setLen (BinToHex_without0x (socModelRef.current.DMA.length))
+      dmaConfigs.setSta (BinToHex_without0x (socModelRef.current.DMA.status))
+      dmaConfigs.setLedCtrl (BinToHex_without0x (socModelRef.current.Led_matrix.controlRegister))
       localStorage.setItem('soc_code', code)
     }
   }
@@ -535,6 +552,7 @@ export default function SocPage({}: Props) {
                 <Tab label="Schematic View" />
                 <Tab label="Disassembly" />
                 <Tab label="Console" />
+                <Tab label="MMU" />
               </Tabs>
               {/* Tab index = 0: Coding View and Registers table */}
               <TabPanel
@@ -613,7 +631,27 @@ export default function SocPage({}: Props) {
                   <div className="monitor" id="monitor" tabIndex={0}></div>
                   <Keyboard />
                 </div>
+              </TabPanel >
+              <TabPanel index={4} className="pt-8">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
+                      {isStepping ? (
+                        <DisplayStepCode code={stepCode} pc={pc} />
+                      ) : (
+                        <CodeEditor
+                          value={code}
+                          onChange={handleChangeCode}
+                          disable={disableCodeEditor}
+                          hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex != 4}
+                        />
+                      )}
+                    </div>
+                  <TLBTable tlb={tlb} disabled={isStepping} />
+                  {/* <PageTable data={pageTable} /> */}
+                </div>
               </TabPanel>
+
+
             </TabContext>
           </div>
 
@@ -655,7 +693,7 @@ export default function SocPage({}: Props) {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <TLBTable tlb={tlb} disabled={isStepping} />
-              <PageTable data={pageTable} />
+              {/* <PageTable data={pageTable} /> */}
             </div>
           </div>
 
@@ -679,6 +717,7 @@ export default function SocPage({}: Props) {
                   <TextField
                     label="Control"
                     autoComplete="off"
+                    value={dmaConfigs?.led_control}
                     InputProps={{
                       startAdornment: '0x',
                     }}

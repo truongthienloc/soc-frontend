@@ -7,6 +7,13 @@ export function BinToHex(binaryStr: string): string {
     return hexadecimal
 }
 
+export function BinToHex_without0x(binaryStr: string): string {
+    binaryStr = binaryStr.padStart(32, '0')
+    const decimal = parseInt(binaryStr, 2)
+    const hexadecimal =  decimal.toString(16).toUpperCase()
+    return hexadecimal
+}
+
 export function DecToHex(decimalNum: number): string {
     const hexChars = '0123456789ABCDEF'
     let hexResult = ''

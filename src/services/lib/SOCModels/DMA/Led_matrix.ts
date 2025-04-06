@@ -14,7 +14,7 @@ export default class LEDMatrix {
     state           : number
     logger         ?: Logger
     active_println  : boolean
-    // led             : LedMatrix
+    led             : LedMatrix
     count_beats      = 0
 
     constructor() {
@@ -26,12 +26,23 @@ export default class LEDMatrix {
         this.state                      = 0
         this.active                     = false
         this.active_println             = true
-        // this.led                        = new LedMatrix ('#led-matrix-container')
+        this.led                        = new LedMatrix ('.led-matrix')
 
     }
 
     public setLogger(logger: Logger) {
         this.logger = logger
+    }
+
+    public reset () {
+        this.controlRegister            = '00000000000000000000000000000000'
+        this.dataRegisters              = Array(288).fill('00000000000000000000000000000000')
+        this.matrix_buffer              = Array(96).fill('00000000000000000000000000000000')
+        this.Matrix_Slave               = new Slave('Matrix_Slave', true)
+        this.Matrix_Slave.ChannelD.sink = '1'
+        this.state                      = 0
+        this.active                     = false
+        this.active_println             = true
     }
 
     public println(active: boolean, ...args: string[]) {
@@ -147,12 +158,12 @@ export default class LEDMatrix {
         }
         this.matrix_buffer = this.matrix_buffer.map(s => s.replace(/,/g, ''))
 
-        // for (let i = 0; i< 96; i++) {
-        //     for (let j =0; j< 96; j++) {
-        //         if (this.matrix_buffer[i][j] == '1') this.led.turnOn(i, j)
-        //         if (this.matrix_buffer[i][j] == '0') this.led.turnOff(i, j)
-        //     }
-        // }
+        for (let i = 0; i< 96; i++) {
+            for (let j =0; j< 96; j++) {
+                if (this.matrix_buffer[i][j] == '1') this.led.turnOn(i, j)
+                if (this.matrix_buffer[i][j] == '0') this.led.turnOff(i, j)
+            }
+        }
     }
 }
 

@@ -4,9 +4,11 @@ import { IMEMPOINT, LMPOINT } from '~/configs/memoryPoint.constant'
 export type ReturnUseDMAConfig = ReturnType<typeof useDMAConfig>
 
 export default function useDMAConfig() {
-    const [src, setSrc] = useState(LMPOINT)
-    const [des, setDes] = useState(IMEMPOINT)
+    const [src, setSrc] = useState('0')
+    const [des, setDes] = useState('0')
     const [len, setLen] = useState('0')
+    const [status, setSta] = useState('0')
+    const [led_control, setLedCtrl] = useState('0')
 
     return {
         src,
@@ -15,5 +17,9 @@ export default function useDMAConfig() {
         setDes,
         len,
         setLen,
+        status, 
+        setSta,
+        led_control,
+        setLedCtrl
     }
 }

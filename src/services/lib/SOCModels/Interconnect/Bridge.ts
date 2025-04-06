@@ -102,7 +102,9 @@ export default class Bridge {
                 this.state = this.STATE_RECEIVE
 
             } 
+
             if (ready0 && this.Bridge_master.ChannelD.valid == '1') {
+                
                 this.Bridge_slave.ChannelD          = this.Bridge_master.ChannelD
                 this.println (
                     this.active_println

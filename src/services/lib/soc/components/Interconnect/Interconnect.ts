@@ -54,7 +54,7 @@ export default class Interconnect extends TileLinkObject {
         this.initShape()
         this.initText()
         this.initAdapter()
-        this.initSwitch()
+        // this.initSwitch()
     }
 
     protected initShape(): void {

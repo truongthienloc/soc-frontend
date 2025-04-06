@@ -278,8 +278,6 @@ export default class Memory {
         return result
     }
 
-
-
     public GetInstructionMemory () {
         for (let i = 0; i<0X00FFF; i+=1 ){
             console.log(i.toString(2).padStart(17,'0'),this.Memory[i.toString(2).padStart(17,'0')])

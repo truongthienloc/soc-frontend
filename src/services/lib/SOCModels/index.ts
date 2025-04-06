@@ -11,11 +11,12 @@ const SOC               = new Soc('super SoC')
 const code              = 
 `
 .text
-lui  x1, 0x3
-ori  x1, x1, 0x04c
+//lui  x1, 0x3
+//ori  x1, x1, 0x04c
 
 addi x2, x0, 1
-//sw   x1, 16(x1)
+sw   x2, 44(x1)
+lw   x3, 44(x1)
 //lw   x3, 16(x1)
 sw   x2, 16(x1) // Led control register
 sw   x2, 0(x1)  // DMA source register

@@ -89,6 +89,7 @@ export default class Bridge {
         }
 
         if (this.state == this.STATE_SEND) {
+            console.log (ready0 , this.Bridge_master.ChannelD.valid == '1')
             if (!this.fifo_from_Interconnect.isEmpty() && ready1) {
                 this.Bridge_slave.receive(this.fifo_from_Interconnect.dequeue())
                 this.Bridge_master.ChannelA = this.Bridge_slave.ChannelA

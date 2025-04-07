@@ -158,13 +158,13 @@ export default class Soc {
             , this.Bus0.state == 0
         )
         
-        // this.DMA.Run (
-        //     this.Bus1.Pout[1].dequeue()
-        //     ,this.Bus0.Pout[1].dequeue()
-        //     , this.cycle
-        //     , this.Bus0.state == 0
-        //     , this.Bus1.state == 0
-        // )
+        this.DMA.Run (
+            this.Bus1.Pout[1].dequeue()
+            ,this.Bus0.Pout[1].dequeue()
+            , this.cycle
+            , this.Bus0.state == 0
+            , this.Bus1.state == 0
+        )
             
         this.Memory.Run(
             this.cycle
@@ -184,40 +184,42 @@ export default class Soc {
             ,this.cycle
         )
 
-        // this.Bridge.Run (
-        //     this.Bus0.Pout[3]
-        //     , this.Bus1.Pout[0]
-        //     , this.Bus0.state == 0
-        //     , this.Bus1.state == 0
-        //     , this.cycle
-        // )
+        this.Bridge.Run (
+            this.Bus0.Pout[3]
+            , this.Bus1.Pout[0]
+            , this.Bus0.state == 0
+            , this.Bus1.state == 0
+            , this.cycle
+        )
         
-        // this.Bus1.Run (
-        //     this.Bridge.Bridge_master.ChannelA
-        //     , this.DMA.DMA_Slave.ChannelD
-        //     , this.Led_matrix.Matrix_Slave.ChannelD
-        //     , this.Bridge.Bridge_master.ChannelA.valid == '1'
-        //     , this.Bridge.state == 0
-        //     , this.DMA.DMA_Slave.ChannelD.valid == '1'
-        //     , this.Led_matrix.Matrix_Slave.ChannelD.valid == '1'
-        //     , this.cycle
-        // )
+        this.Bus1.Run (
+            this.Bridge.Bridge_master.ChannelA
+            , this.DMA.DMA_Slave.ChannelD
+            , this.Led_matrix.Matrix_Slave.ChannelD
+            , this.Bridge.Bridge_master.ChannelA.valid == '1'
+            , this.Bridge.state == 0
+            , this.DMA.DMA_Slave.ChannelD.valid == '1'
+            , this.Led_matrix.Matrix_Slave.ChannelD.valid == '1'
+            , this.cycle
+        )
 
-        // this.Led_matrix.Run(
-        //     this.Bus1.Pout[2].dequeue()
-        //     , this.cycle
-        //     , this.Bus1.state == 0
-        // )
+        this.Led_matrix.Run(
+            this.Bus1.Pout[2].dequeue()
+            , this.cycle
+            , this.Bus1.state == 0
+        )
         
         this.cycle.incr()
     }
 
     public self_config () {
+        let bre = 0
         while (
             this.Processor.pc <
             this.Memory.Ins_pointer || this.Processor.state != 0
         ) {
-
+            // if (bre > 988) break
+            // bre ++ 
             this.Processor.active_println = false
             this.Bus0.active_println      = false
             this.Memory.active_println    = false
@@ -248,7 +250,8 @@ export default class Soc {
             )
             this.cycle.incr()
         }
-
+        // console.log('bre', bre)
+        // console.log (this.Processor.getRegisters())
         this.Processor.active_println = true
         this.Bus0.active_println      = true
         this.Memory.active_println    = true

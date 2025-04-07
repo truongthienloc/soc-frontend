@@ -53,18 +53,19 @@ export default class MMU {
     ) 
     {
 
-        if (parseInt(logic_address, 2) < 0X04000 ) {
+        if (this.satp < 0x80000000 || parseInt ('0'+logic_address,2) >= 0X1FFFF + 1) { //1000 0000 0000 0000 0000 0000 0000 0000
             this.MMU_message = ' MMU is bypassed'
-            this.physical_address = logic_address.slice(-17)
+            this.physical_address = logic_address.slice(-18)
         } else {
             this.search_in_TLB(logic_address)
         }
 
         if (this.MMU_message == " TLB: VPN is caught.") {
-            if (parseInt ('0'+this.physical_address) > parseInt ('0'+this.endAddress)) {
+            if (parseInt ('0'+this.physical_address,2)> this.endAddress) {
                 this.MMU_message = ' ERROR: Page fault!!!!'
             }
         }
+
         return
     }
 
@@ -95,6 +96,7 @@ export default class MMU {
         this.TLB               = P
         this.satp              = satp
         this.endAddress        = endAddress
+
     
     }
 
@@ -118,7 +120,7 @@ export default class MMU {
             this.physical_address = (physical_addresses[check_pagenum.indexOf(true)]).toString(2).padStart(17, '0')
         } else {
             this.MMU_message = " TLB: VPN is missed."
-            this.physical_address = (this.satp + vpn_dec*4).toString(2).padStart(17, '0')
+            this.physical_address = (this.satp & 0xFFFF + vpn_dec*4).toString(2).padStart(17, '0')
         }
 
     }

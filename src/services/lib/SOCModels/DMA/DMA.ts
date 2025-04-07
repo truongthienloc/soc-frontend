@@ -5,6 +5,7 @@ import ChannelD             from "./../Interconnect/ChannelD"
 import { Interconnect } from '../../soc/components/Interconnect'
 import Cycle from "../Compile/cycle"
 import {Logger }            from '../Compile/soc.d'
+import { BinToHex } from '../Compile/convert'
 
 export default class DMA {
     sourceAddress       : string
@@ -117,14 +118,18 @@ export default class DMA {
             if (InterConnect2DMA.valid == '1'
                 && InterConnect2DMA.sink == '0'
             ) {
+
+                this.DMA_Master.receive(InterConnect2DMA)
                 this.println (
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The DMA is receiving messeage AccessAckData from INTERCONNET.'
+                    +': The DMA is receiving messeage AccessAckData from INTERCONNET. ('
+                    + BinToHex (this.DMA_Master.ChannelD.data) 
+                    +')'
                 )
                 this.DMA_Master.ChannelA.valid = '0'
-                this.DMA_Master.receive(InterConnect2DMA)
+
                 this.DMA_buffer[this.count_beats+this.count_burst*4] = this.DMA_Master.ChannelD.data
 
                 this.count_beats +=1
@@ -148,8 +153,8 @@ export default class DMA {
             )
             this.DMA_Master.send(
                 'PUT',
-                ((parseInt(this.destinationAddress.slice(-17), 2) + 0 + this.count_burst*4)  * 4).toString(2).padStart(17, '0'),
-                this.DMA_buffer[0]
+                ((parseInt(this.destinationAddress.slice(-17), 2) + 0 + this.count_burst*16)).toString(2).padStart(17, '0'),
+                this.DMA_buffer[0 + this.count_burst*4]
             )
             this.DMA_Master.ChannelA.valid = '1'
             this.DMA_Master.ChannelA.size  = '10'
@@ -165,8 +170,8 @@ export default class DMA {
             )
             this.DMA_Master.send(
                 'PUT',
-                ((parseInt(this.destinationAddress.slice(-17), 2) + 1  + this.count_burst*4)  * 4).toString(2).padStart(17, '0'),
-                this.DMA_buffer[1]
+                ((parseInt(this.destinationAddress.slice(-17), 2) + 4  + this.count_burst*16)).toString(2).padStart(17, '0'),
+                this.DMA_buffer[1 + this.count_burst*4]
             )
             this.DMA_Master.ChannelA.valid = '1'
             this.DMA_Master.ChannelA.size  = '10'
@@ -182,8 +187,8 @@ export default class DMA {
             )
             this.DMA_Master.send(
                 'PUT',
-                ((parseInt(this.destinationAddress.slice(-17), 2) + 2  + this.count_burst*4)  * 4).toString(2).padStart(17, '0'),
-                this.DMA_buffer[2]
+                ((parseInt(this.destinationAddress.slice(-17), 2) + 8  + this.count_burst*16)).toString(2).padStart(17, '0'),
+                this.DMA_buffer[2 + this.count_burst*4]
             )
             this.DMA_Master.ChannelA.valid = '1'
             this.DMA_Master.ChannelA.size  = '10'
@@ -197,15 +202,17 @@ export default class DMA {
                 + cycle.toString() 
                 +': The DMA is sending messeage PUT to INTERCONNET.'
             )
+            console.log ('this.destinationAddress.slice(-17)', parseInt(this.destinationAddress.slice(-17), 2))
             this.DMA_Master.send(
                 'PUT',
-                ((parseInt(this.destinationAddress.slice(-17), 2) + 3  + this.count_burst*4)  * 4).toString(2).padStart(17, '0'),
-                this.DMA_buffer[3]
+                ((parseInt(this.destinationAddress.slice(-17), 2) + 12  + this.count_burst*16)).toString(2).padStart(17, '0'),
+                this.DMA_buffer[3 + this.count_burst*4 ]
             )
             this.DMA_Master.ChannelA.valid = '1'
             this.DMA_Master.ChannelA.size  = '10'
             this.DMA_Slave.ChannelD.valid  = '0'
             this.burst.push ( {...this.DMA_Master.ChannelA})
+            console.log (this.count_burst)
             cycle.incr()
 
             this.state += 1
@@ -281,7 +288,7 @@ export default class DMA {
         const address = this.DMA_Slave.ChannelA.address
         const data    = this.DMA_Slave.ChannelA.data
         // Kiểm tra địa chỉ và dữ liệu có hợp lệ không
-        if (address.length !== 17 || data.length !== 32) {
+        if (address.length !== 18 || data.length !== 32) {
             console.log("Invalid address or data length")
             return
         }
@@ -291,16 +298,16 @@ export default class DMA {
 
         if (this.state == 0) {
             switch (hexAddress) {
-                case '0x0000304C':
+                case '0x00020000':
                     this.sourceAddress = data
                     break
-                case '0x00003050':
+                case '0x00020004':
                     this.destinationAddress = data
                     break
-                case '0x00003054':
+                case '0x00020008':
                     this.length = data
                     break
-                case '0x00003058':
+                case '0x0002000C':
                     this.control = data
                     break
                 default:
@@ -322,52 +329,6 @@ export default class DMA {
                 if (ready0) this.state    = 2
             } else {
                 if (ready0) this.state = 1
-            }
-        }
-    }
-
-    get(InterConnect2DMA: ChannelD) {
-        if (this.state == 2) {
-            // Get operation for different addresses and store results in beats array
-            this.DMA_Master.send(
-                'GET',
-                (parseInt(this.sourceAddress.slice(-17), 2)).toString(2).padStart(17, '0'),
-                ''
-            )
-            this.state += 1
-            return {...this.DMA_Master.ChannelA}
-        }
-    
-        if (this.state == 3) {
-            if (InterConnect2DMA.valid == '1'
-                && InterConnect2DMA.sink == '0'
-            ) {
-                    this.DMA_Master.receive(InterConnect2DMA)
-                    this.DMA_buffer[parseInt(this.length, 2)] = this.DMA_Master.ChannelD.data
-                    this.length = (parseInt(this.length, 2) - 4).toString(2).padStart(32, '0')
-                    this.state += 1
-            }
-        }
-    }
-
-    put(InterConnect2DMA: ChannelD) {
-        if (this.state == 4 ) {
-            console.log(`Sending data from source address: ${this.sourceAddress}`)
-            this.DMA_Master.send (
-                'PUT'
-                , (this.destinationAddress).slice(0,18)
-                , this.DMA_buffer [parseInt(this.destinationAddress + this.sendoffset + 0, 2)]
-            )
-            this.state += 1
-            return {...this.DMA_Master.ChannelA}
-        }
-
-        if (this.state == 5 ) {
-            if (InterConnect2DMA.valid == '1'
-                && InterConnect2DMA.sink == '1'
-            ) {
-                this.DMA_Master.receive (InterConnect2DMA)
-                this.state = 0
             }
         }
     }

@@ -95,15 +95,7 @@ export default class Memory {
 
             if (this.slaveMemory.ChannelA.size == '10') {
                 // FIRST BURST
-                this.println (this.active_println,
-                    'Cycle '             +
-                    cycle.toString()     +
-                    ': The MEMORY is sending an AccessAckData message to the INTERCONNECT (' 
-                    + BinToHex (this.slaveMemory.ChannelD.data) 
-                    +').'
-                )
                 cycle.incr()
-                
                 this.slaveMemory.send(
                     'AccessAckData', 
                     this.slaveMemory.ChannelA.source, 
@@ -112,10 +104,6 @@ export default class Memory {
                     this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
                     this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
                 )
-
-                this.burst.push (this.slaveMemory.ChannelD)
-
-                //SECOND BURST
                 this.println (this.active_println,
                     'Cycle '             +
                     cycle.toString()     +
@@ -123,8 +111,10 @@ export default class Memory {
                     + BinToHex (this.slaveMemory.ChannelD.data) 
                     +').'
                 )
-                cycle.incr()
+                this.burst.push (this.slaveMemory.ChannelD)
 
+                //SECOND BURST
+                cycle.incr()
                 this.slaveMemory.send(
                     'AccessAckData', 
                     this.slaveMemory.ChannelA.source, 
@@ -133,9 +123,6 @@ export default class Memory {
                     this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 5).toString(2).padStart(17, '0')] +
                     this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 4).toString(2).padStart(17, '0')]
                 )
-                this.burst.push (this.slaveMemory.ChannelD)
-
-                //THIRD BURST
                 this.println (this.active_println,
                     'Cycle '             +
                     cycle.toString()     +
@@ -143,8 +130,10 @@ export default class Memory {
                     + BinToHex (this.slaveMemory.ChannelD.data) 
                     +').'
                 )
-                cycle.incr()
+                this.burst.push (this.slaveMemory.ChannelD)
 
+                //THIRD BURST
+                cycle.incr()
                 this.slaveMemory.send(
                     'AccessAckData', 
                     this.slaveMemory.ChannelA.source, 
@@ -153,9 +142,6 @@ export default class Memory {
                     this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 9 ).toString(2).padStart(17, '0')] +
                     this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 8 ).toString(2).padStart(17, '0')]
                 )
-                this.burst.push (this.slaveMemory.ChannelD)
-
-                //FOURTH BURST
                 this.println (this.active_println,
                     'Cycle '             +
                     cycle.toString()     +
@@ -163,6 +149,9 @@ export default class Memory {
                     + BinToHex (this.slaveMemory.ChannelD.data) 
                     +').'
                 )
+                this.burst.push (this.slaveMemory.ChannelD)
+
+                //FOURTH BURST
                 cycle.incr()
 
                 this.slaveMemory.send(
@@ -173,7 +162,16 @@ export default class Memory {
                     this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 13).toString(2).padStart(17, '0')] +
                     this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 12).toString(2).padStart(17, '0')]
                 )
+                this.println (this.active_println,
+                    'Cycle '             +
+                    cycle.toString()     +
+                    ': The MEMORY is sending an AccessAckData message to the INTERCONNECT (' 
+                    + BinToHex (this.slaveMemory.ChannelD.data) 
+                    +').'
+                )
                 this.burst.push (this.slaveMemory.ChannelD)
+
+                console.log ('this.burst', this.burst)
             }
                          
             this.state   = this.IDLE_STATE
@@ -267,7 +265,7 @@ export default class Memory {
     public getPageNumber (): Register[] {
         const result: Register[]    = []
         const PageTablePointer0     =   0x0003000
-        for (let i = PageTablePointer0; i < (PageTablePointer0 + 4 * 16); i+=1) {
+        for (let i = PageTablePointer0; i < (PageTablePointer0 + 4 * 24); i+=1) {
             result.push({
                 name: '0x' +  i.toString(16).padStart(8,'0'), 
                 value: '0x' + dec('0' + this.Memory[i.toString(2).padStart(17,'0')]).toString(16).padStart(2,'0')

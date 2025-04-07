@@ -202,10 +202,10 @@ export default class InterConnect {
                 if (
                     (
                     (
-                        (parseInt('0'+dataFromBridge.address, 2)    >= 0X00000     ) 
-                    &&  (parseInt('0'+dataFromBridge.address, 2)    <= 0X00060 * 3 *4) 
+                        (parseInt('0'+dataFromBridge.address, 2)    >= 0X1C000      ) 
+                    &&  (parseInt('0'+dataFromBridge.address, 2)    <= 0X1FFFF      ) 
                     )
-                    ||  (parseInt('0'+dataFromBridge.address, 2)    == 0X0305C     )
+                    ||  (parseInt('0'+dataFromBridge.address, 2)    == 0x0020010    )
                     )
                 &&  !this.Pin[0].isEmpty ()
                 ) {
@@ -220,8 +220,10 @@ export default class InterConnect {
                     if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(this.Pin[0].dequeue())
                 }
                 if (
-                    (parseInt('0'+dataFromBridge.address, 2) >= 0x000304C ) 
-                &&  (parseInt('0'+dataFromBridge.address, 2) < 0x000305C )
+                    (parseInt('0'+dataFromBridge.address, 2) == 0x0020000) 
+                ||  (parseInt('0'+dataFromBridge.address, 2) == 0x0020004)
+                ||  (parseInt('0'+dataFromBridge.address, 2) == 0x0020008)
+                ||  (parseInt('0'+dataFromBridge.address, 2) == 0x002000C)
                 &&  !this.Pin[0].isEmpty()
                 ) {
 

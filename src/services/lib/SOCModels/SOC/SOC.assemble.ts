@@ -26,21 +26,22 @@ export function assemble(
         addi x3, x2, 0x60
 
         page_table:
-
-        beq x2, x3, end
+        addi x31, x31, 1
         sw x1, 0(x2)
         addi x2, x2, 4
         addi x1, x1, 0x400
-        jal x0, page_table
+        bne x2, x3, page_table
 
         end:
+
 
         `
     this.Assembler.reset()
     this.Assembler.assemblerFromIns(setting_code)
     this.Memory.reset (Mem_tb)
-    this.Memory.SetInstructionMemory(this.Assembler.binary_code) 
-    this.Processor.pc = this.Memory.Ins_pointer
+    this.Memory.SetInstructionMemory(this.Assembler.binary_code)
+    this.Processor.InsLength = this.Memory.Ins_pointer
+    // this.Processor.pc = this.Memory.Ins_pointer
     this.self_config()
     
     //****************SYNC ACTIVED MODEL VS VIEW****************
@@ -49,7 +50,6 @@ export function assemble(
         this.MMU.active         = this.view.mmuModule.getActivated()
         this.Bus0.active        = this.view.interconnect.getActivated()
         this.Bus1.active        = this.view.interconnect.getActivated()
-        // this.DMA.active         = this.view.dmaModule.getActivated()
         this.Memory.active      = this.view.memoryModule.getActivated()
     }
     
@@ -102,5 +102,6 @@ export function assemble(
 
     // console.log("MMU: ", this.MMU);
     this.Processor.keyBoard_waiting = false
+    this.Processor.MMU.satp = 0x80003000
     return !this.Assembler.syntax_error
 }

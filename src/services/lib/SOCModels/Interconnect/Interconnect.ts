@@ -198,6 +198,7 @@ export default class InterConnect {
                         // cycle.incr()
                     }
                 }
+                console.log ('data', data)
             } else {
                 this.println (
                     this.active_println
@@ -376,12 +377,8 @@ export default class InterConnect {
             const dataFromProcessor = {...this.Pin[0].dequeue()}
             if (
                 (
-                    (parseInt('0'+dataFromProcessor.address, 2)    > 0x000305C + 1) 
-                &&  (parseInt('0'+dataFromProcessor.address, 2)    < 0X1BFFF    + 1)
-                ) || 
-                (
                     (parseInt('0'+dataFromProcessor.address, 2)    >= 0)
-                &&  (parseInt('0'+dataFromProcessor.address, 2)    <= 0x000305C  )
+                &&  (parseInt('0'+dataFromProcessor.address, 2)    <= 0X1BFFF    + 1  )
                 )
                 
             ) {
@@ -393,20 +390,23 @@ export default class InterConnect {
                 )
                 if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(dataFromProcessor)
             }
-            // if (
-            //     (parseInt('0'+dataFromProcessor.address, 2) >= 0x000304C) 
-            //     && (parseInt('0'+dataFromProcessor.address, 2) <= 0x000305C)
-            // ) {
-            //     if (dataFromProcessor.opcode == '000') {
-            //         this.println (
-            //             this.active_println
-            //             ,'Cycle '
-            //             + cycle.toString() 
-            //             +': The INTERCONNECT is sending data from PROCESSOR to SUB-INTERCONNECT.'
-            //         )
-            //         if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromProcessor)
-            //     }
-            // }
+            if (
+                    (parseInt('0'+dataFromProcessor.address, 2) == 0x0020000) 
+                ||  (parseInt('0'+dataFromProcessor.address, 2) == 0x0020004)
+                ||  (parseInt('0'+dataFromProcessor.address, 2) == 0x0020008)
+                ||  (parseInt('0'+dataFromProcessor.address, 2) == 0x002000C)
+                ||  (parseInt('0'+dataFromProcessor.address, 2) == 0x0020010)
+            ) {
+                if (dataFromProcessor.opcode == '000') {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The INTERCONNECT is sending data from PROCESSOR to SUB-INTERCONNECT.'
+                    )
+                    if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromProcessor)
+                }
+            }
         }
 
         if (Abiter == 1 && !this.Pin[1].isEmpty()) {

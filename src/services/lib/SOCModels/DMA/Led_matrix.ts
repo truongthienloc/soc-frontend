@@ -144,7 +144,8 @@ export default class LEDMatrix {
            
         }
 
-        let index = addr / 4  // Tính toán chỉ số của thành ghi
+        let index = (addr -  0x1C000) / 4  // Tính toán chỉ số của thành ghi
+        console.log ('index', index)
         if (index >= 384) {
             console.log (addr)
             throw new Error("Address out of range")
@@ -156,7 +157,7 @@ export default class LEDMatrix {
         for (let i = 0; i < 96; i++) {
             this.matrix_buffer[i] = this.dataRegisters.slice(i * 3, (i + 1) * 3).join()
         }
-        this.matrix_buffer = this.matrix_buffer.map(s => s.replace(/,/g, ''))
+        // this.matrix_buffer = this.matrix_buffer.map(s => s.replace(/,/g, ''))
 
         // for (let i = 0; i< 96; i++) {
         //     for (let j =0; j< 96; j++) {

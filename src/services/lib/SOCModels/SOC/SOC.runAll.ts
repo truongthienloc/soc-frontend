@@ -13,7 +13,7 @@ export async function RunAll(this: Soc) {
         this.Memory.Ins_pointer || this.Processor.state != 0 || this.DMA.state !=0
     ) {
         await this.Step()
-        // if (bre > 99) break
+        // if (bre > 66) break
         // bre ++   
     }
 
@@ -44,6 +44,7 @@ export async function RunAll(this: Soc) {
     // console.log (this.Bridge.state)
     // console.log (this.Bridge)
     // console.log(this.Bridge.fifo_from_subInterconnect)
+    console.log (this.Memory.getPageNumber())
     console.log (this.Processor.getRegisters())
    this.event.emit(Soc.SOCEVENT.DONE_ALL)
 }

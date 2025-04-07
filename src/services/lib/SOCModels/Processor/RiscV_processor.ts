@@ -577,17 +577,6 @@ export default class RiscVProcessor {
         return handleRegister(this.register)
     }
 
-
-    // public setImem(binary_code: string[] = []) {
-    //     if (this.active == true) {
-    //         let pc_addr = 0
-    //         for (let i of binary_code) {
-    //             this.Instruction_memory[pc_addr.toString(2)] = i
-    //             pc_addr += 4
-    //         }
-    //     }
-    // }
-
     public reset(): void {
         this.register = {
             '00000': '00000000000000000000000000000000',
@@ -627,59 +616,6 @@ export default class RiscVProcessor {
         this.Instruction_memory = {}
         this.pc = 0
     }
-
-    // RunAll(fileName: string, stalled: boolean) {
-    //     this.pc = 0
-    //     let count= 0
-    //     if (this.active == true) {
-    //         while (this.pc < Object.values(this.Instruction_memory).length * 4 - 4) {
-    //             const element = this.Instruction_memory[this.pc.toString(2)]
-    //             this.run(element, this.pc, false)
-    //             // if (count > 300) {
-    //             //     console.log(fileName, 'problem!!!!')
-    //             //     break
-    //             // }
-    //             // count++
-    //         }
-    //     }
-    // }
-
-    // dataMemory(address: string, memRead: string, memWrite: string, writeData: string) {
-    //     if (dec('0' + address) % 4 != 0) {
-    //         return '00000000000000000000000000000000'
-    //     }
-    //     if (memRead[0] === '1') {
-    //         if (!(address in this.Data_memory)) {
-    //             return '00000000000000000000000000000000'
-    //         }
-    //         if (memRead === '100') {
-    //             return this.Data_memory[address].slice(-8)
-    //         }
-    //         if (memRead === '101') {
-    //             return this.Data_memory[address].slice(-16)
-    //         }
-    //         if (memRead === '110') {
-    //             return this.Data_memory[address]
-    //         }
-    //     }
-
-    //     if (memWrite[0] === '1') {
-    //         if (!(address in this.Data_memory)) {
-    //             this.Data_memory[address] = '00000000000000000000000000000000'
-    //         }
-    //         if (memWrite === '100') {
-    //             this.Data_memory[address] = this.Data_memory[address].slice(8) + writeData.slice(-8)
-    //         }
-    //         if (memWrite === '101') {
-    //             this.Data_memory[address] =
-    //                 this.Data_memory[address].slice(16) + writeData.slice(-16)
-    //         }
-    //         if (memWrite === '110') {
-    //             this.Data_memory[address] = writeData
-    //         }
-    //     }
-    //     return '00000000000000000000000000000000'
-    // }
 
     ALU(operand1: any, operand2: any, operation: string): string {
         this.zero = 0
@@ -1249,6 +1185,7 @@ export default class RiscVProcessor {
             if (this.stalled == false) {
                 this.pc     = mux(mux(pc + 4, (dec(imm) << 1) + pc, this.pcSrc1), ALUResult, this.pcSrc2)
             } else this.pc = pc
+
 
             this.lineColor['3']         = mux(this.lineColor['2'], this.lineColor['1'], this.ALUSrc);
             this.lineColor['6']         = mux(this.lineColor['0'], this.lineColor['4'], this.pcSrc1);

@@ -16,6 +16,32 @@ export function assemble(
     ) {
     this.println('Cycle ', this.cycle.toString(), ': System is setting up')
     console.log('Cycle ', this.cycle.toString(), ': System is setting up')
+
+    const setting_code = `
+        .text
+        lui x1, 0x1
+        addi x1, x1, 0x3
+
+        lui  x2, 0x3
+        addi x3, x2, 0x60
+
+        page_table:
+
+        beq x2, x3, end
+        sw x1, 0(x2)
+        addi x2, x2, 4
+        addi x1, x1, 0x400
+        jal x0, page_table
+
+        end:
+
+        `
+    this.Assembler.reset()
+    this.Assembler.assemblerFromIns(setting_code)
+    this.Memory.reset (Mem_tb)
+    this.Memory.SetInstructionMemory(this.Assembler.binary_code) 
+    this.Processor.pc = this.Memory.Ins_pointer
+    this.self_config()
     
     //****************SYNC ACTIVED MODEL VS VIEW****************
     if (this.view) {
@@ -28,20 +54,20 @@ export function assemble(
     }
     
     //****************CHECK SYNTAX ERROR****************
-    this.Assembler.syntax_error = false
-    this.Assembly_code = []
+    this.Assembler.reset()
     this.Assembler.assemblerFromIns(code)                             
     
     //****************SET INITIAL STATUS****************
     // SET INITIAL DATA
     this.Processor.reset()
+    this.Processor.pc = this.Memory.Ins_pointer
     this.cycle.cycle = 0
     this.Led_matrix.reset ()
-    this.Led_matrix.led = new LedMatrix ('.led-matrix')
+    // this.Led_matrix.led = new LedMatrix ('.led-matrix')
 
-    this.Memory.reset (Mem_tb)
+    // this.Memory.reset (Mem_tb)
     this.Memory.SetInstructionMemory(this.Assembler.binary_code) 
-    this.Memory.setPageNumber()
+    // this.Memory.setPageNumber()
 
     this.Processor.InsLength = this.Memory.Ins_pointer
 

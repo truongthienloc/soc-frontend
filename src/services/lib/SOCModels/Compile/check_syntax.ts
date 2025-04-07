@@ -297,6 +297,13 @@ export default class Assembler {
         and: '0000000',
     }
 
+    public reset () {
+        this.address        = {}
+        this.binary_code    = []
+        this.Instructions   = []
+        this.syntax_error   = false
+    }
+
     public handlerString(input: string): string {
         let string = input
         if (string.includes('//')) {

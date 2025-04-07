@@ -6,7 +6,7 @@ export default class MMU {
     active              : boolean
     physical_address    : string
     TLB                 : [ number, number, number, number][]
-    stap                : number
+    satp                : number
     MMU_message         : string
 
     step                : number
@@ -21,7 +21,7 @@ export default class MMU {
         this.endAddress         = 0
 
         this.physical_address   = '' // Initialized with a number
-        this.stap               = 0
+        this.satp               = 0
         this.TLB                = new Array(8).fill([0, 0, 0, 0]) // Initialized as 8 rows of [0, 0, 0, 0]
         this.MMU_message        = ''
         this.step               = 0
@@ -53,7 +53,7 @@ export default class MMU {
     ) 
     {
 
-        if (parseInt(logic_address, 2) < 0X04000) {
+        if (parseInt(logic_address, 2) < 0X04000 ) {
             this.MMU_message = ' MMU is bypassed'
             this.physical_address = logic_address.slice(-17)
         } else {
@@ -88,12 +88,12 @@ export default class MMU {
         , number
         , number
         ][]
-        , stap       : number
+        , satp       : number
         , endAddress : number 
 
     ){
         this.TLB               = P
-        this.stap              = stap
+        this.satp              = satp
         this.endAddress        = endAddress
     
     }
@@ -101,13 +101,13 @@ export default class MMU {
     public search_in_TLB(logic_address: string) {
         const VPN               = logic_address.slice(0, 20)// 10 bit đầu tiên
         const OFFSET            = logic_address.slice(20, 32) // 12 bit cuối cùng
-        const vpn_dec           = parseInt(VPN, 2) & 0b1111
-        const offset_dec        = parseInt(OFFSET, 2);
+        const vpn_dec           = parseInt(VPN, 2) & 0b11111 
+        const offset_dec        = parseInt(OFFSET, 2) & 0xfff 
         const check_pagenum = this.TLB.map(
             (tlbEntry) => vpn_dec === tlbEntry[0] && tlbEntry[2] === 1 
         );
 
-        const exist = check_pagenum.some(Boolean);
+        const exist = check_pagenum.some(Boolean)
         
         const physical_addresses = this.TLB.map(
             (tlbEntry) => offset_dec + tlbEntry[1]
@@ -118,7 +118,7 @@ export default class MMU {
             this.physical_address = (physical_addresses[check_pagenum.indexOf(true)]).toString(2).padStart(17, '0')
         } else {
             this.MMU_message = " TLB: VPN is missed."
-            this.physical_address = (this.stap + vpn_dec*4).toString(2).padStart(17, '0')
+            this.physical_address = (this.satp + vpn_dec*4).toString(2).padStart(17, '0')
         }
 
     }

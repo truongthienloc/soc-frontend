@@ -195,7 +195,7 @@ export default class InterConnect {
                             + cycle.toString() 
                             +': The INTERCONNECT is receiving data from MEMORY.'
                         )
-                        cycle.incr()
+                        // cycle.incr()
                     }
                 }
             } else {
@@ -381,7 +381,7 @@ export default class InterConnect {
                 ) || 
                 (
                     (parseInt('0'+dataFromProcessor.address, 2)    >= 0)
-                &&  (parseInt('0'+dataFromProcessor.address, 2)    < 0x000304C  )
+                &&  (parseInt('0'+dataFromProcessor.address, 2)    <= 0x000305C  )
                 )
                 
             ) {
@@ -393,20 +393,20 @@ export default class InterConnect {
                 )
                 if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(dataFromProcessor)
             }
-            if (
-                (parseInt('0'+dataFromProcessor.address, 2) >= 0x000304C) 
-                && (parseInt('0'+dataFromProcessor.address, 2) <= 0x000305C)
-            ) {
-                if (dataFromProcessor.opcode == '000') {
-                    this.println (
-                        this.active_println
-                        ,'Cycle '
-                        + cycle.toString() 
-                        +': The INTERCONNECT is sending data from PROCESSOR to SUB-INTERCONNECT.'
-                    )
-                    if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromProcessor)
-                }
-            }
+            // if (
+            //     (parseInt('0'+dataFromProcessor.address, 2) >= 0x000304C) 
+            //     && (parseInt('0'+dataFromProcessor.address, 2) <= 0x000305C)
+            // ) {
+            //     if (dataFromProcessor.opcode == '000') {
+            //         this.println (
+            //             this.active_println
+            //             ,'Cycle '
+            //             + cycle.toString() 
+            //             +': The INTERCONNECT is sending data from PROCESSOR to SUB-INTERCONNECT.'
+            //         )
+            //         if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromProcessor)
+            //     }
+            // }
         }
 
         if (Abiter == 1 && !this.Pin[1].isEmpty()) {

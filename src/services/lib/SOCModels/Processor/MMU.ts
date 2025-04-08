@@ -53,7 +53,10 @@ export default class MMU {
     ) 
     {
 
-        if (this.satp < 0x80000000 || parseInt ('0'+logic_address,2) >= 0X1FFFF + 1) { //1000 0000 0000 0000 0000 0000 0000 0000
+        if (this.satp < 0x80000000 
+            // || parseInt ('0'+logic_address,2) >= 0X1FFFF + 1
+            || parseInt ('0'+logic_address,2) >= 0X1C000
+        ) { //1000 0000 0000 0000 0000 0000 0000 0000
             this.MMU_message = ' MMU is bypassed'
             this.physical_address = logic_address.slice(-18)
         } else {
@@ -120,7 +123,8 @@ export default class MMU {
             this.physical_address = (physical_addresses[check_pagenum.indexOf(true)]).toString(2).padStart(17, '0')
         } else {
             this.MMU_message = " TLB: VPN is missed."
-            this.physical_address = (this.satp & 0xFFFF + vpn_dec*4).toString(2).padStart(17, '0')
+            console.log ((this.satp & 0xFFFF) + vpn_dec*4)
+            this.physical_address = ((this.satp & 0xFFFF) + vpn_dec*4).toString(2).padStart(17, '0')
         }
 
     }

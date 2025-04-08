@@ -99,8 +99,11 @@ export default class DMA {
 
             this.DMA_Master.send(
                 'GET',
-                (parseInt(this.sourceAddress.slice(-17), 2)).toString(2).padStart(17, '0'),
+                (parseInt(this.sourceAddress.slice(-17), 2) + this.count_burst * 16).toString(2).padStart(17, '0'),
                 ''
+            )
+            console.log ('(parseInt(this.sourceAddress.slice(-17), 2) + this.count_burst * 4)',
+                (this.count_burst)
             )
             this.DMA_Master.ChannelA.size = '10'
             this.DMA_Slave.ChannelD.valid = '0'

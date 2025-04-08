@@ -198,7 +198,6 @@ export default class InterConnect {
                         // cycle.incr()
                     }
                 }
-                console.log ('data', data)
             } else {
                 this.println (
                     this.active_println
@@ -378,7 +377,7 @@ export default class InterConnect {
             if (
                 (
                     (parseInt('0'+dataFromProcessor.address, 2)    >= 0)
-                &&  (parseInt('0'+dataFromProcessor.address, 2)    <= 0X1BFFF    + 1  )
+                &&  (parseInt('0'+dataFromProcessor.address, 2)    <= 0X1FFFF  )
                 )
                 
             ) {

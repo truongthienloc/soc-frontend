@@ -121,16 +121,16 @@ export default class InterConnect {
         ,dataFromSub_valid          : boolean
         ,cycle                      : Cycle
     ) {
-        this.RecFromProcessor(dataFromProcessor, cycle, dataFromProcessor_valid)
+        this.RecFromProcessor(dataFromProcessor, cycle)
         this.RecFromDMA(dataFromDMA, cycle, dataFromDMA_valid)
         this.RecFromMem(dataFromMemory, cycle, dataFromMemory_valid)
         this.RecFromSub(dataFromSub, cycle, dataFromSub_valid)
 
     }
 
-    RecFromProcessor(data: ChannelA, cycle: Cycle, valid: boolean): void {
+    RecFromProcessor(data: ChannelA, cycle: Cycle): void {
 
-        if (this.active && this.Pactived[0] && valid && data.valid == '1') {
+        if (this.active && this.Pactived[0] && data.valid == '1') {
             this.println (
                 this.active_println
                 ,'Cycle '

@@ -13,14 +13,10 @@ export async function RunAll(this: Soc) {
         this.Memory.Ins_pointer || this.Processor.state != 0 || this.DMA.state !=0
     ) {
         await this.Step()
-            // if (bre > 75  ) break
-            // bre ++   
+        // if (bre > 10  ) break
+        // bre ++   
     }
-    // console.log (this.Memory.GetMemory()['0001000000101100'.padStart(17,'0')])
-    // for (let i = 0X1C000; i < 0X1C000+ 73*4; i+= 4) {
-    //     console.log (this.Memory.GetMemory()[i.toString(2).padStart(17,'0')])
-    // }
-    
+    // console.log (this.Processor.FIFO)
 
     // console.log (this.MMU.endAddress)
     // console.log (this.Memory.Memory['10001000000010011'])
@@ -28,7 +24,9 @@ export async function RunAll(this: Soc) {
     // console.log (this.Memory.Memory['10001000000010001'])
     // console.log (this.Memory.Memory['10001000000010000'])
     // console.log (this.Bridge.state)
-    // console.log (this.Bus0.Pin[0])
+    // console.log (this.Bus0)
+    // console.log (this.cycle)
+    // console.log (this.Memory.slaveMemory.ChannelD)
     // console.log (this.Bus1)
     // console.log(this.Bus1.Pin[0])
     console.log (this.Led_matrix.state, this.Led_matrix.matrix_buffer)

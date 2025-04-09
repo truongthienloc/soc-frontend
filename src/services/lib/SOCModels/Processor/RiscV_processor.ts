@@ -4,6 +4,7 @@ import Master from '../Interconnect/Master'
 import { dec, stringToAsciiAndBinary, BinToHex } from '../Compile/convert'
 import { Keyboard, Logger, Monitor } from '../Compile/soc.d'
 import Ecall from '../Ecall/Ecall'
+import { FIFO_ChannelA }    from "../Interconnect/FIFO_ChannelA"
 
 import ChannelD from '../Interconnect/ChannelD'
 import Cycle from '../Compile/cycle'
@@ -35,6 +36,7 @@ export default class RiscVProcessor {
     pre_pc                      = 0
     pc                          = 0
     active_println              : boolean
+    FIFO                        = new FIFO_ChannelA() 
 
     public static PROCESSOR_EVENT = {KEY_WAITING: 'KEY_WAITING', KEY_FREE: 'KEY_FREE'}
     event = new EventEmitter ()
@@ -125,7 +127,10 @@ export default class RiscVProcessor {
 
             this.master.ChannelA.valid = '1'
             this.master.send ('GET',  (this.pc).toString(2).padStart(17, '0'), this.SendData)
+            
             this.master.ChannelA.size  = '00'
+            this.FIFO.enqueue ({...this.master.ChannelA})
+
             this.state              = this.RECEIVE_INSTRUCTION_STATE
             return
     }
@@ -311,6 +316,7 @@ export default class RiscVProcessor {
             this.master.ChannelA.valid = '1'
             this.master.send ('GET',  this.MMU.physical_address, this.SendData)
             this.master.ChannelA.valid = '1'
+            this.FIFO.enqueue ({...this.master.ChannelA})
             this.state = this.REPLACE_TLBE_STATE
         }
         else if (this.MMU.MMU_message == ' ERROR: Page fault!!!!') {
@@ -328,6 +334,7 @@ export default class RiscVProcessor {
         else {
             this.state =  this.RECEIVE_INTERCONNECT_STATE 
             this.master.send (this.Processor_messeage,  this.MMU.physical_address, this.SendData)
+
             this.println(this.active_println,
                 'Cycle ' 
                 + cycle.toString()  
@@ -337,6 +344,8 @@ export default class RiscVProcessor {
                 +BinToHex(this.MMU.physical_address)
             )
             this.master.ChannelA.valid = '1'
+            this.FIFO.enqueue ({...this.master.ChannelA})
+
         }
 
         return
@@ -365,7 +374,6 @@ export default class RiscVProcessor {
                     + cycle.toString() 
                     +': The PROCESSOR is receiving messeage AccessAckData from INTERCONNECT.'
                 )
-                console.log ()
                 this.register[this.writeReg] =  this.master.ChannelD.data
             }
             
@@ -398,8 +406,8 @@ export default class RiscVProcessor {
             + cycle.toString() 
             +': The TLB is replacing an entry.'
         )
-        
-        this.MMU.pageReplace ([parseInt(VPN , 2) & 0xf,  dec (frame) & 0XFFF0, 1, cycle.cycle])
+
+        this.MMU.pageReplace ([parseInt(VPN , 2) & 0xf,  (dec (frame) & 0XFFF0) * 4, 1, cycle.cycle])
 
         this.master.ChannelA.valid = '0'
 
@@ -601,6 +609,7 @@ export default class RiscVProcessor {
         this.Data_memory = {}
         this.Instruction_memory = {}
         this.pc = 0
+        this.FIFO = new FIFO_ChannelA()
     }
 
     ALU(operand1: any, operand2: any, operation: string): string {
@@ -1044,6 +1053,7 @@ export default class RiscVProcessor {
             this.pre_pc = pc
             this.stalled = false 
             let readData = ''
+
             if (instruction == '00000000000000000000000001110011') {
                 
                 if (icBusy) {

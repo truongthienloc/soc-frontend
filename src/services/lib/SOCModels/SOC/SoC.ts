@@ -6,7 +6,7 @@ import { dec, stringToAsciiAndBinary, BinToHex } from '../Compile/convert'
 import Memory from '../Memory/Memory'
 import { Keyboard, Logger, Monitor } from '../Compile/soc.d'
 // import {Logger } from './soc.d'
-import Ecall from '../Ecall/Ecall'
+// import Ecall from '../Ecall/Ecall'
 import { NCKHBoard } from '../../soc/boards'
 import DMA from '../DMA/DMA'
 import Assembler from '../Compile/check_syntax'
@@ -15,17 +15,17 @@ import { Register } from '~/types/register'
 // import { eventNames } from 'process'
 import EventEmitter from '../../EventEmitter/EventEmitter'
 import type { TLB, TLBEntries } from '../Compile/soc.d'
-import { Disassembly } from '~/components/CodeEditor'
+// import { Disassembly } from '~/components/CodeEditor'
 import { assemble } from '../SOC/SOC.assemble'
 
 import { RunAll } from '../SOC/SOC.runAll'
-import { Step } from '../SOC/SOC.step'
+// import { Step } from '../SOC/SOC.step'
 import BuddyAllocator from "../Memory/BuddyAllocator"
 import sub_InterConnect from '../Interconnect/sub_Interconnect'
-import ChannelA from '../Interconnect/ChannelA'
-import ChannelD from "./../Interconnect/ChannelD"
+// import ChannelA from '../Interconnect/ChannelA'
+// import ChannelD from "./../Interconnect/ChannelD"
 import Bridge from "./../Interconnect/Bridge"
-import { FIFO_ChannelA } from '../Interconnect/FIFO_ChannelA'
+// import { FIFO_ChannelA } from '../Interconnect/FIFO_ChannelA'
 import LEDMatrix from '../DMA/Led_matrix'
 import Cycle from '../Compile/cycle'
 // import { Console } from 'console'
@@ -157,57 +157,70 @@ export default class Soc {
             , this.Bus0.Pout[0].dequeue()
             , this.Bus0.state == 0
         )
-        
-        this.DMA.Run (
-            this.Bus1.Pout[1].dequeue()
-            ,this.Bus0.Pout[1].dequeue()
-            , this.cycle
-            , this.Bus0.state == 0
-            , this.Bus1.state == 0
-        )
+
+        // if (this.cycle.cycle % 2 == 0) {
+            this.Bus0.Run (
+                this.Processor.FIFO.dequeue()
+                ,this.DMA.burst
+                ,this.Memory.burst
+                ,this.Bridge.Bridge_slave.ChannelD
+                ,this.Processor.master.ChannelA.valid == '1'
+                ,this.DMA.DMA_Master.ChannelA.valid == '1'
+                ,this.Memory.slaveMemory.ChannelD.valid == '1'
+                ,this.Bridge.Bridge_slave.ChannelD.valid == '1'
+                ,this.cycle
+            )
+        // }
+
+        // if (this.cycle.cycle % 4 ==0) {
+            this.DMA.Run (
+                this.Bus1.Pout[1].dequeue()
+                ,this.Bus0.Pout[1].dequeue()
+                , this.cycle
+                , this.Bus0.state == 0
+                , this.Bus1.state == 0
+            )
+        // }
+
+        // if (this.cycle.cycle % 2 == 0) {
             
-        this.Memory.Run(
-            this.cycle
-            , this.Bus0.Pout[2].dequeue()
-            , this.Bus0.state == 0
-        )
-        
-        this.Bus0.Run (
-            this.Processor.master.ChannelA
-            ,this.DMA.burst
-            ,this.Memory.burst
-            ,this.Bridge.Bridge_slave.ChannelD
-            ,this.Processor.master.ChannelA.valid == '1'
-            ,this.DMA.DMA_Master.ChannelA.valid == '1'
-            ,this.Memory.slaveMemory.ChannelD.valid == '1'
-            ,this.Bridge.Bridge_slave.ChannelD.valid == '1'
-            ,this.cycle
-        )
+            this.Memory.Run(
+                this.cycle
+                , this.Bus0.Pout[2].dequeue()
+                , this.Bus0.state == 0
+            )
+        // }
 
-        this.Bridge.Run (
-            this.Bus0.Pout[3]
-            , this.Bus1.Pout[0]
-            , this.Bus0.state == 0
-            , this.Bus1.state == 0
-            , this.cycle
-        )
-        
-        this.Bus1.Run (
-            this.Bridge.Bridge_master.ChannelA
-            , this.DMA.DMA_Slave.ChannelD
-            , this.Led_matrix.Matrix_Slave.ChannelD
-            , this.Bridge.Bridge_master.ChannelA.valid == '1'
-            , this.Bridge.state == 0
-            , this.DMA.DMA_Slave.ChannelD.valid == '1'
-            , this.Led_matrix.Matrix_Slave.ChannelD.valid == '1'
-            , this.cycle
-        )
+        // if (this.cycle.cycle % 4 ==0) {
+            this.Bridge.Run (
+                this.Bus0.Pout[3]
+                , this.Bus1.Pout[0]
+                , this.Bus0.state == 0
+                , this.Bus1.state == 0
+                , this.cycle
+            )
+        // } 
 
-        this.Led_matrix.Run(
-            this.Bus1.Pout[2].dequeue()
-            , this.cycle
-            , this.Bus1.state == 0
-        )
+        // if (this.cycle.cycle % 4 ==0) {
+            this.Bus1.Run (
+                this.Bridge.Bridge_master.ChannelA
+                , this.DMA.DMA_Slave.ChannelD
+                , this.Led_matrix.Matrix_Slave.ChannelD
+                , this.Bridge.Bridge_master.ChannelA.valid == '1'
+                , this.Bridge.state == 0
+                , this.DMA.DMA_Slave.ChannelD.valid == '1'
+                , this.Led_matrix.Matrix_Slave.ChannelD.valid == '1'
+                , this.cycle
+            )
+        // } 
+        
+        // if (this.cycle.cycle % 4 ==0) {
+            this.Led_matrix.Run(
+                this.Bus1.Pout[2].dequeue()
+                , this.cycle
+                , this.Bus1.state == 0
+            )
+        // } 
         
         this.cycle.incr()
     }

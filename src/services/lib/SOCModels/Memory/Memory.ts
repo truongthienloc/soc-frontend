@@ -171,7 +171,7 @@ export default class Memory {
                 )
                 this.burst.push (this.slaveMemory.ChannelD)
 
-                console.log ('this.burst', this.burst)
+                // console.log ('this.burst', this.burst)
             }
                          
             this.state   = this.IDLE_STATE

@@ -12,8 +12,8 @@ const code              =
 `
 .text
 lui x1,0x1c
-//lui x5,0xfff
-//ori x5, x5, 0xfff
+lui x5,0xfff
+ori x5, x5, 0xfff
 addi x2, x0, 288
 
 mmio:

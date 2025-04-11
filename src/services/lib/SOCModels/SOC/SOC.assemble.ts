@@ -39,6 +39,9 @@ export function assemble(
     this.Assembler.reset()
     this.Assembler.assemblerFromIns(setting_code)
     this.Memory.reset (Mem_tb)
+    this.Memory.Ins_pointer = 0
+    this.Processor.reset()
+    this.Processor.pc = 0
     this.Memory.SetInstructionMemory(this.Assembler.binary_code)
     this.Processor.InsLength = this.Memory.Ins_pointer
     // this.Processor.pc = this.Memory.Ins_pointer

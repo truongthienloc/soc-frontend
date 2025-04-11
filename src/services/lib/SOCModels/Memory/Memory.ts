@@ -82,7 +82,7 @@ export default class Memory {
                     this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
                     this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
                 )
-                this.burst.push (this.slaveMemory.ChannelD)
+                this.burst.push ({...this.slaveMemory.ChannelD})
 
                 this.println (this.active_println,
                     'Cycle '             +
@@ -111,7 +111,7 @@ export default class Memory {
                     + BinToHex (this.slaveMemory.ChannelD.data) 
                     +').'
                 )
-                this.burst.push (this.slaveMemory.ChannelD)
+                this.burst.push ({...this.slaveMemory.ChannelD})
 
                 //SECOND BURST
                 cycle.incr()
@@ -130,7 +130,7 @@ export default class Memory {
                     + BinToHex (this.slaveMemory.ChannelD.data) 
                     +').'
                 )
-                this.burst.push (this.slaveMemory.ChannelD)
+                this.burst.push ({...this.slaveMemory.ChannelD})
 
                 //THIRD BURST
                 cycle.incr()
@@ -149,7 +149,7 @@ export default class Memory {
                     + BinToHex (this.slaveMemory.ChannelD.data) 
                     +').'
                 )
-                this.burst.push (this.slaveMemory.ChannelD)
+                this.burst.push ({...this.slaveMemory.ChannelD})
 
                 //FOURTH BURST
                 cycle.incr()
@@ -169,7 +169,7 @@ export default class Memory {
                     + BinToHex (this.slaveMemory.ChannelD.data) 
                     +').'
                 )
-                this.burst.push (this.slaveMemory.ChannelD)
+                this.burst.push ({...this.slaveMemory.ChannelD})
 
                 // console.log ('this.burst', this.burst)
             }
@@ -208,7 +208,7 @@ export default class Memory {
                 this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
                 this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
             )
-            this.burst.push (this.slaveMemory.ChannelD)
+            this.burst.push ({...this.slaveMemory.ChannelD})
             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(0,8)
             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(8,16)
             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(16,24)

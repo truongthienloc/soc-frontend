@@ -313,7 +313,7 @@ export default class Memory {
         for (let i = 0; i < sortedMemory.length; i += 4) {
             let element = ''
             for (let j = 3; j>=0 ; j--) {
-                element += sortedMemory[i+j][1]
+                if (i+j < sortedMemory.length) element += sortedMemory[i+j][1]
             }
             littleEndianMemory [i.toString(2).padStart(17, '0')] = element
 

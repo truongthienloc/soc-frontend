@@ -16,7 +16,7 @@ export function assemble(
     ) {
     this.println('Cycle ', this.cycle.toString(), ': System is setting up')
     console.log('Cycle ', this.cycle.toString(), ': System is setting up')
-
+    console.log ('self config 1')
     const setting_code = `
         .text
         lui x1, 0x1
@@ -36,17 +36,24 @@ export function assemble(
 
 
         `
+
     this.Assembler.reset()
+    
     this.Assembler.assemblerFromIns(setting_code)
+    
     this.Memory.reset (Mem_tb)
     this.Memory.Ins_pointer = 0
     this.Processor.reset()
     this.Processor.pc = 0
     this.Memory.SetInstructionMemory(this.Assembler.binary_code)
-    this.Processor.InsLength = this.Memory.Ins_pointer
-    // this.Processor.pc = this.Memory.Ins_pointer
-    this.self_config()
+    // this.Memory.GetInstructionMemory()
     
+    this.Processor.InsLength = this.Memory.Ins_pointer
+    
+    // this.Processor.pc = this.Memory.Ins_pointer
+   
+    this.self_config()
+
     //****************SYNC ACTIVED MODEL VS VIEW****************
     if (this.view) {
         this.Processor.active   = this.view.cpuModule.getActivated()

@@ -19,7 +19,7 @@ import { Disassembly } from '~/components/CodeEditor'
 import { assemble } from '../SOC/SOC.assemble'
 
 import { RunAll } from '../SOC/SOC.runAll'
-import { Step } from '../SOC/SOC.step'
+// import { Step } from '../SOC/SOC.step'
 import BuddyAllocator from "../Memory/BuddyAllocator"
 import sub_InterConnect from '../Interconnect/sub_Interconnect'
 import ChannelA from '../Interconnect/ChannelA'
@@ -220,9 +220,13 @@ export default class Soc {
         ) {
             // if (bre > 7) break
             // bre ++ 
-            this.Processor.active_println = true
-            this.Bus0.active_println      = true
-            this.Memory.active_println    = true
+            console.log ('this.Processor.pc,  this.Memory.Ins_pointer, this.Processor.state != 0', this.Processor.pc,  this.Memory.Ins_pointer, this.Processor.state != 0)
+            this.Processor.active_println = false
+            this.Bus0.active_println      = false
+            this.Memory.active_println    = false
+            this.Processor.active_println = false
+            this.Bus0.active_println      = false
+            this.Memory.active_println    = false
 
             this.Processor.Run(
                 false

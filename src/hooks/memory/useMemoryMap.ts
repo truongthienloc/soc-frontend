@@ -1,77 +1,74 @@
 import { startTransition, useEffect, useState } from 'react'
-import { DMEMPOINT, IMEMPOINT, IOPOINT, LMPOINT, STACKPOINT } from '~/configs/memoryPoint.constant'
+import {
+    PERIPHERAL_POINT,
+    DATA_POINT,
+    PAGE_TABLE_POINT,
+    INSTRUCTION_POINT,
+} from '~/configs/memoryPoint.constant'
 
 export type MemoryMapHookReturn = ReturnType<typeof useMemoryMap>
 
 export default function useMemoryMap() {
     /** Memory Map state */
-    const [lmPoint, setLmPoint] = useState(LMPOINT)
-    const [ioPoint, setIOPoint] = useState(IOPOINT)
-    const [iMemPoint, setIMemPoint] = useState(IMEMPOINT)
-    const [dMemPoint, setDMemPoint] = useState(DMEMPOINT)
-    const [stackPoint, setStackPoint] = useState(STACKPOINT)
+    const [instructionPoint, setInstructionPoint] = useState(INSTRUCTION_POINT)
+    const [pageTablePoint, setPageTablePoint] = useState(PAGE_TABLE_POINT)
+    const [dataPoint, setDataPoint] = useState(DATA_POINT)
+    const [peripheralPoint, setPeripheralPoint] = useState(PERIPHERAL_POINT)
 
     const [savedPoints, setSavedPoints] = useState({
-        lmPoint: LMPOINT,
-        ioPoint: IOPOINT,
-        iMemPoint: IMEMPOINT,
-        dMemPoint: DMEMPOINT,
-        stackPoint: STACKPOINT,
+        instructionPoint: INSTRUCTION_POINT,
+        pageTablePoint: PAGE_TABLE_POINT,
+        dataPoint: DATA_POINT,
+        peripheralPoint: PERIPHERAL_POINT,
     })
 
     const [isModified, setIsModified] = useState(false)
 
     function reset() {
-        setLmPoint(LMPOINT)
-        setIOPoint(IOPOINT)
-        setIMemPoint(IMEMPOINT)
-        setDMemPoint(DMEMPOINT)
-        setStackPoint(STACKPOINT)
+        setInstructionPoint(INSTRUCTION_POINT)
+        setPageTablePoint(PAGE_TABLE_POINT)
+        setDataPoint(DATA_POINT)
+        setPeripheralPoint(PERIPHERAL_POINT)
         setSavedPoints({
-            lmPoint: LMPOINT,
-            ioPoint: IOPOINT,
-            iMemPoint: IMEMPOINT,
-            dMemPoint: DMEMPOINT,
-            stackPoint: STACKPOINT,
+            instructionPoint: INSTRUCTION_POINT,
+            pageTablePoint: PAGE_TABLE_POINT,
+            dataPoint: DATA_POINT,
+            peripheralPoint: PERIPHERAL_POINT,
         })
     }
 
     function save() {
         setSavedPoints({
-            lmPoint: lmPoint,
-            ioPoint: ioPoint,
-            iMemPoint: iMemPoint,
-            dMemPoint: dMemPoint,
-            stackPoint: stackPoint,
+            instructionPoint: instructionPoint,
+            pageTablePoint: pageTablePoint,
+            dataPoint: dataPoint,
+            peripheralPoint: peripheralPoint,
         })
     }
 
     useEffect(() => {
         startTransition(() => {
             setIsModified(
-                lmPoint !== savedPoints.lmPoint ||
-                    ioPoint !== savedPoints.ioPoint ||
-                    iMemPoint !== savedPoints.iMemPoint ||
-                    dMemPoint !== savedPoints.dMemPoint ||
-                    stackPoint !== savedPoints.stackPoint,
+                instructionPoint !== savedPoints.instructionPoint ||
+                    pageTablePoint !== savedPoints.pageTablePoint ||
+                    dataPoint !== savedPoints.dataPoint ||
+                    peripheralPoint !== savedPoints.peripheralPoint,
             )
         })
-    }, [lmPoint, ioPoint, iMemPoint, dMemPoint, stackPoint, savedPoints])
+    }, [instructionPoint, pageTablePoint, dataPoint, peripheralPoint, savedPoints])
 
     return {
-        lmPoint,
-        ioPoint,
-        iMemPoint,
-        dMemPoint,
-        stackPoint,
+        instructionPoint,
+        pageTablePoint,
+        dataPoint,
+        peripheralPoint,
         savedPoints,
         isModified,
         reset,
         save,
-        setLmPoint,
-        setIOPoint,
-        setIMemPoint,
-        setDMemPoint,
-        setStackPoint,
+        setInstructionPoint,
+        setPageTablePoint,
+        setDataPoint,
+        setPeripheralPoint,
     }
 }

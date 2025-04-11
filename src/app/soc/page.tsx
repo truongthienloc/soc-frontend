@@ -197,6 +197,8 @@ export default function SocPage({}: Props) {
         /** Keyboard Listener */
         socModelRef.current.Processor.event.on(RiscVProcessor.PROCESSOR_EVENT.KEY_WAITING, () => {
           console.log('keyboard is waiting')
+          setShowSimulatorType('CODE_EDITOR')
+          setTabIndex(3)
           setIsKeyboardWaiting(true)
         })
 
@@ -217,7 +219,7 @@ export default function SocPage({}: Props) {
     startTransition(() => {
       setAllowRun(false)
     })
-  }, [savedPoints, tlbData, pointer, isStepping])
+  }, [savedPoints, pointer, isStepping])
 
   function handleChangeCode(code: string) {
     startTransition(() => {
@@ -373,9 +375,9 @@ export default function SocPage({}: Props) {
     setIsStepping(false)
     setPc(undefined)
 
-    const { lmPoint, ioPoint, iMemPoint, dMemPoint, stackPoint } = memoryMap
+    const { instructionPoint, pageTablePoint, dataPoint, peripheralPoint } = memoryMap
 
-    const decIO_point = parseInt(ioPoint, 16)
+    const decIO_point = parseInt(pageTablePoint, 16)
 
     const tlbEntries = tlb2Array(tlb.tlbData)
     const requirementMem = decIO_point
@@ -397,6 +399,7 @@ export default function SocPage({}: Props) {
       toast.success('Ready to run')
       setAllowRun(true)
       updateCoreDataAfterRun()
+      setIsKeyboardWaiting(false)
       localStorage.setItem('soc_code', code)
     }
   }

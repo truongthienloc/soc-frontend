@@ -69,7 +69,7 @@ export default function DMATable({ data, configs }: Props) {
               startAdornment: '0x',
               readOnly: true,
             }}
-            disabled  
+            disabled
           />
           {/* <div className="absolute right-1 flex flex-col gap-1 p-1">
             <button

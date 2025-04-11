@@ -1,38 +1,32 @@
-export const LMPOINT = '0'
-export const IOPOINT = '480'
-export const IMEMPOINT = '4C0'
-export const DMEMPOINT = '14C0'
-export const STACKPOINT = '114C0'
+export const INSTRUCTION_POINT = '0'
+export const PAGE_TABLE_POINT = '3000'
+export const DATA_POINT = '4000'
+export const PERIPHERAL_POINT = '1C000'
 
 export const MEMORY_SECTION = [
     {
         name: 'Memory Address',
-        start: LMPOINT,
+        start: INSTRUCTION_POINT,
         end: undefined,
     },
     {
-        name: 'LM',
-        start: LMPOINT,
-        end: IOPOINT,
+        name: 'INSTRUCTION',
+        start: INSTRUCTION_POINT,
+        end: PAGE_TABLE_POINT,
     },
     {
-        name: 'IO',
-        start: IOPOINT,
-        end: IMEMPOINT,
+        name: 'PAGE_TABLE',
+        start: PAGE_TABLE_POINT,
+        end: DATA_POINT,
     },
     {
-        name: 'IMEM',
-        start: IMEMPOINT,
-        end: DMEMPOINT,
+        name: 'DATA',
+        start: DATA_POINT,
+        end: PERIPHERAL_POINT,
     },
     {
-        name: 'DMEM',
-        start: DMEMPOINT,
-        end: STACKPOINT,
-    },
-    {
-        name: 'STACK',
-        start: STACKPOINT,
+        name: 'PERIPHERAL',
+        start: PERIPHERAL_POINT,
         end: undefined,
     },
 ]

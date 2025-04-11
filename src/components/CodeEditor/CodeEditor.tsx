@@ -63,17 +63,13 @@ function CodeEditor({ value = '', onChange, disable = false, hidden }: CodeEdito
       if (textareaRef.current?.style.display === 'none') {
         codeRef.current.setValue(value)
       }
-    }
-    else {
+    } else {
       codeRef.current.refresh()
     }
   }, [value, disable, hidden])
 
   return (
-    <div
-      ref={containerRef}
-      className="h-full min-h-[300px] min-w-[250px] flex-1 text-base"
-    >
+    <div ref={containerRef} className="h-full min-h-[300px] min-w-[250px] flex-1 text-base">
       <textarea
         ref={textareaRef}
         name="code-editor"

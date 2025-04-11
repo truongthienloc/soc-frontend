@@ -9,7 +9,7 @@ export default class LedMatrix {
 
     constructor(containerQuery: string) {
         this.container = document.querySelector(containerQuery)
-        console.log ('container', this.container)
+        console.log('container', this.container)
     }
 
     /**
@@ -37,7 +37,6 @@ export default class LedMatrix {
         // console.log ('!led',!led)
 
         if (!led) {
-
             return
         }
 

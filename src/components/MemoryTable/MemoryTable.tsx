@@ -92,11 +92,10 @@ export default function MemoryTable({
       range = { startHex: startDec.toString(16) }
     } else {
       const memoryRanges = [
-        { min: memoryMap.lmPoint, max: memoryMap.ioPoint },
-        { min: memoryMap.ioPoint, max: memoryMap.iMemPoint },
-        { min: memoryMap.iMemPoint, max: memoryMap.dMemPoint },
-        { min: memoryMap.dMemPoint, max: memoryMap.stackPoint },
-        { min: memoryMap.stackPoint, max: undefined },
+        { min: memoryMap.instructionPoint, max: memoryMap.pageTablePoint },
+        { min: memoryMap.pageTablePoint, max: memoryMap.dataPoint },
+        { min: memoryMap.dataPoint, max: memoryMap.peripheralPoint },
+        { min: memoryMap.peripheralPoint, max: undefined },
       ]
 
       const { min, max } = memoryRanges[tabIndex - 1]
@@ -139,11 +138,10 @@ export default function MemoryTable({
         className="max-sm:w-screen"
       >
         <Tab label="ALL" />
-        <Tab label="LED" />
-        <Tab label="IO" />
-        <Tab label="IMEM" />
-        <Tab label="DMEM" />
-        <Tab label="STACK" />
+        <Tab label="INS" />
+        <Tab label="PAGE" />
+        <Tab label="DATA" />
+        <Tab label="PERI" />
       </Tabs>
       <div className="mb-3 mt-1 flex justify-center gap-2 max-sm:flex-col">
         <div className="flex gap-2">

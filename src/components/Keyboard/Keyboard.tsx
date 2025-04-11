@@ -3,9 +3,9 @@ import { cn } from '~/helpers/cn'
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {}
 
-export default function Keyboard({ className, ...props}: Props) {
+export default function Keyboard({ className, ...props }: Props) {
   return (
-    <div {...props} className={cn("keyboard", className)} id="keyboard"> 
+    <div {...props} className={cn('keyboard', className)} id="keyboard">
       <div className="row">
         <button className="btn">1</button>
         <button className="btn">2</button>

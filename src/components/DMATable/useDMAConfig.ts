@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { IMEMPOINT, LMPOINT } from '~/configs/memoryPoint.constant'
+import { DATA_POINT, INSTRUCTION_POINT } from '~/configs/memoryPoint.constant'
 
 export type ReturnUseDMAConfig = ReturnType<typeof useDMAConfig>
 
@@ -17,9 +17,9 @@ export default function useDMAConfig() {
         setDes,
         len,
         setLen,
-        status, 
+        status,
         setSta,
         led_control,
-        setLedCtrl
+        setLedCtrl,
     }
 }

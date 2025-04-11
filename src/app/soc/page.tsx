@@ -98,6 +98,9 @@ export default function SocPage({}: Props) {
   const dmaConfigs = useDMAConfig()
   const [dmaData, setDmaData] = useState<Register[]>([])
 
+  /** Keyboard */
+  const [isKeyboardWaiting, setIsKeyboardWaiting] = useState(false)
+
   useEffect(() => {
     const socCode = localStorage.getItem('soc_code') ?? ''
     setTimeout(() => {
@@ -190,11 +193,20 @@ export default function SocPage({}: Props) {
 
         setSocModel(socModel)
         setPageTable(socModel.Memory.getPageNumber())
+
+        /** Keyboard Listener */
+        socModelRef.current.Processor.event.on(RiscVProcessor.PROCESSOR_EVENT.KEY_WAITING, () => {
+          console.log('keyboard is waiting')
+          setIsKeyboardWaiting(true)
+        })
+
+        socModelRef.current.Processor.event.on(RiscVProcessor.PROCESSOR_EVENT.KEY_FREE, () => {
+          console.log('keyboard is free')
+          setIsKeyboardWaiting(false)
+        })
       }
 
       firstLoad()
-
-      return () => {}
     }
   }, [setPosition1])
 
@@ -207,13 +219,10 @@ export default function SocPage({}: Props) {
     })
   }, [savedPoints, tlbData, pointer, isStepping])
 
-  const handleChangeCode = (code: string) => {
-    setCode(code)
-    // if (allowRun) {
-    //   startTransition(() => {
-    //     setAllowRun(false)
-    //   })
-    // }
+  function handleChangeCode(code: string) {
+    startTransition(() => {
+      setCode(code)
+    })
   }
 
   const handleChangeMemoryData = (address: string, data: string) => {
@@ -230,6 +239,37 @@ export default function SocPage({}: Props) {
     setAllowRun(false)
   }
 
+  function updateCoreDataAfterRun() {
+    if (!socModelRef.current) {
+      return
+    }
+
+    /** Memory */
+    const newMemoryTable = convertMemoryCoreToRegisterType(socModelRef.current.Memory.GetMemory())
+    setMemoryData(newMemoryTable)
+    setPageTable(socModelRef.current.Memory.getPageNumber())
+    /** MMU */
+    const newTLB = array2TLB(socModelRef.current.MMU.TLB)
+    tlb.setTLBEntries(newTLB)
+    /** Processor */
+    setRegisters([
+      ...socModelRef.current.Processor.getRegisters(),
+      {
+        name: 'pc',
+        value: DecToHex(socModelRef.current.Processor.pc),
+      },
+    ])
+    setStepColors(modelColors2ViewColors(socModelRef.current.Processor.lineColor))
+    /** DMA */
+    dmaConfigs.setDes(BinToHex_without0x(socModelRef.current.DMA.destinationAddress))
+    dmaConfigs.setSrc(BinToHex_without0x(socModelRef.current.DMA.sourceAddress))
+    dmaConfigs.setLen(BinToHex_without0x(socModelRef.current.DMA.length))
+    dmaConfigs.setSta(BinToHex_without0x(socModelRef.current.DMA.status))
+    /** Led Matrix */
+    dmaConfigs.setLedCtrl(BinToHex_without0x(socModelRef.current.Led_matrix.controlRegister))
+    // setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
+  }
+
   const handleRunAllClick = () => {
     if (!socModelRef.current) {
       return
@@ -237,33 +277,11 @@ export default function SocPage({}: Props) {
 
     logRef.current?.clear()
     socModelRef.current.event.once(Soc.SOCEVENT.DONE_ALL, () => {
-      if (!socModelRef.current) {
-        return
-      }
-
-      const newMemoryTable = convertMemoryCoreToRegisterType(socModelRef.current.Memory.GetMemory())
-      const newTLB = array2TLB(socModelRef.current.MMU.TLB)
-      setMemoryData(newMemoryTable)
-      tlb.setTLBEntries(newTLB)
-      setRegisters([
-        ...socModelRef.current.Processor.getRegisters(),
-        {
-          name: 'pc',
-          value: DecToHex(socModelRef.current.Processor.pc),
-        },
-      ])
-      setPageTable(socModelRef.current.Memory.getPageNumber())
-      dmaConfigs.setDes (BinToHex_without0x (socModelRef.current.DMA.destinationAddress))
-      dmaConfigs.setSrc (BinToHex_without0x (socModelRef.current.DMA.sourceAddress))
-      dmaConfigs.setLen (BinToHex_without0x (socModelRef.current.DMA.length))
-      dmaConfigs.setSta (BinToHex_without0x (socModelRef.current.DMA.status))
-      dmaConfigs.setLedCtrl (BinToHex_without0x (socModelRef.current.Led_matrix.controlRegister))
-      // setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
+      updateCoreDataAfterRun()
     })
+
     socModelRef.current.RunAll()
-    // setShowSimulatorType('SOC')
     setAllowRun(false)
-    // setRegistersData(convertRegisters2TwinRegisters(socModelRef.current.getRegisters()))
   }
 
   const handleImportClick = () => {
@@ -318,34 +336,9 @@ export default function SocPage({}: Props) {
       }
 
       setPc(socModelRef.current.Processor.pc)
-      socModelRef.current.Processor.event.once(RiscVProcessor.PROCESSOR_EVENT.KEY_WAITING, () => {
-          console.log ('keyboard is waiting')
-      })
-      socModelRef.current.event.once(Soc.SOCEVENT.STEP_END, () => {
-        
-        if (!socModelRef.current) {
-          return
-        }
 
-        const newMemoryTable = convertMemoryCoreToRegisterType(socModelRef.current.Memory.Memory)
-        const newTLB = array2TLB(socModelRef.current.MMU.TLB)
-        setMemoryData(newMemoryTable)
-        tlb.setTLBEntries(newTLB)
-        setRegisters([
-          ...socModelRef.current.Processor.getRegisters(),
-          {
-            name: 'pc',
-            value: DecToHex(socModelRef.current.Processor.pc),
-          },
-        ])
-        setPageTable(socModelRef.current.Memory.getPageNumber())
-        setStepColors(modelColors2ViewColors(socModelRef.current.Processor.lineColor))
-        dmaConfigs.setDes (BinToHex_without0x (socModelRef.current.DMA.destinationAddress))
-        dmaConfigs.setSrc (BinToHex_without0x (socModelRef.current.DMA.sourceAddress))
-        dmaConfigs.setLen (BinToHex_without0x (socModelRef.current.DMA.length))
-        dmaConfigs.setSta (BinToHex_without0x (socModelRef.current.DMA.status))
-        dmaConfigs.setLedCtrl (BinToHex_without0x (socModelRef.current.Led_matrix.controlRegister))
-        // setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
+      socModelRef.current.event.once(Soc.SOCEVENT.STEP_END, () => {
+        updateCoreDataAfterRun()
       })
       socModelRef.current.stepWithEvent()
     }
@@ -403,21 +396,7 @@ export default function SocPage({}: Props) {
     } else {
       toast.success('Ready to run')
       setAllowRun(true)
-      setPageTable(socModelRef.current.Memory.getPageNumber())
-      // setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
-      setRegisters([
-        ...socModelRef.current.Processor.getRegisters(),
-        {
-          name: 'pc',
-          value: DecToHex(socModelRef.current.Processor.pc),
-        },
-      ])
-
-      dmaConfigs.setDes (BinToHex_without0x (socModelRef.current.DMA.destinationAddress))
-      dmaConfigs.setSrc (BinToHex_without0x (socModelRef.current.DMA.sourceAddress))
-      dmaConfigs.setLen (BinToHex_without0x (socModelRef.current.DMA.length))
-      dmaConfigs.setSta (BinToHex_without0x (socModelRef.current.DMA.status))
-      dmaConfigs.setLedCtrl (BinToHex_without0x (socModelRef.current.Led_matrix.controlRegister))
+      updateCoreDataAfterRun()
       localStorage.setItem('soc_code', code)
     }
   }
@@ -573,7 +552,7 @@ export default function SocPage({}: Props) {
                         value={code}
                         onChange={handleChangeCode}
                         disable={disableCodeEditor}
-                        hidden={showSimulatorType !== 'CODE_EDITOR'}
+                        hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex !== 0}
                       />
                     )}
                   </div>
@@ -599,7 +578,7 @@ export default function SocPage({}: Props) {
                         value={code}
                         onChange={handleChangeCode}
                         disable={disableCodeEditor}
-                        hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex != 1}
+                        hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex !== 1}
                       />
                     )}
                   </div>
@@ -623,35 +602,39 @@ export default function SocPage({}: Props) {
                       value={code}
                       onChange={handleChangeCode}
                       disable={disableCodeEditor}
-                      hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex != 3}
+                      hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex !== 3}
                     />
                   )}
                 </div>
                 <div className="mt-8 min-w-[460px] max-sm:-ml-14 max-sm:-mt-14 max-sm:mb-14 max-sm:scale-75">
-                  <div className="monitor" id="monitor" tabIndex={0}></div>
+                  <div
+                    className={cn('monitor', {
+                      'animate-pulse': isKeyboardWaiting,
+                    })}
+                    id="monitor"
+                    tabIndex={0}
+                  ></div>
                   <Keyboard />
                 </div>
-              </TabPanel >
+              </TabPanel>
               <TabPanel index={4} className="pt-8">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
-                      {isStepping ? (
-                        <DisplayStepCode code={stepCode} pc={pc} />
-                      ) : (
-                        <CodeEditor
-                          value={code}
-                          onChange={handleChangeCode}
-                          disable={disableCodeEditor}
-                          hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex != 4}
-                        />
-                      )}
-                    </div>
+                    {isStepping ? (
+                      <DisplayStepCode code={stepCode} pc={pc} />
+                    ) : (
+                      <CodeEditor
+                        value={code}
+                        onChange={handleChangeCode}
+                        disable={disableCodeEditor}
+                        hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex !== 4}
+                      />
+                    )}
+                  </div>
                   <TLBTable tlb={tlb} disabled={isStepping} />
                   {/* <PageTable data={pageTable} /> */}
                 </div>
               </TabPanel>
-
-
             </TabContext>
           </div>
 

@@ -123,7 +123,6 @@ export default class MMU {
             this.physical_address = (physical_addresses[check_pagenum.indexOf(true)]).toString(2).padStart(17, '0')
         } else {
             this.MMU_message = " TLB: VPN is missed."
-            console.log ((this.satp & 0xFFFF) + vpn_dec*4)
             this.physical_address = ((this.satp & 0xFFFF) + vpn_dec*4).toString(2).padStart(17, '0')
         }
 

@@ -182,7 +182,6 @@ export default class RiscVProcessor {
             +': The PROCESSOR is processing.'
         )
             let [message, data, logic_address, writeRegister, size] = this.internalProcessing (this.instruction, this.pc, icBusy)
-
             if (message == 'ECALL') {
                 this.println (this.active_println, 'Ecall instruction')
                 if (parseInt(this.register['10001'], 2) == 1) {
@@ -1048,7 +1047,7 @@ export default class RiscVProcessor {
     }
 
     internalProcessing (instruction: string, pc: number, icBusy: boolean): [string, string, string, string, string] {
-        if (this.active == true) {
+
                    
             this.pre_pc = pc
             this.stalled = false 
@@ -1213,6 +1212,6 @@ export default class RiscVProcessor {
             this.lineColor['wb'      ]  = this.wb           .toString()           
             this.lineColor['imm'     ]  = this.imm          .toString()     
             return [message, data, address, writeRegister, size]
-        } else return ['', '', '', '', '']
+
     }
 }

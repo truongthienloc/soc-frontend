@@ -1,8 +1,8 @@
 // import DMA from './DMA'
 import Soc from './SOC/SoC'
-import ChannelD from './Interconnect/ChannelD'
-import ChannelA from "./Interconnect/ChannelA";
-import DMA from './DMA/DMA';
+// import ChannelD from './Interconnect/ChannelD'
+// import ChannelA from "./Interconnect/ChannelA";
+// import DMA from './DMA/DMA';
 // import { LayersTwoTone } from '@mui/icons-material';
 // import { cyan } from '@mui/material/colors';
 // import { Console } from 'console';
@@ -12,8 +12,8 @@ const code              =
 `
 .text
 lui x1,0x1c
-//lui x5,0xfff
-//ori x5, x5, 0xfff
+lui x5,0xfff
+ori x5, x5, 0xfff
 addi x2, x0, 288
 
 mmio:
@@ -27,16 +27,13 @@ slli x1, x1, 16
 lui x31,0x1c
 
 addi x2, x0, 1
-sw   x2, 16(x1) // Led control register
+sw   x2, 16(x1)  // Led control register
 sw   x31, 0(x1)  // DMA source register
 sw   x31, 4(x1)  // DMA destination register
 addi x2, x0, 72
-sw   x2, 8(x1)  // DMA length register
-sw   x2, 12(x1) // DMA control register
-
+sw   x2, 8(x1)   // DMA length register
+sw   x2, 12(x1)  // DMA control register
 `
-
-
 
 SOC.Processor.active    = true
 SOC.MMU.active          = true

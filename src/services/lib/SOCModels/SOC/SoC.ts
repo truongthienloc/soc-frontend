@@ -218,25 +218,23 @@ export default class Soc {
             this.Processor.pc <
             this.Memory.Ins_pointer || this.Processor.state != 0
         ) {
-            // if (bre > 988) break
-            // bre ++ 
+            if (bre > 8) break
+            bre ++ 
             this.Processor.active_println = false
             this.Bus0.active_println      = false
             this.Memory.active_println    = false
 
+            console.log ('processor 0')
             this.Processor.Run(
                 false
                 , this.cycle
                 , this.Bus0.Pout[0].dequeue()
                 , this.Bus0.state == 0
             )
-                
-            this.Memory.Run(
-                this.cycle
-                , this.Bus0.Pout[2].dequeue()
-                , this.Bus0.state == 0
-            )
-            
+            console.log ('processor 1')
+
+            console.log ('bus0 state 0', this.Bus0.state)
+            console.log ('this.Processor.master.ChannelA', this.Processor.master.ChannelA)
             this.Bus0.Run (
                 this.Processor.master.ChannelA
                 ,this.DMA.burst
@@ -248,6 +246,15 @@ export default class Soc {
                 ,this.Bridge.Bridge_slave.ChannelD.valid == '1'
                 ,this.cycle
             )
+            console.log ('bus0 state 1', this.Bus0.state)
+                
+            this.Memory.Run(
+                this.cycle
+                , this.Bus0.Pout[2].dequeue()
+                , this.Bus0.state == 0
+            )
+            
+
             this.cycle.incr()
         }
         // console.log('bre', bre)

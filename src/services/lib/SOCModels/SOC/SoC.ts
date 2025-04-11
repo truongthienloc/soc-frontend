@@ -233,9 +233,10 @@ export default class Soc {
         ) {
             // if (bre > 988) break
             // bre ++ 
-            this.Processor.active_println = false
-            this.Bus0.active_println      = false
-            this.Memory.active_println    = false
+            console.log ('this.Processor.pc,  this.Memory.Ins_pointer, this.Processor.state != 0', this.Processor.pc,  this.Memory.Ins_pointer, this.Processor.state != 0)
+            this.Processor.active_println = true
+            this.Bus0.active_println      = true
+            this.Memory.active_println    = true
 
             this.Processor.Run(
                 false

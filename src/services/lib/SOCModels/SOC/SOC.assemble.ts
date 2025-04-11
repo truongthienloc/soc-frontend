@@ -46,14 +46,13 @@ export function assemble(
     this.Processor.reset()
     this.Processor.pc = 0
     this.Memory.SetInstructionMemory(this.Assembler.binary_code)
-    this.Memory.GetInstructionMemory()
+    // this.Memory.GetInstructionMemory()
     
     this.Processor.InsLength = this.Memory.Ins_pointer
     
     // this.Processor.pc = this.Memory.Ins_pointer
    
     this.self_config()
-    console.log ('self config 2')
 
     //****************SYNC ACTIVED MODEL VS VIEW****************
     if (this.view) {

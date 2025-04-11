@@ -83,6 +83,7 @@ export default class InterConnect {
     ) {
 
         if (this.state == this.RECEIVE_STATE)   {
+            console.log ('dataFromProcessor', dataFromProcessor)
             this.RecData (
                 dataFromProcessor           
                 ,dataFromDMA                
@@ -129,14 +130,16 @@ export default class InterConnect {
     }
 
     RecFromProcessor(data: ChannelA, cycle: Cycle): void {
-
-        if (this.active && this.Pactived[0] && data.valid == '1') {
+        console.log ('data', data)
+        console.log (this.active , this.Pactived[0] , data.valid == '1')
+        if (this.Pactived[0] && data.valid == '1') {
             this.println (
                 this.active_println
                 ,'Cycle '
                 + cycle.toString() 
                 +': The INTERCONNECT is receiving data from PROCESSOR.'
             )
+            console.log ('data', data, this.Pin[0] instanceof FIFO_ChannelA)
             if (this.Pin[0] instanceof FIFO_ChannelA) {
                 this.Pin[0].enqueue({...data})
                 this.Timing[0].enqueue(cycle.cycle)
@@ -182,7 +185,7 @@ export default class InterConnect {
     }
 
     RecFromMem(data: ChannelD[], cycle: Cycle, valid: boolean): void {
-        if (this.active && this.Pactived[2] && valid) {
+        if (this.Pactived[2] && valid) {
 
             if (this.Pin[2] instanceof FIFO_ChannelD) {
                 for (let item of data) {

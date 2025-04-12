@@ -187,7 +187,7 @@ export default class Soc {
                 ,this.Memory.state == this.Memory.IDLE_STATE
                 ,this.Bridge.state == this.Bridge.STATE_RECEIVE
                 ,this.cycle
-            )
+        )
 
         this.Bridge.Run (
             this.Bus0.Pout[3]
@@ -230,10 +230,6 @@ export default class Soc {
             this.Bus0.active_println      = false
             this.Memory.active_println    = false
 
-            // this.Processor.active_println = true
-            // this.Bus0.active_println      = true
-            // this.Memory.active_println    = true 
-
             this.Processor.Run(
                 false
                 , this.cycle
@@ -264,17 +260,12 @@ export default class Soc {
                 ,this.cycle
             )
             this.cycle.incr()
-            this.Processor.active_println = true
-            this.Bus0.active_println      = true
-            this.Memory.active_println    = true 
-            this.Processor.active_println = false
-            this.Bus0.active_println      = false
-            this.Memory.active_println    = false
+
         }
 
-                    this.Processor.active_println = true
-            this.Bus0.active_println      = true
-            this.Memory.active_println    = true 
+        this.Processor.active_println = true
+        this.Bus0.active_println      = true
+        this.Memory.active_println    = true 
 
     }
 }

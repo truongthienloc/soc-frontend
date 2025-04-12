@@ -238,6 +238,7 @@ export default class DMA {
                 
                 this.DMA_Master.receive(InterConnect2DMA)
                 
+                console.log ('this.count_beats', this.count_beats)
                 this.count_beats +=1
                 if (this.count_beats == 4) {
                     this.state = 2

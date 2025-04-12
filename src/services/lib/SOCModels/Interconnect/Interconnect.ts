@@ -79,6 +79,12 @@ export default class InterConnect {
         ,dataFromDMA_valid          : boolean
         ,dataFromMemory_valid       : boolean
         ,dataFromSub_valid          : boolean
+
+        , Processor_ready           : boolean
+        , DMA_ready                 : boolean
+        , Memory_ready              : boolean
+        , Bridge_ready              : boolean
+
         ,cycle                      : Cycle
     ) {
 
@@ -103,7 +109,13 @@ export default class InterConnect {
 
         if (this.state == this.SEND_STATE)      {
 
-            this.Abiter(cycle)
+            this.Abiter(
+                cycle
+                , Processor_ready   
+                , DMA_ready         
+                , Memory_ready      
+                , Bridge_ready   
+            )
             
             // this.state = 0
             return
@@ -228,7 +240,13 @@ export default class InterConnect {
         }
     }
 
-    Abiter(cycle: Cycle)  {
+    Abiter(
+        cycle: Cycle
+        , Processor_ready   : boolean
+        , DMA_ready         : boolean
+        , Memory_ready      : boolean
+        , Bridge_ready      : boolean
+    )  {
 
         const Processor_Timing       = this.Timing[0].peek()
         const DMA_Timing             = this.Timing[1].peek()
@@ -287,84 +305,180 @@ export default class InterConnect {
         for (let i = 0; i < minIndices.length; i++) {
             if ( minIndices[i] == 0) {
                 if (Pro2Memory && DMA2Mem && minIndices.includes(1)) {
-                    this.Route (0, cycle)
-                    this.Timing[0].dequeue()
+                    this.Route (0
+                        , cycle
+                        , Processor_ready   
+                        , DMA_ready         
+                        , Memory_ready      
+                        , Bridge_ready      
+                    )
+                    // this.Timing[0].dequeue()
                 }
                 else if (Pro2Sub && DMA2Sub && minIndices.includes(1)) {
-                    this.Route (0, cycle)
-                    this.Timing[0].dequeue()
+                    this.Route (0
+                        , cycle
+                        , Processor_ready   
+                        , DMA_ready         
+                        , Memory_ready      
+                        , Bridge_ready   
+                    )
+                    // this.Timing[0].dequeue()
                 }
                 else {
-                    this.Route (0, cycle)
-                    this.Timing[0].dequeue()
+                    this.Route (0
+                        , cycle
+                        , Processor_ready   
+                        , DMA_ready         
+                        , Memory_ready      
+                        , Bridge_ready   
+                    )
+                    // this.Timing[0].dequeue()
 
                     if (minIndices.includes(1)) {
-                        this.Route (1, cycle)
+                        this.Route (1
+                            , cycle
+                            , Processor_ready   
+                            , DMA_ready         
+                            , Memory_ready      
+                            , Bridge_ready   
+                        )
                         minIndices [minIndices.indexOf(1)] = -1
-                        this.Timing[1].dequeue()
+                        // this.Timing[1].dequeue()
                     }
                 }
             }
 
             if ( minIndices[i] == 1) {
                 if (Pro2Memory && DMA2Mem && minIndices.includes(0)) {
-                    this.Route (0, cycle)
-                    this.Timing[1].dequeue()
+                    this.Route (0
+                        , cycle
+                        , Processor_ready   
+                        , DMA_ready         
+                        , Memory_ready      
+                        , Bridge_ready   
+                    )
+                    // this.Timing[1].dequeue()
                 }
                 else if (Pro2Sub && DMA2Sub) {
-                    this.Route (0, cycle)
-                    this.Timing[1].dequeue()
+                    this.Route (0
+                        , cycle
+                        , Processor_ready   
+                        , DMA_ready         
+                        , Memory_ready      
+                        , Bridge_ready   
+                    )
+                    // this.Timing[1].dequeue()
                 }
                 else {
-                    this.Route (1, cycle)
-                    this.Timing[1].dequeue()
+                    this.Route (1
+                        , cycle
+                        , Processor_ready   
+                        , DMA_ready         
+                        , Memory_ready      
+                        , Bridge_ready   
+                    )
+                    // this.Timing[1].dequeue()
 
                     if (minIndices.includes(1)) {
-                        this.Route (0, cycle)
+                        this.Route (0
+                            , cycle
+                            , Processor_ready   
+                            , DMA_ready         
+                            , Memory_ready      
+                            , Bridge_ready   
+                        )
                         minIndices [minIndices.indexOf(0)] = -1
-                        this.Timing[0].dequeue()
+                        // this.Timing[0].dequeue()
                     }
                 }
             }
 
             if ( minIndices[i] == 2) {
                 if (Mem2Pro && Sub2Pro && minIndices.includes(3)) {
-                    this.Route (3, cycle)
-                    this.Timing[3].dequeue()
+                    this.Route (3
+                        , cycle
+                        , Processor_ready   
+                        , DMA_ready         
+                        , Memory_ready      
+                        , Bridge_ready   
+                    )
+                    // this.Timing[3].dequeue()
                 }
                 else if (Mem2DMA && Sub2DMA && minIndices.includes(3)) {
-                    this.Route (3, cycle)
-                    this.Timing[3].dequeue()
+                    this.Route (3
+                        , cycle
+                        , Processor_ready   
+                        , DMA_ready         
+                        , Memory_ready      
+                        , Bridge_ready   
+                    )
+                    // this.Timing[3].dequeue()
                 }
                 else {
-                    this.Route (2, cycle)
-                    this.Timing[2].dequeue()
+                    this.Route (2
+                        , cycle
+                        , Processor_ready   
+                        , DMA_ready         
+                        , Memory_ready      
+                        , Bridge_ready   
+                    )
+                    // this.Timing[2].dequeue()
 
                     if (minIndices.includes(3)) {
-                        this.Route (3, cycle)
+                        this.Route (3
+                            , cycle
+                            , Processor_ready   
+                            , DMA_ready         
+                            , Memory_ready      
+                            , Bridge_ready   
+                        )
                         minIndices [minIndices.indexOf(3)] = -1
-                        this.Timing[3].dequeue()
+                        // this.Timing[3].dequeue()
                     }
                 }
             }
 
             if ( minIndices[i] == 3) {
                 if (Mem2Pro && Sub2Pro && minIndices.includes(2)) {
-                    this.Route (3, cycle)
-                    this.Timing[3].dequeue()
+                    this.Route (3
+                        , cycle
+                        , Processor_ready   
+                        , DMA_ready         
+                        , Memory_ready      
+                        , Bridge_ready   
+                    )
+                    // this.Timing[3].dequeue()
                 }
                 else if (Mem2DMA && Sub2DMA && minIndices.includes(2)) {
-                    this.Route (3, cycle)
-                    this.Timing[3].dequeue()
+                    this.Route (3
+                        , cycle
+                        , Processor_ready   
+                        , DMA_ready         
+                        , Memory_ready      
+                        , Bridge_ready   
+                    )
+                    // this.Timing[3].dequeue()
                 }
                 else {
-                    this.Route (3, cycle)
+                    this.Route (3
+                        , cycle
+                        , Processor_ready   
+                        , DMA_ready         
+                        , Memory_ready      
+                        , Bridge_ready   
+                    )
                     this.Timing[3].dequeue()
 
                     if (minIndices.includes(3)) {
-                        this.Route (2, cycle)
+                        this.Route (2
+                            , cycle
+                            , Processor_ready   
+                            , DMA_ready         
+                            , Memory_ready      
+                            , Bridge_ready   
+                        )
                         minIndices [minIndices.indexOf(2)] = -1
-                        this.Timing[2].dequeue()
+                        // this.Timing[2].dequeue()
                     }
                 }
             }
@@ -372,8 +486,18 @@ export default class InterConnect {
         this.state = 0
     }
 
-    Route (Abiter: number, cycle: Cycle) {
-        if (Abiter == 0 && !this.Pin[0].isEmpty()) {
+    Route (
+        Abiter: number
+        , cycle: Cycle
+        , Processor_ready   : boolean
+        , DMA_ready         : boolean
+        , Memory_ready      : boolean
+        , Bridge_ready      : boolean
+    ) {
+        if (Abiter == 0 
+            && !this.Pin[0].isEmpty()
+            &&  Processor_ready
+        ) {
             const dataFromProcessor = {...this.Pin[0].dequeue()}
             if (
                 (
@@ -382,6 +506,7 @@ export default class InterConnect {
                 )
                 
             ) {
+                
                 this.println (
                     this.active_println
                     ,'Cycle '
@@ -389,6 +514,7 @@ export default class InterConnect {
                     +': The INTERCONNECT is sending data from PROCESSOR to MEMORY.'
                 )
                 if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(dataFromProcessor)
+                this.Timing[0].dequeue()
             }
             if (
                     (parseInt('0'+dataFromProcessor.address, 2) == 0x0020000) 
@@ -405,21 +531,28 @@ export default class InterConnect {
                         +': The INTERCONNECT is sending data from PROCESSOR to SUB-INTERCONNECT.'
                     )
                     if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue(dataFromProcessor)
+                    this.Timing[0].dequeue()
                 }
             }
         }
 
-        if (Abiter == 1 && !this.Pin[1].isEmpty()) {
+        if (Abiter == 1 
+            && !this.Pin[1].isEmpty()
+            && DMA_ready
+        ) {
             const dataFromDMA       = {...this.Pin[1].peek()}
             // console.log ('this.Pin[1]',this.Pin[1])
             if (dataFromDMA.opcode == '100') {
-                this.println (
-                    this.active_println
-                    ,'Cycle '
-                    + cycle.toString() 
-                    +': The INTERCONNECT is sending data from DMA to MEMORY.'
-                )
-                if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue({...this.Pin[1].dequeue()})
+                if (Memory_ready) {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The INTERCONNECT is sending data from DMA to MEMORY.'
+                    )
+                    if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue({...this.Pin[1].dequeue()})
+                    this.Timing[1].dequeue()
+                }
             } else {
 
                 while (!this.Pin[1].isEmpty()) {
@@ -432,11 +565,15 @@ export default class InterConnect {
                     if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue({...this.Pin[1].dequeue()})
                     this.Timing[1].dequeue()
                 }
+
                 
             }
         }
 
-        if (Abiter == 2 && !this.Pin[2].isEmpty()) {
+        if (Abiter == 2 
+            && !this.Pin[2].isEmpty()
+            && Memory_ready
+        ) {
             const dataFromMem = {...this.Pin[2].peek()}
             
             // if (dataFromMem instanceof ChannelD) {
@@ -448,7 +585,7 @@ export default class InterConnect {
                         + cycle.toString() 
                         +': The INTERCONNECT is sending data from MEMORY to PROCESSOR.'
                     )
-                        //console.log('this.Pout[0].peek()', this.Pout[0].peek())
+                    this.Timing[2].dequeue()
                 } else {
                     // while (!this.Pin[2].isEmpty()) {
                         this.println (
@@ -459,11 +596,16 @@ export default class InterConnect {
                         )
                         if (this.Pout[1] instanceof FIFO_ChannelD) {
                             this.Pout[1].enqueue({...this.Pin[2].dequeue()})
+
                         }
+                        this.Timing[2].dequeue()
                 }
         }
 
-        if (Abiter == 3 && !this.Pin[3].isEmpty()) {
+        if (Abiter == 3 
+            && !this.Pin[3].isEmpty()
+            && Bridge_ready
+        ) {
             const dataFromSInterconnect = {...this.Pin[3].dequeue()}
             if (dataFromSInterconnect.source == '00') {
                 this.println (
@@ -473,6 +615,7 @@ export default class InterConnect {
                     +': The INTERCONNECT is sending data from SUB-INTERCONNECT to PROCESSOR.'
                 )
                 if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue(dataFromSInterconnect)
+                this.Timing[3].dequeue()
                 // console.log('this.Pout[0]', this.Pout[0])
             } else {
                 this.println (
@@ -483,6 +626,7 @@ export default class InterConnect {
                 )
                 
                 if (this.Pout[1] instanceof FIFO_ChannelD) this.Pout[1].enqueue(dataFromSInterconnect)
+                    this.Timing[3].dequeue()
             }
         }
     }

@@ -114,6 +114,8 @@ export default class Bridge {
                 )
                 this.state = this.STATE_RECEIVE
             }
+
+            if (!ready0 && this.Bridge_master.ChannelD.valid == '1') this.state = this.STATE_SEND
             
 
             return 

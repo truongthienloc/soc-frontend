@@ -45,7 +45,7 @@ export default class Memory {
         , MMU2Memory    : ChannelA
         , ready         : boolean
     ) {
-
+        // console.log ('MMU2Memory', MMU2Memory)
         if (this.state == this.IDLE_STATE)                          {
             this.burst              = []
             this.slaveMemory.ChannelD.valid = '0'

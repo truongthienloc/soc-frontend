@@ -173,16 +173,21 @@ export default class Soc {
         )
         
         this.Bus0.Run (
-            this.Processor.master.ChannelA
-            ,this.DMA.burst
-            ,this.Memory.burst
-            ,this.Bridge.Bridge_slave.ChannelD
-            ,this.Processor.master.ChannelA.valid == '1'
-            ,this.DMA.DMA_Master.ChannelA.valid == '1'
-            ,this.Memory.slaveMemory.ChannelD.valid == '1'
-            ,this.Bridge.Bridge_slave.ChannelD.valid == '1'
-            ,this.cycle
-        )
+                this.Processor.FIFO.dequeue()
+                ,this.DMA.burst
+                ,this.Memory.burst
+                ,this.Bridge.Bridge_slave.ChannelD
+                ,this.Processor.master.ChannelA.valid == '1'
+                ,this.DMA.DMA_Master.ChannelA.valid == '1'
+                ,this.Memory.slaveMemory.ChannelD.valid == '1'
+                ,this.Bridge.Bridge_slave.ChannelD.valid == '1'
+                ,this.Processor.state == this.Processor.RECEIVE_INSTRUCTION_STATE 
+                || this.Processor.state == this.Processor.RECEIVE_INTERCONNECT_STATE
+                ,this.DMA.state == 3 || this.DMA.state == 5
+                ,this.Memory.state == this.Memory.IDLE_STATE
+                ,this.Bridge.state == this.Bridge.STATE_RECEIVE
+                ,this.cycle
+            )
 
         this.Bridge.Run (
             this.Bus0.Pout[3]
@@ -251,6 +256,11 @@ export default class Soc {
                 ,this.DMA.DMA_Master.ChannelA.valid == '1'
                 ,this.Memory.slaveMemory.ChannelD.valid == '1'
                 ,this.Bridge.Bridge_slave.ChannelD.valid == '1'
+                ,this.Processor.state == this.Processor.RECEIVE_INSTRUCTION_STATE 
+                || this.Processor.state == this.Processor.RECEIVE_INTERCONNECT_STATE
+                ,this.DMA.state == 3 || this.DMA.state == 5
+                ,this.Memory.state == this.Memory.IDLE_STATE
+                ,this.Bridge.state == this.Bridge.STATE_RECEIVE
                 ,this.cycle
             )
             this.cycle.incr()

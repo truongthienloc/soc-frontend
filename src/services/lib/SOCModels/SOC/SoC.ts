@@ -220,8 +220,7 @@ export default class Soc {
         ) {
             // if (bre > 7) break
             // bre ++ 
-            console.log ('this.Processor.pc,  this.Memory.Ins_pointer, this.Processor.state != 0', this.Processor.pc,  this.Memory.Ins_pointer, this.Processor.state != 0)
-            this.Processor.active_println = false
+        
             this.Bus0.active_println      = false
             this.Memory.active_println    = false
             this.Processor.active_println = false
@@ -254,10 +253,6 @@ export default class Soc {
             )
             this.cycle.incr()
         }
-        // console.log('bre', bre)
-        // console.log (this.Processor.getRegisters())
-        this.Processor.active_println = true
-        this.Bus0.active_println      = true
-        this.Memory.active_println    = true
+
     }
 }

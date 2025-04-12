@@ -19,7 +19,8 @@ export async function RunAll(this: Soc) {
     // console.log (this.Processor.FIFO)
 
     // console.log (this.MMU.endAddress)
-    // console.log (this.Memory.Memory['10001000000010011'])
+    console.log (this.Memory.Memory['00100000000001100'])
+    console.log (this.Memory.Memory)
     // console.log (this.Memory.Memory['10001000000010010'])
     // console.log (this.Memory.Memory['10001000000010001'])
     // console.log (this.Memory.Memory['10001000000010000'])
@@ -29,7 +30,7 @@ export async function RunAll(this: Soc) {
     // console.log (this.Memory.slaveMemory.ChannelD)
     // console.log (this.Bus1)
     // console.log(this.Bus1.Pin[0])
-    console.log (this.Led_matrix.state, this.Led_matrix.matrix_buffer)
+    // console.log (this.Led_matrix.state, this.Led_matrix.matrix_buffer)
     // console.log(
     //     this.DMA
     // )
@@ -49,6 +50,7 @@ export async function RunAll(this: Soc) {
     // console.log (this.Bridge)
     // console.log(this.Bridge.fifo_from_subInterconnect)
     // console.log (this.Memory.getPageNumber())
-    console.log (this.Processor.getRegisters())
+    // console.log ('SOC.Memory.GetMemory()',this.Memory.GetMemory())
+    // console.log (this.Processor.getRegisters())
    this.event.emit(Soc.SOCEVENT.DONE_ALL)
 }

@@ -250,6 +250,8 @@ export default class Memory {
         // this.setPageNumber ()
     }
 
+
+
     // public setPageNumber () {
     //     let count = 0
     //     const PageTablePointer = 0x0003000
@@ -275,6 +277,7 @@ export default class Memory {
     }
 
     public GetInstructionMemory () {
+
         for (let i = 0; i<0X00FFF; i+=4 ){
             console.log(
             this.Memory[(i + 3).toString(2).padStart(17,'0')]+
@@ -287,7 +290,8 @@ export default class Memory {
 
     public SetInstructionMemory(Instruction_memory: string[] = []) {
         let count =  this.Ins_pointer
-
+        // for (let i = 0; i < 0X1FFFF  + 1; i+=1) 
+        //     this.Memory[i.toString(2).padStart(17,'0')] = '0'.padStart(8,'0')
         for (const binString of Instruction_memory) {
             if (binString !== '') {
                 // Chia chuỗi nhị phân thành 4 phần và sắp xếp theo kiểu Little Endian

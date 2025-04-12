@@ -16,7 +16,8 @@ export function assemble(
     ) {
     this.println('Cycle ', this.cycle.toString(), ': System is setting up')
     console.log('Cycle ', this.cycle.toString(), ': System is setting up')
-    console.log ('self config 1')
+    // this.Memory.reset (Mem_tb)
+
     const setting_code = `
         .text
         lui x1, 0x1
@@ -40,11 +41,13 @@ export function assemble(
     this.Assembler.reset()
     
     this.Assembler.assemblerFromIns(setting_code)
-    
+
     this.Memory.reset (Mem_tb)
     this.Memory.Ins_pointer = 0
     this.Processor.reset()
     this.Processor.pc = 0
+    
+    this.Memory.GetInstructionMemory()
     this.Memory.SetInstructionMemory(this.Assembler.binary_code)
     // this.Memory.GetInstructionMemory()
     

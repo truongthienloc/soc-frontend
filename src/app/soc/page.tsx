@@ -251,7 +251,7 @@ export default function SocPage({}: Props) {
     setMemoryData(newMemoryTable)
     setPageTable(socModelRef.current.Memory.getPageNumber())
     /** MMU */
-    const newTLB = array2TLB(socModelRef.current.MMU.TLB)
+    const newTLB = array2TLB(socModelRef.current.Processor.MMU.TLB)
     tlb.setTLBEntries(newTLB)
     /** Processor */
     setRegisters([

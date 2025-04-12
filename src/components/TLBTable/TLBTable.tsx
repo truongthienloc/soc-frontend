@@ -72,7 +72,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
         <TextField
           value={editingPointer ? editingPointer : pointer}
           onChange={(e) => setEditingPointer(e.target.value)}
-          label="STAP"
+          label="SATP"
           InputProps={{
             startAdornment: '0x',
           }}
@@ -227,7 +227,9 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                         timestamp: e.target.value,
                       })
                     }
-                    className={cn('[&>input]:inline-block [&>input]:text-center')}
+                    // className={cn('[&>input]:inline-block [&>input]:text-center')}
+                    className={cn({})}
+                    startAdornment="0x"
                     disabled={editingIndex !== index}
                   />
                 </TableCell>

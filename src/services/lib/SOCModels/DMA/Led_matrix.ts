@@ -14,7 +14,7 @@ export default class LEDMatrix {
     state           : number
     logger         ?: Logger
     active_println  : boolean
-    // led             : LedMatrix
+    led             ?: LedMatrix
     count_beats      = 0
 
     constructor() {
@@ -26,7 +26,7 @@ export default class LEDMatrix {
         this.state                      = 0
         this.active                     = false
         this.active_println             = true
-        // this.led                        = new LedMatrix ('.led-matrix')
+        this.led                        = new LedMatrix ('.led-matrix')
 
     }
 
@@ -43,6 +43,7 @@ export default class LEDMatrix {
         this.state                      = 0
         this.active                     = false
         this.active_println             = true
+        this.led?.clear()
     }
 
     public println(active: boolean, ...args: string[]) {
@@ -99,17 +100,19 @@ export default class LEDMatrix {
         if (this.state == 2) {
             this.Matrix_Slave.ChannelD.valid = '0'
             if (ChannelA.valid == '1') {
-                console.log  (
-                    'Cycle ',
-                    cycle.toString(), 
+
+                this.println (this.active_println,
+                    'Cycle '             +
+                    cycle.toString()     +
                     ': The LED-MATRIX is operating.'
                 )
+
                 this.Matrix_Slave.receive (ChannelA)
                 this.writeData (this.Matrix_Slave.ChannelA.address, this.Matrix_Slave.ChannelA.data)
 
                 this.state = 3
             }
-            this.display ()
+            // this.display ()
             return
         }
 
@@ -145,27 +148,17 @@ export default class LEDMatrix {
         }
 
         let index = (addr -  0x1C000) / 4  // Tính toán chỉ số của thành ghi
-        console.log ('index', index)
         if (index >= 384) {
             console.log (addr)
             throw new Error("Address out of range")
         }
         this.dataRegisters[index] = data  // Gán giá trị vào thành ghi
-    }
-
-    display() {
-        for (let i = 0; i < 96; i++) {
-            this.matrix_buffer[i] = this.dataRegisters.slice(i * 3, (i + 1) * 3).join()
+        for (let i = 0 ; i< 32; i++) {
+            if (this.dataRegisters[index][i]  == '1' && this.led != undefined) 
+                this.led.turnOn(~~(index / 3), i + (index % 3) * 32)
         }
-        this.matrix_buffer = this.matrix_buffer.map(s => s.replace(/,/g, ''))
-
-        // for (let i = 0; i< 96; i++) {
-        //     for (let j =0; j< 96; j++) {
-        //         if (this.matrix_buffer[i][j] == '1') this.led.turnOn(i, j)
-        //         if (this.matrix_buffer[i][j] == '0') this.led.turnOff(i, j)
-        //     }
-        // }
     }
+
 }
 
 // STATE 0 : CONFIG LIKE DMA MUST HAVE ALL CONTROL REGISTER.

@@ -89,26 +89,28 @@ export default class DMA {
                 this.status = '00000000000000000000000000000001'
                 return
             }
-
-            this.println (
-                this.active_println
-                ,'Cycle '
-                + cycle.toString() 
-                +': The DMA is sending messeage GET to INTERCONNET.'
-            )
-
-            this.DMA_Master.send(
-                'GET',
-                (parseInt(this.sourceAddress.slice(-17), 2) + this.count_burst * 16).toString(2).padStart(17, '0'),
-                ''
-            )
-
-            this.DMA_Master.ChannelA.size = '10'
-            this.DMA_Slave.ChannelD.valid = '0'
-            this.DMA_Master.ChannelA.valid = '1'
-
-            this.burst.push ( {...this.DMA_Master.ChannelA})
-            this.state += 1
+            if (ready0) {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The DMA is sending messeage GET to INTERCONNET.'
+                )
+    
+                this.DMA_Master.send(
+                    'GET',
+                    (parseInt(this.sourceAddress.slice(-17), 2) + this.count_burst * 16).toString(2).padStart(17, '0'),
+                    ''
+                )
+    
+                this.DMA_Master.ChannelA.size = '10'
+                this.DMA_Slave.ChannelD.valid = '0'
+                this.DMA_Master.ChannelA.valid = '1'
+    
+                this.burst.push ( {...this.DMA_Master.ChannelA})
+                this.state += 1
+            }
+            
 
             return 
         }
@@ -264,6 +266,22 @@ export default class DMA {
         this.active_println     = true
         this.burst              = []
 
+    }
+    
+    public reset () {
+        this.sourceAddress      = '00000000000000000000000000000000'
+        this.destinationAddress = '00000000000000000000000000000000'
+        this.length             = '00000000000000000000000000000000'
+        this.control            = '00000000000000000000000000000000'
+        this.status             = '00000000000000000000000000000000'
+        this.state              = 0
+        this.sendoffset         = 0
+        this.DMA_Master         = new Master('DMA_Master', true, '01')
+        this.DMA_Master.ChannelA.size = '10'
+        this.DMA_Slave          = new Slave ('DMA_Slave', true)
+        this.DMA_buffer         = Array(288).fill('00000000000000000000000000000000')
+        this.active_println     = true
+        this.burst              = []
     }
     
     public println(active: boolean, ...args: string[]) {

@@ -39,7 +39,7 @@ export function assemble(
         `
 
     this.Assembler.reset()
-    
+    this.Processor.MMU.satp = 0x00003000
     this.Assembler.assemblerFromIns(setting_code)
 
     this.Memory.reset (Mem_tb)
@@ -47,7 +47,7 @@ export function assemble(
     this.Processor.reset()
     this.Processor.pc = 0
     
-    this.Memory.GetInstructionMemory()
+
     this.Memory.SetInstructionMemory(this.Assembler.binary_code)
     // this.Memory.GetInstructionMemory()
     
@@ -76,6 +76,7 @@ export function assemble(
     this.Processor.pc = this.Memory.Ins_pointer
     this.cycle.cycle = 0
     this.Led_matrix.reset ()
+    this.DMA.reset()
     // this.Led_matrix.led = new LedMatrix ('.led-matrix')
 
     // this.Memory.reset (Mem_tb)
@@ -85,7 +86,16 @@ export function assemble(
     this.Processor.InsLength = this.Memory.Ins_pointer
 
     this.Processor.MMU.Set(
-        TLB                 
+        [
+             [0, 0, 0, 0]
+            ,[0, 0, 0, 0]
+            ,[0, 0, 0, 0]
+            ,[0, 0, 0, 0]
+            ,[0, 0, 0, 0]
+            ,[0, 0, 0, 0]
+            ,[0, 0, 0, 0]
+            ,[0, 0, 0, 0]
+        ]                  
         , stap              
         , this.Allocator.allocate(required_mem)                  
     )

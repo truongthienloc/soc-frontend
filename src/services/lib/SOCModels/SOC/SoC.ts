@@ -221,11 +221,13 @@ export default class Soc {
             // if (bre > 7) break
             // bre ++ 
         
-            this.Bus0.active_println      = false
-            this.Memory.active_println    = false
             this.Processor.active_println = false
             this.Bus0.active_println      = false
             this.Memory.active_println    = false
+
+            // this.Processor.active_println = true
+            // this.Bus0.active_println      = true
+            // this.Memory.active_println    = true 
 
             this.Processor.Run(
                 false
@@ -252,7 +254,17 @@ export default class Soc {
                 ,this.cycle
             )
             this.cycle.incr()
+            this.Processor.active_println = true
+            this.Bus0.active_println      = true
+            this.Memory.active_println    = true 
+            this.Processor.active_println = false
+            this.Bus0.active_println      = false
+            this.Memory.active_println    = false
         }
+
+                    this.Processor.active_println = true
+            this.Bus0.active_println      = true
+            this.Memory.active_println    = true 
 
     }
 }

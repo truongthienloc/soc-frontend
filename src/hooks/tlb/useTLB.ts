@@ -14,14 +14,14 @@ export type TLBEntry = {
 export type UseTLBReturn = ReturnType<typeof useTLB>
 
 const defaultDecTLBData = [
-    [0, 0, 4544, 0, 0, 0],
-    [1, 0, 5567, 0, 0, 0],
-    [2, 0, 6590, 0, 0, 0],
-    [3, 0, 7613, 0, 0, 0],
-    [4, 0, 8636, 0, 0, 0],
-    [5, 0, 9659, 0, 0, 0],
-    [6, 0, 10682, 0, 0, 0],
-    [7, 0, 11705, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0],
 ]
 
 const defaultTLBData = defaultDecTLBData.map(
@@ -40,7 +40,7 @@ export default function useTLB(_length?: number) {
     const [length, setLength] = useState(_length ?? 8)
     const [tlbData, setTlbData] = useState<TLBEntry[]>(defaultTLBData)
 
-    const [pointer, setPointer] = useState('11240')
+    const [pointer, setPointer] = useState('80003000')
 
     const setTLBEntry = useCallback(
         (index: number, value: TLBEntry) => {

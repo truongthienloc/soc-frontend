@@ -52,7 +52,7 @@ function DisassemblyPage({ socModel }: Props) {
       <div className="flex flex-1 flex-row gap-2">
         <div className="flex min-w-[300px] flex-1 flex-col">
           <div className="flex flex-row justify-between p-4">
-            <h2 className="text-left text-xl">Input your binary machine code here:</h2>
+            <h2 className="text-left text-xl">Input your binary machine code:</h2>
             <Button className="h-fit" variant="outlined" onClick={handleDisassembleClick}>
               Disassemble
             </Button>

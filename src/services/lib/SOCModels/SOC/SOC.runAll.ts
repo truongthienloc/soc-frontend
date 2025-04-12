@@ -13,19 +13,23 @@ export async function RunAll(this: Soc) {
         this.Memory.Ins_pointer || this.Processor.state != 0 || this.DMA.state !=0
     ) {
         await this.Step()
-        // if (bre > 10  ) break
+        // if (bre > 165  ) break
         // bre ++   
     }
-    // console.log (this.Processor.FIFO)
-
+    console.log (this.Processor.state)
+    console.log (this.Processor.pc ,
+        this.Memory.Ins_pointer,
+        this.DMA.state)
+    // console.log (this.Processor.master.ChannelA)
+    // console.log ('this.DMA.state', this.DMA)
     // console.log (this.MMU.endAddress)
-    console.log (this.Memory.Memory['00100000000001100'])
-    console.log (this.Memory.Memory)
+    // console.log (this.Memory.Memory['00100000000001100'])
+    console.log (this.Memory.state)
     // console.log (this.Memory.Memory['10001000000010010'])
     // console.log (this.Memory.Memory['10001000000010001'])
     // console.log (this.Memory.Memory['10001000000010000'])
     // console.log (this.Bridge.state)
-    // console.log (this.Bus0)
+    console.log (this.Bus0)
     // console.log (this.cycle)
     // console.log (this.Memory.slaveMemory.ChannelD)
     // console.log (this.Bus1)

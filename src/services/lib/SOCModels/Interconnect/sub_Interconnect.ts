@@ -208,6 +208,7 @@ export default class InterConnect {
                     ||  (parseInt('0'+dataFromBridge.address, 2)    == 0x0020010    )
                     )
                 &&  !this.Pin[0].isEmpty ()
+
                 ) {
                    
                     this.println (

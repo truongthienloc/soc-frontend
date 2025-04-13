@@ -40,7 +40,7 @@ export default class DMA {
     ) {
         
         if (this.state == this.STATE_RecPutFrSub) {
-            this.DMA_Master.ChannelA.ready ='1'
+            this.DMA_Master.ChannelD.ready ='1'
 
             if (sub2DMA.valid == '1') {
                 this.println (
@@ -81,7 +81,7 @@ export default class DMA {
 
         if (this.state == 2) {
             this.burst = []
-            this.DMA_Master.ChannelA.ready = '0'
+            this.DMA_Master.ChannelD.ready = '0'
             if (this.count_burst == parseInt (this.length, 2)) {
                 this.state = 0
                 this.count_burst = 0
@@ -127,7 +127,7 @@ export default class DMA {
         if (this.state == 3) {
             
             this.DMA_Master.ChannelA.valid = '0'
-            this.DMA_Master.ChannelA.ready = '1'
+            this.DMA_Master.ChannelD.ready = '1'
             if (InterConnect2DMA.valid == '1'
                 && InterConnect2DMA.sink == '0'
             ) {
@@ -157,7 +157,7 @@ export default class DMA {
 
         if (this.state == 4 && ready0) {
             this.burst = []
-            this.DMA_Master.ChannelA.ready = '0'
+            this.DMA_Master.ChannelD.ready = '0'
             if (ready0) {
                 this.println (
                     this.active_println
@@ -171,7 +171,7 @@ export default class DMA {
                     this.DMA_buffer[0 + this.count_burst*4]
                 )
                 this.DMA_Master.ChannelA.valid = '1'
-                this.DMA_Master.ChannelA.ready = '0'
+                this.DMA_Master.ChannelD.ready = '0'
                 this.DMA_Master.ChannelA.size  = '10'
                 this.DMA_Slave.ChannelD.valid  = '0'
                 this.burst.push ( {...this.DMA_Master.ChannelA})
@@ -189,7 +189,7 @@ export default class DMA {
                     this.DMA_buffer[1 + this.count_burst*4]
                 )
                 this.DMA_Master.ChannelA.valid = '1'
-                this.DMA_Master.ChannelA.ready = '0'
+                this.DMA_Master.ChannelD.ready = '0'
                 this.DMA_Master.ChannelA.size  = '10'
                 this.DMA_Slave.ChannelD.valid  = '0'
                 this.burst.push ( {...this.DMA_Master.ChannelA})
@@ -241,7 +241,7 @@ export default class DMA {
         if (this.state == 5) {
             
             this.DMA_Master.ChannelA.valid = '0'    
-            this.DMA_Master.ChannelA.ready = '1'
+            this.DMA_Master.ChannelD.ready = '1'
             if (InterConnect2DMA.valid == '1'
                 && InterConnect2DMA.sink == '10'
             ) {

@@ -95,7 +95,7 @@ export default class RiscVProcessor {
         //#This state also checks the available values of the Program Counter.                   #
         //#                                                                                      #
         //########################################################################################
-        this.master.ChannelA.ready = '0'
+        this.master.ChannelD.ready = '0'
 
         if (this.pc >= this.InsLength) {
             this.state = this.GET_INSTRUCTION_STATE
@@ -151,7 +151,7 @@ export default class RiscVProcessor {
         //#######################################################
 
         this.master.ChannelA.valid = '0'
-        this.master.ChannelA.ready = '1'
+        this.master.ChannelD.ready = '1'
         if (InterConnect2CPU.valid == '1') {
             this.master.receive (InterConnect2CPU)
             this.instruction = this.master.ChannelD.data
@@ -179,7 +179,7 @@ export default class RiscVProcessor {
         //#                                                     #
         //#######################################################
         this.master.ChannelA.valid = '0'
-        this.master.ChannelA.ready = '0'
+        this.master.ChannelD.ready = '0'
 
         this.println (
             this.active_println
@@ -269,7 +269,7 @@ export default class RiscVProcessor {
     }
 
     if (this.state == this.ACESS_INTERCONNECT_STATE )    {
-        this.master.ChannelA.ready = '0'
+        this.master.ChannelD.ready = '0'
         if (ready) {
             this.MMU.run(this.SendAddress)
 
@@ -359,7 +359,7 @@ export default class RiscVProcessor {
 
     if (this.state == this.RECEIVE_INTERCONNECT_STATE)   {
         this.master.ChannelA.valid = '0'
-        this.master.ChannelA.ready = '1'
+        this.master.ChannelD.ready = '1'
         if (InterConnect2CPU.valid == '1') {
             this.master.receive (InterConnect2CPU)
             if (InterConnect2CPU.opcode == '000') {
@@ -393,7 +393,7 @@ export default class RiscVProcessor {
       
     if (this.state == this.REPLACE_TLBE_STATE)           {
         this.master.ChannelA.valid = '0'
-        this.master.ChannelA.ready = '0'
+        this.master.ChannelD.ready = '0'
 
         if (InterConnect2CPU.valid == '1') {
 

@@ -49,7 +49,7 @@ export default class Memory {
         if (this.state == this.IDLE_STATE)                          {
             this.burst              = []
             this.slaveMemory.ChannelD.valid = '0'
-            this.slaveMemory.ChannelD.ready = '1'
+            this.slaveMemory.ChannelA.ready = '1'
             if (MMU2Memory.valid == '1') {
                 this.slaveMemory.ChannelD.valid = '1'
                 if (MMU2Memory.opcode == '100') this.state = this.RECEIVE_GET_STATE
@@ -72,7 +72,7 @@ export default class Memory {
         }
 
         if (this.state == this.SEND_ACCESSACKDATA_STATE)   {
-            this.slaveMemory.ChannelD.ready = '0'
+            this.slaveMemory.ChannelA.ready = '0'
             if (ready) {
                 if (this.slaveMemory.ChannelA.size == '00') {
                     this.slaveMemory.ChannelD.valid = '1'
@@ -198,7 +198,7 @@ export default class Memory {
         }
 
         if (this.state ==  this.SEND_ACCESSACK_STATE)       {
-            this.slaveMemory.ChannelD.ready = '0'
+            this.slaveMemory.ChannelA.ready = '0'
             if (ready) {
                 this.slaveMemory.ChannelD.valid = '1'
                 this.println (this.active_println,
@@ -301,10 +301,8 @@ export default class Memory {
         //     this.Memory[i.toString(2).padStart(17,'0')] = '0'.padStart(8,'0')
         for (const binString of Instruction_memory) {
             if (binString !== '') {
-                // Chia chuỗi nhị phân thành 4 phần và sắp xếp theo kiểu Little Endian
                 for (let i = 3; i >= 0; i--) {
                     let part = binString.substring(i * 8, (i + 1) * 8);
-                    // Lưu mỗi phần vào Memory với key là địa chỉ nhị phân tương ứng
                     this.Memory[count.toString(2).padStart(17, '0')] = part;
                     count += 1;
                 }
@@ -315,16 +313,15 @@ export default class Memory {
     }
 
     public GetMemory() {
-        // Chuyển object sang mảng các cặp [key, value]
-        const entries = Object.entries(this.Memory)
+
+        const newFormMemory = Object.entries(this.Memory) // CONVERT INTO [KEY, VALUE] FORM
         const littleEndianMemory: { [key: string]: string } = {};
         
-        // Sắp xếp mảng dựa trên key, giữ nguyên dạng số thập phân
-        const sortedMemory = entries.sort((a, b) => parseInt(a[0], 10) - parseInt(b[0], 10));
-        for (let i = 0; i < sortedMemory.length; i += 4) {
+        const sortMemory = newFormMemory.sort((a, b) => parseInt(a[0], 10) - parseInt(b[0], 10)) // SORT BY INDEX ([1]-> VALUEVALUE)
+        for (let i = 0; i < sortMemory.length; i += 4) {
             let element = ''
             for (let j = 3; j>=0 ; j--) {
-                if (i+j < sortedMemory.length) element += sortedMemory[i+j][1]
+                if (i+j < sortMemory.length) element += sortMemory[i+j][1]
             }
             littleEndianMemory [i.toString(2).padStart(17, '0')] = element
 

@@ -18,6 +18,7 @@ export default class InterConnect {
     state               : number
     logger             ?: Logger
     active_println      : boolean 
+    ready               : boolean
 
     RECEIVE_STATE       = 0
     SEND_STATE          = 1
@@ -66,7 +67,8 @@ export default class InterConnect {
                     ,new FIFO_timing()
         ]
         this.active_println = true
-        this.Pactived = [true, true, true, true]
+        this.ready          = true
+        this.Pactived       = [true, true, true, true]
 
     }
 
@@ -89,7 +91,7 @@ export default class InterConnect {
     ) {
 
         if (this.state == this.RECEIVE_STATE)   {
-
+            this.ready = true
             this.RecData (
                 dataFromProcessor           
                 ,dataFromDMA                
@@ -103,12 +105,12 @@ export default class InterConnect {
             )
             if (! ((this.Pin[0].isEmpty()) && (this.Pin[1].isEmpty()) && (this.Pin[2].isEmpty()) && (this.Pin[3].isEmpty()))) {
                 this.state +=1
+                this.ready = false
             }
             return
         }
 
         if (this.state == this.SEND_STATE)      {
-
             this.Abiter(
                 cycle
                 , Processor_ready   
@@ -116,8 +118,8 @@ export default class InterConnect {
                 , Memory_ready      
                 , Bridge_ready   
             )
-            
-            // this.state = 0
+            this.state = this.RECEIVE_STATE
+            this.ready = true
             return
         }
 
@@ -160,7 +162,6 @@ export default class InterConnect {
                     + cycle.toString() 
                     +': The DATA from PROCESSOR is invalid!'
                 )
-                console.error("Error: Pin[0] is not FIFO_ChannelA")
             }
 
         }
@@ -189,7 +190,6 @@ export default class InterConnect {
                     + cycle.toString() 
                     +': The DATA from DMA is invalid!'
                 )
-                console.error("Error: Pin[1] is not FIFO_ChannelA")
             }
         }
     }
@@ -218,7 +218,6 @@ export default class InterConnect {
                     + cycle.toString() 
                     +': The DATA from MEMORY is invalid!'
                 )
-                console.error("Error: Pin[2] is not FIFO_ChannelD")
             }
         }
     }
@@ -235,7 +234,12 @@ export default class InterConnect {
                 this.Pin[3].enqueue({...data})
                 this.Timing[3].enqueue(cycle.cycle)
             } else {
-                console.error("Error: Pin[3] is not FIFO_ChannelD")
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The DATA from SUB-INTERCONNECT is invalid!'
+                )
             }
         }
     }
@@ -503,6 +507,7 @@ export default class InterConnect {
                     (parseInt('0'+dataFromProcessor.address, 2)    >= 0)
                 &&  (parseInt('0'+dataFromProcessor.address, 2)    <= 0X1FFFF  )
                 && Memory_ready
+                
                 )
                 
             ) {

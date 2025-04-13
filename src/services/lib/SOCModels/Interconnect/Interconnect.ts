@@ -496,13 +496,13 @@ export default class InterConnect {
     ) {
         if (Abiter == 0 
             && !this.Pin[0].isEmpty()
-            &&  Processor_ready
         ) {
             const dataFromProcessor = {...this.Pin[0].dequeue()}
             if (
                 (
                     (parseInt('0'+dataFromProcessor.address, 2)    >= 0)
                 &&  (parseInt('0'+dataFromProcessor.address, 2)    <= 0X1FFFF  )
+                && Memory_ready
                 )
                 
             ) {
@@ -517,12 +517,15 @@ export default class InterConnect {
                 this.Timing[0].dequeue()
             }
             if (
+                (
                     (parseInt('0'+dataFromProcessor.address, 2) == 0x0020000) 
                 ||  (parseInt('0'+dataFromProcessor.address, 2) == 0x0020004)
                 ||  (parseInt('0'+dataFromProcessor.address, 2) == 0x0020008)
                 ||  (parseInt('0'+dataFromProcessor.address, 2) == 0x002000C)
                 ||  (parseInt('0'+dataFromProcessor.address, 2) == 0x0020010)
-            ) {
+                ) 
+                && Bridge_ready
+        ) {
                 if (dataFromProcessor.opcode == '000') {
                     this.println (
                         this.active_println
@@ -538,7 +541,6 @@ export default class InterConnect {
 
         if (Abiter == 1 
             && !this.Pin[1].isEmpty()
-            && DMA_ready
         ) {
             const dataFromDMA       = {...this.Pin[1].peek()}
             // console.log ('this.Pin[1]',this.Pin[1])
@@ -554,30 +556,28 @@ export default class InterConnect {
                     this.Timing[1].dequeue()
                 }
             } else {
-
-                while (!this.Pin[1].isEmpty()) {
-                    this.println (
-                        this.active_println
-                        ,'Cycle '
-                        + cycle.toString() 
-                        +': The INTERCONNECT is sending data from DMA to SUB-INTERCONNCET.'
-                    )
-                    if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue({...this.Pin[1].dequeue()})
-                    this.Timing[1].dequeue()
+                if (Bridge_ready) {
+                    while (!this.Pin[1].isEmpty()) {
+                        this.println (
+                            this.active_println
+                            ,'Cycle '
+                            + cycle.toString() 
+                            +': The INTERCONNECT is sending data from DMA to SUB-INTERCONNCET.'
+                        )
+                        if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue({...this.Pin[1].dequeue()})
+                        this.Timing[1].dequeue()
+                    }
                 }
-
-                
             }
         }
 
         if (Abiter == 2 
             && !this.Pin[2].isEmpty()
-            && Memory_ready
         ) {
             const dataFromMem = {...this.Pin[2].peek()}
             
             // if (dataFromMem instanceof ChannelD) {
-                if (dataFromMem.source == '00') {
+                if (dataFromMem.source == '00' && Processor_ready) {
                     if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue({...this.Pin[2].dequeue()})
                     this.println (
                         this.active_println
@@ -587,7 +587,7 @@ export default class InterConnect {
                     )
                     this.Timing[2].dequeue()
                 } else {
-                    // while (!this.Pin[2].isEmpty()) {
+                    if (DMA_ready) {
                         this.println (
                             this.active_println
                             ,'Cycle '
@@ -599,15 +599,15 @@ export default class InterConnect {
 
                         }
                         this.Timing[2].dequeue()
+                    }
                 }
         }
 
         if (Abiter == 3 
             && !this.Pin[3].isEmpty()
-            && Bridge_ready
         ) {
             const dataFromSInterconnect = {...this.Pin[3].dequeue()}
-            if (dataFromSInterconnect.source == '00') {
+            if (dataFromSInterconnect.source == '00' && Processor_ready) {
                 this.println (
                     this.active_println
                     ,'Cycle '
@@ -618,15 +618,17 @@ export default class InterConnect {
                 this.Timing[3].dequeue()
                 // console.log('this.Pout[0]', this.Pout[0])
             } else {
-                this.println (
-                    this.active_println
-                    ,'Cycle '
-                    + cycle.toString() 
-                    +': The INTERCONNECT is sending data from SUB-INTERCONNECT to DMA.'
-                )
-                
-                if (this.Pout[1] instanceof FIFO_ChannelD) this.Pout[1].enqueue(dataFromSInterconnect)
-                    this.Timing[3].dequeue()
+                if (DMA_ready) {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The INTERCONNECT is sending data from SUB-INTERCONNECT to DMA.'
+                    )
+                    
+                    if (this.Pout[1] instanceof FIFO_ChannelD) this.Pout[1].enqueue(dataFromSInterconnect)
+                        this.Timing[3].dequeue()
+                }
             }
         }
     }

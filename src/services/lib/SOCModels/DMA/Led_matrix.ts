@@ -92,7 +92,7 @@ export default class LEDMatrix {
             )
             this.Matrix_Slave.send ('AccessAck', this.Matrix_Slave.ChannelA.source, '')
             this.Matrix_Slave.ChannelD.valid = '1'
-            this.Matrix_Slave.ChannelD.sink  = '10'
+            this.Matrix_Slave.ChannelD.sink  = '1'
             this.state +=1
             return
         }
@@ -126,7 +126,7 @@ export default class LEDMatrix {
                 )
                 this.Matrix_Slave.send ('AccessAck', this.Matrix_Slave.ChannelA.source, '')
                 this.Matrix_Slave.ChannelD.valid = '1'
-                this.Matrix_Slave.ChannelD.sink  = '10'
+                this.Matrix_Slave.ChannelD.sink  = '1'
                 this.state = 2
 
             return

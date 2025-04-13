@@ -243,7 +243,7 @@ export default class DMA {
             this.DMA_Master.ChannelA.valid = '0'    
             this.DMA_Master.ChannelD.ready = '1'
             if (InterConnect2DMA.valid == '1'
-                && InterConnect2DMA.sink == '10'
+                && InterConnect2DMA.sink == '1'
             ) {
                 this.println (
                     this.active_println

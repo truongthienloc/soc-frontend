@@ -55,6 +55,8 @@ export default class Bridge {
         if (this.state == this.STATE_RECEIVE)    {
             this.Bridge_master.ChannelA.valid = '0'
             this.Bridge_master.ChannelD.valid = '0'
+            this.Bridge_master.ChannelA.ready = '1'
+            this.Bridge_master.ChannelD.ready = '1'
             if (!dataFrInterconnect.isEmpty()) {
 
                 while (!dataFrInterconnect.isEmpty()) {
@@ -89,6 +91,8 @@ export default class Bridge {
         }
 
         if (this.state == this.STATE_SEND) {
+            this.Bridge_master.ChannelA.ready = '0'
+            this.Bridge_master.ChannelD.ready = '0'
             if (!this.fifo_from_Interconnect.isEmpty() && ready1) {
                 this.Bridge_slave.receive(this.fifo_from_Interconnect.dequeue())
                 this.Bridge_master.ChannelA = this.Bridge_slave.ChannelA

@@ -6,6 +6,7 @@ import { Interconnect } from '../../soc/components/Interconnect'
 import Cycle from "../Compile/cycle"
 import {Logger }            from '../Compile/soc.d'
 import { BinToHex } from '../Compile/convert'
+import { read } from 'fs'
 
 export default class DMA {
     sourceAddress       : string
@@ -38,31 +39,36 @@ export default class DMA {
         , 
     ) {
         
-        if (this.state == this.STATE_RecPutFrSub && sub2DMA.valid == '1') {
-            this.println (
-                this.active_println
-                ,'Cycle '
-                + cycle.toString() 
-                +': The DMA is receiving messeage PUT from SUB-INTERCONNETC.'
-            )
+        if (this.state == this.STATE_RecPutFrSub) {
+            this.DMA_Master.ChannelA.ready ='1'
 
-            this.DMA_Slave.receive(sub2DMA)
-            this.config (ready0, cycle)
-            if (ready1) {
-                this.DMA_Slave.send ('AccessAck', '00', '')
-                this.DMA_Slave.ChannelD.sink = '01'
+            if (sub2DMA.valid == '1') {
                 this.println (
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The DMA is sending messeage AccessAck to SUB-INTERCONNETC.'
+                    +': The DMA is receiving messeage PUT from SUB-INTERCONNETC.'
                 )
-
-
+    
+                this.DMA_Slave.receive(sub2DMA)
+                this.config (ready0, cycle)
+                if (ready1) {
+                    this.DMA_Slave.send ('AccessAck', '00', '')
+                    this.DMA_Slave.ChannelD.sink = '01'
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The DMA is sending messeage AccessAck to SUB-INTERCONNETC.'
+                    )
+    
+    
+                }
+                else {
+                    this.state = this.STATE_RecPutFrSub
+                }
             }
-            else {
-                this.state = this.STATE_RecPutFrSub
-            }
+
             return
         }
 
@@ -75,10 +81,12 @@ export default class DMA {
 
         if (this.state == 2) {
             this.burst = []
+            this.DMA_Master.ChannelA.ready = '0'
             if (this.count_burst == parseInt (this.length, 2)) {
                 this.state = 0
                 this.count_burst = 0
                 this.count_beats = 0
+
 
                 this.println (
                     this.active_println
@@ -106,6 +114,7 @@ export default class DMA {
                 this.DMA_Master.ChannelA.size = '10'
                 this.DMA_Slave.ChannelD.valid = '0'
                 this.DMA_Master.ChannelA.valid = '1'
+
     
                 this.burst.push ( {...this.DMA_Master.ChannelA})
                 this.state += 1
@@ -118,6 +127,7 @@ export default class DMA {
         if (this.state == 3) {
             
             this.DMA_Master.ChannelA.valid = '0'
+            this.DMA_Master.ChannelA.ready = '1'
             if (InterConnect2DMA.valid == '1'
                 && InterConnect2DMA.sink == '0'
             ) {
@@ -147,78 +157,83 @@ export default class DMA {
 
         if (this.state == 4 && ready0) {
             this.burst = []
+            this.DMA_Master.ChannelA.ready = '0'
+            if (ready0) {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The DMA is sending messeage PUT to INTERCONNET.'
+                )
+                this.DMA_Master.send(
+                    'PUT',
+                    ((parseInt(this.destinationAddress.slice(-17), 2) + 0 + this.count_burst*16)).toString(2).padStart(17, '0'),
+                    this.DMA_buffer[0 + this.count_burst*4]
+                )
+                this.DMA_Master.ChannelA.valid = '1'
+                this.DMA_Master.ChannelA.ready = '0'
+                this.DMA_Master.ChannelA.size  = '10'
+                this.DMA_Slave.ChannelD.valid  = '0'
+                this.burst.push ( {...this.DMA_Master.ChannelA})
+                cycle.incr()
+    
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The DMA is sending messeage PUT to INTERCONNET.'
+                )
+                this.DMA_Master.send(
+                    'PUT',
+                    ((parseInt(this.destinationAddress.slice(-17), 2) + 4  + this.count_burst*16)).toString(2).padStart(17, '0'),
+                    this.DMA_buffer[1 + this.count_burst*4]
+                )
+                this.DMA_Master.ChannelA.valid = '1'
+                this.DMA_Master.ChannelA.ready = '0'
+                this.DMA_Master.ChannelA.size  = '10'
+                this.DMA_Slave.ChannelD.valid  = '0'
+                this.burst.push ( {...this.DMA_Master.ChannelA})
+                cycle.incr()
+    
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The DMA is sending messeage PUT to INTERCONNET.'
+                )
+                this.DMA_Master.send(
+                    'PUT',
+                    ((parseInt(this.destinationAddress.slice(-17), 2) + 8  + this.count_burst*16)).toString(2).padStart(17, '0'),
+                    this.DMA_buffer[2 + this.count_burst*4]
+                )
+                this.DMA_Master.ChannelA.valid = '1'
+                this.DMA_Master.ChannelA.size  = '10'
+                this.DMA_Slave.ChannelD.valid  = '0'
+                this.burst.push ( {...this.DMA_Master.ChannelA})
+                cycle.incr()
+    
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The DMA is sending messeage PUT to INTERCONNET.'
+                )
+                console.log ('this.destinationAddress.slice(-17)', parseInt(this.destinationAddress.slice(-17), 2))
+                this.DMA_Master.send(
+                    'PUT',
+                    ((parseInt(this.destinationAddress.slice(-17), 2) + 12  + this.count_burst*16)).toString(2).padStart(17, '0'),
+                    this.DMA_buffer[3 + this.count_burst*4 ]
+                )
+                this.DMA_Master.ChannelA.valid = '1'
+                this.DMA_Master.ChannelA.size  = '10'
+                this.DMA_Slave.ChannelD.valid  = '0'
+                this.burst.push ( {...this.DMA_Master.ChannelA})
+                console.log (this.count_burst)
+                cycle.incr()
+    
+                this.state += 1
+            }
 
-            this.println (
-                this.active_println
-                ,'Cycle '
-                + cycle.toString() 
-                +': The DMA is sending messeage PUT to INTERCONNET.'
-            )
-            this.DMA_Master.send(
-                'PUT',
-                ((parseInt(this.destinationAddress.slice(-17), 2) + 0 + this.count_burst*16)).toString(2).padStart(17, '0'),
-                this.DMA_buffer[0 + this.count_burst*4]
-            )
-            this.DMA_Master.ChannelA.valid = '1'
-            this.DMA_Master.ChannelA.size  = '10'
-            this.DMA_Slave.ChannelD.valid  = '0'
-            this.burst.push ( {...this.DMA_Master.ChannelA})
-            cycle.incr()
-
-            this.println (
-                this.active_println
-                ,'Cycle '
-                + cycle.toString() 
-                +': The DMA is sending messeage PUT to INTERCONNET.'
-            )
-            this.DMA_Master.send(
-                'PUT',
-                ((parseInt(this.destinationAddress.slice(-17), 2) + 4  + this.count_burst*16)).toString(2).padStart(17, '0'),
-                this.DMA_buffer[1 + this.count_burst*4]
-            )
-            this.DMA_Master.ChannelA.valid = '1'
-            this.DMA_Master.ChannelA.size  = '10'
-            this.DMA_Slave.ChannelD.valid  = '0'
-            this.burst.push ( {...this.DMA_Master.ChannelA})
-            cycle.incr()
-
-            this.println (
-                this.active_println
-                ,'Cycle '
-                + cycle.toString() 
-                +': The DMA is sending messeage PUT to INTERCONNET.'
-            )
-            this.DMA_Master.send(
-                'PUT',
-                ((parseInt(this.destinationAddress.slice(-17), 2) + 8  + this.count_burst*16)).toString(2).padStart(17, '0'),
-                this.DMA_buffer[2 + this.count_burst*4]
-            )
-            this.DMA_Master.ChannelA.valid = '1'
-            this.DMA_Master.ChannelA.size  = '10'
-            this.DMA_Slave.ChannelD.valid  = '0'
-            this.burst.push ( {...this.DMA_Master.ChannelA})
-            cycle.incr()
-
-            this.println (
-                this.active_println
-                ,'Cycle '
-                + cycle.toString() 
-                +': The DMA is sending messeage PUT to INTERCONNET.'
-            )
-            console.log ('this.destinationAddress.slice(-17)', parseInt(this.destinationAddress.slice(-17), 2))
-            this.DMA_Master.send(
-                'PUT',
-                ((parseInt(this.destinationAddress.slice(-17), 2) + 12  + this.count_burst*16)).toString(2).padStart(17, '0'),
-                this.DMA_buffer[3 + this.count_burst*4 ]
-            )
-            this.DMA_Master.ChannelA.valid = '1'
-            this.DMA_Master.ChannelA.size  = '10'
-            this.DMA_Slave.ChannelD.valid  = '0'
-            this.burst.push ( {...this.DMA_Master.ChannelA})
-            console.log (this.count_burst)
-            cycle.incr()
-
-            this.state += 1
             
             return 
         }
@@ -226,6 +241,7 @@ export default class DMA {
         if (this.state == 5) {
             
             this.DMA_Master.ChannelA.valid = '0'    
+            this.DMA_Master.ChannelA.ready = '1'
             if (InterConnect2DMA.valid == '1'
                 && InterConnect2DMA.sink == '10'
             ) {
@@ -346,6 +362,7 @@ export default class DMA {
                         + cycle.toString() 
                         +': The DMA is actived.'
                     )
+                    this.DMA_Master.ChannelD.ready = '0'
                 if (ready0) this.state    = 2
             } else {
                 if (ready0) this.state = 1

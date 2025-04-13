@@ -13,10 +13,13 @@ export async function RunAll(this: Soc) {
         this.Memory.Ins_pointer || this.Processor.state != 0 || this.DMA.state !=0
     ) {
         await this.Step()
-        // if (bre > 213  ) break
-        // bre ++   
+        // if (this.DMA.DMA_Master.ChannelA.valid == '1' && this.DMA.state ==2) break
+        // if (this.DMA.count_burst == 1) break
+        // if (bre > 165 ) break
+        // bre++
+           
     }
-    // console.log ('this.DMA.state', this.DMA)
+    console.log (this.DMA.state)
     // console.log (this.Processor.state)
     // console.log (this.Processor.pc ,
     //     this.Memory.Ins_pointer)

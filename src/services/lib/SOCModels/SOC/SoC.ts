@@ -173,20 +173,22 @@ export default class Soc {
         )
         
         this.Bus0.Run (
-                this.Processor.FIFO.dequeue()
-                ,this.DMA.burst
-                ,this.Memory.burst
-                ,this.Bridge.Bridge_slave.ChannelD
-                ,this.Processor.master.ChannelA.valid == '1'
-                ,this.DMA.DMA_Master.ChannelA.valid == '1'
-                ,this.Memory.slaveMemory.ChannelD.valid == '1'
-                ,this.Bridge.Bridge_slave.ChannelD.valid == '1'
-                ,this.Processor.state == this.Processor.RECEIVE_INSTRUCTION_STATE 
-                || this.Processor.state == this.Processor.RECEIVE_INTERCONNECT_STATE
-                ,this.DMA.state == 3 || this.DMA.state == 5
-                ,this.Memory.state == this.Memory.IDLE_STATE
-                ,this.Bridge.state == this.Bridge.STATE_RECEIVE
-                ,this.cycle
+            this.Processor.FIFO.dequeue()
+            ,this.DMA.burst
+            ,this.Memory.burst
+            ,this.Bridge.Bridge_slave.ChannelD
+            //valid signal
+            ,this.Processor.master.ChannelA.valid == '1'
+            ,this.DMA.DMA_Master.ChannelA.valid == '1'
+            ,this.Memory.slaveMemory.ChannelD.valid == '1'
+            ,this.Bridge.Bridge_slave.ChannelD.valid == '1'
+            //ready signal
+            ,this.Processor.master.ChannelA.ready == '1'
+            ,this.DMA.DMA_Master.ChannelA.ready == '1'
+            ,this.Memory.slaveMemory.ChannelD.ready   == '1'
+            ,this.Bridge.Bridge_master.ChannelD.ready == '1'
+            //cycle
+            ,this.cycle
         )
 
         this.Bridge.Run (
@@ -202,7 +204,7 @@ export default class Soc {
             , this.DMA.DMA_Slave.ChannelD
             , this.Led_matrix.Matrix_Slave.ChannelD
             , this.Bridge.Bridge_master.ChannelA.valid == '1'
-            , this.Bridge.state == 0
+            , this.Bridge.Bridge_master.ChannelA.ready == '1'
             , this.DMA.DMA_Slave.ChannelD.valid == '1'
             , this.Led_matrix.Matrix_Slave.ChannelD.valid == '1'
             , this.cycle
@@ -248,15 +250,17 @@ export default class Soc {
                 ,this.DMA.burst
                 ,this.Memory.burst
                 ,this.Bridge.Bridge_slave.ChannelD
+                //valid signal
                 ,this.Processor.master.ChannelA.valid == '1'
                 ,this.DMA.DMA_Master.ChannelA.valid == '1'
                 ,this.Memory.slaveMemory.ChannelD.valid == '1'
                 ,this.Bridge.Bridge_slave.ChannelD.valid == '1'
-                ,this.Processor.state == this.Processor.RECEIVE_INSTRUCTION_STATE 
-                || this.Processor.state == this.Processor.RECEIVE_INTERCONNECT_STATE
-                ,this.DMA.state == 3 || this.DMA.state == 5
-                ,this.Memory.state == this.Memory.IDLE_STATE
-                ,this.Bridge.state == this.Bridge.STATE_RECEIVE
+                //ready signal
+                ,this.Processor.master.ChannelA.ready == '1'
+                ,this.DMA.DMA_Master.ChannelA.ready == '1'
+                ,this.Memory.slaveMemory.ChannelD.ready   == '1'
+                ,this.Bridge.Bridge_master.ChannelD.ready == '1'
+                //cycle
                 ,this.cycle
             )
             this.cycle.incr()

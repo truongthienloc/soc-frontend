@@ -86,7 +86,7 @@ export default class RiscVProcessor {
   ) 
     {
 
-    if (this.state == this.GET_INSTRUCTION_STATE)       {
+    if (this.state == this.GET_INSTRUCTION_STATE)        {
 
         //########################################################################################
         //#                                                                                      #
@@ -95,6 +95,8 @@ export default class RiscVProcessor {
         //#This state also checks the available values of the Program Counter.                   #
         //#                                                                                      #
         //########################################################################################
+        this.master.ChannelA.ready = '0'
+
         if (this.pc >= this.InsLength) {
             this.state = this.GET_INSTRUCTION_STATE
             if (this.Warnning == 0) {
@@ -137,7 +139,7 @@ export default class RiscVProcessor {
         return
     }
 
-    if (this.state == this.RECEIVE_INSTRUCTION_STATE)   {
+    if (this.state == this.RECEIVE_INSTRUCTION_STATE)    {
 
         //#######################################################
         //#                                                     #
@@ -149,6 +151,7 @@ export default class RiscVProcessor {
         //#######################################################
 
         this.master.ChannelA.valid = '0'
+        this.master.ChannelA.ready = '1'
         if (InterConnect2CPU.valid == '1') {
             this.master.receive (InterConnect2CPU)
             this.instruction = this.master.ChannelD.data
@@ -166,7 +169,7 @@ export default class RiscVProcessor {
         return
     }
 
-    if (this.state == this.PROCESSING_STATE)            {
+    if (this.state == this.PROCESSING_STATE)             {
         //#######################################################
         //#                                                     #
         //#This state is the 'Receive Instructions' state.      #
@@ -175,7 +178,8 @@ export default class RiscVProcessor {
         //#Next state is Internal Processing state.             #
         //#                                                     #
         //#######################################################
-
+        this.master.ChannelA.valid = '0'
+        this.master.ChannelA.ready = '0'
 
         this.println (
             this.active_println
@@ -265,6 +269,7 @@ export default class RiscVProcessor {
     }
 
     if (this.state == this.ACESS_INTERCONNECT_STATE )    {
+        this.master.ChannelA.ready = '0'
         if (ready) {
             this.MMU.run(this.SendAddress)
 
@@ -352,8 +357,9 @@ export default class RiscVProcessor {
         return
     }
 
-    if (this.state == this.RECEIVE_INTERCONNECT_STATE)  {
+    if (this.state == this.RECEIVE_INTERCONNECT_STATE)   {
         this.master.ChannelA.valid = '0'
+        this.master.ChannelA.ready = '1'
         if (InterConnect2CPU.valid == '1') {
             this.master.receive (InterConnect2CPU)
             if (InterConnect2CPU.opcode == '000') {
@@ -385,36 +391,37 @@ export default class RiscVProcessor {
         return
     }
       
-    if (this.state == this.REPLACE_TLBE_STATE)          {
-    this.master.ChannelA.valid = '0'
-
-    if (InterConnect2CPU.valid == '1') {
-
-        this.println (
-            this.active_println
-            ,'Cycle '
-            + cycle.toString() 
-            +': The PROCESSOR is receiving messeage AccessAckData from INTERCONNECT.'
-        )
-
-        const VPN       = this.SendAddress.slice(0, 20)  
-        this.master.receive (InterConnect2CPU)
-        const frame     = this.master.ChannelD.data
-
-        this.println (
-            this.active_println
-            ,'Cycle '
-            + cycle.toString() 
-            +': The TLB is replacing an entry.'
-        )
-
-        this.MMU.pageReplace ([parseInt(VPN , 2) & 0xf,  (dec (frame) & 0XFFF0) * 4, 1, cycle.cycle])
-
+    if (this.state == this.REPLACE_TLBE_STATE)           {
         this.master.ChannelA.valid = '0'
+        this.master.ChannelA.ready = '0'
 
-        this.state = 3
-    }
-    return
+        if (InterConnect2CPU.valid == '1') {
+
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The PROCESSOR is receiving messeage AccessAckData from INTERCONNECT.'
+            )
+
+            const VPN       = this.SendAddress.slice(0, 20)  
+            this.master.receive (InterConnect2CPU)
+            const frame     = this.master.ChannelD.data
+
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The TLB is replacing an entry.'
+            )
+
+            this.MMU.pageReplace ([parseInt(VPN , 2) & 0xf,  (dec (frame) & 0XFFF0) * 4, 1, cycle.cycle])
+
+            this.master.ChannelA.valid = '0'
+
+            this.state = 3
+        }
+        return
     }
   }
 

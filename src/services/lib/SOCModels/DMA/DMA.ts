@@ -167,7 +167,7 @@ export default class DMA {
                 )
                 this.DMA_Master.send(
                     'PUT',
-                    ((parseInt(this.destinationAddress.slice(-17), 2) + 0 + this.count_burst*16)).toString(2).padStart(17, '0'),
+                    ((parseInt(this.destinationAddress, 2) + 0 + this.count_burst*16)).toString(2).padStart(17, '0'),
                     this.DMA_buffer[0 + this.count_burst*4]
                 )
                 this.DMA_Master.ChannelA.valid = '1'
@@ -185,7 +185,7 @@ export default class DMA {
                 )
                 this.DMA_Master.send(
                     'PUT',
-                    ((parseInt(this.destinationAddress.slice(-17), 2) + 4  + this.count_burst*16)).toString(2).padStart(17, '0'),
+                    ((parseInt(this.destinationAddress, 2) + 4  + this.count_burst*16)).toString(2).padStart(17, '0'),
                     this.DMA_buffer[1 + this.count_burst*4]
                 )
                 this.DMA_Master.ChannelA.valid = '1'
@@ -203,7 +203,7 @@ export default class DMA {
                 )
                 this.DMA_Master.send(
                     'PUT',
-                    ((parseInt(this.destinationAddress.slice(-17), 2) + 8  + this.count_burst*16)).toString(2).padStart(17, '0'),
+                    ((parseInt(this.destinationAddress, 2) + 8  + this.count_burst*16)).toString(2).padStart(17, '0'),
                     this.DMA_buffer[2 + this.count_burst*4]
                 )
                 this.DMA_Master.ChannelA.valid = '1'
@@ -218,10 +218,10 @@ export default class DMA {
                     + cycle.toString() 
                     +': The DMA is sending messeage PUT to INTERCONNET.'
                 )
-                console.log ('this.destinationAddress.slice(-17)', parseInt(this.destinationAddress.slice(-17), 2))
+                console.log ('this.destinationAddress', parseInt(this.destinationAddress, 2))
                 this.DMA_Master.send(
                     'PUT',
-                    ((parseInt(this.destinationAddress.slice(-17), 2) + 12  + this.count_burst*16)).toString(2).padStart(17, '0'),
+                    ((parseInt(this.destinationAddress, 2) + 12  + this.count_burst*16)).toString(2).padStart(17, '0'),
                     this.DMA_buffer[3 + this.count_burst*4 ]
                 )
                 this.DMA_Master.ChannelA.valid = '1'

@@ -202,8 +202,8 @@ export default class InterConnect {
                 if (
                     (
                     (
-                        (parseInt('0'+dataFromBridge.address, 2)    >= 0X1C000      ) 
-                    &&  (parseInt('0'+dataFromBridge.address, 2)    <= 0X1FFFF      ) 
+                        (parseInt('0'+dataFromBridge.address, 2)    >= 0x0020014) 
+                    &&  (parseInt('0'+dataFromBridge.address, 2)    <= 0x0020014 +  9216 ) 
                     )
                     ||  (parseInt('0'+dataFromBridge.address, 2)    == 0x0020010    )
                     )

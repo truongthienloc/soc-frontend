@@ -549,7 +549,7 @@ export default class InterConnect {
         ) {
             const dataFromDMA       = {...this.Pin[1].peek()}
             // console.log ('this.Pin[1]',this.Pin[1])
-            if (dataFromDMA.opcode == '100') {
+            if (parseInt('0'+dataFromDMA.address, 2) < 0x20014) { //2 001A parseInt('0'+dataFromDMA.address, 2)
                 if (Memory_ready) {
                     this.println (
                         this.active_println
@@ -582,15 +582,17 @@ export default class InterConnect {
             const dataFromMem = {...this.Pin[2].peek()}
             
             // if (dataFromMem instanceof ChannelD) {
-                if (dataFromMem.source == '00' && Processor_ready) {
-                    if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue({...this.Pin[2].dequeue()})
-                    this.println (
-                        this.active_println
-                        ,'Cycle '
-                        + cycle.toString() 
-                        +': The INTERCONNECT is sending data from MEMORY to PROCESSOR.'
-                    )
-                    this.Timing[2].dequeue()
+                if (dataFromMem.source == '00') {
+                    if (Processor_ready) {
+                        if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue({...this.Pin[2].dequeue()})
+                            this.println (
+                                this.active_println
+                                ,'Cycle '
+                                + cycle.toString() 
+                                +': The INTERCONNECT is sending data from MEMORY to PROCESSOR.'
+                            )
+                            this.Timing[2].dequeue()
+                    }
                 } else {
                     if (DMA_ready) {
                         this.println (

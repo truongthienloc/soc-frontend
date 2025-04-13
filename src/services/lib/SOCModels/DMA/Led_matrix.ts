@@ -26,7 +26,7 @@ export default class LEDMatrix {
         this.state                      = 0
         this.active                     = false
         this.active_println             = true
-        this.led                        = new LedMatrix ('.led-matrix')
+        // this.led                        = new LedMatrix ('.led-matrix')
 
     }
 
@@ -136,7 +136,7 @@ export default class LEDMatrix {
 
     writeData(address: string, data: string) {
         // Kiểm tra địa chỉ và dữ liệu có hợp lệ không
-        if (address.length !== 17 || data.length !== 32) {
+        if (address.length !== 18 || data.length !== 32) {
             throw new Error("Invalid address or data length")
         }
 
@@ -147,7 +147,7 @@ export default class LEDMatrix {
            
         }
 
-        let index = (addr -  0x1C000) / 4  // Tính toán chỉ số của thành ghi
+        let index = (addr -  0x20014) / 4  // Tính toán chỉ số của thành ghi
         if (index >= 384) {
             console.log (addr)
             throw new Error("Address out of range")

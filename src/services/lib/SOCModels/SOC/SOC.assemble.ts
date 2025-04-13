@@ -35,7 +35,6 @@ export function assemble(
 
         end:
 
-
         `
 
     this.Assembler.reset()

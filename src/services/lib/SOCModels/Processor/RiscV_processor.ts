@@ -133,7 +133,6 @@ export default class RiscVProcessor {
             
             this.master.ChannelA.size  = '00'
             this.FIFO.enqueue ({...this.master.ChannelA})
-
             this.state              = this.RECEIVE_INSTRUCTION_STATE
         }
         return
@@ -393,7 +392,7 @@ export default class RiscVProcessor {
       
     if (this.state == this.REPLACE_TLBE_STATE)           {
         this.master.ChannelA.valid = '0'
-        this.master.ChannelD.ready = '0'
+        this.master.ChannelD.ready = '1'
 
         if (InterConnect2CPU.valid == '1') {
 

@@ -18,43 +18,43 @@ export function assemble(
     console.log('Cycle ', this.cycle.toString(), ': System is setting up')
     // this.Memory.reset (Mem_tb)
 
-    const setting_code = `
-        .text
-        lui x1, 0x1
-        addi x1, x1, 0x3
+    // const setting_code = `
+    //     .text
+    //     lui x1, 0x1
+    //     addi x1, x1, 0x3
 
-        lui  x2, 0x3
-        addi x3, x2, 0x60
+    //     lui  x2, 0x3
+    //     addi x3, x2, 0x60
 
-        page_table:
-        addi x31, x31, 1
-        sw x1, 0(x2)
-        addi x2, x2, 4
-        addi x1, x1, 0x400
-        bne x2, x3, page_table
+    //     page_table:
+    //     addi x31, x31, 1
+    //     sw x1, 0(x2)
+    //     addi x2, x2, 4
+    //     addi x1, x1, 0x400
+    //     bne x2, x3, page_table
 
-        end:
+    //     end:
 
-        `
+    //     `
 
-    this.Assembler.reset()
-    this.Processor.MMU.satp = 0x00003000
-    this.Assembler.assemblerFromIns(setting_code)
+    // this.Assembler.reset()
+    // this.Processor.MMU.satp = 0x00003000
+    // this.Assembler.assemblerFromIns(setting_code)
 
-    this.Memory.reset (Mem_tb)
-    this.Memory.Ins_pointer = 0
-    this.Processor.reset()
-    this.Processor.pc = 0
+    // this.Memory.reset (Mem_tb)
+    // this.Memory.Ins_pointer = 0
+    // this.Processor.reset()
+    // this.Processor.pc = 0
     
 
-    this.Memory.SetInstructionMemory(this.Assembler.binary_code)
+    // this.Memory.SetInstructionMemory(this.Assembler.binary_code)
     // this.Memory.GetInstructionMemory()
     
-    this.Processor.InsLength = this.Memory.Ins_pointer
+    // this.Processor.InsLength = this.Memory.Ins_pointer
     
     // this.Processor.pc = this.Memory.Ins_pointer
    
-    this.self_config()
+    // this.self_config()
 
     //****************SYNC ACTIVED MODEL VS VIEW****************
     if (this.view) {
@@ -72,18 +72,14 @@ export function assemble(
     //****************SET INITIAL STATUS****************
     // SET INITIAL DATA
     this.Processor.reset()
-    this.Processor.pc = this.Memory.Ins_pointer
+    this.Processor.pc = 0
     this.cycle.cycle = 0
     this.Led_matrix.reset ()
     this.DMA.reset()
-    // this.Led_matrix.led = new LedMatrix ('.led-matrix')
-
-    // this.Memory.reset (Mem_tb)
+    this.Memory.reset (Mem_tb)
     this.Memory.SetInstructionMemory(this.Assembler.binary_code) 
-    // this.Memory.setPageNumber()
 
     this.Processor.InsLength = this.Memory.Ins_pointer
-
     this.Processor.MMU.Set(
         [
              [0, 0, 0, 0]
@@ -95,7 +91,7 @@ export function assemble(
             ,[0, 0, 0, 0]
             ,[0, 0, 0, 0]
         ]                  
-        , stap              
+        , 0              
         , this.Allocator.allocate(required_mem)                  
     )
 
@@ -122,8 +118,7 @@ export function assemble(
         console.log('SYSTEM IS READY TO RUN')
     }
 
-    // console.log("MMU: ", this.MMU);
     this.Processor.keyBoard_waiting = false
-    this.Processor.MMU.satp = 0x80003000
+
     return !this.Assembler.syntax_error
 }

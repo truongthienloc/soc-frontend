@@ -97,7 +97,6 @@ export default class MMU {
 
     ){
         this.TLB               = P
-        this.satp              = satp
         this.endAddress        = endAddress
 
     

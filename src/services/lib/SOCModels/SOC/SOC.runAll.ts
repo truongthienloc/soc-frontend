@@ -15,11 +15,12 @@ export async function RunAll(this: Soc) {
         await this.Step()
         // if (this.DMA.DMA_Master.ChannelA.valid == '1' && this.DMA.state ==2) break
         // if (this.DMA.count_burst == 1) break
-        // if (bre > 138 ) break
+        // if (bre > 10 ) break
         // bre++
-           
     }
-    console.log (this.DMA)
+
+    console.log (this.Processor.MMU.satp)
+    // console.log (this.DMA)
     // console.log (this.Processor.state)
     // console.log (this.Processor.pc ,
     //     this.Memory.Ins_pointer)
@@ -58,6 +59,6 @@ export async function RunAll(this: Soc) {
     // console.log(this.Bridge.fifo_from_subInterconnect)
     // console.log (this.Memory.getPageNumber())
     // console.log ('SOC.Memory.GetMemory()',this.Memory.GetMemory())
-    // console.log (this.Processor.getRegisters())
+    console.log (this.Processor.getRegisters())
    this.event.emit(Soc.SOCEVENT.DONE_ALL)
 }

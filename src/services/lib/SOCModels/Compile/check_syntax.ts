@@ -89,6 +89,7 @@ export default class Assembler {
         t5: '11110',
         x31: '11111',
         t6: '11111',
+        satp: '000110000000'
     }
 
     private FMT: Registers = {
@@ -103,7 +104,7 @@ export default class Assembler {
         lw: 'I',
         slliw: 'I',
         sllw: 'R',
-        CSRRW: 'I',
+        csrrw: 'I',
         ld: 'I',
         srliw: 'I',
         srlw: 'R',
@@ -111,7 +112,7 @@ export default class Assembler {
         lbu: 'I',
         sraiw: 'I',
         sraw: 'R',
-        CSRRWI: 'I',
+        csrrwI: 'I',
         lhu: 'I',
         CSRRSI: 'I',
         lwu: 'I',
@@ -164,7 +165,7 @@ export default class Assembler {
         lw: '0000011',
         slliw: '0011011',
         sllw: '0111011',
-        CSRRW: '1110011',
+        csrrw: '1110011',
         ld: '0000011',
         srliw: '0011011',
         srlw: '0111011',
@@ -172,7 +173,7 @@ export default class Assembler {
         lbu: '0000011',
         sraiw: '0011011',
         sraw: '0111011',
-        CSRRWI: '1110011',
+        csrrwI: '1110011',
         lhu: '0000011',
         CSRRSI: '1110011',
         lwu: '0000011',
@@ -224,7 +225,7 @@ export default class Assembler {
         lw: '010',
         slliw: '001',
         sllw: '001',
-        CSRRW: '001',
+        csrrw: '001',
         ld: '011',
         srliw: '101',
         srlw: '101',
@@ -232,7 +233,7 @@ export default class Assembler {
         lbu: '100',
         sraiw: '101',
         sraw: '101',
-        CSRRWI: '101',
+        csrrwI: '101',
         lhu: '101',
         CSRRSI: '110',
         lwu: '110',
@@ -410,6 +411,14 @@ export default class Assembler {
         if (mlist.length != 5 && String (mlist[0]).toUpperCase() !== 'ECALL') {
             this.syntax_error = true
             return ''
+        }
+        if (['csrrw'].includes(mlist[0])) {
+            const opcode = this.OPCODE[mlist[0]]
+            const funct3 = this.FUNCT3[mlist[0]]
+            const rd     = this.register [mlist[1]]
+            const rs1    = this.register [mlist[2]]
+            const csr    = this.register [mlist[3]]
+            return csr + rs1 + funct3 + rd + opcode
         }
         if (['lb', 'lw', 'lh', 'ld', 'lbu', 'lhu', 'lwu'].includes(mlist[0])) {
             const opcode = this.OPCODE[mlist[0]]
@@ -657,7 +666,6 @@ export default class Assembler {
         }
 
         this.Instructions = ins
-        console.log('this.Instructions: ', this.Instructions)
 
         for (let i = pos + 1; i < ins.length; i++) {
 
@@ -675,9 +683,11 @@ export default class Assembler {
             if (this.FMT[t[0]] === 'R') {
                 string = this.RType(ins[i])
             }
+
             if (this.FMT[t[0]] === 'I') {
                 string = this.IType(ins[i])
             }
+
             if (this.FMT[t[0]] === 'S') {
                 string = this.SType(ins[i])
             }
@@ -692,13 +702,16 @@ export default class Assembler {
             }
 
             const type = ['R', 'I', 'S', 'SB', 'U', 'UJ']
+
             if (!type.includes(this.FMT[t[0]]) && ins[i].charAt(ins[i].length - 1) !== ':') {
                 this.syntax_error = true
             }
+
                 
             result += string + '\n'
         }
         console.log('Address: ', this.address, this.syntax_error)
         this.binary_code = result.split('\n')
+        console.log ('binary code', this.binary_code)
     }
 }

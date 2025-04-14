@@ -507,9 +507,7 @@ export default class InterConnect {
                     (parseInt('0'+dataFromProcessor.address, 2)    >= 0)
                 &&  (parseInt('0'+dataFromProcessor.address, 2)    <= 0X1FFFF  )
                 && Memory_ready
-                
                 )
-                
             ) {
                 
                 this.println (
@@ -528,6 +526,8 @@ export default class InterConnect {
                 ||  (parseInt('0'+dataFromProcessor.address, 2) == 0x0020008)
                 ||  (parseInt('0'+dataFromProcessor.address, 2) == 0x002000C)
                 ||  (parseInt('0'+dataFromProcessor.address, 2) == 0x0020010)
+                ||  (parseInt('0'+dataFromProcessor.address, 2) >= 0x0020014 
+                    && parseInt('0'+dataFromProcessor.address, 2) >= 0x0020014 + 288 * 4 )
                 ) 
                 && Bridge_ready
         ) {

@@ -1074,6 +1074,17 @@ export default class RiscVProcessor {
                     
                 return ['ECALL', '', '', '', '']
             }
+            
+            if (instruction.slice(25, 32) == '1110011') {
+                const readRegister1 = instruction.slice(12, 17)
+                const writeRegister = instruction.slice(20, 25)
+
+                this.register[writeRegister] = this.MMU.satp.toString(2).padStart(32,'0')
+                this.MMU.satp                = parseInt ('0'+this.register[readRegister1], 2)
+                this.pc = this.pc + 4
+
+                return ['','','','','']
+            }
 
             this.control(instruction.slice(25, 32), instruction.slice(17, 20))
             

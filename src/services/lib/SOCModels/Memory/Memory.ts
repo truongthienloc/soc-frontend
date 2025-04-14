@@ -296,7 +296,8 @@ export default class Memory {
     }
 
     public SetInstructionMemory(Instruction_memory: string[] = []) {
-        let count =  this.Ins_pointer
+        let count =  0
+        this.Ins_pointer = 0 
         // for (let i = 0; i < 0X1FFFF  + 1; i+=1) 
         //     this.Memory[i.toString(2).padStart(17,'0')] = '0'.padStart(8,'0')
         for (const binString of Instruction_memory) {

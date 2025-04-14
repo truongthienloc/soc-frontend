@@ -85,6 +85,7 @@ const register: Registers = {
     t5: '11110',
     x31: '11111',
     t6: '11111',
+    satp : '000110000000'
 }
 
 const FMT: Registers = {
@@ -389,6 +390,13 @@ function RType(input: string): string {
 
 function IType(input: string): string {
     const mlist = input.split(' ')
+    if (['csrrw'].includes(mlist[0])) {
+        const opcode = OPCODE[mlist[0]]
+        const funct3 = FUNCT3[mlist[0]]
+        const rd     = register [mlist[1]]
+        const rs1    = register [mlist[2]]
+        const csr    = register [mlist[3]]
+    }
     if (['lb', 'lw', 'lh', 'ld', 'lbu', 'lhu', 'lwu'].includes(mlist[0])) {
         const opcode = OPCODE[mlist[0]]
         const funct3 = FUNCT3[mlist[0]]

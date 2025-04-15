@@ -87,6 +87,15 @@ export default function DMATable({ data, configs }: Props) {
           </div> */}
         </div>
         <TextField
+          label="CONTROL"
+          autoComplete="off"
+          value={configs?.control}
+          InputProps={{
+            startAdornment: '0x',
+          }}
+          disabled
+        />
+        <TextField
           label="STATUS"
           autoComplete="off"
           value={configs?.status}

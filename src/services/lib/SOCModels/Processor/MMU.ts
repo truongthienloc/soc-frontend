@@ -109,6 +109,7 @@ export default class MMU {
         , Processor_action: string
     ) {
         const VPN               = logic_address.slice(0, 20)// 10 bit đầu tiên
+        console.log ('VPN', VPN)
         const OFFSET            = logic_address.slice(20, 32) // 12 bit cuối cùng
         const vpn_dec           = parseInt(VPN, 2) & 0b11111 
         const offset_dec        = parseInt(OFFSET, 2) & 0xfff 
@@ -152,6 +153,9 @@ export default class MMU {
         const physical_addresses = this.TLB.map(
             (tlbEntry) => offset_dec + tlbEntry[1]
         );
+        console.log ('offset_dec', offset_dec)
+        console.log ('tlb', this.TLB)
+        console.log ((this.satp & 0xFFFF) + vpn_dec*4, vpn_dec)
 
         // console.log ('exist check_func ', exist, valid)
 

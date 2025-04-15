@@ -73,7 +73,8 @@ export default class RiscVProcessor {
     PROCESSING_STATE                = 2
     ACESS_INTERCONNECT_STATE        = 3
     RECEIVE_INTERCONNECT_STATE      = 4
-    REPLACE_TABLE_STATE              = 5
+    REPLACE_TABLE_STATE_DATA        = 5
+    REPLACE_TABLE_STATE_INS         = 6
 
     Warnning                        = 0
     keyBoard_waiting        : boolean
@@ -96,7 +97,7 @@ export default class RiscVProcessor {
         //#                                                                                      #
         //########################################################################################
         this.master.ChannelD.ready = '0'
-
+        console.log ('this.pc', this.pc, this.InsLength)
         if (this.pc >= this.InsLength) {
             this.state = this.GET_INSTRUCTION_STATE
             if (this.Warnning == 0) {
@@ -151,7 +152,7 @@ export default class RiscVProcessor {
                 this.master.send ('GET',  this.MMU.physical_address, this.SendData)
                 this.master.ChannelA.valid = '1'
                 this.FIFO.enqueue ({...this.master.ChannelA})
-                this.state = this.REPLACE_TABLE_STATE
+                this.state = this.REPLACE_TABLE_STATE_INS
             }
             else if (this.MMU.MMU_message == ' ERROR: Page fault!!!!') {
 
@@ -164,7 +165,7 @@ export default class RiscVProcessor {
 
                 this.state  = this.GET_INSTRUCTION_STATE
                 this.pc     = this.pc + 4
-
+                console.log ('hahah')
             }
             else {
                 this.master.ChannelA.valid = '1'
@@ -368,14 +369,14 @@ export default class RiscVProcessor {
                 this.master.send ('GET',  this.MMU.physical_address, this.SendData)
                 this.master.ChannelA.valid = '1'
                 this.FIFO.enqueue ({...this.master.ChannelA})
-                this.state = this.REPLACE_TABLE_STATE
+                this.state = this.REPLACE_TABLE_STATE_DATA
             }
             else if (this.MMU.MMU_message == ' ERROR: Page fault!!!!') {
 
                 this.println (
                     this.active_println
                     ,'Cycle '
-                    + cycle.toString()
+                    + cycle.toString()+':'
                     + this.MMU.MMU_message
                 )
 
@@ -444,7 +445,7 @@ export default class RiscVProcessor {
         return
     }
       
-    if (this.state == this.REPLACE_TABLE_STATE)           {
+    if (this.state == this.REPLACE_TABLE_STATE_INS)           {
         this.master.ChannelA.valid = '0'
         this.master.ChannelD.ready = '1'
 
@@ -468,6 +469,7 @@ export default class RiscVProcessor {
                 +': The TLB is replacing an entry.'
             )
             // VA, PA, excute, read, write, valid, timetime 
+
             this.MMU.pageReplace ([
                 parseInt(VPN , 2) & 0x1f
                 , (dec (frame) & 0XFFF0) * 4
@@ -480,6 +482,47 @@ export default class RiscVProcessor {
             this.master.ChannelA.valid = '0'
             console.log (dec (frame))
             this.state = this.GET_INSTRUCTION_STATE
+        }
+        return
+    }
+
+    if (this.state == this.REPLACE_TABLE_STATE_DATA)           {
+        this.master.ChannelA.valid = '0'
+        this.master.ChannelD.ready = '1'
+
+        if (InterConnect2CPU.valid == '1') {
+
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The PROCESSOR is receiving messeage AccessAckData from INTERCONNECT.'
+            )
+
+            const VPN       = this.SendAddress.slice(0, 20)  
+            this.master.receive (InterConnect2CPU)
+            const frame     = this.master.ChannelD.data
+
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The TLB is replacing an entry.'
+            )
+            // VA, PA, excute, read, write, valid, timetime 
+            console.log ('frame',frame)
+            this.MMU.pageReplace ([
+                parseInt(VPN , 2) & 0x1f
+                , (dec (frame) & 0XFFF0) * 4
+                , (dec (frame) & 0X0008) /8
+                , (dec (frame) & 0X0004) /4
+                , (dec (frame) & 0X0002) /2
+                , (dec (frame) & 0X0001) 
+                , cycle.cycle])
+
+            this.master.ChannelA.valid = '0'
+            console.log (dec (frame))
+            this.state = this.ACESS_INTERCONNECT_STATE
         }
         return
     }

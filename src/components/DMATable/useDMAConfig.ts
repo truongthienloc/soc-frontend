@@ -7,6 +7,7 @@ export default function useDMAConfig() {
     const [src, setSrc] = useState('0')
     const [des, setDes] = useState('0')
     const [len, setLen] = useState('0')
+    const [control, setCtrl] = useState('0')
     const [status, setSta] = useState('0')
     const [led_control, setLedCtrl] = useState('0')
 
@@ -17,7 +18,9 @@ export default function useDMAConfig() {
         setDes,
         len,
         setLen,
-        status,
+        control,
+        setCtrl,
+        status, 
         setSta,
         led_control,
         setLedCtrl,

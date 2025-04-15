@@ -14,8 +14,8 @@ import { Register, TwinRegister } from '~/types/register'
 
 const styles: { [key: string]: SxProps<Theme> } = {
   table: {
-    minWidth: 650,
-    maxWidth: 1000,
+    minWidth: 400,
+    maxWidth: 500,
     '& .MuiTableCell-root': {
       height: '2rem',
       padding: '0.15rem',

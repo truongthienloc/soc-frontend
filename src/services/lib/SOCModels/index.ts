@@ -26,7 +26,7 @@ const SOC               = new Soc('super SoC')
 // lui  x1, 0x1        // create pattern for first page table entry for data with PPN = 0x0004 
 // addi x1, x1, 0x7    // readable = 1, wirteable = 1, valid = 1
 
-// addi x2, x2, 0x10   // re-Create page table base address
+// addi x2, x2, 12   // re-Create page table base address
 // addi x3, x2, 0x60   // Number of all PTE bytes
 // page_table_data:
 // sw 	x1, 0(x2)       // store PTE  
@@ -38,10 +38,10 @@ const SOC               = new Soc('super SoC')
 // lui x2, 0x80003     
 // csrrw x0, x2, satp 
 
-// main code
 // start:
 // addi x31, x0, 1
-// addi x31, x0, 2
+// lui x1, 0x8
+// sw x31, 0(x1)
 // `
 const code              = 
 `
@@ -58,7 +58,7 @@ sw   x2, 16(x1) // Led control register at address: 0x20010.
 
 //Config for led-matrix's operation registers.
 dma:
-lui x31 , 0x1c      // Create DMA source register's value.
+lui  x31, 0x1c      // Create DMA source register's value.
 sw   x31, 0(x1)     // DMA source register 
 addi x30, x1, 0x14  // Create DMA destination register's value.
 sw   x30, 4(x1)     // DMA destination register.

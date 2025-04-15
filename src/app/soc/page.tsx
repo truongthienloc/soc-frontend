@@ -219,7 +219,7 @@ export default function SocPage({}: Props) {
     startTransition(() => {
       setAllowRun(false)
     })
-  }, [savedPoints, pointer, isStepping])
+  }, [savedPoints, isStepping])
 
   function handleChangeCode(code: string) {
     startTransition(() => {
@@ -253,6 +253,7 @@ export default function SocPage({}: Props) {
     /** MMU */
     const newTLB = array2TLB(socModelRef.current.Processor.MMU.TLB)
     tlb.setTLBEntries(newTLB)
+    tlb.setPointer (socModelRef.current.Processor.MMU.satp.toString(16))
     /** Processor */
     setRegisters([
       ...socModelRef.current.Processor.getRegisters(),
@@ -266,7 +267,8 @@ export default function SocPage({}: Props) {
     dmaConfigs.setDes(BinToHex_without0x(socModelRef.current.DMA.destinationAddress))
     dmaConfigs.setSrc(BinToHex_without0x(socModelRef.current.DMA.sourceAddress))
     dmaConfigs.setLen(BinToHex_without0x(socModelRef.current.DMA.length))
-    dmaConfigs.setSta(BinToHex_without0x(socModelRef.current.DMA.status))
+    dmaConfigs.setCtrl(BinToHex_without0x(socModelRef.current.DMA.control))
+    dmaConfigs.setSta(BinToHex_without0x(socModelRef.current.DMA.control))
     /** Led Matrix */
     dmaConfigs.setLedCtrl(BinToHex_without0x(socModelRef.current.Led_matrix.controlRegister))
     // setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
@@ -546,7 +548,7 @@ export default function SocPage({}: Props) {
                   onExportClick={handleExportCodeClick}
                   onClose={() => setShowSimulatorType('SOC')}
                 />
-                <div className="grid grid-cols-[4fr_6fr]">
+                <div className="grid grid-cols-[6fr_4fr]">
                   <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
                     {isStepping ? (
                       <DisplayStepCode code={stepCode} pc={pc} />

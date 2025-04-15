@@ -54,7 +54,7 @@ export default class MMU {
         , Processor_action: string
     ) 
     {
-
+        
         if (this.satp < 0x80000000 
             // || parseInt ('0'+logic_address,2) >= 0X1FFFF + 1
             || parseInt ('0'+logic_address,2) >= 0X1C000
@@ -73,7 +73,7 @@ export default class MMU {
 
         return
     }
-
+        // VA, PA, excute, read, write, valid, timetime 
     public pageReplace(Replacement_page: [ number, number, number, number, number, number, number]) {
         let minValue = Infinity;
         let minIndex = 0;
@@ -84,7 +84,12 @@ export default class MMU {
                 minIndex = i
             }
         }
-        this.TLB[minIndex] = Replacement_page  // Replace with new row values
+        if (Replacement_page[5] == 1) {
+            this.TLB[minIndex] = Replacement_page
+        } else {
+            this.MMU_message = ' ERROR: Page fault!!!!'
+        }
+
     }
 
     public Set(
@@ -108,47 +113,47 @@ export default class MMU {
         const vpn_dec           = parseInt(VPN, 2) & 0b11111 
         const offset_dec        = parseInt(OFFSET, 2) & 0xfff 
         let check_pagenum       = [false]
-        let check_valid         = [false]
+        let check_func          = [false]
 
         if (Processor_action == 'PUT') {
             check_pagenum = this.TLB.map(
-                (tlbEntry) => vpn_dec === tlbEntry[0]
+                (tlbEntry) => vpn_dec === tlbEntry[0] && tlbEntry[5] === 1
             )
 
-            check_valid = this.TLB.map(
-                (tlbEntry) => tlbEntry[5] === 1 && tlbEntry[4] === 1
+            check_func  = this.TLB.map(
+                (tlbEntry) => tlbEntry[4] === 1
             )
         }
 
         if (Processor_action == 'GET') {
             check_pagenum = this.TLB.map(
-                (tlbEntry) => vpn_dec === tlbEntry[0] 
+                (tlbEntry) => vpn_dec === tlbEntry[0] && tlbEntry[5] === 1
             )
 
-            check_valid = this.TLB.map(
-                (tlbEntry) => tlbEntry[5] === 1 && tlbEntry[3] === 1
+            check_func  = this.TLB.map(
+                (tlbEntry) => tlbEntry[3] === 1
             )
         } 
 
         if (Processor_action == 'FETCH') {
             check_pagenum = this.TLB.map(
-                (tlbEntry) => vpn_dec === tlbEntry[0] 
+                (tlbEntry) => vpn_dec === tlbEntry[0] && tlbEntry[5] === 1
             )
 
-            check_valid = this.TLB.map(
-                (tlbEntry) => tlbEntry[5] === 1 && tlbEntry[2] === 1
+            check_func  = this.TLB.map(
+                (tlbEntry) => tlbEntry[2] === 1
             )
         } 
         
 
         const exist = check_pagenum.some(Boolean)
-        const valid = check_valid.some(Boolean)
+        const valid = check_func .some(Boolean)
         
         const physical_addresses = this.TLB.map(
             (tlbEntry) => offset_dec + tlbEntry[1]
         );
 
-        // console.log ('exist check_valid', exist, valid)
+        // console.log ('exist check_func ', exist, valid)
 
         if (exist) {
             if (valid) {
@@ -158,7 +163,7 @@ export default class MMU {
             else {
                 this.MMU_message = ' ERROR: Page fault!!!!'
             }
-           
+            
         } else {
             this.MMU_message = " TLB: VPN is missed."
             this.physical_address = ((this.satp & 0xFFFF) + vpn_dec*4).toString(2).padStart(17, '0')

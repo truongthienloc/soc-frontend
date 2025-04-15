@@ -478,7 +478,7 @@ export default class RiscVProcessor {
                 , cycle.cycle])
 
             this.master.ChannelA.valid = '0'
-
+            console.log (dec (frame))
             this.state = this.GET_INSTRUCTION_STATE
         }
         return

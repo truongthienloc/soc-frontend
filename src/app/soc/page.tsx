@@ -268,7 +268,7 @@ export default function SocPage({}: Props) {
     dmaConfigs.setSrc(BinToHex_without0x(socModelRef.current.DMA.sourceAddress))
     dmaConfigs.setLen(BinToHex_without0x(socModelRef.current.DMA.length))
     dmaConfigs.setCtrl(BinToHex_without0x(socModelRef.current.DMA.control))
-    dmaConfigs.setSta(BinToHex_without0x(socModelRef.current.DMA.control))
+    dmaConfigs.setSta(BinToHex_without0x(socModelRef.current.DMA.status))
     /** Led Matrix */
     dmaConfigs.setLedCtrl(BinToHex_without0x(socModelRef.current.Led_matrix.controlRegister))
     // setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))

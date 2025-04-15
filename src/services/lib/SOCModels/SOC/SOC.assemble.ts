@@ -82,14 +82,14 @@ export function assemble(
     this.Processor.InsLength = this.Memory.Ins_pointer
     this.Processor.MMU.Set(
         [
-             [0, 0, 0, 0]
-            ,[0, 0, 0, 0]
-            ,[0, 0, 0, 0]
-            ,[0, 0, 0, 0]
-            ,[0, 0, 0, 0]
-            ,[0, 0, 0, 0]
-            ,[0, 0, 0, 0]
-            ,[0, 0, 0, 0]
+             [0, 0, 0, 0, 0, 0, 0]
+            ,[0, 0, 0, 0, 0, 0, 0]
+            ,[0, 0, 0, 0, 0, 0, 0]
+            ,[0, 0, 0, 0, 0, 0, 0]
+            ,[0, 0, 0, 0, 0, 0, 0]
+            ,[0, 0, 0, 0, 0, 0, 0]
+            ,[0, 0, 0, 0, 0, 0, 0]
+            ,[0, 0, 0, 0, 0, 0, 0]
         ]                  
         , 0              
         , this.Allocator.allocate(required_mem)                  
@@ -119,6 +119,7 @@ export function assemble(
     }
 
     this.Processor.keyBoard_waiting = false
+    // this.MMU.satp = 0x80000000 
 
     return !this.Assembler.syntax_error
 }

@@ -5,7 +5,8 @@ import { dec, stringToAsciiAndBinary, BinToHex }    from '../Compile/convert'
 export default class MMU {
     active              : boolean
     physical_address    : string
-    TLB                 : [ number, number, number, number][]
+    TLB                 : [ number, number, number, number, number, number, number][] 
+    // VA, PA, excute, read, write, valid, timetime 
     satp                : number
     MMU_message         : string
 
@@ -22,7 +23,7 @@ export default class MMU {
 
         this.physical_address   = '' // Initialized with a number
         this.satp               = 0
-        this.TLB                = new Array(8).fill([0, 0, 0, 0]) // Initialized as 8 rows of [0, 0, 0, 0]
+        this.TLB                = new Array(8).fill([0, 0, 0, 0, 0, 0, 0]) // Initialized as 8 rows of [0, 0, 0, 0]
         this.MMU_message        = ''
         this.step               = 0
         this.done               = false
@@ -50,6 +51,7 @@ export default class MMU {
 
     public run (
         logic_address   : string
+        , Processor_action: string
     ) 
     {
 
@@ -60,7 +62,7 @@ export default class MMU {
             this.MMU_message = ' MMU is bypassed'
             this.physical_address = logic_address.slice(-18)
         } else {
-            this.search_in_TLB(logic_address)
+            this.search_in_TLB(logic_address, Processor_action)
         }
 
         if (this.MMU_message == " TLB: VPN is caught.") {
@@ -72,26 +74,21 @@ export default class MMU {
         return
     }
 
-    public pageReplace(Replacement_page: [number, number, number, number]) {
+    public pageReplace(Replacement_page: [ number, number, number, number, number, number, number]) {
         let minValue = Infinity;
-        let minIndex = -1;
+        let minIndex = 0;
 
         for (let i = 0; i < this.TLB.length; i++) {
-            if (this.TLB[i][3] < minValue) {  // Access the fourth element (index 3)
-            minValue = this.TLB[i][3];
-                minIndex = i;
+            if (this.TLB[i][6] < minValue) {  // Access the fourth element (index 3)
+            minValue = this.TLB[i][6]
+                minIndex = i
             }
         }
-        if (minIndex !== -1) this.TLB[minIndex] = Replacement_page;  // Replace with new row values
+        this.TLB[minIndex] = Replacement_page  // Replace with new row values
     }
 
     public Set(
-        P            : [
-        number
-        , number
-        , number
-        , number
-        ][]
+        P            : [ number, number, number, number, number, number, number][]
         , satp       : number
         , endAddress : number 
 
@@ -102,24 +99,66 @@ export default class MMU {
     
     }
 
-    public search_in_TLB(logic_address: string) {
+    public search_in_TLB(
+        logic_address: string
+        , Processor_action: string
+    ) {
         const VPN               = logic_address.slice(0, 20)// 10 bit đầu tiên
         const OFFSET            = logic_address.slice(20, 32) // 12 bit cuối cùng
         const vpn_dec           = parseInt(VPN, 2) & 0b11111 
         const offset_dec        = parseInt(OFFSET, 2) & 0xfff 
-        const check_pagenum = this.TLB.map(
-            (tlbEntry) => vpn_dec === tlbEntry[0] && tlbEntry[2] === 1 
-        );
+        let check_pagenum       = [false]
+        let check_valid         = [false]
+
+        if (Processor_action == 'PUT') {
+            check_pagenum = this.TLB.map(
+                (tlbEntry) => vpn_dec === tlbEntry[0]
+            )
+
+            check_valid = this.TLB.map(
+                (tlbEntry) => tlbEntry[5] === 1 && tlbEntry[4] === 1
+            )
+        }
+
+        if (Processor_action == 'GET') {
+            check_pagenum = this.TLB.map(
+                (tlbEntry) => vpn_dec === tlbEntry[0] 
+            )
+
+            check_valid = this.TLB.map(
+                (tlbEntry) => tlbEntry[5] === 1 && tlbEntry[3] === 1
+            )
+        } 
+
+        if (Processor_action == 'FETCH') {
+            check_pagenum = this.TLB.map(
+                (tlbEntry) => vpn_dec === tlbEntry[0] 
+            )
+
+            check_valid = this.TLB.map(
+                (tlbEntry) => tlbEntry[5] === 1 && tlbEntry[2] === 1
+            )
+        } 
+        
 
         const exist = check_pagenum.some(Boolean)
+        const valid = check_valid.some(Boolean)
         
         const physical_addresses = this.TLB.map(
             (tlbEntry) => offset_dec + tlbEntry[1]
         );
 
+        // console.log ('exist check_valid', exist, valid)
+
         if (exist) {
-            this.MMU_message = " TLB: VPN is caught."
-            this.physical_address = (physical_addresses[check_pagenum.indexOf(true)]).toString(2).padStart(17, '0')
+            if (valid) {
+                this.MMU_message = " TLB: VPN is caught."
+                this.physical_address = (physical_addresses[check_pagenum.indexOf(true)]).toString(2).padStart(17, '0')
+            }
+            else {
+                this.MMU_message = ' ERROR: Page fault!!!!'
+            }
+           
         } else {
             this.MMU_message = " TLB: VPN is missed."
             this.physical_address = ((this.satp & 0xFFFF) + vpn_dec*4).toString(2).padStart(17, '0')

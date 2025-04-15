@@ -73,7 +73,7 @@ export default class RiscVProcessor {
     PROCESSING_STATE                = 2
     ACESS_INTERCONNECT_STATE        = 3
     RECEIVE_INTERCONNECT_STATE      = 4
-    REPLACE_TLBE_STATE              = 5
+    REPLACE_TABLE_STATE              = 5
 
     Warnning                        = 0
     keyBoard_waiting        : boolean
@@ -119,21 +119,69 @@ export default class RiscVProcessor {
                 +': The PROCESSOR is sending messeage GET to INTERCONNCET.'
             )
 
-            this.println(this.active_println,
-                'Cycle ' 
-                + cycle.toString()  
-                +': Logical_address: ' 
-                +BinToHex((this.pc).toString(2).padStart(17, '0')) 
-                +' -> Physical address1: ' 
-                +BinToHex((this.pc).toString(2).padStart(17, '0'))
-            )
+            this.MMU.run ((this.pc).toString(2).padStart(32, '0'), 'FETCH')
+            this.SendAddress = (this.pc).toString(2).padStart(32, '0')
 
-            this.master.ChannelA.valid = '1'
-            this.master.send ('GET',  (this.pc).toString(2).padStart(17, '0'), this.SendData)
-            
-            this.master.ChannelA.size  = '00'
-            this.FIFO.enqueue ({...this.master.ChannelA})
-            this.state              = this.RECEIVE_INSTRUCTION_STATE
+            if (this.MMU.MMU_message == ' TLB: VPN is missed.') {
+
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() +':'
+                    + this.MMU.MMU_message
+                )
+
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is sending messeage GET to INTERCONNCET.'
+                )
+
+                this.println(this.active_println,
+                    'Cycle ' 
+                    + cycle.toString()  
+                    +': Logical_address: ' 
+                    +BinToHex((this.pc).toString(2).padStart(32, '0')) 
+                    +' -> Physical address: ' 
+                    +BinToHex(this.MMU.physical_address)
+                )
+                
+                this.master.ChannelA.valid = '1'
+                this.master.send ('GET',  this.MMU.physical_address, this.SendData)
+                this.master.ChannelA.valid = '1'
+                this.FIFO.enqueue ({...this.master.ChannelA})
+                this.state = this.REPLACE_TABLE_STATE
+            }
+            else if (this.MMU.MMU_message == ' ERROR: Page fault!!!!') {
+
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString()
+                    + this.MMU.MMU_message
+                )
+
+                this.state  = this.GET_INSTRUCTION_STATE
+                this.pc     = this.pc + 4
+
+            }
+            else {
+                this.master.ChannelA.valid = '1'
+                this.master.send ('GET',  (this.pc).toString(2).padStart(17, '0'), this.SendData)
+
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() + ':'
+                    + this.MMU.MMU_message
+                )
+                
+                this.master.ChannelA.size  = '00'
+                this.FIFO.enqueue ({...this.master.ChannelA})
+                this.state              = this.RECEIVE_INSTRUCTION_STATE
+
+            }
         }
         return
     }
@@ -270,7 +318,7 @@ export default class RiscVProcessor {
     if (this.state == this.ACESS_INTERCONNECT_STATE )    {
         this.master.ChannelD.ready = '0'
         if (ready) {
-            this.MMU.run(this.SendAddress)
+            this.MMU.run(this.SendAddress, this.Processor_messeage)
 
             if (this.Processor_messeage == 'PUT') {
                 this.println (
@@ -320,7 +368,7 @@ export default class RiscVProcessor {
                 this.master.send ('GET',  this.MMU.physical_address, this.SendData)
                 this.master.ChannelA.valid = '1'
                 this.FIFO.enqueue ({...this.master.ChannelA})
-                this.state = this.REPLACE_TLBE_STATE
+                this.state = this.REPLACE_TABLE_STATE
             }
             else if (this.MMU.MMU_message == ' ERROR: Page fault!!!!') {
 
@@ -337,6 +385,13 @@ export default class RiscVProcessor {
             else {
                 this.state =  this.RECEIVE_INTERCONNECT_STATE 
                 this.master.send (this.Processor_messeage,  this.MMU.physical_address, this.SendData)
+
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString()
+                    + this.MMU.MMU_message
+                )
 
                 this.println(this.active_println,
                     'Cycle ' 
@@ -384,13 +439,12 @@ export default class RiscVProcessor {
             }
             
             this.master.receive (InterConnect2CPU)
-            
             this.state =  this.GET_INSTRUCTION_STATE
         }
         return
     }
       
-    if (this.state == this.REPLACE_TLBE_STATE)           {
+    if (this.state == this.REPLACE_TABLE_STATE)           {
         this.master.ChannelA.valid = '0'
         this.master.ChannelD.ready = '1'
 
@@ -413,12 +467,19 @@ export default class RiscVProcessor {
                 + cycle.toString() 
                 +': The TLB is replacing an entry.'
             )
-
-            this.MMU.pageReplace ([parseInt(VPN , 2) & 0xf,  (dec (frame) & 0XFFF0) * 4, 1, cycle.cycle])
+            // VA, PA, excute, read, write, valid, timetime 
+            this.MMU.pageReplace ([
+                parseInt(VPN , 2) & 0x1f
+                , (dec (frame) & 0XFFF0) * 4
+                , (dec (frame) & 0X0008) /8
+                , (dec (frame) & 0X0004) /4
+                , (dec (frame) & 0X0002) /2
+                , (dec (frame) & 0X0001) 
+                , cycle.cycle])
 
             this.master.ChannelA.valid = '0'
 
-            this.state = 3
+            this.state = this.GET_INSTRUCTION_STATE
         }
         return
     }
@@ -1179,9 +1240,9 @@ export default class RiscVProcessor {
                         this.slt,
                     ),
                     mux(
-                        (dec(imm) << 12).toString(2).padStart(32, '0') +
+                        (parseInt (imm,2) * 4096).toString(2).padStart(32, '0') +
                             pc.toString(2).padStart(32, '0'),
-                        (dec(imm) << 12).toString(2).padStart(32, '0'),
+                        (parseInt (imm,2) * 4096).toString(2).padStart(32, '0'),
                         this.auiOrLui,
                     ),
                     this.wb,

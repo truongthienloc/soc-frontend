@@ -15,11 +15,13 @@ export async function RunAll(this: Soc) {
         await this.Step()
         // if (this.DMA.DMA_Master.ChannelA.valid == '1' && this.DMA.state ==2) break
         // if (this.DMA.count_burst == 1) break
-        // if (bre > 10 ) break
+        // if (bre > 1000 - 89 ) break
         // bre++
     }
 
     console.log (this.Processor.MMU.satp)
+    console.log (this.Processor.MMU.TLB)
+    // console.log (this.Memory.getPageNumber())
     // console.log (this.DMA)
     // console.log (this.Processor.state)
     // console.log (this.Processor.pc ,

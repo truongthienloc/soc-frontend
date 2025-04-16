@@ -20,7 +20,7 @@ export async function RunAll(this: Soc) {
     }
 
     console.log (this.Processor.MMU.satp)
-    console.log (this.Processor.MMU.TLB)
+    // console.log (this.Processor.MMU.TLB)
     // console.log (this.Memory.getPageNumber())
     // console.log (this.DMA)
     // console.log (this.Processor.state)

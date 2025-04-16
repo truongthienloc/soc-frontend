@@ -97,7 +97,7 @@ export default class RiscVProcessor {
         //#                                                                                      #
         //########################################################################################
         this.master.ChannelD.ready = '0'
-        console.log ('this.pc', this.pc, this.InsLength)
+
         if (this.pc >= this.InsLength) {
             this.state = this.GET_INSTRUCTION_STATE
             if (this.Warnning == 0) {
@@ -165,7 +165,6 @@ export default class RiscVProcessor {
 
                 this.state  = this.GET_INSTRUCTION_STATE
                 this.pc     = this.pc + 4
-                console.log ('hahah')
             }
             else {
                 this.master.ChannelA.valid = '1'
@@ -480,7 +479,6 @@ export default class RiscVProcessor {
                 , cycle.cycle])
 
             this.master.ChannelA.valid = '0'
-            console.log (dec (frame))
             this.state = this.GET_INSTRUCTION_STATE
         }
         return
@@ -510,7 +508,6 @@ export default class RiscVProcessor {
                 +': The TLB is replacing an entry.'
             )
             // VA, PA, excute, read, write, valid, timetime 
-            console.log ('frame',frame)
             this.MMU.pageReplace ([
                 parseInt(VPN , 2) & 0x1f
                 , (dec (frame) & 0XFFF0) * 4
@@ -521,13 +518,11 @@ export default class RiscVProcessor {
                 , cycle.cycle])
 
             this.master.ChannelA.valid = '0'
-            console.log (dec (frame))
             this.state = this.ACESS_INTERCONNECT_STATE
         }
         return
     }
   }
-
 
     public println(active: boolean, ...args: string[]) {
         
@@ -1182,7 +1177,7 @@ export default class RiscVProcessor {
             if (instruction.slice(25, 32) == '1110011') {
                 const readRegister1 = instruction.slice(12, 17)
                 const writeRegister = instruction.slice(20, 25)
-
+                const readRegister2 = instruction.slice(7, 12)
                 this.register[writeRegister] = this.MMU.satp.toString(2).padStart(32,'0')
                 this.MMU.satp                = parseInt ('0'+this.register[readRegister1], 2)
                 this.pc = this.pc + 4

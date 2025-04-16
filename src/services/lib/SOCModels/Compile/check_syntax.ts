@@ -416,8 +416,8 @@ export default class Assembler {
             const opcode = this.OPCODE[mlist[0]]
             const funct3 = this.FUNCT3[mlist[0]]
             const rd     = this.register [mlist[1]]
-            const rs1    = this.register [mlist[2]]
-            const csr    = this.register [mlist[3]]
+            const rs1    = this.register [mlist[3]]
+            const csr    = this.register [mlist[2]]
             return csr + rs1 + funct3 + rd + opcode
         }
         if (['lb', 'lw', 'lh', 'ld', 'lbu', 'lhu', 'lwu'].includes(mlist[0])) {

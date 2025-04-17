@@ -20,7 +20,7 @@ export default function useDMAConfig() {
         setLen,
         control,
         setCtrl,
-        status, 
+        status,
         setSta,
         led_control,
         setLedCtrl,

@@ -253,7 +253,7 @@ export default function SocPage({}: Props) {
     /** MMU */
     const newTLB = array2TLB(socModelRef.current.Processor.MMU.TLB)
     tlb.setTLBEntries(newTLB)
-    tlb.setPointer (socModelRef.current.Processor.MMU.satp.toString(16))
+    tlb.setPointer(socModelRef.current.Processor.MMU.satp.toString(16))
     /** Processor */
     setRegisters([
       ...socModelRef.current.Processor.getRegisters(),
@@ -652,9 +652,9 @@ export default function SocPage({}: Props) {
               </Button>
             </div>
             <div className="grid grid-cols-1 gap-2 pr-4">
-              <div className="flex justify-center">
+              {/* <div className="flex justify-center">
                 <MemoryMap className="" memoryMap={memoryMap} disabled={isStepping} />
-              </div>
+              </div> */}
               <MemoryTable
                 data={memoryData}
                 onChangeData={handleChangeMemoryData}

@@ -3,40 +3,38 @@ import short from 'short-uuid'
 
 export type TLBEntry = {
     id: string
-    VPN: string,
-    PPN: string,
-    E: string,
-    R: string,
-    W: string,
-    valid: string,
-    timestamp: string,
+    VPN: string
+    PPN: string
+    E: string
+    R: string
+    W: string
+    valid: string
+    timestamp: string
 }
 
 export type UseTLBReturn = ReturnType<typeof useTLB>
 
 const defaultDecTLBData = [
-     [0, 0, 0, 0, 0, 0, 0],
-     [0, 0, 0, 0, 0, 0, 0],
-     [0, 0, 0, 0, 0, 0, 0],
-     [0, 0, 0, 0, 0, 0, 0],
-     [0, 0, 0, 0, 0, 0, 0],
-     [0, 0, 0, 0, 0, 0, 0],
-     [0, 0, 0, 0, 0, 0, 0],
-     [0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0],
 ]
 
-const defaultTLBData = defaultDecTLBData.map(
-    ([VPN, PPN, E, R, W, valid, timestamp]) => ({
-        id: short.generate(),
-        VPN: VPN.toString(16),
-        PPN: PPN.toString(16).padStart(8, '0'),
-        E: E.toString(),
-        R: R.toString(),
-        W: W.toString(),
-        valid: valid.toString(),
-        timestamp: timestamp.toString(),
-    }),
-)
+const defaultTLBData = defaultDecTLBData.map(([VPN, PPN, E, R, W, valid, timestamp]) => ({
+    id: short.generate(),
+    VPN: VPN.toString(16),
+    PPN: PPN.toString(16).padStart(8, '0'),
+    E: E.toString(),
+    R: R.toString(),
+    W: W.toString(),
+    valid: valid.toString(),
+    timestamp: timestamp.toString(),
+}))
 
 export default function useTLB(_length?: number) {
     const [length, setLength] = useState(_length ?? 8)

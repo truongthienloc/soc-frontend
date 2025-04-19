@@ -161,9 +161,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
 
                 <TableCell>
                   <Input
-                    value={
-                      editingIndex === index ? editingTLB?.PPN : row.PPN
-                    }
+                    value={editingIndex === index ? editingTLB?.PPN : row.PPN}
                     onChange={(e) =>
                       setEditingTLB({
                         ...editingTLB!,
@@ -178,9 +176,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                 <TableCell className="text-center">
                   <Input
                     className={cn('w-10 px-1 [&>input]:inline-block [&>input]:text-center', {})}
-                    value={
-                      editingIndex === index ? editingTLB?.E : row.E
-                    }
+                    value={editingIndex === index ? editingTLB?.E : row.E}
                     onChange={(e) =>
                       setEditingTLB({
                         ...editingTLB!,
@@ -192,26 +188,21 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                 </TableCell>
                 <TableCell className="text-center">
                   <Input
-                  className={cn('w-10 px-1 [&>input]:inline-block [&>input]:text-center', {})}
-                    value={
-                      editingIndex === index ? editingTLB?.R : row.R
-                    }
+                    className={cn('w-10 px-1 [&>input]:inline-block [&>input]:text-center', {})}
+                    value={editingIndex === index ? editingTLB?.R : row.R}
                     onChange={(e) =>
                       setEditingTLB({
                         ...editingTLB!,
                         R: e.target.value,
                       })
                     }
-                    
                     disabled={editingIndex !== index}
                   />
                 </TableCell>
                 <TableCell className="text-center">
                   <Input
-                   className={cn('w-10 px-1 [&>input]:inline-block [&>input]:text-center', {})}
-                    value={
-                      editingIndex === index ? editingTLB?.W : row.W
-                    }
+                    className={cn('w-10 px-1 [&>input]:inline-block [&>input]:text-center', {})}
+                    value={editingIndex === index ? editingTLB?.W : row.W}
                     onChange={(e) =>
                       setEditingTLB({
                         ...editingTLB!,

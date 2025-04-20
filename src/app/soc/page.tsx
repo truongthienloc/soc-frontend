@@ -574,6 +574,7 @@ export default function SocPage({}: Props) {
                   onExportClick={handleMemoryTableExport}
                   onClose={() => setShowSimulatorType('SOC')}
                 />
+
                 <div className="grid grid-cols-[4fr_6fr]">
                   <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
                     {isStepping ? (
@@ -591,6 +592,17 @@ export default function SocPage({}: Props) {
                     <Datapath data={stepColors} />
                   </div>
                 </div>
+                <div className="relative"> {/* hoặc div bọc toàn bộ vùng panel */}
+                {/* Các nội dung khác: code editor, hình vẽ datapath, v.v. */}
+
+                <div className="absolute bottom-2 right-4 flex flex-col items-end text-xs text-red-500 z-10">
+                  <span className="mb-1 font-semibold">ⓘ This is ONLY a reference function and may NOT be accurate.</span>
+                  <span className="mb-1 font-semibold">It is intended to illustrate how RV32I instructions can be executed,</span>
+                  <span className="mb-1 font-semibold">but does NOT reflect the actual schematic of the system.</span>
+                </div>
+
+                
+              </div>
               </TabPanel>
               <TabPanel
                 index={2}

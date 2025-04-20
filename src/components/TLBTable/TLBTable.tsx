@@ -225,7 +225,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                     disabled={editingIndex !== index}
                   />
                 </TableCell>
-                <TableCell>
+                <TableCell >
                   <Input
                     value={editingIndex === index ? editingTLB?.timestamp : row.timestamp}
                     onChange={(e) =>
@@ -236,7 +236,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                     }
                     // className={cn('[&>input]:inline-block [&>input]:text-center')}
                     className={cn({})}
-                    startAdornment="0x"
+                    startAdornment=""
                     disabled={editingIndex !== index}
                   />
                 </TableCell>

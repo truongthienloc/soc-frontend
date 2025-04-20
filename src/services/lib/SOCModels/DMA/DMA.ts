@@ -2,7 +2,7 @@ import Slave from './../Interconnect/Slave'
 import Master from './../Interconnect/Master'
 import ChannelA             from "./../Interconnect/ChannelA"
 import ChannelD             from "./../Interconnect/ChannelD"
-import { Interconnect } from '../../soc/components/Interconnect'
+import { FIFO_ChannelD }    from "../Interconnect/FIFO_ChannelD"
 import Cycle from "../Compile/cycle"
 import {Logger }            from '../Compile/soc.d'
 import { BinToHex } from '../Compile/convert'
@@ -18,7 +18,7 @@ export default class DMA {
     sendoffset          : number
     DMA_Master          : Master
     DMA_Slave           : Slave
-    DMA_buffer          : string[]
+    DMA_buffer          : FIFO_ChannelD
     burst               : ChannelA[]
     logger             ?: Logger
     active_println      : boolean
@@ -142,7 +142,7 @@ export default class DMA {
                 )
                 this.DMA_Master.ChannelA.valid = '0'
 
-                this.DMA_buffer[this.count_beats+this.count_burst*4] = this.DMA_Master.ChannelD.data
+                this.DMA_buffer.enqueue(this.DMA_Master.ChannelD)
 
                 this.count_beats +=1
                 if (this.count_beats == 4) {
@@ -167,7 +167,7 @@ export default class DMA {
                 this.DMA_Master.send(
                     'PUT',
                     ((parseInt(this.destinationAddress, 2) + 0 + this.count_burst*16)).toString(2).padStart(17, '0'),
-                    this.DMA_buffer[0 + this.count_burst*4]
+                    this.DMA_buffer.dequeue().data
                 )
                 this.DMA_Master.ChannelA.valid = '1'
                 this.DMA_Master.ChannelD.ready = '0'
@@ -185,7 +185,7 @@ export default class DMA {
                 this.DMA_Master.send(
                     'PUT',
                     ((parseInt(this.destinationAddress, 2) + 4  + this.count_burst*16)).toString(2).padStart(17, '0'),
-                    this.DMA_buffer[1 + this.count_burst*4]
+                    this.DMA_buffer.dequeue().data
                 )
                 this.DMA_Master.ChannelA.valid = '1'
                 this.DMA_Master.ChannelD.ready = '0'
@@ -203,7 +203,7 @@ export default class DMA {
                 this.DMA_Master.send(
                     'PUT',
                     ((parseInt(this.destinationAddress, 2) + 8  + this.count_burst*16)).toString(2).padStart(17, '0'),
-                    this.DMA_buffer[2 + this.count_burst*4]
+                    this.DMA_buffer.dequeue().data
                 )
                 this.DMA_Master.ChannelA.valid = '1'
                 this.DMA_Master.ChannelA.size  = '10'
@@ -221,7 +221,7 @@ export default class DMA {
                 this.DMA_Master.send(
                     'PUT',
                     ((parseInt(this.destinationAddress, 2) + 12  + this.count_burst*16)).toString(2).padStart(17, '0'),
-                    this.DMA_buffer[3 + this.count_burst*4 ]
+                    this.DMA_buffer.dequeue().data
                 )
                 this.DMA_Master.ChannelA.valid = '1'
                 this.DMA_Master.ChannelA.size  = '10'
@@ -278,7 +278,7 @@ export default class DMA {
         this.DMA_Master         = new Master('DMA_Master', true, '01')
         this.DMA_Master.ChannelA.size = '10'
         this.DMA_Slave          = new Slave ('DMA_Slave', true)
-        this.DMA_buffer         = Array(288).fill('00000000000000000000000000000000')
+        this.DMA_buffer         = new FIFO_ChannelD ()
         this.active_println     = true
         this.burst              = []
 
@@ -295,7 +295,7 @@ export default class DMA {
         this.DMA_Master         = new Master('DMA_Master', true, '01')
         this.DMA_Master.ChannelA.size = '10'
         this.DMA_Slave          = new Slave ('DMA_Slave', true)
-        this.DMA_buffer         = Array(288).fill('00000000000000000000000000000000')
+        this.DMA_buffer         = new FIFO_ChannelD ()
         this.active_println     = true
         this.burst              = []
     }

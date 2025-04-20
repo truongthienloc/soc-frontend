@@ -504,8 +504,8 @@ export default class InterConnect {
             const dataFromProcessor = {...this.Pin[0].dequeue()}
             if (
                 (
-                    (parseInt('0'+dataFromProcessor.address, 2)    >= 0)
-                &&  (parseInt('0'+dataFromProcessor.address, 2)    <= 0X1FFFF  )
+                    (parseInt('0'+dataFromProcessor.address, 2)    >= 0         )
+                &&  (parseInt('0'+dataFromProcessor.address, 2)    <= 0X1FFFF   )
                 && Memory_ready
                 )
             ) {

@@ -57,7 +57,7 @@ export default class MMU {
         
         if (this.satp < 0x80000000 
             // || parseInt ('0'+logic_address,2) >= 0X1FFFF + 1
-            || parseInt ('0'+logic_address,2) >= 0X1C000
+            // || parseInt ('0'+logic_address,2) >= 0X1C000
         ) { //1000 0000 0000 0000 0000 0000 0000 0000
             this.MMU_message = ' MMU is bypassed'
             this.physical_address = logic_address.slice(-18)
@@ -65,11 +65,11 @@ export default class MMU {
             this.search_in_TLB(logic_address, Processor_action)
         }
 
-        if (this.MMU_message == " TLB: VPN is caught.") {
-            if (parseInt ('0'+this.physical_address,2)> this.endAddress) {
-                this.MMU_message = ' ERROR: Page fault!!!!'
-            }
-        }
+        // if (this.MMU_message == " TLB: VPN is caught.") {
+        //     if (parseInt ('0'+this.physical_address,2)> this.endAddress) {
+        //         this.MMU_message = ' ERROR: Page fault!!!!'
+        //     }
+        // }
 
         return
     }
@@ -109,7 +109,7 @@ export default class MMU {
         , Processor_action: string
     ) {
         const VPN               = logic_address.slice(0, 20)// 10 bit đầu tiên
-        console.log ('VPN', VPN)
+        // console.log ('VPN', VPN)
         const OFFSET            = logic_address.slice(20, 32) // 12 bit cuối cùng
         const vpn_dec           = parseInt(VPN, 2) & 0b11111 
         const offset_dec        = parseInt(OFFSET, 2) & 0xfff 
@@ -153,9 +153,9 @@ export default class MMU {
         const physical_addresses = this.TLB.map(
             (tlbEntry) => offset_dec + tlbEntry[1]
         );
-        console.log ('offset_dec', offset_dec)
-        console.log ('tlb', this.TLB)
-        console.log ((this.satp & 0xFFFF) + vpn_dec*4, vpn_dec)
+        // console.log ('offset_dec', offset_dec)
+        // console.log ('tlb', this.TLB)
+        // console.log ((this.satp & 0xFFFF) + vpn_dec*4, vpn_dec)
 
         // console.log ('exist check_func ', exist, valid)
 

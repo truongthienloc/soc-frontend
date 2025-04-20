@@ -517,8 +517,21 @@ export default class RiscVProcessor {
                 , (dec (frame) & 0X0001) 
                 , cycle.cycle])
 
-            this.master.ChannelA.valid = '0'
-            this.state = this.ACESS_INTERCONNECT_STATE
+            if (this.MMU.MMU_message == ' ERROR: Page fault!!!!') {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString()+':2'
+                    + this.MMU.MMU_message
+                )
+                
+                this.state = this.GET_INSTRUCTION_STATE
+                this.master.ChannelA.valid = '0'
+            } else {
+                this.master.ChannelA.valid = '0'
+                this.state = this.ACESS_INTERCONNECT_STATE
+            }
+            
         }
         return
     }
@@ -1179,9 +1192,9 @@ export default class RiscVProcessor {
                 const writeRegister = instruction.slice(20, 25)
                 const readRegister2 = instruction.slice(7, 12)
                 this.register[writeRegister] = this.MMU.satp.toString(2).padStart(32,'0')
+                this.register['00000']       = '0'.padStart(32,'0')
                 this.MMU.satp                = parseInt ('0'+this.register[readRegister1], 2)
                 this.pc = this.pc + 4
-
                 return ['','','','','']
             }
 

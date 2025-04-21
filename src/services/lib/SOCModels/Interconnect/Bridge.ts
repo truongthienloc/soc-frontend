@@ -13,6 +13,7 @@ export default class Bridge {
     Bridge_slave                : Slave
     fifo_from_Interconnect      : FIFO_ChannelA
     fifo_from_subInterconnect   : FIFO_ChannelD
+    fifo_to_subInterconnect     : FIFO_ChannelA
     state                       : number
     active_println              : boolean
     logger                     ?: Logger
@@ -25,6 +26,7 @@ export default class Bridge {
         this.Bridge_slave               = new Slave ('Bridge_slave', true)
         this.fifo_from_Interconnect     = new FIFO_ChannelA ()
         this.fifo_from_subInterconnect  = new FIFO_ChannelD ()
+        this.fifo_to_subInterconnect    = new FIFO_ChannelA ()
         this.state                      = 0
         this.active_println             = true
     }
@@ -83,18 +85,27 @@ export default class Bridge {
                         ,'Cycle '
                         + cycle.toString() 
                         +': The BRIDGE is receiving data from SUB-INTERCONNECT.'
-                    ) 
+                    )
+                    this.fifo_from_subInterconnect.enqueue ({...this.Bridge_master.ChannelD})
                 }
                 this.state = this.STATE_SEND 
+                // console.log (this.fifo_from_subInterconnect.isEmpty())
            }
+           if ((dataFrsubInterconnect.isEmpty())
+                && (dataFrInterconnect.isEmpty())
+                && (!this.fifo_from_Interconnect.isEmpty())
+            ){
+                this.state = this.STATE_SEND 
+            }
            return
         }
 
         if (this.state == this.STATE_SEND) {
             this.Bridge_master.ChannelA.ready = '0'
             this.Bridge_master.ChannelD.ready = '0'
+            // console.log (this.fifo_from_subInterconnect.isEmpty())
             if (!this.fifo_from_Interconnect.isEmpty() && ready1) {
-                this.Bridge_slave.receive(this.fifo_from_Interconnect.dequeue())
+                this.fifo_to_subInterconnect.enqueue (this.fifo_from_Interconnect.dequeue())
                 this.Bridge_master.ChannelA = this.Bridge_slave.ChannelA
 
                 this.println (
@@ -104,11 +115,11 @@ export default class Bridge {
                     +': The BRIDGE is sending data to SUB-INTERCONNECT.'
                 )  
                 this.state = this.STATE_RECEIVE
-
             } 
 
-            if (ready0 && this.Bridge_master.ChannelD.valid == '1') {
+            if (ready0 && !this.fifo_from_subInterconnect.isEmpty()) {
                 
+                this.Bridge_master.receive (this.fifo_from_subInterconnect.dequeue())
                 this.Bridge_slave.ChannelD          = this.Bridge_master.ChannelD
                 this.println (
                     this.active_println
@@ -117,9 +128,11 @@ export default class Bridge {
                     +': The BRIDGE is sending data to INTERCONNECT.'
                 )
                 this.state = this.STATE_RECEIVE
+    
+                // if (!ready0 && this.Bridge_master.ChannelD.valid == '1') this.state = this.STATE_SEND
             }
 
-            if (!ready0 && this.Bridge_master.ChannelD.valid == '1') this.state = this.STATE_SEND
+
             
 
             return 

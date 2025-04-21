@@ -200,8 +200,8 @@ export default class Soc {
         )
         
         this.Bus1.Run (
-            this.Bridge.Bridge_master.ChannelA
-            , this.DMA.DMA_Slave.ChannelD
+            this.Bridge.fifo_to_subInterconnect
+            , this.DMA.fifo_to_subInterconnect
             , this.Led_matrix.Matrix_Slave.ChannelD
             , this.Bridge.Bridge_master.ChannelA.valid == '1'
             , this.Bridge.Bridge_master.ChannelD.ready == '1'
@@ -219,30 +219,14 @@ export default class Soc {
         this.cycle.incr()
     }
 
-    public self_config () {
-        let bre = 0
-        while (
-            this.Processor.pc <
-            this.Memory.Ins_pointer || this.Processor.state != 0
-        ) {
-            // if (bre > 7) break
-            // bre ++ 
-        
-            this.Processor.active_println = false
-            this.Bus0.active_println      = false
-            this.Memory.active_println    = false
+    public async Step_ () {
 
-            this.Processor.Run(
+        if (this.cycle.cycle % 1 == 0) {
+            await this.Processor.Run(
                 false
                 , this.cycle
                 , this.Bus0.Pout[0].dequeue()
-                , this.Bus0.state == 0
-            )
-
-            this.Memory.Run(
-                this.cycle
-                , this.Bus0.Pout[2].dequeue()
-                , this.Bus0.state == 0
+                , this.Bus0.ready
             )
 
             this.Bus0.Run (
@@ -263,13 +247,57 @@ export default class Soc {
                 //cycle
                 ,this.cycle
             )
-            this.cycle.incr()
+
+            this.Memory.Run(
+                this.cycle
+                , this.Bus0.Pout[2].dequeue()
+                , this.Bus0.state == 0
+            )
+
+            this.Bridge.Run (
+                this.Bus0.Pout[3]
+                , this.Bus1.Pout[0]
+                , this.Bus0.ready
+                , this.Bus1.ready
+                , this.cycle
+            )
+        }
+
+        if (this.cycle.cycle % 2 == 0) {
+
+            this.DMA.Run (
+                this.Bus1.Pout[1].dequeue()
+                ,this.Bus0.Pout[1].dequeue()
+                , this.cycle
+                , this.Bus0.state == 0
+                , this.Bus1.state == 0
+            )
 
         }
 
-        this.Processor.active_println = true
-        this.Bus0.active_println      = true
-        this.Memory.active_println    = true 
+        if (this.cycle.cycle % 8 == 0) {
+
+            this.Bus1.Run (
+                this.Bridge.fifo_to_subInterconnect
+                , this.DMA.fifo_to_subInterconnect
+                , this.Led_matrix.Matrix_Slave.ChannelD
+                , this.Bridge.Bridge_master.ChannelA.valid == '1'
+                , this.Led_matrix.ready
+                , this.Bridge.Bridge_master.ChannelA.ready == '1'
+                , this.DMA.DMA_Slave.ChannelD.valid == '1'
+                , this.Led_matrix.Matrix_Slave.ChannelD.valid == '1'
+                , this.cycle
+            )
+            // console.log (this.Led_matrix.state, this.Led_matrix.ready)
+
+            this.Led_matrix.Run(
+                this.Bus1.Pout[2].dequeue()
+                , this.cycle
+                , this.Bus1.state == 0
+            )
+        }
+        
+        this.cycle.incr()
 
     }
 }

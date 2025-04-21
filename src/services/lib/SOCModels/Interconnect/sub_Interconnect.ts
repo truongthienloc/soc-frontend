@@ -5,6 +5,7 @@ import { FIFO_ChannelD }    from "./FIFO_ChannelD"
 import { FIFO_timing }      from "./FIFO_timing"
 import Cycle                from "../Compile/cycle"
 import {Logger }            from '../Compile/soc.d'
+import { LedMatrix } from "~/components/LedMatrix"
 
 export default class InterConnect {
     active      : boolean
@@ -13,6 +14,7 @@ export default class InterConnect {
     Pout        : (FIFO_ChannelD | FIFO_ChannelA)[]
     Pactived    : boolean[]
     state       : number
+    ready       : boolean
     logger     ?: Logger
     active_println              : boolean
 
@@ -20,6 +22,7 @@ export default class InterConnect {
         this.active         = active
         this.state          = 0
         this.active_println = true
+        this.ready          = false
 
         this.Pin           = [
                             new FIFO_ChannelA() // Bridge
@@ -63,10 +66,11 @@ export default class InterConnect {
     }
 
     Run (
-        dataFromBridge           : ChannelA
-        ,dataFromDMA             : ChannelD
+        dataFromBridge           : FIFO_ChannelA
+        ,dataFromDMA             : FIFO_ChannelD
         ,dataFromLed             : ChannelD
         ,dataFromBridge_valid    : boolean
+        ,Led_ready               : boolean
         ,Bridge_ready            : boolean
         ,dataFromDMA_valid       : boolean
         ,dataFromLed_valid       : boolean
@@ -75,6 +79,8 @@ export default class InterConnect {
 
 
         if (this.state == 0) {
+            this.ready = true
+
             this.RecData (
                 dataFromBridge           
                 ,dataFromDMA                
@@ -86,24 +92,29 @@ export default class InterConnect {
             )
             if (! ((this.Pin[0].isEmpty()) && (this.Pin[1].isEmpty()) && (this.Pin[2].isEmpty()))) {
                 this.state +=1
+                this.ready = false
             }
+            
             return
         }
         if (this.state == 1) {
-            this.Route (this.Abiter(), cycle, Bridge_ready)
+            this.ready = false
+            this.Route (this.Abiter(), cycle, Bridge_ready, Led_ready)
             this.state = 0
             return
         }
     }
 
     RecData(
-        dataFromBridge           : ChannelA
-        ,dataFromDMA             : ChannelD
+        dataFromBridge           : FIFO_ChannelA
+        ,dataFromDMA             : FIFO_ChannelD
         ,dataFromLed             : ChannelD
-        ,dataFromBridge_valid    : boolean
 
+        ,dataFromBridge_valid    : boolean
         ,dataFromDMA_valid       : boolean
         ,dataFromLed_valid       : boolean
+
+
         ,cycle                   : Cycle
     ) {
         this.RecFromBridge(dataFromBridge, cycle, dataFromBridge_valid)
@@ -112,40 +123,43 @@ export default class InterConnect {
 
     }
 
-    RecFromBridge(data: ChannelA, cycle : Cycle, valid: boolean): void {
-        if (this.active && this.Pactived[0] && valid) {
-
-            this.println (
-                this.active_println
-                ,'Cycle '
-                + cycle.toString() 
-                +': The SUB-INTERCONNECT is receiving data from BRIDGE.'
-            )
-
-            if (this.Pin[0] instanceof FIFO_ChannelA) {
-                this.Pin[0].enqueue({...data})
-                this.Timming[0].enqueue(cycle.cycle)
-            } else {
-                console.error("Error: Pin[0] is not FIFO_ChannelA")
+    RecFromBridge(data: FIFO_ChannelA, cycle : Cycle, valid: boolean): void {
+        if (this.active && this.Pactived[0] && !data.isEmpty()) {
+            if (data.peek().valid == '1') {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The SUB-INTERCONNECT is receiving data from BRIDGE.'
+                )
+    
+                if (this.Pin[0] instanceof FIFO_ChannelA) {
+                    this.Pin[0].enqueue(data.dequeue())
+                    this.Timming[0].enqueue(cycle.cycle)
+                } else {
+                    console.error("Error: Pin[0] is not FIFO_ChannelA")
+                }
             }
+            
         }
     }
 
-    RecFromDMA(data: ChannelD, cycle : Cycle, valid: boolean): void {
-        if (this.active && this.Pactived[1] && valid) {
+    RecFromDMA(data: FIFO_ChannelD, cycle : Cycle, valid: boolean): void {
+        if (this.active && this.Pactived[1] && !data.isEmpty()) {
+            if (data.peek().valid == '1') {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The SUB-INTERCONNECT is receiving data from DMA.'
+                )
 
-            this.println (
-                this.active_println
-                ,'Cycle '
-                + cycle.toString() 
-                +': The SUB-INTERCONNECT is receiving data from DMA.'
-            )
-
-            if (this.Pin[1] instanceof FIFO_ChannelD) {
-                this.Pin[1].enqueue({...data})
-                this.Timming[1].enqueue(cycle.cycle)
-            } else {
-                console.error("Error: Pin[1] is not FIFO_ChannelA")
+                if (this.Pin[1] instanceof FIFO_ChannelD) {
+                    this.Pin[1].enqueue (data.dequeue())
+                    this.Timming[1].enqueue(cycle.cycle)
+                } else {
+                    console.error("Error: Pin[1] is not FIFO_ChannelA")
+                }
             }
         }
     }
@@ -194,8 +208,9 @@ export default class InterConnect {
     Route (Abiter: number
         , cycle: Cycle
         , Bridge_ready: boolean
+        , Led_ready   : boolean
     ) {
-
+        // console.log(Abiter)
         if (Abiter == 0 ) {
             const dataFromBridge = {...this.Pin[0].peek()}
                 // console.log ('dataFromBridge', dataFromBridge)
@@ -207,7 +222,7 @@ export default class InterConnect {
                     )
                     ||  (parseInt('0'+dataFromBridge.address, 2)    == 0x0020010    )
                     )
-                &&  !this.Pin[0].isEmpty ()
+                &&  !this.Pin[0].isEmpty () && Led_ready
 
                 ) {
                    
@@ -217,7 +232,7 @@ export default class InterConnect {
                         + cycle.toString() 
                         +': The SUB-INTERCONNECT is sending data from BRIDGE to LED-MATRIX.'
                     )
-
+                    // console.log (Led_ready)
                     if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(this.Pin[0].dequeue())
                 }
                 if (
@@ -242,7 +257,9 @@ export default class InterConnect {
         if (Abiter == 1) {
             const dataFromDMA = {...this.Pin[1].peek()}
             // if (dataFromDMA instanceof ChannelD) {
-            if (!this.Pin[1].isEmpty()) {
+            if (!this.Pin[1].isEmpty() && Bridge_ready
+            
+            ) {
                 this.println (
                     this.active_println
                     ,'Cycle '
@@ -257,8 +274,7 @@ export default class InterConnect {
 
         if (Abiter == 2) {
             const dataFromLED = {...this.Pin[2].peek()}
-
-            if (!this.Pin[2].isEmpty() && Bridge_ready) {
+            if (!this.Pin[2].isEmpty()) {
                 this.println (
                     this.active_println
                     ,'Cycle '

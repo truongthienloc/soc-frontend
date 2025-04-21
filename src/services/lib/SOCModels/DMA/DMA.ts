@@ -7,6 +7,7 @@ import Cycle from "../Compile/cycle"
 import {Logger }            from '../Compile/soc.d'
 import { BinToHex } from '../Compile/convert'
 import { read } from 'fs'
+import { FIFO_ChannelA } from '../Interconnect/FIFO_ChannelA'
 
 export default class DMA {
     sourceAddress       : string
@@ -25,6 +26,7 @@ export default class DMA {
 
     count_burst        = 0
     count_beats        = 0 
+    fifo_to_subInterconnect : FIFO_ChannelD
 
     STATE_RecPutFrSub = 0
 
@@ -62,7 +64,7 @@ export default class DMA {
                         +': The DMA is sending messeage AccessAck to SUB-INTERCONNETC.'
                     )
     
-    
+                    this.fifo_to_subInterconnect.enqueue({...this.DMA_Slave.ChannelD})
                 }
                 else {
                     this.state = this.STATE_RecPutFrSub
@@ -82,6 +84,7 @@ export default class DMA {
         if (this.state == 2) {
             this.burst = []
             this.DMA_Master.ChannelD.ready = '0'
+            
             if (this.count_burst * 16 >= parseInt (this.length, 2)) {
                 this.state = 0
                 this.count_burst = 0
@@ -174,7 +177,7 @@ export default class DMA {
                 this.DMA_Master.ChannelA.size  = '10'
                 this.DMA_Slave.ChannelD.valid  = '0'
                 this.burst.push ( {...this.DMA_Master.ChannelA})
-                cycle.incr()
+                // cycle.incr()
     
                 this.println (
                     this.active_println
@@ -192,7 +195,7 @@ export default class DMA {
                 this.DMA_Master.ChannelA.size  = '10'
                 this.DMA_Slave.ChannelD.valid  = '0'
                 this.burst.push ( {...this.DMA_Master.ChannelA})
-                cycle.incr()
+                // cycle.incr()
     
                 this.println (
                     this.active_println
@@ -209,7 +212,7 @@ export default class DMA {
                 this.DMA_Master.ChannelA.size  = '10'
                 this.DMA_Slave.ChannelD.valid  = '0'
                 this.burst.push ( {...this.DMA_Master.ChannelA})
-                cycle.incr()
+                // cycle.incr()
     
                 this.println (
                     this.active_println
@@ -217,7 +220,7 @@ export default class DMA {
                     + cycle.toString() 
                     +': The DMA is sending messeage PUT to INTERCONNET.'
                 )
-                console.log ('this.destinationAddress', parseInt(this.destinationAddress, 2))
+                // console.log ('this.destinationAddress', parseInt(this.destinationAddress, 2))
                 this.DMA_Master.send(
                     'PUT',
                     ((parseInt(this.destinationAddress, 2) + 12  + this.count_burst*16)).toString(2).padStart(17, '0'),
@@ -227,8 +230,8 @@ export default class DMA {
                 this.DMA_Master.ChannelA.size  = '10'
                 this.DMA_Slave.ChannelD.valid  = '0'
                 this.burst.push ( {...this.DMA_Master.ChannelA})
-                console.log (this.count_burst)
-                cycle.incr()
+                // console.log (this.count_burst)
+                // cycle.incr()
     
                 this.state += 1
             }
@@ -253,7 +256,7 @@ export default class DMA {
                 
                 this.DMA_Master.receive(InterConnect2DMA)
                 
-                console.log ('this.count_beats', this.count_beats)
+                // console.log ('this.count_beats', this.count_beats)
                 this.count_beats +=1
                 if (this.count_beats == 4) {
                     this.state = 2
@@ -279,6 +282,7 @@ export default class DMA {
         this.DMA_Master.ChannelA.size = '10'
         this.DMA_Slave          = new Slave ('DMA_Slave', true)
         this.DMA_buffer         = new FIFO_ChannelD ()
+        this.fifo_to_subInterconnect = new FIFO_ChannelD ()
         this.active_println     = true
         this.burst              = []
 

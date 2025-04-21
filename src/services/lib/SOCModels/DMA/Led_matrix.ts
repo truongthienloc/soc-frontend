@@ -16,6 +16,7 @@ export default class LEDMatrix {
     active_println  : boolean
     led             ?: LedMatrix
     count_beats      = 0
+    ready           : boolean
 
     constructor() {
         this.controlRegister            = '00000000000000000000000000000000'
@@ -26,7 +27,8 @@ export default class LEDMatrix {
         this.state                      = 0
         this.active                     = false
         this.active_println             = true
-        this.led                        = new LedMatrix ('.led-matrix')
+        this.ready                      = false
+        // this.led                        = new LedMatrix ('.led-matrix')
 
     }
 
@@ -41,6 +43,7 @@ export default class LEDMatrix {
         // this.Matrix_Slave               = new Slave('Matrix_Slave', true)
         this.Matrix_Slave.ChannelD.sink = '1'
         this.state                      = 0
+        this.ready                      = false
         this.active                     = false
         this.active_println             = true
         this.led?.clear()
@@ -68,6 +71,7 @@ export default class LEDMatrix {
     ) {
 
         if (this.state == 0) {
+            this.ready = true
             if  (ChannelA.valid == '1' && ChannelA.source == '00') {
                 this.println (
                     this.active_println
@@ -78,17 +82,16 @@ export default class LEDMatrix {
                 this.controlRegister = this.Matrix_Slave.ChannelA.data
                 this.active          = true
                 this.state          += 1
-                
                 return
             }
+
         }
 
         if (this.state == 1 && ready) {
-
             this.println (this.active_println,
                 'Cycle '             +
                 cycle.toString()     +
-                ': The LED-MATRIX is sending an AccessAck message to the SUB-INTERCONNECT.'
+                ': The LED-MATRIX is sending an AccessAck message to the SUB-INTERCONNECT.1'
             )
             this.Matrix_Slave.send ('AccessAck', this.Matrix_Slave.ChannelA.source, '')
             this.Matrix_Slave.ChannelD.valid = '1'
@@ -99,6 +102,7 @@ export default class LEDMatrix {
 
         if (this.state == 2) {
             this.Matrix_Slave.ChannelD.valid = '0'
+            this.ready = true
             if (ChannelA.valid == '1') {
 
                 this.println (this.active_println,
@@ -109,25 +113,30 @@ export default class LEDMatrix {
 
                 this.Matrix_Slave.receive (ChannelA)
                 this.writeData (this.Matrix_Slave.ChannelA.address, this.Matrix_Slave.ChannelA.data)
-
                 this.state = 3
+                this.ready = false
             }
+            // this.ready = false
             // this.display ()
+            
             return
         }
 
-        if (this.state == 3 && ready) {
-
+        if (this.state == 3) {
+            this.ready = false
+            if (ready) {
                 this.println   (
                     this.active_println
                     ,'Cycle ' 
                     + cycle.toString() 
-                    + ': The LED-MATRIX is sending an AccessAck message to the SUB-INTERCONNECT.'
+                    + ': The LED-MATRIX is sending an AccessAck message to the SUB-INTERCONNECT.2'
                 )
                 this.Matrix_Slave.send ('AccessAck', this.Matrix_Slave.ChannelA.source, '')
                 this.Matrix_Slave.ChannelD.valid = '1'
                 this.Matrix_Slave.ChannelD.sink  = '1'
                 this.state = 2
+            }
+            this.ready = false
 
             return
         }

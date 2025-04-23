@@ -11,6 +11,7 @@ export default function GuidePage({}: Props) {
           <Tab label="OVERVIEW" />
           <Tab label="CONTROL BUTTON" />
           <Tab label="INSTRUCTIONS SUPPORTED" />
+          <Tab label="MEMORY MAP" />
         </Tabs>
 
         <TabPanel
@@ -341,6 +342,19 @@ export default function GuidePage({}: Props) {
               <img src="/images/guide/u-type/auipc-instruction.png" alt="AUIPC instruction" />
             </ul>
           </div>
+        </TabPanel>
+        <TabPanel
+          className="max-h-[85dvh] space-y-4 overflow-auto px-4 py-4 text-justify"
+          index={3}
+        >
+          <h2 className="text-center text-2xl font-bold text-[#006EAF]">OVERVIEW</h2>
+          <img src="/images/guide/memory_map.png" alt="LUI instruction" /> 
+          <p className="indent-8">
+            The SOC SIMULATOR is a tool that simulates the behavior of a System on Chip (SoC)
+            designed and developed by a group of authors:{' '}
+            <strong>Trương Thiên Lộc & Nguyễn Gia Bảo Ngọc</strong>. The purpose of the SOC is to
+            support beginners who are starting to explore SoC Design.
+          </p>
         </TabPanel>
       </TabContext>
     </div>

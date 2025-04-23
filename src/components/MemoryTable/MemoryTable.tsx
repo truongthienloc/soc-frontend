@@ -138,10 +138,10 @@ export default function MemoryTable({
         className="max-sm:w-screen"
       >
         <Tab label="ALL" />
-        <Tab label="INS" />
+        {/* <Tab label="INS" />
         <Tab label="PAGE" />
         <Tab label="DATA" />
-        <Tab label="PERI" />
+        <Tab label="PERI" /> */}
       </Tabs>
       <div className="mb-3 mt-1 flex justify-center gap-2 max-sm:flex-col">
         <div className="flex gap-2">

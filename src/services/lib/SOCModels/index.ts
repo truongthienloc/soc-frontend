@@ -43,56 +43,56 @@ const SOC               = new Soc('super SoC')
 // lui x1, 0x8
 // sw x31, 0(x1)
 // `
-// const code              = 
-// `
-// .text
-// // Create page table base address
-// lui x2, 0x3
+const code              = 
+`
+.text
+// Create page table base address
+lui x2, 0x3
 
-// // Generate instruction page table
-// page_table_ins:
-// addi x1, x0, 0x0009 // firsrt page table for instructions with PPN = 0x0000, executable = 1, valid = 1
-// sw   x1, 0(x2)
+// Generate instruction page table
+page_table_ins:
+addi x1, x0, 0x0009 // firsrt page table for instructions with PPN = 0x0000, executable = 1, valid = 1
+sw   x1, 0(x2)
 
-// page_table_peri:
-// lui  x1, 0x7
-// addi x1, x1, 0x7
-// sw   x1, 112(x2)
+page_table_peri:
+lui  x1, 0x7
+addi x1, x1, 0x7
+sw   x1, 112(x2)
 
-// lui x2, 0x80003     
-// csrrw x0, satp, x2 
+lui x2, 0x80003     
+csrrw x0, satp, x2 
 
-// lui x1,0x1c
-// lui x5,0xfff
-// ori x5, x5, 0xfff
-// addi x2, x0, 288
+lui x1,0x1c
+lui x5,0xfff
+ori x5, x5, 0xfff
+addi x2, x0, 288
 
-// mmio:
-// addi x3, x3, 1
-// sw x3, 0(x1)
-// addi x1, x1, 4
-// bne x2, x3, mmio
+mmio:
+addi x3, x3, 1
+sw x3, 0(x1)
+addi x1, x1, 4
+bne x2, x3, mmio
 
-// Create base memory map address registerss: 0x20000 
-// addi x1, x0, 0x2
-// slli x1, x1, 16
+Create base memory map address registerss: 0x20000 
+addi x1, x0, 0x2
+slli x1, x1, 16
 
-// csrrw x0, satp, x0
-// //Config for led-matrix's control registers.
-// led:
-// addi x2, x0, 1
-// sw   x2, 16(x1) // Led control register at address: 0x20010.
+csrrw x0, satp, x0
+//Config for led-matrix's control registers.
+led:
+addi x2, x0, 1
+sw   x2, 16(x1) // Led control register at address: 0x20010.
 
-// //Config for led-matrix's operation registers.
-// dma:
-// lui  x31, 0x1c      // Create DMA source register's value.
-// sw   x31, 0(x1)     // DMA source register 
-// addi x30, x1, 0x14  // Create DMA destination register's value.
-// sw   x30, 4(x1)     // DMA destination register.
-// addi x2 , x0, 0x480 // Create DMA length register value.
-// sw   x2 , 8(x1)     // DMA length register.
-// sw   x2 , 12(x1)    // DMA control register (non-zero = active).
-// `
+//Config for led-matrix's operation registers.
+dma:
+lui  x31, 0x1c      // Create DMA source register's value.
+sw   x31, 0(x1)     // DMA source register 
+addi x30, x1, 0x14  // Create DMA destination register's value.
+sw   x30, 4(x1)     // DMA destination register.
+addi x2 , x0, 0x480 // Create DMA length register value.
+sw   x2 , 8(x1)     // DMA length register.
+sw   x2 , 12(x1)    // DMA control register (non-zero = active).
+`
 
 // const code              = 
 // `
@@ -145,29 +145,29 @@ const SOC               = new Soc('super SoC')
 // sw x3, 0(x1)
 // `
 
-const code              = 
-`
-.text
-// Create page table base address
-addi x1, x0, 0x2
-slli x1, x1, 16
+// const code              = 
+// `
+// .text
+// // Create page table base address
+// addi x1, x0, 0x2
+// slli x1, x1, 16
 
-//csrrw x0, satp, x0
-//Config for led-matrix's control registers.
-led:
-addi x2, x0, 1
-sw   x2, 16(x1) // Led control register at address: 0x20010.
-lui  x31, 0x1c
-//Config for led-matrix's operation registers.
-dma:
-lui  x31, 0x1c      // Create DMA source register's value.
-sw   x31, 0(x1)     // DMA source register 
-addi x30, x1, 0x14  // Create DMA destination register's value.
-sw   x30, 4(x1)     // DMA destination register.
-addi x2 , x0, 0x480  // Create DMA length register value.
-sw   x2 , 8(x1)     // DMA length register.
-sw   x2 , 12(x1)    // DMA control register (non-zero = active).
-`
+// //csrrw x0, satp, x0
+// //Config for led-matrix's control registers.
+// led:
+// addi x2, x0, 1
+// sw   x2, 16(x1) // Led control register at address: 0x20010.
+// lui  x31, 0x1c
+// //Config for led-matrix's operation registers.
+// dma:
+// lui  x31, 0x1c      // Create DMA source register's value.
+// sw   x31, 0(x1)     // DMA source register 
+// addi x30, x1, 0x14  // Create DMA destination register's value.
+// sw   x30, 4(x1)     // DMA destination register.
+// addi x2 , x0, 0x480  // Create DMA length register value.
+// sw   x2 , 8(x1)     // DMA length register.
+// sw   x2 , 12(x1)    // DMA control register (non-zero = active).
+// `
 SOC.Processor.active    = true
 SOC.MMU.active          = true
 SOC.Bus0.active         = true

@@ -205,7 +205,7 @@ export default function MemoryTable({
                   {/* <TableCell>{parseInt(value.value, 16)}</TableCell> */}
                   <TableCell className="max-w-2">
                     <div className="flex items-center">
-                      {value.name === modifiedName ? (
+                      {/* {value.name === modifiedName ? (
                         <>
                           <Input
                             className="max-w-28 px-1"
@@ -221,10 +221,10 @@ export default function MemoryTable({
                             <DoneIcon />
                           </Button>
                         </>
-                      ) : (
+                      ) : ( */}
                         <>
-                          <span>{value.value}</span>
-                          <Button
+                          <span className='py-3'>{value.value}</span>
+                          {/* <Button
                             className="ml-auto h-fit w-fit min-w-0 bg-white px-2"
                             variant="outlined"
                             color="warning"
@@ -232,9 +232,9 @@ export default function MemoryTable({
                             disabled={disabled}
                           >
                             <EditIcon />
-                          </Button>
+                          </Button> */}
                         </>
-                      )}
+                      {/* )} */}
                     </div>
                   </TableCell>
                 </TableRow>

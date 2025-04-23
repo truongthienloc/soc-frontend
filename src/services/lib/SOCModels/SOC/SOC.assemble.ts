@@ -37,6 +37,7 @@ export function assemble(
     this.Led_matrix.reset ()
     this.DMA.reset()
     this.Memory.reset (Mem_tb)
+    console.log ('Mem_tb', Mem_tb)
     this.Memory.SetInstructionMemory(this.Assembler.binary_code) 
 
     this.Processor.InsLength = this.Memory.Ins_pointer

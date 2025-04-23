@@ -29,7 +29,7 @@ export async function RunAll(this: Soc) {
     // console.log (this.DMA.fifo_to_subInterconnect)
     // console.log (this.Processor.MMU.TLB)
     // console.log (this.Memory.getPageNumber())
-    console.log (this.DMA)
+    // console.log (this.DMA)
     // console.log (this.Processor.state)
     // console.log (this.Processor.pc ,
     //     this.Memory.Ins_pointer)
@@ -47,7 +47,7 @@ export async function RunAll(this: Soc) {
     // console.log (this.Memory.slaveMemory.ChannelD)
     // console.log (this.Bus1)
     // console.log(this.Bus1.Pin[0])
-    // console.log (this.Led_matrix.state, this.Led_matrix.dataRegisters)
+    console.log (this.Led_matrix.state, this.Led_matrix.dataRegisters)
     // console.log(
     //     this.DMA
     // )

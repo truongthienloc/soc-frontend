@@ -136,7 +136,8 @@ export default function SocPage({}: Props) {
         }
 
         const handleMMUClick = () => {
-          setShowSimulatorType('MMU')
+          setShowSimulatorType('CODE_EDITOR')
+          setTabIndex(1)
         }
 
         const handleIOClick = () => {
@@ -301,6 +302,7 @@ export default function SocPage({}: Props) {
           return
         }
         const text = await file.text()
+        console.log('text', text)
         setDisableCodeEditor(true)
         setCode(text)
 
@@ -533,10 +535,10 @@ export default function SocPage({}: Props) {
             <TabContext index={tabIndex} setIndex={setTabIndex}>
               <Tabs>
                 <Tab label="Coding View" />
-                <Tab label="Schematic View" />
-                <Tab label="Disassembly" />
-                <Tab label="Console" />
                 <Tab label="MMU" />
+                <Tab label="Console" />
+                <Tab label="Disassembly" />
+                <Tab label="Schematic simulate" />
               </Tabs>
               {/* Tab index = 0: Coding View and Registers table */}
               <TabPanel
@@ -566,7 +568,7 @@ export default function SocPage({}: Props) {
               </TabPanel>
               {/* Tab index = 1: Schematic View */}
               <TabPanel
-                index={1}
+                index={4}
                 className="flex flex-1 flex-col pt-4 max-sm:mb-20 max-sm:w-dvw max-sm:overflow-auto max-sm:px-1"
               >
                 <TopFunctionButton
@@ -584,7 +586,7 @@ export default function SocPage({}: Props) {
                         value={code}
                         onChange={handleChangeCode}
                         disable={disableCodeEditor}
-                        hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex !== 1}
+                        hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex !== 4}
                       />
                     )}
                   </div>
@@ -605,12 +607,12 @@ export default function SocPage({}: Props) {
               </div>
               </TabPanel>
               <TabPanel
-                index={2}
+                index={3}
                 className="flex flex-1 flex-col gap-4 pt-8 max-sm:mb-20 max-sm:w-dvw max-sm:overflow-auto max-sm:px-1"
               >
                 <Disassembly socModel={socModel} />
               </TabPanel>
-              <TabPanel index={3} className="grid grid-cols-[4fr_6fr] pt-8">
+              <TabPanel index={2} className="grid grid-cols-[4fr_6fr] pt-8">
                 <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
                   {isStepping ? (
                     <DisplayStepCode code={stepCode} pc={pc} />
@@ -619,7 +621,7 @@ export default function SocPage({}: Props) {
                       value={code}
                       onChange={handleChangeCode}
                       disable={disableCodeEditor}
-                      hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex !== 3}
+                      hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex !== 2}
                     />
                   )}
                 </div>
@@ -634,7 +636,7 @@ export default function SocPage({}: Props) {
                   <Keyboard />
                 </div>
               </TabPanel>
-              <TabPanel index={4} className="pt-8">
+              <TabPanel index={1} className="pt-8">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
                     {isStepping ? (
@@ -644,7 +646,7 @@ export default function SocPage({}: Props) {
                         value={code}
                         onChange={handleChangeCode}
                         disable={disableCodeEditor}
-                        hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex !== 4}
+                        hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex !== 1}
                       />
                     )}
                   </div>
@@ -658,7 +660,7 @@ export default function SocPage({}: Props) {
           {/* MEMORY MAP SECTION */}
           <div className={cn({ hidden: showSimulatorType !== 'MEMORY' })}>
             <div className="mb-4 flex flex-row items-center justify-between gap-2 py-1">
-              <h2 className="text-xl font-bold">Memory Map:</h2>
+              <h2 className="text-xl font-bold">Range 0x00000 - 0x1ffff</h2>
               <Button onClick={() => setShowSimulatorType('SOC')}>
                 <CloseIcon />
               </Button>
@@ -850,7 +852,7 @@ export default function SocPage({}: Props) {
             disabled={!allowRun}
             onClick={handleRunAllClick}
           >
-            SOC Run
+            Run
           </Button>
           <Button
             className="h-fit capitalize"
@@ -858,7 +860,7 @@ export default function SocPage({}: Props) {
             onClick={handleStepClick}
             disabled={!allowRun}
           >
-            Processor Step
+            Step
           </Button>
         </div>
       </div>

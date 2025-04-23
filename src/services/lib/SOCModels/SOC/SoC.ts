@@ -178,15 +178,15 @@ export default class Soc {
             ,this.Memory.burst
             ,this.Bridge.Bridge_slave.ChannelD
             //valid signal
-            ,this.Processor.master.ChannelA.valid == '1'
-            ,this.DMA.DMA_Master.ChannelA.valid == '1'
-            ,this.Memory.slaveMemory.ChannelD.valid == '1'
-            ,this.Bridge.Bridge_slave.ChannelD.valid == '1'
+            ,this.Processor.master.ChannelA.valid       == '1'
+            ,this.DMA.DMA_Master.ChannelA.valid         == '1'
+            ,this.Memory.slaveMemory.ChannelD.valid     == '1'
+            ,this.Bridge.Bridge_slave.ChannelD.valid    == '1'
             //ready signal
-            ,this.Processor.master.ChannelD.ready == '1'
-            ,this.DMA.DMA_Master.ChannelD.ready == '1'
-            ,this.Memory.slaveMemory.ChannelA.ready   == '1'
-            ,this.Bridge.Bridge_master.ChannelA.ready == '1'
+            ,this.Processor.master.ChannelD.ready       == '1'
+            ,this.DMA.DMA_Master.ChannelD.ready         == '1'
+            ,this.Memory.slaveMemory.ChannelA.ready     == '1'
+            ,this.Bridge.Bridge_master.ChannelA.ready   == '1'
             //cycle
             ,this.cycle
         )
@@ -203,10 +203,11 @@ export default class Soc {
             this.Bridge.fifo_to_subInterconnect
             , this.DMA.fifo_to_subInterconnect
             , this.Led_matrix.Matrix_Slave.ChannelD
-            , this.Bridge.Bridge_master.ChannelA.valid == '1'
-            , this.Bridge.Bridge_master.ChannelD.ready == '1'
-            , this.DMA.DMA_Slave.ChannelD.valid == '1'
-            , this.Led_matrix.Matrix_Slave.ChannelD.valid == '1'
+            , this.Bridge.Bridge_master.ChannelA.valid      == '1'
+            , this.Led_matrix.ready
+            , this.Bridge.Bridge_master.ChannelA.ready      == '1'
+            , this.DMA.DMA_Slave.ChannelD.valid             == '1'
+            , this.Led_matrix.Matrix_Slave.ChannelD.valid   == '1'
             , this.cycle
         )
 
@@ -235,15 +236,15 @@ export default class Soc {
                 ,this.Memory.burst
                 ,this.Bridge.Bridge_slave.ChannelD
                 //valid signal
-                ,this.Processor.master.ChannelA.valid == '1'
-                ,this.DMA.DMA_Master.ChannelA.valid == '1'
-                ,this.Memory.slaveMemory.ChannelD.valid == '1'
-                ,this.Bridge.Bridge_slave.ChannelD.valid == '1'
+                ,this.Processor.master.ChannelA.valid       == '1'
+                ,this.DMA.DMA_Master.ChannelA.valid         == '1'
+                ,this.Memory.slaveMemory.ChannelD.valid     == '1'
+                ,this.Bridge.Bridge_slave.ChannelD.valid    == '1'
                 //ready signal
-                ,this.Processor.master.ChannelD.ready == '1'
-                ,this.DMA.DMA_Master.ChannelD.ready == '1'
-                ,this.Memory.slaveMemory.ChannelA.ready   == '1'
-                ,this.Bridge.Bridge_master.ChannelA.ready == '1'
+                ,this.Processor.master.ChannelD.ready       == '1'
+                ,this.DMA.DMA_Master.ChannelD.ready         == '1'
+                ,this.Memory.slaveMemory.ChannelA.ready     == '1'
+                ,this.Bridge.Bridge_master.ChannelA.ready   == '1'
                 //cycle
                 ,this.cycle
             )
@@ -281,14 +282,13 @@ export default class Soc {
                 this.Bridge.fifo_to_subInterconnect
                 , this.DMA.fifo_to_subInterconnect
                 , this.Led_matrix.Matrix_Slave.ChannelD
-                , this.Bridge.Bridge_master.ChannelA.valid == '1'
+                , this.Bridge.Bridge_master.ChannelA.valid      == '1'
                 , this.Led_matrix.ready
-                , this.Bridge.Bridge_master.ChannelA.ready == '1'
-                , this.DMA.DMA_Slave.ChannelD.valid == '1'
-                , this.Led_matrix.Matrix_Slave.ChannelD.valid == '1'
+                , this.Bridge.Bridge_master.ChannelA.ready      == '1'
+                , this.DMA.DMA_Slave.ChannelD.valid             == '1'
+                , this.Led_matrix.Matrix_Slave.ChannelD.valid   == '1'
                 , this.cycle
             )
-            // console.log (this.Led_matrix.state, this.Led_matrix.ready)
 
             this.Led_matrix.Run(
                 this.Bus1.Pout[2].dequeue()

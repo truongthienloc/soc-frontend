@@ -309,7 +309,6 @@ export default class RiscVProcessor {
                     )
                     this.Warnning = 1
                 }
-                console.log(this.state, 'this.state', message)
             } 
         }
             return
@@ -1199,7 +1198,7 @@ export default class RiscVProcessor {
             }
 
             this.control(instruction.slice(25, 32), instruction.slice(17, 20))
-            
+
             let size = 'none'
             if (instruction.slice(25, 32) === '0000011')
                 switch (instruction.slice(17, 20)) {
@@ -1309,9 +1308,8 @@ export default class RiscVProcessor {
             //.log(pc + 4, (dec(imm) << 1) , this.pcSrc1)
 
             if (this.stalled == false) {
-                this.pc     = mux(mux(pc + 4, (dec(imm) << 1) + pc, this.pcSrc1), ALUResult, this.pcSrc2)
+                this.pc     = mux(mux(pc + 4, (dec(imm) << 1) + pc, this.pcSrc1), dec ('0'+ALUResult), this.pcSrc2)
             } else this.pc = pc
-
 
             this.lineColor['3']         = mux(this.lineColor['2'], this.lineColor['1'], this.ALUSrc);
             this.lineColor['6']         = mux(this.lineColor['0'], this.lineColor['4'], this.pcSrc1);

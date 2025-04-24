@@ -13,16 +13,8 @@ export async function RunAll(this: Soc) {
         this.Memory.Ins_pointer || this.Processor.state != 0 || this.DMA.state !=0
     ) {
         await this.Step_()
-        // if (this.DMA.DMA_Master.ChannelA.valid == '1' && this.DMA.state ==2) break
-        // if (this.DMA.count_burst == 1) break
-        // if (bre > 250 + 20 + 10 + 20 + 10 + 100) break
-        // bre++
     }
 
-    // console.log ((
-    //     this.Processor.pc <
-    //     this.Memory.Ins_pointer || this.Processor.state != 0 || this.DMA.state !=0
-    // ))
     // console.log (this.Bus1.Pin[0])
     // console.log (this.cycle.cycle)
     // console.log (this.Bus1)
@@ -47,7 +39,7 @@ export async function RunAll(this: Soc) {
     // console.log (this.Memory.slaveMemory.ChannelD)
     // console.log (this.Bus1)
     // console.log(this.Bus1.Pin[0])
-    console.log (this.Led_matrix.state, this.Led_matrix.dataRegisters)
+    // console.log (this.Led_matrix.state, this.Led_matrix.dataRegisters)
     // console.log(
     //     this.DMA
     // )
@@ -68,7 +60,7 @@ export async function RunAll(this: Soc) {
     // console.log(this.Bridge.fifo_from_subInterconnect)
     // console.log (this.Memory.getPageNumber())
     // console.log ('SOC.Memory.GetMemory()',this.Memory.GetMemory())
-    // console.log (this.Processor.getRegisters())
+    console.log (this.Processor.getRegisters())
     // console.log (this.Processor.MMU.satp)
    this.event.emit(Soc.SOCEVENT.DONE_ALL)
 }

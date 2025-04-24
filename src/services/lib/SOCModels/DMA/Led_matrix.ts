@@ -28,7 +28,7 @@ export default class LEDMatrix {
         this.active                     = false
         this.active_println             = true
         this.ready                      = false
-        this.led                        = new LedMatrix ('.led-matrix')
+        // this.led                        = new LedMatrix ('.led-matrix')
 
     }
 

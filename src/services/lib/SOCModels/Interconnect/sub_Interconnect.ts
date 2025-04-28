@@ -233,7 +233,7 @@ export default class InterConnect {
                         +': The SUB-INTERCONNECT is sending data from BRIDGE to LED-MATRIX.'
                     )
                     // console.log (Led_ready)
-                    if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue(this.Pin[0].dequeue())
+                    if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue({...this.Pin[0].dequeue()})
                 }
                 if (
                     (parseInt('0'+dataFromBridge.address, 2) == 0x0020000) 
@@ -250,7 +250,7 @@ export default class InterConnect {
                         +': The SUB-INTERCONNECT is sending data from BRIDGE to DMA.'
                     )
 
-                    if (this.Pout[1] instanceof FIFO_ChannelA) this.Pout[1].enqueue(this.Pin[0].dequeue())
+                    if (this.Pout[1] instanceof FIFO_ChannelA) this.Pout[1].enqueue({...this.Pin[0].dequeue()})
                 }
             //}
         }
@@ -267,7 +267,7 @@ export default class InterConnect {
                     +': The SUB-INTERCONNECT is sending data from DMA to BRIDGE.'
                 )
                 
-                if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue(this.Pin[1].dequeue())
+                if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue({...this.Pin[1].dequeue()})
                 // console.log ('dataFromDMA', this.Pout[0])
             }
         }
@@ -282,7 +282,7 @@ export default class InterConnect {
                     +': The SUB-INTERCONNECT is sending data from LED-MATRIX to BRIDGE.'
                 )
                         
-                if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue(this.Pin[2].dequeue())
+                if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue({...this.Pin[2].dequeue()})
             }
             
         } 

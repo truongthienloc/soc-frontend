@@ -84,11 +84,11 @@ export default class DMA {
         if (this.state == 2) {
             this.burst = []
             this.DMA_Master.ChannelD.ready = '0'
-            
+            // console.log ( this.count_burst, this.count_beats)
             if (this.count_burst * 16 >= parseInt (this.length, 2)) {
                 this.state = 0
-                this.count_burst = 0
-                this.count_beats = 0
+                // this.count_burst = 0
+                // this.count_beats = 0
 
                 this.println (
                     this.active_println

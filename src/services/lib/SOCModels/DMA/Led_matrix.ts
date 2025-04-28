@@ -71,36 +71,6 @@ export default class LEDMatrix {
     ) {
 
         if (this.state == 0) {
-            this.ready = true
-            if  (ChannelA.valid == '1' && ChannelA.source == '00') {
-                this.println (
-                    this.active_println
-                    , 'Cycle '+ cycle.toString() + ': The LED matrix is being configured.'
-                )
-
-                this.Matrix_Slave.receive (ChannelA)
-                this.controlRegister = this.Matrix_Slave.ChannelA.data
-                this.active          = true
-                this.state          += 1
-                return
-            }
-
-        }
-
-        if (this.state == 1 && ready) {
-            this.println (this.active_println,
-                'Cycle '             +
-                cycle.toString()     +
-                ': The LED-MATRIX is sending an AccessAck message to the SUB-INTERCONNECT.1'
-            )
-            this.Matrix_Slave.send ('AccessAck', this.Matrix_Slave.ChannelA.source, '')
-            this.Matrix_Slave.ChannelD.valid = '1'
-            this.Matrix_Slave.ChannelD.sink  = '1'
-            this.state +=1
-            return
-        }
-
-        if (this.state == 2) {
             this.Matrix_Slave.ChannelD.valid = '0'
             this.ready = true
             if (ChannelA.valid == '1') {
@@ -108,21 +78,24 @@ export default class LEDMatrix {
                 this.println (this.active_println,
                     'Cycle '             +
                     cycle.toString()     +
-                    ': The LED-MATRIX is operating.'
+                    ': The LED-MATRIX is receiving a PUT message from the INTERCONNECT.'
                 )
 
                 this.Matrix_Slave.receive (ChannelA)
-                this.writeData (this.Matrix_Slave.ChannelA.address, this.Matrix_Slave.ChannelA.data)
-                this.state = 3
+                if (parseInt (this.Matrix_Slave.ChannelA.address, 2) == 0x20010) {
+                    this.controlRegister = this.Matrix_Slave.ChannelA.data
+                } else {
+                    this.writeData (this.Matrix_Slave.ChannelA.address, this.Matrix_Slave.ChannelA.data)
+                }
+                
+                this.state = 1
                 this.ready = false
             }
-            // this.ready = false
-            // this.display ()
             
             return
         }
 
-        if (this.state == 3) {
+        if (this.state == 1) {
             this.ready = false
             if (ready) {
                 this.println   (
@@ -134,7 +107,7 @@ export default class LEDMatrix {
                 this.Matrix_Slave.send ('AccessAck', this.Matrix_Slave.ChannelA.source, '')
                 this.Matrix_Slave.ChannelD.valid = '1'
                 this.Matrix_Slave.ChannelD.sink  = '1'
-                this.state = 2
+                this.state = 0
             }
             this.ready = false
 
@@ -161,6 +134,7 @@ export default class LEDMatrix {
             console.log (addr)
             throw new Error("Address out of range")
         }
+
         this.dataRegisters[index] = data  // Gán giá trị vào thành ghi
         for (let i = 0 ; i< 32; i++) {
             if (this.dataRegisters[index][i]  == '1' && this.led != undefined) 

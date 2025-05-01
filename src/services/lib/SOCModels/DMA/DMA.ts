@@ -19,8 +19,8 @@ export default class DMA {
     sendoffset          : number
     DMA_Master          : Master
     DMA_Slave           : Slave
-    DMA_buffer          : FIFO_ChannelD
-    burst               : ChannelA[]
+    DMA_RXbuffer        : FIFO_ChannelD
+    DMA_TXbuffer        : FIFO_ChannelA
     logger             ?: Logger
     active_println      : boolean
 
@@ -49,7 +49,7 @@ export default class DMA {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The DMA is receiving messeage PUT from SUB-INTERCONNETC.'
+                    +': The DMA is receiving messeage PUT from SUB-INTERCONNECT.'
                 )
     
                 this.DMA_Slave.receive(sub2DMA)
@@ -82,7 +82,7 @@ export default class DMA {
         }
 
         if (this.state == 2) {
-            this.burst = []
+            this.DMA_TXbuffer       = new FIFO_ChannelA ()
             this.DMA_Master.ChannelD.ready = '0'
             // console.log ( this.count_burst, this.count_beats)
             if (this.count_burst * 16 >= parseInt (this.length, 2)) {
@@ -118,7 +118,7 @@ export default class DMA {
                 this.DMA_Master.ChannelA.valid = '1'
 
     
-                this.burst.push ( {...this.DMA_Master.ChannelA})
+                this.DMA_TXbuffer.enqueue ( {...this.DMA_Master.ChannelA})
                 this.state += 1
             }
             
@@ -145,7 +145,7 @@ export default class DMA {
                 )
                 this.DMA_Master.ChannelA.valid = '0'
 
-                this.DMA_buffer.enqueue(this.DMA_Master.ChannelD)
+                this.DMA_RXbuffer.enqueue(this.DMA_Master.ChannelD)
 
                 this.count_beats +=1
                 if (this.count_beats == 4) {
@@ -158,7 +158,7 @@ export default class DMA {
         }
 
         if (this.state == 4 && ready0) {
-            this.burst = []
+            this.DMA_TXbuffer       = new FIFO_ChannelA ()
             this.DMA_Master.ChannelD.ready = '0'
             if (ready0) {
                 this.println (
@@ -170,13 +170,13 @@ export default class DMA {
                 this.DMA_Master.send(
                     'PUT',
                     ((parseInt(this.destinationAddress, 2) + 0 + this.count_burst*16)).toString(2).padStart(17, '0'),
-                    this.DMA_buffer.dequeue().data
+                    this.DMA_RXbuffer.dequeue().data
                 )
                 this.DMA_Master.ChannelA.valid = '1'
                 this.DMA_Master.ChannelD.ready = '0'
                 this.DMA_Master.ChannelA.size  = '10'
                 this.DMA_Slave.ChannelD.valid  = '0'
-                this.burst.push ( {...this.DMA_Master.ChannelA})
+                this.DMA_TXbuffer.enqueue ( {...this.DMA_Master.ChannelA})
                 // cycle.incr()
     
                 this.println (
@@ -188,13 +188,13 @@ export default class DMA {
                 this.DMA_Master.send(
                     'PUT',
                     ((parseInt(this.destinationAddress, 2) + 4  + this.count_burst*16)).toString(2).padStart(17, '0'),
-                    this.DMA_buffer.dequeue().data
+                    this.DMA_RXbuffer.dequeue().data
                 )
                 this.DMA_Master.ChannelA.valid = '1'
                 this.DMA_Master.ChannelD.ready = '0'
                 this.DMA_Master.ChannelA.size  = '10'
                 this.DMA_Slave.ChannelD.valid  = '0'
-                this.burst.push ( {...this.DMA_Master.ChannelA})
+                this.DMA_TXbuffer.enqueue ( {...this.DMA_Master.ChannelA})
                 // cycle.incr()
     
                 this.println (
@@ -206,12 +206,12 @@ export default class DMA {
                 this.DMA_Master.send(
                     'PUT',
                     ((parseInt(this.destinationAddress, 2) + 8  + this.count_burst*16)).toString(2).padStart(17, '0'),
-                    this.DMA_buffer.dequeue().data
+                    this.DMA_RXbuffer.dequeue().data
                 )
                 this.DMA_Master.ChannelA.valid = '1'
                 this.DMA_Master.ChannelA.size  = '10'
                 this.DMA_Slave.ChannelD.valid  = '0'
-                this.burst.push ( {...this.DMA_Master.ChannelA})
+                this.DMA_TXbuffer.enqueue ( {...this.DMA_Master.ChannelA})
                 // cycle.incr()
     
                 this.println (
@@ -224,14 +224,13 @@ export default class DMA {
                 this.DMA_Master.send(
                     'PUT',
                     ((parseInt(this.destinationAddress, 2) + 12  + this.count_burst*16)).toString(2).padStart(17, '0'),
-                    this.DMA_buffer.dequeue().data
+                    this.DMA_RXbuffer.dequeue().data
                 )
                 this.DMA_Master.ChannelA.valid = '1'
                 this.DMA_Master.ChannelA.size  = '10'
                 this.DMA_Slave.ChannelD.valid  = '0'
-                this.burst.push ( {...this.DMA_Master.ChannelA})
-                // console.log (this.count_burst)
-                // cycle.incr()
+                this.DMA_TXbuffer.enqueue ( {...this.DMA_Master.ChannelA})
+                // this.DMA_Master.ChannelA.valid = '0'
     
                 this.state += 1
             }
@@ -281,10 +280,10 @@ export default class DMA {
         this.DMA_Master         = new Master('DMA_Master', true, '01')
         this.DMA_Master.ChannelA.size = '10'
         this.DMA_Slave          = new Slave ('DMA_Slave', true)
-        this.DMA_buffer         = new FIFO_ChannelD ()
+        this.DMA_RXbuffer         = new FIFO_ChannelD ()
         this.fifo_to_subInterconnect = new FIFO_ChannelD ()
         this.active_println     = true
-        this.burst              = []
+        this.DMA_TXbuffer              = new FIFO_ChannelA ()
 
     }
     
@@ -299,9 +298,9 @@ export default class DMA {
         this.DMA_Master         = new Master('DMA_Master', true, '01')
         this.DMA_Master.ChannelA.size = '10'
         this.DMA_Slave          = new Slave ('DMA_Slave', true)
-        this.DMA_buffer         = new FIFO_ChannelD ()
+        this.DMA_RXbuffer       = new FIFO_ChannelD ()
         this.active_println     = true
-        this.burst              = []
+        this.DMA_TXbuffer       = new FIFO_ChannelA ()
     }
     
     public println(active: boolean, ...args: string[]) {
@@ -366,9 +365,9 @@ export default class DMA {
                         +': The DMA is actived.'
                     )
                     this.DMA_Master.ChannelD.ready = '0'
-                if (ready0) this.state    = 2
+                if (ready0) this.state = 2
             } else {
-                if (ready0) this.state = 1
+                this.state = 1
             }
         }
     }

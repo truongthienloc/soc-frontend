@@ -84,6 +84,12 @@ lui t2, 0xfff
 ori t2, t2, 0xfff
 addi t0, zero, 288
 
+mmio:
+addi t4, t4, 1
+sw   t4, 0(t1)
+addi t1, t1, 4
+bne  t0, t4, mmio
+
 // Create base memory map address register: 0x20000 
 addi t1, zero, 0x2
 slli t1, t1, 16
@@ -99,21 +105,21 @@ sw   t0, 16(t1)      // Led control register at address: 0x20010.
 dma:
 lui  t5, 0x1c         // Create DMA source register's value.
 sw   t5, 0(t1)        // DMA source register 
-addi t6, t1, 0x14     // Create DMA destination register's value.
+addi t6, zero, 0x14     // Create DMA destination register's value.
 sw   t6, 4(t1)        // DMA destination register.
 addi t0, zero, 0x480  // Create DMA length register value.
 sw   t0, 8(t1)        // DMA length register.
 sw   t0, 12(t1)       // DMA control register (non-zero = active).
 
-addi t1, zero, 0x2
-slli t1, t1, 16
-addi t0, zero, 200
-addi t2, zero, 1 
-mmio:
-addi t4, t4, 1
-sw   t4, 20(t1)
-addi t1, t1, 4
-bne  t0, t4, mmio
+// addi t1, zero, 0x2
+// slli t1, t1, 16
+// addi t0, zero, 200
+// addi t2, zero, 1 
+// mmio:
+// addi t4, t4, 1
+// sw   t4, 20(t1)
+// addi t1, t1, 4
+// bne  t0, t4, mmio
 
 `
 // const code              = 

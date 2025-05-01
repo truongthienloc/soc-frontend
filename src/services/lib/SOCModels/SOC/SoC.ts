@@ -174,7 +174,7 @@ export default class Soc {
         
         this.Bus0.Run (
             this.Processor.FIFO.dequeue()
-            ,this.DMA.burst
+            ,this.DMA.DMA_TXbuffer
             ,this.Memory.burst
             ,this.Bridge.Bridge_slave.ChannelD
             //valid signal
@@ -232,7 +232,7 @@ export default class Soc {
 
             this.Bus0.Run (
                 this.Processor.FIFO.dequeue()
-                ,this.DMA.burst
+                ,this.DMA.DMA_TXbuffer
                 ,this.Memory.burst
                 ,this.Bridge.Bridge_slave.ChannelD
                 //valid signal
@@ -251,8 +251,8 @@ export default class Soc {
 
             this.Memory.Run(
                 this.cycle
-                , this.Bus0.Pout[2].dequeue()
-                , this.Bus0.state == 0
+                , this.Bus0.Pout[2]
+                , this.Bus0.ready
             )
 
             this.Bridge.Run (
@@ -270,7 +270,7 @@ export default class Soc {
                 this.Bus1.Pout[1].dequeue()
                 ,this.Bus0.Pout[1].dequeue()
                 , this.cycle
-                , this.Bus0.state == 0
+                , this.Bus0.ready
                 , this.Bus1.state == 0
             )
 

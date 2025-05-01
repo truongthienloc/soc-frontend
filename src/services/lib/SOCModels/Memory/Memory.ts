@@ -7,6 +7,7 @@ import {Logger } from './../Compile/soc.d'
 import Cycle from '../Compile/cycle'
 import { Rock_3D } from 'next/font/google'
 import { BinToHex } from '../Compile/convert'
+import { FIFO_ChannelA }    from "../Interconnect/FIFO_ChannelA"
 
 export default class Memory {
     Memory          : { [key: string]: string }
@@ -42,30 +43,33 @@ export default class Memory {
 
     public Run (
         cycle           : Cycle
-        , MMU2Memory    : ChannelA
+        , Int2Memory    : any // FIFO_ChannelA
         , ready         : boolean
     ) {
-        // console.log ('MMU2Memory', MMU2Memory)
+        // console.log ('Int2Memory', Int2Memory)
+        let Int2Memory_ = Int2Memory.peek()
         if (this.state == this.IDLE_STATE)                          {
+            Int2Memory_ = Int2Memory.dequeue ()
             this.burst              = []
             this.slaveMemory.ChannelD.valid = '0'
             this.slaveMemory.ChannelA.ready = '1'
-            if (MMU2Memory.valid == '1') {
+
+            if (Int2Memory_.valid == '1') {
                 this.slaveMemory.ChannelD.valid = '1'
-                if (MMU2Memory.opcode == '100') this.state = this.RECEIVE_GET_STATE
-                if (MMU2Memory.opcode == '000') this.state = this.RECEIVE_PUT_STATA
+                if (Int2Memory_.opcode == '100') this.state = this.RECEIVE_GET_STATE
+                if (Int2Memory_.opcode == '000') this.state = this.RECEIVE_PUT_STATA
             }
         }
 
         if (this.state == this.RECEIVE_GET_STATE)                   {
             this.slaveMemory.ChannelD.valid = '0'
-            this.slaveMemory.receive (MMU2Memory)
+            this.slaveMemory.receive (Int2Memory_)
             this.println (this.active_println,
                             'Cycle '             +
                             cycle.toString()     +
                             ': The MEMORY is receiving GET message from the INTERCONNECT.'
                             )
-            this.slaveMemory.receive (MMU2Memory)
+            this.slaveMemory.receive (Int2Memory_)
             this.state = this.SEND_ACCESSACKDATA_STATE
 
             return 
@@ -185,9 +189,9 @@ export default class Memory {
         }   
         
         if (this.state == this.RECEIVE_PUT_STATA)                   {
-            if (MMU2Memory.opcode == '000') {
+            if (Int2Memory_.opcode == '000') {
                 this.slaveMemory.ChannelD.valid = '0'
-                this.slaveMemory.receive (MMU2Memory)
+                this.slaveMemory.receive (Int2Memory_)
                 this.println (this.active_println,
                     'Cycle '             +
                     cycle.toString()     +
@@ -200,6 +204,7 @@ export default class Memory {
         if (this.state ==  this.SEND_ACCESSACK_STATE)       {
             this.slaveMemory.ChannelA.ready = '0'
             if (ready) {
+                
                 this.slaveMemory.ChannelD.valid = '1'
                 this.println (this.active_println,
                     'Cycle '             +
@@ -209,17 +214,19 @@ export default class Memory {
                 this.slaveMemory.send(
                     'AccessAck', 
                     this.slaveMemory.ChannelA.source,                 
-                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
-                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
-                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
-                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+                    '0'.padStart(32, '0')
                 )
                 this.burst.push ({...this.slaveMemory.ChannelD})
                 this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(0,8)
                 this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(8,16)
                 this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(16,24)
                 this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(24,32)
-    
+                // console.log ( 'memory'+
+                //     this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')]
+                //     + this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')]
+                //     + this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')]
+                //     + this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+                // )
                 this.state   = this.IDLE_STATE
                 cycle.incr()
             }

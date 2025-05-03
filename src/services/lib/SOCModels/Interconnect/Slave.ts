@@ -50,7 +50,7 @@ export default class Slave {
                                     , data
                                     , '0'
                                     , '1'
-                                    , '1')
+                                    , '0')
     }
 
     receive(channelA: ChannelA){

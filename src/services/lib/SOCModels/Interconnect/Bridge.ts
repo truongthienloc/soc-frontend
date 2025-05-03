@@ -63,17 +63,15 @@ export default class Bridge {
 
                 while (!dataFrInterconnect.isEmpty()) {
                     if (dataFrInterconnect.peek().valid == '1') {
-                        this.fifo_from_Interconnect.enqueue (dataFrInterconnect.dequeue())
+                        this.fifo_from_Interconnect.enqueue ({...dataFrInterconnect.dequeue()})
                     }
                 }
-                
                 this.println (
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
                     +': The BRIDGE is receiving data from INTERCONNECT.'
                 )
-                
                 this.state = this.STATE_SEND 
            } 
            if (!dataFrsubInterconnect.isEmpty()) {

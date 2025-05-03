@@ -267,8 +267,8 @@ export default class Soc {
         if (this.cycle.cycle % 2 == 0) {
 
             this.DMA.Run (
-                this.Bus1.Pout[1].dequeue()
-                ,this.Bus0.Pout[1].dequeue()
+                this.Bus1.Pout[1]
+                ,this.Bus0.Pout[1]
                 , this.cycle
                 , this.Bus0.ready
                 , this.Bus1.state == 0

@@ -29,7 +29,21 @@ export class FIFO_ChannelD {
     }
     
     peek(): any {
-        return this.queue[0];
+        if (this.queue.length === 0) {
+            // Trả về một đối tượng mới của ChannelA với các giá trị mặc định khi hàng đợi rỗng
+            return new ChannelD(
+                '000',   // opcode
+                '000',   // param
+                '10',    // size
+                '00',    // source
+                '0'.padStart(17, '0'), // address
+                '0000',  // mask
+                '0'.padStart(32, '0'), // data
+                '0',     // corrupt
+                '0',     // additional fields (depending on ChannelA constructor requirements)
+                '0'
+            );
+        } else return this.queue[0];
     }
     
     isEmpty(): boolean {

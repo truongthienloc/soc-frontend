@@ -10,20 +10,25 @@ export async function RunAll(this: Soc) {
     let bre = 0
     while (
         this.Processor.pc <
-        this.Memory.Ins_pointer || this.Processor.state != 0 || this.DMA.state !=0
+        this.Memory.Ins_pointer || this.Processor.state != 0 || this.DMA.state !=5
     ) {
-        if (bre == 11367 - 1472 + 9   ) break
-        // if (bre == 600 + 5 + 1) break
-        bre++
+        // if (bre == 3276) break
+        // // // if (bre == 600 + 5 + 1) break
+        // bre++
+        // console.log(bre,'bre')
         await this.Step_()
     }
-
+    console.log ( this.Processor.pc ,
+        this.Memory.Ins_pointer , this.Processor.state != 0 , this.DMA.state !=5)
+    console.log(this.Memory.Memory['00000000101000000'])    
     // console.log (this.Bus0.Timing)
-    // console.log (this.Bus0.Pout)
-    console.log (this.Bus0)
+    // console.log (this.Bus0.Pin[2])
+    // console.log (this.Bus0)
+    // console.log (this.Bus0.Pin[0])
+    // console.log (this.Bridge)
     // console.log (this.Bus0.Pin)
     // console.log (this.cycle.cycle)
-    // console.log (this.Bus1)
+    // console.log (this.Bus1.Pin[0])
     // console.log (this.DMA.fifo_to_subInterconnect)
     // console.log (this.Processor.MMU.TLB)
     // console.log (this.Memory.getPageNumber())
@@ -45,7 +50,7 @@ export async function RunAll(this: Soc) {
     // console.log (this.Memory.slaveMemory.ChannelD)
     // console.log (this.Bus1)
     // console.log(this.Bus1.Pin[0])
-    // console.log (this.Led_matrix.state, this.Led_matrix.dataRegisters)
+    console.log (this.Led_matrix.state, this.Led_matrix.dataRegisters)
     // console.log(
     //     this.DMA
     // )

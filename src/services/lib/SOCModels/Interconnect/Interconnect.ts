@@ -590,8 +590,6 @@ export default class InterConnect {
             && !this.Pin[2].isEmpty()
         ) {
             const dataFromMem = {...this.Pin[2].peek()}
-            
-            // if (dataFromMem instanceof ChannelD) {
                 if (dataFromMem.source == '00') {
                     if (Processor_ready) {
                         if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue({...this.Pin[2].dequeue()})
@@ -616,7 +614,6 @@ export default class InterConnect {
 
                         }
                         this.Timing[2].dequeue()
-                        console.log('this.Pout[1]',this.Pout[1])
                     }
                 }
         }

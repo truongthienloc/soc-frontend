@@ -502,6 +502,7 @@ export default class InterConnect {
         , Memory_ready      : boolean
         , Bridge_ready      : boolean
     ) {
+
         if (Abiter == 0 
             && !this.Pin[0].isEmpty()
         ) {

@@ -65,7 +65,7 @@ export default class DMA {
                 )
                 this.DMA_Slave.receive({...subnterConnect2DMA_})
                 this.config (Interconnect_ready, cycle)
-                active              = this.control != '00000000000000000000000000000000'
+                active      = this.control != '00000000000000000000000000000000'
                 this.state  = this.ResConfig
             }
 
@@ -107,7 +107,7 @@ export default class DMA {
                         if (this.count_burst * 16 >= parseInt (this.length, 2) 
                             && this.control != '00000000000000000000000000000000'
                         ) {
-                            this.state = this.DONE
+                            this.state = this.IDLE_state
                             this.println (
                                 this.active_println
                                 ,'Cycle '

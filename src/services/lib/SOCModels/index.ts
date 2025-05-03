@@ -84,11 +84,11 @@ lui t2, 0xfff
 ori t2, t2, 0xfff
 addi t0, zero, 288
 
-// mmio:
-// addi t4, t4, 1
-// sw   t4, 0(t1)
-// addi t1, t1, 4
-// bne  t0, t4, mmio
+mmio:
+addi t4, t4, 1
+sw   t4, 0(t1)
+addi t1, t1, 4
+bne  t0, t4, mmio
 
 // Create base memory map address register: 0x20000 
 addi t1, zero, 0x2
@@ -115,11 +115,12 @@ addi t1, zero, 0x2
 slli t1, t1, 16
 addi t0, zero, 200
 addi t2, zero, 1 
-mmio:
+addi t4, zero, 0
+mmio_:
 addi t4, t4, 1
 sw   t4, 20(t1)
 addi t1, t1, 4
-bne  t0, t4, mmio
+bne  t0, t4, mmio_
 
 `
 // const code              = 

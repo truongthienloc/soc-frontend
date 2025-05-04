@@ -13,9 +13,9 @@ export async function RunAll(this: Soc) {
         this.Memory.Ins_pointer || this.Processor.state != 0 
         || 
         !(
-            this.DMA.control == '00000000000000000000000000000000' || 
-            (this.DMA.control != '00000000000000000000000000000000' 
-            && this.DMA.status == '00000000000000000000000000000001')
+            this.DMA.controlRegister == '00000000000000000000000000000000' || 
+            (this.DMA.controlRegister != '00000000000000000000000000000000' 
+            && this.DMA.statusRegister == '00000000000000000000000000000001')
          )
     ) {
         if (bre == 33170) break

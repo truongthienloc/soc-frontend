@@ -11,31 +11,28 @@ import { FIFO_ChannelA } from '../Interconnect/FIFO_ChannelA'
 import { act } from 'react'
 
 export default class DMA {
-    sourceAddress       : string
-    destinationAddress  : string
-    length              : string
-    control             : string
-    status              : string
+    sourceRegister       : string
+    destRegister  : string
+    lengthRegister              : string
+    controlRegister             : string
+    statusRegister              : string
     state               : number 
-    sendoffset          : number
     DMA_Master          : Master
     DMA_Slave           : Slave
-    DMA_RXbuffer        : FIFO_ChannelD
-    DMA_TXbuffer        : FIFO_ChannelA
+    RX_FIFO        : FIFO_ChannelD
+    TX_FIFO_0        : FIFO_ChannelA
     logger             ?: Logger
     active_println      : boolean
 
     count_burst        = 0
     count_beats        = 0 
-    fifo_to_subInterconnect : FIFO_ChannelD
+    TX_FIFO_1 : FIFO_ChannelD
 
-    STATE_RecPutFrSub = 0
-    IDLE_state        = 0
-    ResponseSubInterconnect = 1
-    sendGET_state         = 2
-    sendPUT_state       =3
-    ResConfig           =4
-    DONE                =5
+
+    REC_state      =   0
+    GET_state       =   1
+    PUT_state       =   2
+    ACK_state       =   3
 
 
 
@@ -48,31 +45,32 @@ export default class DMA {
         , 
     ) {
 
-        if (this.state == this.IDLE_state) {
-            this.DMA_Master.ChannelA.valid = '0'    
-            this.DMA_Master.ChannelD.ready = '1'
-            let subnterConnect2DMA_ = subnterConnect2DMA.peek()
-            let InterConnect2DMA_   = InterConnect2DMA.peek()
-            let active              = this.control != '00000000000000000000000000000000'
-            if (subnterConnect2DMA_.valid == '1') {
-                subnterConnect2DMA_ = subnterConnect2DMA.dequeue()
-                
+        if (this.state == this.REC_state)      {
+            this.DMA_Master.ChannelA.valid  = '0'    
+            this.DMA_Master.ChannelD.ready  = '1'
+            let data_from_sub_interconnect  = subnterConnect2DMA.peek()
+            let data_from_interconncet      = InterConnect2DMA.peek()
+            let active                      = this.controlRegister != '00000000000000000000000000000000'
+            if (data_from_sub_interconnect.valid == '1') {
+                data_from_sub_interconnect  = subnterConnect2DMA.dequeue()
                 this.println (
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
                     +': The DMA is receiving messeage PUT from SUB-INTERCONNECT.'
                 )
-                this.DMA_Slave.receive({...subnterConnect2DMA_})
+                this.DMA_Slave.receive({...data_from_sub_interconnect})
                 this.config (Interconnect_ready, cycle)
-                active      = this.control != '00000000000000000000000000000000'
-                this.state  = this.ResConfig
+                active      = this.controlRegister != '00000000000000000000000000000000'
+                this.state  = this.ACK_state
+                return
             }
 
-            if (InterConnect2DMA_.valid == '1') {
-                InterConnect2DMA_ = InterConnect2DMA.dequeue ()
-                if (InterConnect2DMA_.opcode == '001') {
-                    this.DMA_Master.receive(InterConnect2DMA_)
+            if (data_from_interconncet.valid == '1') {
+                data_from_interconncet = InterConnect2DMA.dequeue ()
+
+                if (data_from_interconncet.opcode == '001') {
+                    this.DMA_Master.receive(data_from_interconncet)
                     this.println (
                         this.active_println
                         ,'Cycle '
@@ -82,15 +80,16 @@ export default class DMA {
                         +')'
                     )
                     this.DMA_Master.ChannelA.valid = '0'
-                    this.DMA_RXbuffer.enqueue(this.DMA_Master.ChannelD)
+                    this.RX_FIFO.enqueue(this.DMA_Master.ChannelD)
                     this.count_beats +=1
                     if (this.count_beats == 4) {
-                        if (active) this.state = this.sendPUT_state
+                        if (active) this.state = this.PUT_state
                         this.count_beats = 0
                     }
-                    else this.state = this.IDLE_state
+                    else this.state = this.REC_state
                 }
-                if (InterConnect2DMA_.opcode == '000') {
+
+                if (data_from_interconncet.opcode == '000') {
                     this.println (
                         this.active_println
                         ,'Cycle '
@@ -98,33 +97,32 @@ export default class DMA {
                         +': The DMA is receiving messeage AccessAck from SUB-INTERCONNET.'
                     )
                     
-                    this.DMA_Master.receive(InterConnect2DMA_)
+                    this.DMA_Master.receive(data_from_interconncet)
                     this.count_beats +=1
                     if (this.count_beats == 4) {
-                        if (active) this.state = this.sendGET_state
+                        if (active) this.state = this.GET_state
                         this.count_beats = 0
                         this.count_burst +=1
-                        if (this.count_burst * 16 >= parseInt (this.length, 2) 
-                            && this.control != '00000000000000000000000000000000'
+                        if (this.count_burst * 16 >= parseInt (this.lengthRegister, 2) 
+                            && this.controlRegister != '00000000000000000000000000000000'
                         ) {
-                            this.state = this.IDLE_state
+                            this.state = this.REC_state
                             this.println (
                                 this.active_println
                                 ,'Cycle '
                                 + cycle.toString() 
                                 +': **************** DMA DONE ****************'
                             )
-                            this.status = '00000000000000000000000000000001'
+                            this.statusRegister = '00000000000000000000000000000001'
                             return
                         }
                     } 
-                    else this.state = this.IDLE_state
-                    
+                    else this.state = this.REC_state
                 }
             }
         }
 
-        if (this.state == this.sendGET_state) {
+        if (this.state == this.GET_state)   {
             this.DMA_Master.ChannelD.ready = '0'
             if (Interconnect_ready) {
                 this.println (
@@ -136,21 +134,21 @@ export default class DMA {
     
                 this.DMA_Master.send(
                     'GET',
-                    (parseInt(this.sourceAddress.slice(-17), 2) + this.count_burst * 16).toString(2).padStart(17, '0'),
+                    (parseInt(this.sourceRegister.slice(-17), 2) + this.count_burst * 16).toString(2).padStart(17, '0'),
                     ''
                 )
     
                 this.DMA_Master.ChannelA.size = '10'
                 this.DMA_Slave.ChannelD.valid = '0'
                 this.DMA_Master.ChannelA.valid = '1'
-                this.DMA_TXbuffer.enqueue ( {...this.DMA_Master.ChannelA})
-                this.state = this.IDLE_state
+                this.TX_FIFO_0.enqueue ( {...this.DMA_Master.ChannelA})
+                this.state = this.REC_state
             }
         }
 
-        if (this.state == this.sendPUT_state) {
-            this.DMA_TXbuffer       = new FIFO_ChannelA ()
-            this.DMA_Master.ChannelD.ready = '0'
+        if (this.state == this.PUT_state)   {
+            this.TX_FIFO_0               = new FIFO_ChannelA ()
+            this.DMA_Master.ChannelD.ready  = '0'
             if (Interconnect_ready) {
                 this.println (
                     this.active_println
@@ -160,14 +158,14 @@ export default class DMA {
                 )
                 this.DMA_Master.send(
                     'PUT',
-                    ((parseInt(this.destinationAddress, 2) + 0 + this.count_burst*16)).toString(2).padStart(17, '0'),
-                    this.DMA_RXbuffer.dequeue().data
+                    ((parseInt(this.destRegister, 2) + 0 + this.count_burst*16)).toString(2).padStart(17, '0'),
+                    this.RX_FIFO.dequeue().data
                 )
                 this.DMA_Master.ChannelA.valid = '1'
                 this.DMA_Master.ChannelD.ready = '0'
                 this.DMA_Master.ChannelA.size  = '10'
                 this.DMA_Slave.ChannelD.valid  = '0'
-                this.DMA_TXbuffer.enqueue ( {...this.DMA_Master.ChannelA})
+                this.TX_FIFO_0.enqueue ( {...this.DMA_Master.ChannelA})
                 // cycle.incr()
     
                 this.println (
@@ -178,14 +176,14 @@ export default class DMA {
                 )
                 this.DMA_Master.send(
                     'PUT',
-                    ((parseInt(this.destinationAddress, 2) + 4  + this.count_burst*16)).toString(2).padStart(17, '0'),
-                    this.DMA_RXbuffer.dequeue().data
+                    ((parseInt(this.destRegister, 2) + 4  + this.count_burst*16)).toString(2).padStart(17, '0'),
+                    this.RX_FIFO.dequeue().data
                 )
                 this.DMA_Master.ChannelA.valid = '1'
                 this.DMA_Master.ChannelD.ready = '0'
                 this.DMA_Master.ChannelA.size  = '10'
                 this.DMA_Slave.ChannelD.valid  = '0'
-                this.DMA_TXbuffer.enqueue ( {...this.DMA_Master.ChannelA})
+                this.TX_FIFO_0.enqueue ( {...this.DMA_Master.ChannelA})
                 // cycle.incr()
     
                 this.println (
@@ -196,13 +194,13 @@ export default class DMA {
                 )
                 this.DMA_Master.send(
                     'PUT',
-                    ((parseInt(this.destinationAddress, 2) + 8  + this.count_burst*16)).toString(2).padStart(17, '0'),
-                    this.DMA_RXbuffer.dequeue().data
+                    ((parseInt(this.destRegister, 2) + 8  + this.count_burst*16)).toString(2).padStart(17, '0'),
+                    this.RX_FIFO.dequeue().data
                 )
                 this.DMA_Master.ChannelA.valid = '1'
                 this.DMA_Master.ChannelA.size  = '10'
                 this.DMA_Slave.ChannelD.valid  = '0'
-                this.DMA_TXbuffer.enqueue ( {...this.DMA_Master.ChannelA})
+                this.TX_FIFO_0.enqueue ( {...this.DMA_Master.ChannelA})
                 // cycle.incr()
     
                 this.println (
@@ -211,21 +209,21 @@ export default class DMA {
                     + cycle.toString() 
                     +': The DMA is sending messeage PUT to INTERCONNET.'
                 )
-                // console.log ('this.destinationAddress', parseInt(this.destinationAddress, 2))
+                // console.log ('this.destRegister', parseInt(this.destRegister, 2))
                 this.DMA_Master.send(
                     'PUT',
-                    ((parseInt(this.destinationAddress, 2) + 12  + this.count_burst*16)).toString(2).padStart(17, '0'),
-                    this.DMA_RXbuffer.dequeue().data
+                    ((parseInt(this.destRegister, 2) + 12  + this.count_burst*16)).toString(2).padStart(17, '0'),
+                    this.RX_FIFO.dequeue().data
                 )
                 this.DMA_Master.ChannelA.valid = '1'
                 this.DMA_Master.ChannelA.size  = '10'
                 this.DMA_Slave.ChannelD.valid  = '0'
-                this.DMA_TXbuffer.enqueue ( {...this.DMA_Master.ChannelA})
-                this.state = this.IDLE_state
+                this.TX_FIFO_0.enqueue ( {...this.DMA_Master.ChannelA})
+                this.state = this.REC_state
             }
         }
 
-        if (this.state == this.ResConfig) {
+        if (this.state == this.ACK_state)   {
             if (subInterconnect_ready) {
                 this.DMA_Slave.send ('AccessAck', '00', '')
                 this.DMA_Slave.ChannelD.sink = '01'
@@ -236,10 +234,10 @@ export default class DMA {
                     +': The DMA is sending messeage AccessAck to SUB-INTERCONNETC.'
                 )
 
-                this.fifo_to_subInterconnect.enqueue({...this.DMA_Slave.ChannelD})
+                this.TX_FIFO_1.enqueue({...this.DMA_Slave.ChannelD})
 
 
-                if (this.control != '00000000000000000000000000000000') {
+                if (this.controlRegister != '00000000000000000000000000000000') {
                     this.println (
                         this.active_println
                         ,'Cycle '
@@ -247,263 +245,44 @@ export default class DMA {
                         +': The DMA is actived.'
                     )
                     this.DMA_Master.ChannelD.ready = '0'
-                    this.state = this.sendGET_state
+                    this.state = this.GET_state
                     return
-                } else this.state = this.IDLE_state
+                } else this.state = this.REC_state
             }
         }
-        // if (this.state == this.STATE_RecPutFrSub) {
-        //     this.DMA_Master.ChannelD.ready ='1'
-        //     let sub2DMA_ = sub2DMA.peek()
-        //     if (sub2DMA_.valid == '1') {
-        //         sub2DMA_ = sub2DMA.dequeue()
-        //         this.println (
-        //             this.active_println
-        //             ,'Cycle '
-        //             + cycle.toString() 
-        //             +': The DMA is receiving messeage PUT from SUB-INTERCONNECT.'
-        //         )
-    
-        //         this.DMA_Slave.receive(sub2DMA_)
-        //         this.config (ready0, cycle)
-        //         if (ready1) {
-        //             this.DMA_Slave.send ('AccessAck', '00', '')
-        //             this.DMA_Slave.ChannelD.sink = '01'
-        //             this.println (
-        //                 this.active_println
-        //                 ,'Cycle '
-        //                 + cycle.toString() 
-        //                 +': The DMA is sending messeage AccessAck to SUB-INTERCONNETC.'
-        //             )
-    
-        //             this.fifo_to_subInterconnect.enqueue({...this.DMA_Slave.ChannelD})
-        //         }
-        //         else {
-        //             this.state = this.STATE_RecPutFrSub
-        //         }
-        //     }
-
-        //     return
-        // }
-
-        // if (this.state == 1) {
-        //     this.DMA_Slave.ChannelD.valid = '0'
-        //     this.state = 0
-        //     return
-        // }
-
-        // if (this.state == 2) {
-        //     this.DMA_TXbuffer       = new FIFO_ChannelA ()
-        //     this.DMA_Master.ChannelD.ready = '0'
-        //     if (this.count_burst * 16 >= parseInt (this.length, 2)) {
-        //         this.state = 0
-        //         this.println (
-        //             this.active_println
-        //             ,'Cycle '
-        //             + cycle.toString() 
-        //             +': **************** DMA DONE ****************'
-        //         )
-        //         this.status = '00000000000000000000000000000001'
-        //         return
-        //     }
-        //     if (ready0) {
-        //         this.println (
-        //             this.active_println
-        //             ,'Cycle '
-        //             + cycle.toString() 
-        //             +': The DMA is sending messeage GET to INTERCONNET.'
-        //         )
-    
-        //         this.DMA_Master.send(
-        //             'GET',
-        //             (parseInt(this.sourceAddress.slice(-17), 2) + this.count_burst * 16).toString(2).padStart(17, '0'),
-        //             ''
-        //         )
-    
-        //         this.DMA_Master.ChannelA.size = '10'
-        //         this.DMA_Slave.ChannelD.valid = '0'
-        //         this.DMA_Master.ChannelA.valid = '1'
-        //         this.DMA_TXbuffer.enqueue ( {...this.DMA_Master.ChannelA})
-        //         this.state += 1
-        //     }
-        //     return 
-        // }
-
-        // if (this.state == 3) {
-            
-        //     this.DMA_Master.ChannelA.valid = '0'
-        //     this.DMA_Master.ChannelD.ready = '1'
-        //     if (InterConnect2DMA.valid == '1'
-        //         && InterConnect2DMA.sink == '0'
-        //     ) {
-
-        //         this.DMA_Master.receive(InterConnect2DMA)
-        //         this.println (
-        //             this.active_println
-        //             ,'Cycle '
-        //             + cycle.toString() 
-        //             +': The DMA is receiving messeage AccessAckData from INTERCONNET. ('
-        //             + BinToHex (this.DMA_Master.ChannelD.data) 
-        //             +')'
-        //         )
-        //         this.DMA_Master.ChannelA.valid = '0'
-
-        //         this.DMA_RXbuffer.enqueue(this.DMA_Master.ChannelD)
-
-        //         this.count_beats +=1
-        //         if (this.count_beats == 4) {
-        //             this.state +=1
-        //             this.count_beats = 0
-        //         }
-        //         else this.state = 3
-        //     }
-        //     return
-        // }
-
-        // if (this.state == 4 && ready0) {
-        //     this.DMA_TXbuffer       = new FIFO_ChannelA ()
-        //     this.DMA_Master.ChannelD.ready = '0'
-        //     if (ready0) {
-        //         this.println (
-        //             this.active_println
-        //             ,'Cycle '
-        //             + cycle.toString() 
-        //             +': The DMA is sending messeage PUT to INTERCONNET.'
-        //         )
-        //         this.DMA_Master.send(
-        //             'PUT',
-        //             ((parseInt(this.destinationAddress, 2) + 0 + this.count_burst*16)).toString(2).padStart(17, '0'),
-        //             this.DMA_RXbuffer.dequeue().data
-        //         )
-        //         this.DMA_Master.ChannelA.valid = '1'
-        //         this.DMA_Master.ChannelD.ready = '0'
-        //         this.DMA_Master.ChannelA.size  = '10'
-        //         this.DMA_Slave.ChannelD.valid  = '0'
-        //         this.DMA_TXbuffer.enqueue ( {...this.DMA_Master.ChannelA})
-        //         // cycle.incr()
-    
-        //         this.println (
-        //             this.active_println
-        //             ,'Cycle '
-        //             + cycle.toString() 
-        //             +': The DMA is sending messeage PUT to INTERCONNET.'
-        //         )
-        //         this.DMA_Master.send(
-        //             'PUT',
-        //             ((parseInt(this.destinationAddress, 2) + 4  + this.count_burst*16)).toString(2).padStart(17, '0'),
-        //             this.DMA_RXbuffer.dequeue().data
-        //         )
-        //         this.DMA_Master.ChannelA.valid = '1'
-        //         this.DMA_Master.ChannelD.ready = '0'
-        //         this.DMA_Master.ChannelA.size  = '10'
-        //         this.DMA_Slave.ChannelD.valid  = '0'
-        //         this.DMA_TXbuffer.enqueue ( {...this.DMA_Master.ChannelA})
-        //         // cycle.incr()
-    
-        //         this.println (
-        //             this.active_println
-        //             ,'Cycle '
-        //             + cycle.toString() 
-        //             +': The DMA is sending messeage PUT to INTERCONNET.'
-        //         )
-        //         this.DMA_Master.send(
-        //             'PUT',
-        //             ((parseInt(this.destinationAddress, 2) + 8  + this.count_burst*16)).toString(2).padStart(17, '0'),
-        //             this.DMA_RXbuffer.dequeue().data
-        //         )
-        //         this.DMA_Master.ChannelA.valid = '1'
-        //         this.DMA_Master.ChannelA.size  = '10'
-        //         this.DMA_Slave.ChannelD.valid  = '0'
-        //         this.DMA_TXbuffer.enqueue ( {...this.DMA_Master.ChannelA})
-        //         // cycle.incr()
-    
-        //         this.println (
-        //             this.active_println
-        //             ,'Cycle '
-        //             + cycle.toString() 
-        //             +': The DMA is sending messeage PUT to INTERCONNET.'
-        //         )
-        //         // console.log ('this.destinationAddress', parseInt(this.destinationAddress, 2))
-        //         this.DMA_Master.send(
-        //             'PUT',
-        //             ((parseInt(this.destinationAddress, 2) + 12  + this.count_burst*16)).toString(2).padStart(17, '0'),
-        //             this.DMA_RXbuffer.dequeue().data
-        //         )
-        //         this.DMA_Master.ChannelA.valid = '1'
-        //         this.DMA_Master.ChannelA.size  = '10'
-        //         this.DMA_Slave.ChannelD.valid  = '0'
-        //         this.DMA_TXbuffer.enqueue ( {...this.DMA_Master.ChannelA})
-        //         // this.DMA_Master.ChannelA.valid = '0'
-    
-        //         this.state += 1
-        //     }
-
-            
-        //     return 
-        // }
-
-        // if (this.state == 5) {
-            
-        //     this.DMA_Master.ChannelA.valid = '0'    
-        //     this.DMA_Master.ChannelD.ready = '1'
-        //     if (InterConnect2DMA.valid == '1'
-        //         && InterConnect2DMA.sink == '1'
-        //     ) {
-        //         this.println (
-        //             this.active_println
-        //             ,'Cycle '
-        //             + cycle.toString() 
-        //             +': The DMA is receiving messeage AccessAck from SUB-INTERCONNET.'
-        //         )
-                
-        //         this.DMA_Master.receive(InterConnect2DMA)
-                
-        //         // console.log ('this.count_beats', this.count_beats)
-        //         this.count_beats +=1
-        //         if (this.count_beats == 4) {
-        //             this.state = 2
-        //             this.count_beats = 0
-        //             this.count_burst +=1
-        //         } else this.state = 5
-        //     }
-
-        //     return
-        // }
 
     }
 
     constructor() {
-        this.sourceAddress      = '00000000000000000000000000000000'
-        this.destinationAddress = '00000000000000000000000000000000'
-        this.length             = '00000000000000000000000000000000'
-        this.control            = '00000000000000000000000000000000'
-        this.status             = '00000000000000000000000000000000'
-        this.state              = 0
-        this.sendoffset         = 0
-        this.DMA_Master         = new Master('DMA_Master', true, '01')
-        this.DMA_Master.ChannelA.size = '10'
-        this.DMA_Slave          = new Slave ('DMA_Slave', true)
-        this.DMA_RXbuffer         = new FIFO_ChannelD ()
-        this.fifo_to_subInterconnect = new FIFO_ChannelD ()
-        this.active_println     = true
-        this.DMA_TXbuffer              = new FIFO_ChannelA ()
+        this.sourceRegister             = '00000000000000000000000000000000'
+        this.destRegister               = '00000000000000000000000000000000'
+        this.lengthRegister             = '00000000000000000000000000000000'
+        this.controlRegister            = '00000000000000000000000000000000'
+        this.statusRegister             = '00000000000000000000000000000000'
+        this.state                      = 0
+        this.DMA_Master                 = new Master('DMA_Master', true, '01')
+        this.DMA_Master.ChannelA.size   = '10'
+        this.DMA_Slave                  = new Slave ('DMA_Slave', true)
+        this.RX_FIFO                    = new FIFO_ChannelD ()
+        this.TX_FIFO_1                  = new FIFO_ChannelD ()
+        this.TX_FIFO_0                  = new FIFO_ChannelA ()
+        this.active_println             = true
 
     }
     
     public reset () {
-        this.sourceAddress      = '00000000000000000000000000000000'
-        this.destinationAddress = '00000000000000000000000000000000'
-        this.length             = '00000000000000000000000000000000'
-        this.control            = '00000000000000000000000000000000'
-        this.status             = '00000000000000000000000000000000'
-        this.state              = 0
-        this.sendoffset         = 0
-        this.DMA_Master         = new Master('DMA_Master', true, '01')
-        this.DMA_Master.ChannelA.size = '10'
-        this.DMA_Slave          = new Slave ('DMA_Slave', true)
-        this.DMA_RXbuffer       = new FIFO_ChannelD ()
-        this.active_println     = true
-        this.DMA_TXbuffer       = new FIFO_ChannelA ()
+        this.sourceRegister              = '00000000000000000000000000000000'
+        this.destRegister         = '00000000000000000000000000000000'
+        this.lengthRegister                     = '00000000000000000000000000000000'
+        this.controlRegister                    = '00000000000000000000000000000000'
+        this.statusRegister                     = '00000000000000000000000000000000'
+        this.state                      = 0
+        this.DMA_Master                 = new Master('DMA_Master', true, '01')
+        this.DMA_Master.ChannelA.size   = '10'
+        this.DMA_Slave                  = new Slave ('DMA_Slave', true)
+        this.RX_FIFO               = new FIFO_ChannelD ()
+        this.active_println             = true
+        this.TX_FIFO_0               = new FIFO_ChannelA ()
     }
     
     public println(active: boolean, ...args: string[]) {
@@ -530,7 +309,7 @@ export default class DMA {
         const data    = this.DMA_Slave.ChannelA.data
         // Kiểm tra địa chỉ và dữ liệu có hợp lệ không
         if (address.length !== 18 || data.length !== 32) {
-            console.log("Invalid address or data length", address,data.length  )
+            console.log("Invalid address or data lengthRegister", address,data.length  )
             return
         }
 
@@ -539,16 +318,16 @@ export default class DMA {
 
         switch (hexAddress) {
             case '0x00020000':
-                this.sourceAddress = data
+                this.sourceRegister = data
                 break
             case '0x00020004':
-                this.destinationAddress = data
+                this.destRegister = data
                 break
             case '0x00020008':
-                this.length = data
+                this.lengthRegister = data
                 break
             case '0x0002000C':
-                this.control = data
+                this.controlRegister = data
                 break
             default:
                 console.log("Invalid address for configuration: " + hexAddress)

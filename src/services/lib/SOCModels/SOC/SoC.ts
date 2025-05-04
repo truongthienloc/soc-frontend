@@ -174,7 +174,7 @@ export default class Soc {
         
         this.Bus0.Run (
             this.Processor.FIFO.dequeue()
-            ,this.DMA.DMA_TXbuffer
+            ,this.DMA.TX_FIFO_0
             ,this.Memory.burst
             ,this.Bridge.Bridge_slave.ChannelD
             //valid signal
@@ -201,7 +201,7 @@ export default class Soc {
         
         this.Bus1.Run (
             this.Bridge.fifo_to_subInterconnect
-            , this.DMA.fifo_to_subInterconnect
+            , this.DMA.TX_FIFO_1
             , this.Led_matrix.Matrix_Slave.ChannelD
             , this.Bridge.Bridge_master.ChannelA.valid      == '1'
             , this.Led_matrix.ready
@@ -232,7 +232,7 @@ export default class Soc {
 
             this.Bus0.Run (
                 this.Processor.FIFO.dequeue()
-                ,this.DMA.DMA_TXbuffer
+                ,this.DMA.TX_FIFO_0
                 ,this.Memory.burst
                 ,this.Bridge.Bridge_slave.ChannelD
                 //valid signal
@@ -280,7 +280,7 @@ export default class Soc {
 
             this.Bus1.Run (
                 this.Bridge.fifo_to_subInterconnect
-                , this.DMA.fifo_to_subInterconnect
+                , this.DMA.TX_FIFO_1
                 , this.Led_matrix.Matrix_Slave.ChannelD
                 , this.Bridge.Bridge_master.ChannelA.valid      == '1'
                 , this.Led_matrix.ready

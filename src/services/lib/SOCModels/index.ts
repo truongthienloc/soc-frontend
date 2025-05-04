@@ -105,7 +105,7 @@ sw   t0, 16(t1)      // Led control register at address: 0x20010.
 dma:
 lui  t5, 0x1c         // Create DMA source register's value.
 sw   t5, 0(t1)        // DMA source register 
-addi t6, zero, 0x140     // Create DMA destination register's value.
+addi t6, zero, 0x140  // Create DMA destination register's value.
 sw   t6, 4(t1)        // DMA destination register.
 addi t0, zero, 0x480  // Create DMA length register value.
 sw   t0, 8(t1)        // DMA length register.
@@ -238,3 +238,60 @@ SOC.assemble(
 
 
 SOC.RunAll()
+const text =
+`.text
+
+lui t0, 0x3 // Create page table base address
+page_table_allocate:
+addi t1, zero, 0x0009    // first page table for instructions with PPN = 0x0000, executable = 1, valid = 1
+sw   t1, 0(t0)
+lui  t1, 0x7
+addi t1, t1, 0x7	// first page table for data with PPN = 0x0000, executable = 1, valid = 1
+sw   t1, 112(t0)
+
+main:
+lui   s0, 0x80003      // active MMU
+csrrw zero, satp, s0
+lui   t1, 0x1c		//create base address to write memory
+addi  t0, zero, 288
+
+write_to_memory:
+	addi t4, t4, 1
+	sw   t4, 0(t1)
+	addi t1, t1, 4
+	bne  t0, t4, write_to_memory
+
+addi t1, zero, 0x2	// create base address to config led
+slli t1, t1, 16
+addi t0, zero, 1
+csrrw zero, satp, zero	//disactive MMU
+
+config_led:
+	sw   t0, 16(t1)     
+	addi t1, zero, 0x2 //active led
+
+csrrw zero, satp, s0 // active MMU
+slli t1, t1, 16
+addi t0, zero, 200
+addi t2, zero, 1 
+addi t4, zero, 0
+
+write_to_led:	
+	addi t4, t4, 1
+	sw   t4, 20(t1)
+	addi t1, t1, 4
+	bne  t0, t4, write_to_led
+
+csrrw zero, satp, zero
+addi t1, zero, 0x2
+slli t1, t1, 16
+
+dma:
+	lui  t5, 0x1c         // Create DMA source register's value.
+	sw   t5, 0(t1)        // DMA source register 
+	addi t6, zero, 0x140  // Create DMA destination register's value.
+	sw   t6, 4(t1)        // DMA destination register.
+	addi t0, zero, 0x480  // Create DMA length register value.
+	sw   t0, 8(t1)        // DMA length register.
+	sw   t0, 12(t1)       // DMA control register (non-zero = active).
+`

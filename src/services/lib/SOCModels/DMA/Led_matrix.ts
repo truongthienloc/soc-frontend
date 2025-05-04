@@ -8,24 +8,24 @@ export default class LEDMatrix {
 
     controlRegister : string
     dataRegisters   : string[]
-    matrix_buffer   : string[]
+
     Matrix_Slave    : Slave
-    active          : boolean
     state           : number
     logger         ?: Logger
     active_println  : boolean
-    led             ?: LedMatrix
-    count_beats      = 0
+    led            ?: LedMatrix
+    count_beats     = 0
     ready           : boolean
+
+    REC_state       = 0
+    RES_state       = 1
 
     constructor() {
         this.controlRegister            = '00000000000000000000000000000000'
         this.dataRegisters              = Array(288).fill('00000000000000000000000000000000')
-        this.matrix_buffer              = Array(96).fill('00000000000000000000000000000000')
         this.Matrix_Slave               = new Slave('Matrix_Slave', true)
         this.Matrix_Slave.ChannelD.sink = '1'
         this.state                      = 0
-        this.active                     = false
         this.active_println             = true
         this.ready                      = false
         // this.led                        = new LedMatrix ('.led-matrix')
@@ -39,12 +39,10 @@ export default class LEDMatrix {
     public reset () {
         this.controlRegister            = '00000000000000000000000000000000'
         this.dataRegisters              = Array(288).fill('00000000000000000000000000000000')
-        this.matrix_buffer              = Array(96).fill('00000000000000000000000000000000')
         // this.Matrix_Slave               = new Slave('Matrix_Slave', true)
         this.Matrix_Slave.ChannelD.sink = '1'
         this.state                      = 0
         this.ready                      = false
-        this.active                     = false
         this.active_println             = true
         this.led?.clear()
     }
@@ -65,15 +63,15 @@ export default class LEDMatrix {
     }
 
     public Run (
-        ChannelA: ChannelA
+        data_from_sub_interconnect: ChannelA
         , cycle : Cycle
         , ready : boolean
     ) {
 
-        if (this.state == 0) {
+        if (this.state == this.REC_state) {
             this.Matrix_Slave.ChannelD.valid = '0'
             this.ready = true
-            if (ChannelA.valid == '1') {
+            if (data_from_sub_interconnect.valid == '1') {
 
                 this.println (this.active_println,
                     'Cycle '             +
@@ -81,21 +79,20 @@ export default class LEDMatrix {
                     ': The LED-MATRIX is receiving a PUT message from the INTERCONNECT.'
                 )
 
-                this.Matrix_Slave.receive (ChannelA)
+                this.Matrix_Slave.receive (data_from_sub_interconnect)
                 if (parseInt (this.Matrix_Slave.ChannelA.address, 2) == 0x20010) {
                     this.controlRegister = this.Matrix_Slave.ChannelA.data
                 } else {
                     this.writeData (this.Matrix_Slave.ChannelA.address, this.Matrix_Slave.ChannelA.data)
                 }
                 
-                this.state = 1
+                this.state = this.RES_state
                 this.ready = false
             }
-            
             return
         }
 
-        if (this.state == 1) {
+        if (this.state == this.RES_state) {
             this.ready = false
             if (ready) {
                 this.println   (
@@ -107,13 +104,12 @@ export default class LEDMatrix {
                 this.Matrix_Slave.send ('AccessAck', this.Matrix_Slave.ChannelA.source, '')
                 this.Matrix_Slave.ChannelD.valid = '1'
                 this.Matrix_Slave.ChannelD.sink  = '1'
-                this.state = 0
+                this.state = this.REC_state
             }
             this.ready = false
 
             return
         }
-
     }
 
     writeData(address: string, data: string) {

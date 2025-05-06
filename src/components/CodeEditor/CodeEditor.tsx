@@ -1,19 +1,28 @@
 'use client'
 
-import dynamic from 'next/dynamic'
-import { useRef, useEffect, useCallback, useLayoutEffect } from 'react'
+import { useRef, useEffect, useCallback } from 'react'
+import useBreakpointManagement, {
+  applyBreakpointsToEditor,
+} from '~/hooks/code-editor/useBreakpointManagement'
 import { defineMode } from '~/services/codemirror'
-// import CodeMirror from 'codemirror'
-// import 'codemirror/addon/mode/simple'
 
 interface CodeEditorProps {
   value?: string
   onChange?: (value: string) => void
   disable?: boolean
   hidden?: boolean
+  breakpoints?: number[]
+  setBreakpoints?: React.Dispatch<React.SetStateAction<number[]>>
 }
 
-function CodeEditor({ value = '', onChange, disable = false, hidden }: CodeEditorProps) {
+function CodeEditor({
+  value = '',
+  onChange,
+  disable = false,
+  hidden,
+  breakpoints,
+  setBreakpoints,
+}: CodeEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const codeRef = useRef<CodeMirror.EditorFromTextArea>()
@@ -33,19 +42,38 @@ function CodeEditor({ value = '', onChange, disable = false, hidden }: CodeEdito
       return
     }
 
-    const code = CodeMirror.fromTextArea(textareaRef.current, {
+    const editor = CodeMirror.fromTextArea(textareaRef.current, {
       mode: 'risc-v',
       theme: 'codewars',
       lineNumbers: true,
+      gutters: ['breakpoints'],
     })
-    codeRef.current = code
+    codeRef.current = editor
 
-    code.setSize('100%', '100%')
+    /** Breakpoint Listener */
+    editor.on('gutterClick', function (instance, line) {
+      const info = instance.lineInfo(line)
+      const hasBreakpoint = info.gutterMarkers && info.gutterMarkers.breakpoints
+      if (hasBreakpoint) {
+        setBreakpoints?.((prev) => prev.filter((l) => l !== line))
+      } else {
+        setBreakpoints?.((prev) => [...prev, line])
+      }
+    })
 
-    code.on('change', (ins) => {
+    /** Initialize breakpoints */
+    if (breakpoints) {
+      applyBreakpointsToEditor(editor, breakpoints)
+    }
+
+    editor.setSize('100%', '100%')
+
+    editor.on('change', (ins) => {
       onChange?.(ins.getValue())
     })
-  }, [value])
+  }, [value, breakpoints])
+
+  useBreakpointManagement({ breakpoints, editor: codeRef.current, hidden })
 
   useEffect(() => {
     if (isStart.current && !hidden) {
@@ -65,6 +93,7 @@ function CodeEditor({ value = '', onChange, disable = false, hidden }: CodeEdito
       }
     } else {
       codeRef.current.refresh()
+      console.log('codeRef.current.refresh: ', codeRef.current)
     }
   }, [value, disable, hidden])
 

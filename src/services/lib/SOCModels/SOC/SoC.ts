@@ -128,15 +128,14 @@ export default class Soc {
         code               : string 
         ,required_mem       : number
         ,Mem_tb             : Register[]
-        ,TLB                : TLBEntries[]
-        ,stap               : number
+        ,break_point        : number[]
+
         ) {
         return assemble.bind(this) (
             code                 
             ,required_mem                
             ,Mem_tb             
-            ,TLB                
-            ,stap                                          
+            ,break_point                                       
         )
     }
 

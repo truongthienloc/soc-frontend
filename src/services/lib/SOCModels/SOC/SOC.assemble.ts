@@ -3,7 +3,7 @@ import Soc from "../SOC/SoC"
 import { TLBEntries } from "../Compile/soc.d"
 import LedMatrix from '../../control/LedMatrix'
 import BuddyAllocator from "../Memory/BuddyAllocator"
-import { ConstructionOutlined, Monitor } from "@mui/icons-material"
+import { CommentBankSharp, ConstructionOutlined, Monitor } from "@mui/icons-material"
 
 
 export function assemble(
@@ -11,8 +11,7 @@ export function assemble(
                 ,code               : string 
                 ,required_mem       : number
                 ,Mem_tb             : Register[]
-                ,TLB                : TLBEntries[]
-                ,stap               : number
+                ,break_point        : number[]
     ) {
 
     //****************SYNC ACTIVED MODEL VS VIEW****************
@@ -25,8 +24,9 @@ export function assemble(
     }
     
     //****************CHECK SYNTAX ERROR****************
+
     this.Assembler.reset()
-    this.Assembler.assemblerFromIns(code)                             
+    this.Assembler.assemblerFromIns(code, break_point.sort()[0])                       
     
     //****************SET INITIAL STATUS****************
     // SET INITIAL DATA

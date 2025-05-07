@@ -220,18 +220,8 @@ SOC.Memory.active       = true
 SOC.assemble(
             code                                     // ,code               : string 
             ,32 * 4096                               // ,required_mem       : number
-            ,[]                                      // ,Mem_tb             : Register[]
-            ,[
-                [0, 0, 0, 0]
-                ,[0, 0, 0, 0]
-                ,[0, 0, 0, 0]
-                ,[0, 0, 0, 0]
-                ,[0, 0, 0, 0]
-                ,[0, 0, 0, 0]
-                ,[0, 0, 0, 0]
-                ,[0, 0, 0, 0]
-            ]                                       // ,TLB                : TLBEntries[]
-            ,0x0003000                             // ,stap               : number
+            ,[]                                      // ,Mem_tb             : Register[]                                      // ,TLB                : TLBEntries[]
+            ,[]                             // ,stap               : number
         )
 // console.log (SOC.Processor.InsLength)
 // console.log (SOC.Processor.pc)

@@ -19,9 +19,11 @@ export default class Assembler {
     public binary_code: string[] = []
     public Instructions: string[] = []
     public syntax_error: boolean
+    public break_point : number
     constructor() {
-        this.binary_code = []
-        this.syntax_error = false
+        this.binary_code    = []
+        this.syntax_error   = false
+        this.break_point    = Infinity
     }
     private register: Registers = {
         x0: '00000',
@@ -307,12 +309,14 @@ export default class Assembler {
 
     public handlerString(input: string): string {
         let string = input
+        // console.log('string', string)
         if (string.includes('//')) {
             string = string.split('//')[0]
         }
         if (string.includes('#')) {
             string = string.split('#')[0]
         }
+        
         string = string
             .replace(/\(|\)|,/g, ' ')
             .trim()
@@ -621,10 +625,25 @@ export default class Assembler {
         return imm + rd + opcode
     }
 
-    public assemblerFromIns(code: string) {
+    public assemblerFromIns(code: string, break_point: number) {
         const string = code
         let result = ''
+        console.log('code', code)
         const ins = string.split('\n')
+        console.log('ins', ins)
+        this.break_point = break_point
+        for (let i = 0; i < ins.length; i++) {
+            if ((ins[i]=='.text'||ins[i] ==''
+                ||ins[i].split('//')[0]  == ''
+                ||ins[i].split('#')[0]   == ''
+                ||ins[i].includes(':')
+                ) && i < break_point
+            ) {
+                this.break_point --
+            }
+        }
+        
+        console.log('first break', this.break_point)
 
         let PC = 0
         let pos = 0
@@ -637,9 +656,11 @@ export default class Assembler {
         }
 
         for (let i = pos + 1; i < ins.length; i++) {
+            // console.log('ins[i]', ins[i])
             ins[i] = this.handlerString(ins[i])
-            console.log('ins[i]', ins[i])
+            
             if (ins[i] === ' ' || ins[i] === '' || ins[i] === '\n') {
+                // if (i < this.break_point) this.break_point --
                 continue
             }
             const li = ins[i].split(' ')
@@ -703,7 +724,7 @@ export default class Assembler {
             }
 
             const type = ['R', 'I', 'S', 'SB', 'U', 'UJ']
-
+            // console.log('this.syntax_error', this.syntax_error)
             if (!type.includes(this.FMT[t[0]]) && ins[i].charAt(ins[i].length - 1) !== ':') {
                 this.syntax_error = true
             }
@@ -714,5 +735,6 @@ export default class Assembler {
         console.log('Address: ', this.address, this.syntax_error)
         this.binary_code = result.split('\n')
         console.log ('binary code', this.binary_code)
+        console.log ('break_point', this.break_point)
     }
 }

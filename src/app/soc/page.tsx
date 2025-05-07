@@ -394,11 +394,7 @@ export default function SocPage({}: Props) {
         code,
         requirementMem,
         memoryData.map((mem) => ({ name: hexToBinary(mem.name), value: hexToBinary(mem.value) })),
-        tlbEntries,
-        parseInt(tlb.pointer, 16),
-        // parseInt(dmaConfigs.src, 16),
-        // parseInt(dmaConfigs.len, 16),
-        // parseInt(dmaConfigs.des, 16),
+        breakpoints
       )
     ) {
       toast.error('Syntax error')

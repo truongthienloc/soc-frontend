@@ -101,6 +101,9 @@ export default function SocPage({}: Props) {
   /** Keyboard */
   const [isKeyboardWaiting, setIsKeyboardWaiting] = useState(false)
 
+  /** Breakpoint */
+  const [breakpoints, setBreakpoints] = useState<number[]>([])
+
   useEffect(() => {
     const socCode = localStorage.getItem('soc_code') ?? ''
     setTimeout(() => {
@@ -560,6 +563,8 @@ export default function SocPage({}: Props) {
                         onChange={handleChangeCode}
                         disable={disableCodeEditor}
                         hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex !== 0}
+                        breakpoints={breakpoints}
+                        setBreakpoints={setBreakpoints}
                       />
                     )}
                   </div>
@@ -587,6 +592,8 @@ export default function SocPage({}: Props) {
                         onChange={handleChangeCode}
                         disable={disableCodeEditor}
                         hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex !== 4}
+                        breakpoints={breakpoints}
+                        setBreakpoints={setBreakpoints}
                       />
                     )}
                   </div>
@@ -594,17 +601,22 @@ export default function SocPage({}: Props) {
                     <Datapath data={stepColors} />
                   </div>
                 </div>
-                <div className="relative"> {/* hoặc div bọc toàn bộ vùng panel */}
-                {/* Các nội dung khác: code editor, hình vẽ datapath, v.v. */}
-
-                <div className="absolute bottom-2 right-4 flex flex-col items-end text-xs text-red-500 z-10">
-                  <span className="mb-1 font-semibold">ⓘ This is ONLY a reference function and may NOT be accurate.</span>
-                  <span className="mb-1 font-semibold">It is intended to illustrate how RV32I instructions can be executed,</span>
-                  <span className="mb-1 font-semibold">but does NOT reflect the actual schematic of the system.</span>
+                <div className="relative">
+                  {' '}
+                  {/* hoặc div bọc toàn bộ vùng panel */}
+                  {/* Các nội dung khác: code editor, hình vẽ datapath, v.v. */}
+                  <div className="absolute bottom-2 right-4 z-10 flex flex-col items-end text-xs text-red-500">
+                    <span className="mb-1 font-semibold">
+                      ⓘ This is ONLY a reference function and may NOT be accurate.
+                    </span>
+                    <span className="mb-1 font-semibold">
+                      It is intended to illustrate how RV32I instructions can be executed,
+                    </span>
+                    <span className="mb-1 font-semibold">
+                      but does NOT reflect the actual schematic of the system.
+                    </span>
+                  </div>
                 </div>
-
-                
-              </div>
               </TabPanel>
               <TabPanel
                 index={3}
@@ -622,6 +634,8 @@ export default function SocPage({}: Props) {
                       onChange={handleChangeCode}
                       disable={disableCodeEditor}
                       hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex !== 2}
+                      breakpoints={breakpoints}
+                      setBreakpoints={setBreakpoints}
                     />
                   )}
                 </div>
@@ -647,6 +661,8 @@ export default function SocPage({}: Props) {
                         onChange={handleChangeCode}
                         disable={disableCodeEditor}
                         hidden={showSimulatorType !== 'CODE_EDITOR' || tabIndex !== 1}
+                        breakpoints={breakpoints}
+                        setBreakpoints={setBreakpoints}
                       />
                     )}
                   </div>

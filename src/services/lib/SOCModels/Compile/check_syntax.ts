@@ -638,6 +638,7 @@ export default class Assembler {
 
         for (let i = pos + 1; i < ins.length; i++) {
             ins[i] = this.handlerString(ins[i])
+            console.log('ins[i]', ins[i])
             if (ins[i] === ' ' || ins[i] === '' || ins[i] === '\n') {
                 continue
             }

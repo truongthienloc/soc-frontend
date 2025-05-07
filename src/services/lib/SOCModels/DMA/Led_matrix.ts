@@ -39,7 +39,7 @@ export default class LEDMatrix {
     public reset () {
         this.controlRegister            = '00000000000000000000000000000000'
         this.dataRegisters              = Array(288).fill('00000000000000000000000000000000')
-        // this.Matrix_Slave               = new Slave('Matrix_Slave', true)
+        this.Matrix_Slave               = new Slave('Matrix_Slave', true)
         this.Matrix_Slave.ChannelD.sink = '1'
         this.state                      = 0
         this.ready                      = false

@@ -1,5 +1,7 @@
 // import fs from 'fs'
 
+import { assemble } from "../SOC/SOC.assemble"
+
 interface Registers {
     [key: string]: string
 }
@@ -584,6 +586,7 @@ export function assemblerFromIns(code: string): string[] {
 
     for (let i = pos + 1; i < ins.length; i++) {
         ins[i] = handler_string(ins[i])
+        console.log('ins[i]', ins[i])
         const t = ins[i].split(' ')
         if (t.length < 2) {
             continue

@@ -265,11 +265,11 @@ export default function SocPage({}: Props) {
     ])
     setStepColors(modelColors2ViewColors(socModelRef.current.Processor.lineColor))
     /** DMA */
-    dmaConfigs.setDes(BinToHex_without0x(socModelRef.current.DMA.destinationAddress))
-    dmaConfigs.setSrc(BinToHex_without0x(socModelRef.current.DMA.sourceAddress))
-    dmaConfigs.setLen(BinToHex_without0x(socModelRef.current.DMA.length))
-    dmaConfigs.setCtrl(BinToHex_without0x(socModelRef.current.DMA.control))
-    dmaConfigs.setSta(BinToHex_without0x(socModelRef.current.DMA.status))
+    dmaConfigs.setDes(BinToHex_without0x(socModelRef.current.DMA.destRegister))
+    dmaConfigs.setSrc(BinToHex_without0x(socModelRef.current.DMA.sourceRegister ))
+    dmaConfigs.setLen(BinToHex_without0x(socModelRef.current.DMA.lengthRegister ))
+    dmaConfigs.setCtrl(BinToHex_without0x(socModelRef.current.DMA.controlRegister ))
+    dmaConfigs.setSta(BinToHex_without0x(socModelRef.current.DMA.statusRegister ))
     /** Led Matrix */
     dmaConfigs.setLedCtrl(BinToHex_without0x(socModelRef.current.Led_matrix.controlRegister))
     // setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))

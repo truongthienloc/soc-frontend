@@ -71,7 +71,7 @@ page_table_ins:
 addi t1, zero, 0x0009       // first page table for instructions with PPN = 0x0000, executable = 1, valid = 1
 sw   t1, 0(t0)
 
-page_table_peri:
+page_table_data:
 lui  t1, 0x7
 addi t1, t1, 0x7
 sw   t1, 112(t0)
@@ -113,9 +113,10 @@ sw   t0, 12(t1)       // DMA control register (non-zero = active).
 
 addi t1, zero, 0x2
 slli t1, t1, 16
-addi t0, zero, 200
+addi t0, zero, 288
 addi t2, zero, 1 
 addi t4, zero, 0
+
 mmio_:
 addi t4, t4, 1
 sw   t4, 20(t1)
@@ -237,7 +238,7 @@ SOC.assemble(
 
 
 
-SOC.RunAll()
+// SOC.RunAll()
 const text =
 `.text
 

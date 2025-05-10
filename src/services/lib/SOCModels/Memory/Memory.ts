@@ -292,7 +292,7 @@ export default class Memory {
             }
         }
 
-        this.Ins_pointer += (Object.values(Instruction_memory).length - 1) * 4
+        this.Ins_pointer = (Object.values(Instruction_memory).length - 1) * 4
     }
 
     public GetMemory() {

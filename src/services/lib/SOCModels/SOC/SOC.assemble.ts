@@ -13,7 +13,7 @@ export function assemble(
                 ,Mem_tb             : Register[]
                 ,break_point        : number[]
     ) {
-
+        console.log('break_point', break_point)
     //****************SYNC ACTIVED MODEL VS VIEW****************
     if (this.view) {
         this.Processor.active   = this.view.cpuModule.getActivated()
@@ -40,7 +40,7 @@ export function assemble(
     this.Memory.SetInstructionMemory(this.Assembler.binary_code) 
 
     if (break_point.length != 0) 
-        this.Processor.InsLength = this.Assembler.break_point * 4
+        this.Processor.InsLength = (this.Assembler.break_point + 1) * 4
     else
         this.Processor.InsLength = this.Memory.Ins_pointer
 

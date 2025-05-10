@@ -221,7 +221,7 @@ SOC.assemble(
             code                                     
             ,32 * 4096                               
             ,[]                                                                                     
-            ,[8]                            
+            ,[]                            
         	)
 
 SOC.RunAll()

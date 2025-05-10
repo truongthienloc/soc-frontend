@@ -628,22 +628,9 @@ export default class Assembler {
     public assemblerFromIns(code: string, break_point: number) {
         const string = code
         let result = ''
-        console.log('code', code)
         const ins = string.split('\n')
-        console.log('ins', ins)
         this.break_point = break_point
-        for (let i = 0; i < ins.length; i++) {
-            if ((ins[i]=='.text'||ins[i] ==''
-                ||ins[i].split('//')[0]  == ''
-                ||ins[i].split('#')[0]   == ''
-                ||ins[i].includes(':')
-                ) && i < break_point
-            ) {
-                this.break_point --
-            }
-        }
-        
-        console.log('first break', this.break_point)
+
 
         let PC = 0
         let pos = 0
@@ -655,8 +642,21 @@ export default class Assembler {
             pos++
         }
 
+        for (let i = pos; i < ins.length; i++) {
+            if ((ins[i]=='.text'||ins[i] ==''
+                ||ins[i].split('//')[0]  == ''
+                ||ins[i].split('#')[0]   == ''
+                ||ins[i].includes(':')
+                ) && i < break_point
+            ) {
+                this.break_point --
+                console.log('ins[i]', ins[i])
+                console.log('this.break_point', this.break_point)
+            }
+        }
+
         for (let i = pos + 1; i < ins.length; i++) {
-            // console.log('ins[i]', ins[i])
+            
             ins[i] = this.handlerString(ins[i])
             
             if (ins[i] === ' ' || ins[i] === '' || ins[i] === '\n') {
@@ -732,9 +732,7 @@ export default class Assembler {
                 
             result += string + '\n'
         }
-        console.log('Address: ', this.address, this.syntax_error)
+
         this.binary_code = result.split('\n')
-        console.log ('binary code', this.binary_code)
-        console.log ('break_point', this.break_point)
     }
 }

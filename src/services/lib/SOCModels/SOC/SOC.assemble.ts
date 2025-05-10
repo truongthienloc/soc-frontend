@@ -26,7 +26,7 @@ export function assemble(
     //****************CHECK SYNTAX ERROR****************
 
     this.Assembler.reset()
-    this.Assembler.assemblerFromIns(code, break_point.sort()[0])                       
+    this.Assembler.assemblerFromIns(code, break_point.sort()[0])        
     
     //****************SET INITIAL STATUS****************
     // SET INITIAL DATA
@@ -37,10 +37,13 @@ export function assemble(
     this.Led_matrix.reset ()
     this.DMA.reset()
     this.Memory.reset (Mem_tb)
-    console.log ('Mem_tb', Mem_tb)
     this.Memory.SetInstructionMemory(this.Assembler.binary_code) 
 
-    this.Processor.InsLength = this.Memory.Ins_pointer
+    if (break_point.length != 0) 
+        this.Processor.InsLength = this.Assembler.break_point * 4
+    else
+        this.Processor.InsLength = this.Memory.Ins_pointer
+
     this.Processor.MMU.Set(
         [
              [0, 0, 0, 0, 0, 0, 0]
@@ -56,8 +59,6 @@ export function assemble(
         , this.Allocator.allocate(required_mem)                  
     )
 
-    // console.log (this.Allocator.allocate(required_mem))
-    // console.log (this.Processor.MMU.endAddress)
 
     for (let i of this.Assembler.Instructions)
         if (i != '.text' && i != '') this.Assembly_code.push(i)
@@ -70,7 +71,6 @@ export function assemble(
     }
 
     this.Processor.keyBoard_waiting = false
-    console.log (this.Processor.pc, this.cycle.cycle, this.MMU.satp)
     this.println('Cycle ', this.cycle.toString(), ': System is setting up')
     console.log('Cycle ', this.cycle.toString(), ': System is setting up')
 

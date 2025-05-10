@@ -221,12 +221,6 @@ export default class Memory {
                 this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(8,16)
                 this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(16,24)
                 this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(24,32)
-                // console.log ( 'memory'+
-                //     this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')]
-                //     + this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')]
-                //     + this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')]
-                //     + this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
-                // )
                 this.state   = this.IDLE_STATE
                 cycle.incr()
             }
@@ -257,26 +251,7 @@ export default class Memory {
         // MEMORY AREA OF Kernel
         for (let i = 0; i < 0X1FFFF  + 1; i+=1) 
             this.Memory[i.toString(2).padStart(17,'0')] = '0'.padStart(8,'0')
-        
-        // for (const element of Mem_tb) 
-        //     this.Memory[element.name] = element.value   
-
-        // this.setPageNumber ()
     }
-
-
-
-    // public setPageNumber () {
-    //     let count = 0
-    //     const PageTablePointer = 0x0003000
-    //     for (let i = PageTablePointer; i < (PageTablePointer + 64); i+=4) { 
-    //         this.Memory[(i+3).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(0,8)
-    //         this.Memory[(i+2).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(8,16)
-    //         this.Memory[(i+1).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(16,24)
-    //         this.Memory[(i+0).toString(2).padStart(17,'0')] = (0X0C000 + count*4096).toString(2).padStart(32,'0').slice(24,32)
-    //         count ++ 
-    //     }
-    // }
 
     public getPageNumber (): Register[] {
         const result: Register[]    = []

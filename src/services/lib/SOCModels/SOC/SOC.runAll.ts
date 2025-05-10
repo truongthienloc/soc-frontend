@@ -8,9 +8,10 @@ export async function RunAll(this: Soc) {
         return
     }
     let bre = 0
+    console.log ('this.Processor.InsLength', this.Processor.InsLength)
     while (
         this.Processor.pc <
-        this.Memory.Ins_pointer || this.Processor.state != 0 
+        this.Processor.InsLength || this.Processor.state != 0 
         || 
         !(
             this.DMA.controlRegister == '00000000000000000000000000000000' || 

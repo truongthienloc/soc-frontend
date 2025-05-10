@@ -36,7 +36,7 @@ export default class RiscVProcessor {
     pre_pc                      = 0
     pc                          = 0
     active_println              : boolean
-    FIFO                        = new FIFO_ChannelA() 
+    FIFO                        = new FIFO_ChannelA()
 
     public static PROCESSOR_EVENT = {KEY_WAITING: 'KEY_WAITING', KEY_FREE: 'KEY_FREE'}
     event = new EventEmitter ()

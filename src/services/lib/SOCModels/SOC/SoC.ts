@@ -54,6 +54,7 @@ export default class Soc {
     disabled: boolean = false
     
     Assembly_code: any
+
     logger?: Logger
     active_keyboard: any
     active_monitor: any

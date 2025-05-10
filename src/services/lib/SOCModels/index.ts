@@ -218,17 +218,13 @@ SOC.Bus1.active         = true
 SOC.Memory.active       = true
 
 SOC.assemble(
-            code                                     // ,code               : string 
-            ,32 * 4096                               // ,required_mem       : number
-            ,[]                                      // ,Mem_tb             : Register[]                                      // ,TLB                : TLBEntries[]
-            ,[]                             // ,stap               : number
-        )
-// console.log (SOC.Processor.InsLength)
-// console.log (SOC.Processor.pc)
+            code                                     
+            ,32 * 4096                               
+            ,[]                                                                                     
+            ,[8]                            
+        	)
 
-
-
-// SOC.RunAll()
+SOC.RunAll()
 const text =
 `.text
 

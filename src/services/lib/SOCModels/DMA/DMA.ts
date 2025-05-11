@@ -94,7 +94,7 @@ export default class DMA {
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': The DMA is receiving messeage AccessAck from SUB-INTERCONNET.'
+                        +': The DMA is receiving messeage AccessAck from INTERCONNECT.'
                     )
                     
                     this.DMA_Master.receive(data_from_interconncet)
@@ -168,12 +168,6 @@ export default class DMA {
                 this.TX_FIFO_0.enqueue ( {...this.DMA_Master.ChannelA})
                 // cycle.incr()
     
-                this.println (
-                    this.active_println
-                    ,'Cycle '
-                    + cycle.toString() 
-                    +': The DMA is sending messeage PUT to INTERCONNET.'
-                )
                 this.DMA_Master.send(
                     'PUT',
                     ((parseInt(this.destRegister, 2) + 4  + this.count_burst*16)).toString(2).padStart(17, '0'),
@@ -186,12 +180,6 @@ export default class DMA {
                 this.TX_FIFO_0.enqueue ( {...this.DMA_Master.ChannelA})
                 // cycle.incr()
     
-                this.println (
-                    this.active_println
-                    ,'Cycle '
-                    + cycle.toString() 
-                    +': The DMA is sending messeage PUT to INTERCONNET.'
-                )
                 this.DMA_Master.send(
                     'PUT',
                     ((parseInt(this.destRegister, 2) + 8  + this.count_burst*16)).toString(2).padStart(17, '0'),
@@ -203,12 +191,6 @@ export default class DMA {
                 this.TX_FIFO_0.enqueue ( {...this.DMA_Master.ChannelA})
                 // cycle.incr()
     
-                this.println (
-                    this.active_println
-                    ,'Cycle '
-                    + cycle.toString() 
-                    +': The DMA is sending messeage PUT to INTERCONNET.'
-                )
                 // console.log ('this.destRegister', parseInt(this.destRegister, 2))
                 this.DMA_Master.send(
                     'PUT',
@@ -231,7 +213,7 @@ export default class DMA {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The DMA is sending messeage AccessAck to SUB-INTERCONNETC.'
+                    +': The DMA is sending messeage AccessAck to SUB-INTERCONNECT.'
                 )
 
                 this.TX_FIFO_1.enqueue({...this.DMA_Slave.ChannelD})

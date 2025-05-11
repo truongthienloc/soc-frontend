@@ -277,7 +277,6 @@ export default class Soc {
         }
 
         if (this.cycle.cycle % 8 == 0) {
-
             this.Bus1.Run (
                 this.Bridge.fifo_to_subInterconnect
                 , this.DMA.TX_FIFO_1

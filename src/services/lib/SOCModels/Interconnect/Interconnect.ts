@@ -202,16 +202,16 @@ export default class InterConnect {
         if (this.Pactived[2] && valid) {
 
             if (this.Pin[2] instanceof FIFO_ChannelD) {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The INTERCONNECT is receiving data from MEMORY.'
+                )
                 for (let item of data) {
                     if (item.valid == '1') {
                         this.Pin[2].enqueue({...item})
                         this.Timing[2].enqueue(cycle.cycle)
-                        this.println (
-                            this.active_println
-                            ,'Cycle '
-                            + cycle.toString() 
-                            +': The INTERCONNECT is receiving data from MEMORY.'
-                        )
                         // cycle.incr()
                     }
                 }
@@ -558,14 +558,13 @@ export default class InterConnect {
             // console.log ('this.Pin[1]',this.Pin[1])
             if (parseInt('0'+dataFromDMA.address, 2) < 0x20014) { //2 001A parseInt('0'+dataFromDMA.address, 2)
                 if (Memory_ready) {
-
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The INTERCONNECT is sending data from DMA to MEMORY.'
+                    )
                     while (!this.Pin[1].isEmpty()) {
-                        this.println (
-                            this.active_println
-                            ,'Cycle '
-                            + cycle.toString() 
-                            +': The INTERCONNECT is sending data from DMA to MEMORY.'
-                        )
                         if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue({...this.Pin[1].dequeue()})
                         this.Timing[1].dequeue()
                     }
@@ -573,13 +572,13 @@ export default class InterConnect {
                 }
             } else {
                 if (Bridge_ready) {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': The INTERCONNECT is sending data from DMA to SUB-INTERCONNCET.'
+                    )
                     while (!this.Pin[1].isEmpty()) {
-                        this.println (
-                            this.active_println
-                            ,'Cycle '
-                            + cycle.toString() 
-                            +': The INTERCONNECT is sending data from DMA to SUB-INTERCONNCET.'
-                        )
                         if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue({...this.Pin[1].dequeue()})
                         this.Timing[1].dequeue()
                     }
@@ -641,7 +640,6 @@ export default class InterConnect {
                         + cycle.toString() 
                         +': The INTERCONNECT is sending data from SUB-INTERCONNECT to DMA.'
                     )
-                    
                     if (this.Pout[1] instanceof FIFO_ChannelD) this.Pout[1].enqueue(dataFromSInterconnect)
                         this.Timing[3].dequeue()
                 }

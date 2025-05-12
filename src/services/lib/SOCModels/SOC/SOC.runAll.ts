@@ -31,6 +31,7 @@ export async function RunAll(this: Soc) {
     // console.log (this.Bus0.Timing)
     // console.log (this.Bus0.Pin[2])
     console.log (this.Bus0)
+    console.log (this.Processor.getRegisters())
     // console.log (this.Bus0.Pin[0])
     // console.log (this.Bridge)
     // console.log (this.Bus0.Pin)

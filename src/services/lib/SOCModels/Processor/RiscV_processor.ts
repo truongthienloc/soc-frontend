@@ -289,7 +289,18 @@ export default class RiscVProcessor {
                     this.register['01010'] = (Math.floor(Math.random() * Math.pow(2, 32)) & 0xFFFFFFFF).toString(2).padStart(32, '0')
                 }
             }
-            if (message == 'PUT' || message == 'GET') {
+            if (message == 'PUT' 
+                || message == 'GET'
+                || message === 'SWAP'
+                || message === 'ADD'
+                || message === 'MAXU'
+                || message === 'MINU'
+                || message === 'MAX'
+                || message === 'MIN'
+                || message === 'OR'
+                || message === 'XOR'
+                || message === 'AND'
+            ) {
                 this.Processor_messeage = message
                 this.SendData           = data
                 this.SendAddress        = logic_address
@@ -336,6 +347,82 @@ export default class RiscVProcessor {
                     +': The PROCESSOR is sending messeage GET to INTERCONNCET.'
 
                 )
+            }
+
+            if (this.Processor_messeage === 'AND') {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is sending messeage LogicalData to INTERCONNCET.'
+                )
+            }
+
+            if (this.Processor_messeage === 'XOR') {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is sending messeage LogicalData to INTERCONNCET.'
+                )                
+            }
+
+            if (this.Processor_messeage === 'OR') {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is sending messeage LogicalData to INTERCONNCET.'
+                )  
+            }
+            if (this.Processor_messeage === 'MIN') {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is sending messeage ArithmeticData to INTERCONNCET.'
+                )                  
+            }
+            if (this.Processor_messeage === 'MAX') {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is sending messeage ArithmeticData to INTERCONNCET.'
+                )                 
+            }
+            if (this.Processor_messeage === 'MINU') {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is sending messeage ArithmeticData to INTERCONNCET.'
+                )                  
+            }
+            if (this.Processor_messeage === 'MAXU') {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is sending messeage ArithmeticData to INTERCONNCET.'
+                )                 
+            }
+
+            if (this.Processor_messeage === 'ADD') {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is sending messeage ArithmeticData to INTERCONNCET.'
+                )  
+            }
+            if (this.Processor_messeage === 'SWAP') {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is sending messeage LogicalData to INTERCONNCET.'
+                )  
             }
             
             if (this.MMU.MMU_message == ' TLB: VPN is missed.') {
@@ -1260,14 +1347,70 @@ export default class RiscVProcessor {
                 message = 'PUT'
                 data = readData2
                 address = ALUResult.padStart(32,'0')
-                if (icBusy) this.stalled = true
             }
             if (instruction.slice(25, 32) === '0000011') {
                 // LW
                 message = 'GET'
                 data = ''
                 address = ALUResult.padStart(32,'0')
-                if (icBusy) this.stalled = true
+            }
+
+            if (instruction.slice(25, 32) == '0101111') {
+                const funct7 = instruction.slice(1,2)
+                if (funct7  ==  '0000111') {
+                    message = 'SWAP'
+                    data = readData2
+                    address = readData1
+                } 
+
+                if (funct7  ==   '0000011') {
+                    message = 'ADD'
+                    data = readData2
+                    address = readData1
+                }
+
+                if (funct7  ==   '0010011') {
+                    message = 'XOR'
+                    data = readData2
+                    address = readData1
+                }
+
+                if (funct7  ==   '0011111') {
+                    message = 'AND'
+                    data = readData2
+                    address = readData1
+                }
+
+                if (funct7  ==    '0011011') {
+                    message = 'OR'
+                    data = readData2
+                    address = readData1
+                }
+
+                if (funct7  ==   '0100011') {
+                    message = 'MIN'
+                    data = readData2
+                    address = readData1
+                }
+
+                if (funct7  ==   '0100111') {
+                    message = 'MAX'
+                    data = readData2
+                    address = readData1
+                }
+
+                if (funct7  ==  '0110011') {
+                    message = 'MINU'
+                    data = readData2
+                    address = readData1
+                }
+
+                if (funct7  ==  '0110111') {
+                    message = 'MAXU'
+                    data = readData2
+                    address = readData1
+
+                }
             }
 
 
@@ -1305,8 +1448,6 @@ export default class RiscVProcessor {
 
                 this.register['00000'] = '00000000000000000000000000000000'
             }
-            //.log(pc + 4, (dec(imm) << 1) , this.pcSrc1)
-
             if (this.stalled == false) {
                 this.pc     = mux(mux(pc + 4, (dec(imm) << 1) + pc, this.pcSrc1), dec ('0'+ALUResult), this.pcSrc2)
             } else this.pc = pc

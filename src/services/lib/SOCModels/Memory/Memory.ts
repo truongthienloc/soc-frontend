@@ -21,11 +21,32 @@ export default class Memory {
     active_println  : boolean
     burst           : ChannelD[]
 
-    IDLE_STATE                  = 0
-    RECEIVE_GET_STATE           = 1
-    RECEIVE_PUT_STATA           = 2
-    SEND_ACCESSACKDATA_STATE    = 3
-    SEND_ACCESSACK_STATE         = 4
+    IDLE_STATE                          = 0
+    RECEIVE_GET_STATE                   = 1
+    RECEIVE_PUT_STATA                   = 2
+    SEND_ACCESSACKDATA_STATE            = 3
+    SEND_ACCESSACK_STATE                = 4
+    
+    RECEIVE_ArithmeticData_Min_STATE    = 5
+    RECEIVE_ArithmeticData_Max_STATE    = 6
+    RECEIVE_ArithmeticData_MinU_STATE   = 7
+    RECEIVE_ArithmeticData_MaxU_STATE   = 8
+    RECEIVE_ArithmeticData_Add_STATE    = 9
+    RECEIVE_LogicalData_Xor_STATE       = 10
+    RECEIVE_LogicalData_Or_STATE        = 11
+    RECEIVE_LogicalData_And_STATE       = 12
+    RECEIVE_LogicalData_Swap_STATE      = 13
+
+    SEND_ArithmeticData_Min_STATE       = 14
+    SEND_ArithmeticData_Max_STATE       = 15
+    SEND_ArithmeticData_MinU_STATE      = 16
+    SEND_ArithmeticData_MaxU_STATE      = 17
+    SEND_ArithmeticData_Add_STATE       = 18
+    SEND_LogicalData_Xor_STATE          = 19
+    SEND_LogicalData_Or_STATE           = 20
+    SEND_LogicalData_And_STATE          = 21
+    SEND_LogicalData_Swap_STATE         = 22
+
 
     constructor(active: boolean) {
         this.state              = 0 
@@ -56,7 +77,30 @@ export default class Memory {
 
             if (Int2Memory_.valid == '1') {
                 this.slaveMemory.ChannelD.valid = '1'
-                if (Int2Memory_.opcode == '100') this.state = this.RECEIVE_GET_STATE
+                if (Int2Memory_.opcode == '100' ) this.state = this.RECEIVE_GET_STATE
+                if (Int2Memory_.opcode == '010' ) {
+                    if (Int2Memory_.param == '000')
+                        this.state = this.RECEIVE_ArithmeticData_Min_STATE
+                    if (Int2Memory_.param == '001')
+                        this.state = this.RECEIVE_ArithmeticData_Max_STATE
+                    if (Int2Memory_.param == '010')
+                        this.state = this.RECEIVE_ArithmeticData_MinU_STATE
+                    if (Int2Memory_.param == '011')
+                        this.state = this.RECEIVE_ArithmeticData_MaxU_STATE
+                    if (Int2Memory_.param == '100')
+                        this.state = this.RECEIVE_ArithmeticData_Add_STATE
+                }
+                    
+                if (Int2Memory_.opcode == '011' ) {
+                    if (Int2Memory_.param == '000')
+                        this.state = this.RECEIVE_LogicalData_Xor_STATE
+                    if (Int2Memory_.param == '001')
+                        this.state = this.RECEIVE_LogicalData_Or_STATE
+                    if (Int2Memory_.param == '010')
+                        this.state = this.RECEIVE_LogicalData_And_STATE
+                    if (Int2Memory_.param == '011')
+                        this.state = this.RECEIVE_LogicalData_Swap_STATE
+                }
                 if (Int2Memory_.opcode == '000') this.state = this.RECEIVE_PUT_STATA
             }
         }
@@ -71,6 +115,117 @@ export default class Memory {
                             )
             this.slaveMemory.receive (Int2Memory_)
             this.state = this.SEND_ACCESSACKDATA_STATE
+
+            return 
+        }
+
+        if (this.state == this.RECEIVE_ArithmeticData_Min_STATE)               {
+            this.slaveMemory.ChannelD.valid = '0'
+            this.slaveMemory.receive (Int2Memory_)
+            this.println (this.active_println,
+                            'Cycle '             +
+                            cycle.toString()     +
+                            ': The MEMORY is receiving ArithmeticData message from the INTERCONNECT.'
+                            )
+            this.slaveMemory.receive (Int2Memory_)
+            this.state = this.SEND_ArithmeticData_Min_STATE
+
+            return 
+        }
+
+        if (this.state == this.RECEIVE_ArithmeticData_Max_STATE)                {
+            this.slaveMemory.ChannelD.valid = '0'
+            this.slaveMemory.receive (Int2Memory_)
+            this.println (this.active_println,
+                            'Cycle '             +
+                            cycle.toString()     +
+                            ': The MEMORY is receiving ArithmeticData message from the INTERCONNECT.'
+                            )
+            this.slaveMemory.receive (Int2Memory_)
+            this.state = this.SEND_ArithmeticData_Max_STATE
+
+            return 
+        }
+
+        if (this.state == this.RECEIVE_ArithmeticData_MinU_STATE)                 {
+            this.slaveMemory.ChannelD.valid = '0'
+            this.slaveMemory.receive (Int2Memory_)
+            this.println (this.active_println,
+                            'Cycle '             +
+                            cycle.toString()     +
+                            ': The MEMORY is receiving ArithmeticData message from the INTERCONNECT.'
+                            )
+            this.slaveMemory.receive (Int2Memory_)
+            this.state = this.SEND_ArithmeticData_MinU_STATE
+            return 
+        }
+
+        if (this.state == this.RECEIVE_ArithmeticData_MaxU_STATE)                   {
+            this.slaveMemory.ChannelD.valid = '0'
+            this.slaveMemory.receive (Int2Memory_)
+            this.println (this.active_println,
+                            'Cycle '             +
+                            cycle.toString()     +
+                            ': The MEMORY is receiving ArithmeticData message from the INTERCONNECT.'
+                            )
+            this.slaveMemory.receive (Int2Memory_)
+            this.state = this.SEND_ArithmeticData_MaxU_STATE
+
+            return 
+        }
+
+        if (this.state == this.RECEIVE_LogicalData_Xor_STATE)                   {
+            this.slaveMemory.ChannelD.valid = '0'
+            this.slaveMemory.receive (Int2Memory_)
+            this.println (this.active_println,
+                            'Cycle '             +
+                            cycle.toString()     +
+                            ': The MEMORY is receiving LogicalData message from the INTERCONNECT.'
+                            )
+            this.slaveMemory.receive (Int2Memory_)
+            this.state = this.SEND_LogicalData_Xor_STATE
+
+            return 
+        }
+
+        if (this.state == this.RECEIVE_LogicalData_Or_STATE)                   {
+            this.slaveMemory.ChannelD.valid = '0'
+            this.slaveMemory.receive (Int2Memory_)
+            this.println (this.active_println,
+                            'Cycle '             +
+                            cycle.toString()     +
+                            ': The MEMORY is receiving LogicalData message from the INTERCONNECT.'
+                            )
+            this.slaveMemory.receive (Int2Memory_)
+            this.state = this.SEND_LogicalData_Or_STATE
+
+            return 
+        }
+        
+        if (this.state == this.RECEIVE_LogicalData_And_STATE)                   {
+            this.slaveMemory.ChannelD.valid = '0'
+            this.slaveMemory.receive (Int2Memory_)
+            this.println (this.active_println,
+                            'Cycle '             +
+                            cycle.toString()     +
+                            ': The MEMORY is receiving LogicalData message from the INTERCONNECT.'
+                            )
+            this.slaveMemory.receive (Int2Memory_)
+            this.state = this.SEND_LogicalData_And_STATE
+
+            return 
+        }
+
+        if (this.state == this.RECEIVE_LogicalData_Swap_STATE)                   {
+            this.slaveMemory.ChannelD.valid = '0'
+            this.slaveMemory.receive (Int2Memory_)
+            this.println (this.active_println,
+                            'Cycle '             +
+                            cycle.toString()     +
+                            ': The MEMORY is receiving LogicalData message from the INTERCONNECT.'
+                            )
+            this.slaveMemory.receive (Int2Memory_)
+            this.state = this.SEND_LogicalData_Swap_STATE
 
             return 
         }

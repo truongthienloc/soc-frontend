@@ -14,6 +14,12 @@ interface Funct7 {
     [key: string]: string
 }
 
+export enum AMO_OP {
+  SWAP = 'AMOSWAP.D',
+  ADD  = 'AMOADD.D',
+  
+}
+
 export default class Assembler {
     private address: { [key: string]: number } = {}
     public binary_code: string[] = []
@@ -95,6 +101,17 @@ export default class Assembler {
     }
 
     private FMT: Registers = {
+        
+        'amoswap.w':  'A',
+        'amoadd.w':   'A',
+        'amoxor.w':   'A',
+        'amoand.w':   'A',
+        'amoor.w':    'A',
+        'amomin.w':   'A',
+        'amomax.w':   'A',
+        'amominu.w':  'A',
+        'amomaxu.w':  'A',
+
         lb: 'I',
         auipc: 'U',
         addw: 'R',
@@ -151,11 +168,23 @@ export default class Assembler {
         sra: 'R',
         andi: 'I',
         or: 'R',
-        lui: 'U',
+        'lui': 'U',
         and: 'R',
     }
 
     private OPCODE: Opcodes = {
+        'LR.W':      '0101111',
+        'SC.W':      '0101111',
+        'amoswap.w': '0101111',
+        'amoadd.w':  '0101111',
+        'amoxor.w':  '0101111',
+        'amoand.w':  '0101111',
+        'amoor.w':   '0101111',
+        'amomin.w':  '0101111',
+        'amomax.w':  '0101111',
+        'amominu.w': '0101111',
+        'amomaxu.w': '0101111',
+
         lb: '0000011',
         auipc: '0010111',
         addw: '0111011',
@@ -217,6 +246,17 @@ export default class Assembler {
     }
 
     private FUNCT3: Funct3 = {
+
+        'amoswap.w': '011',
+        'amoadd.w':  '011',
+        'amoxor.w':  '011',
+        'amoand.w':  '011',
+        'amoor.w':   '011',
+        'amomin.w':  '011',
+        'amomax.w':  '011',
+        'amominu.w': '011',
+        'amomaxu.w': '011',
+
         lb: '000',
         addw: '000',
         ecall: '000',
@@ -298,6 +338,16 @@ export default class Assembler {
         sra: '0100000',
         or: '0000000',
         and: '0000000',
+
+        'amoswap.w': '0000111', 
+        'amoadd.w' :  '0000011',
+        'amoxor.w' :  '0010011',
+        'amoand.w' :  '0011111',
+        'amoor.w'  :   '0011011',
+        'amomin.w' :  '0100011',
+        'amomax.w' :  '0100111',
+        'amominu.w': '0110011',
+        'amomaxu.w': '0110111'
     }
 
     public reset () {
@@ -407,6 +457,25 @@ export default class Assembler {
         const values = [funct7, rs2, rs1, funct3, rd, opcode]
         if (values.some((value) => value === undefined)) this.syntax_error = true
 
+        return funct7 + rs2 + rs1 + funct3 + rd + opcode
+    }
+
+        private AType(input: string): string {
+        const mlist = this.handlerString(input).split(' ')
+        if (mlist.length != 5) {
+            this.syntax_error = true
+            return ''
+        }
+
+        const opcode = this.OPCODE[mlist[0]]
+        const funct3 = this.FUNCT3[mlist[0]]
+        const funct7 = this.FUNCT7[mlist[0]]
+        const rd = this.register[mlist[1]]
+        const rs1 = this.register[mlist[2]]
+        const rs2 = this.register[mlist[3]]
+
+        const values = [funct7, rs2, rs1, funct3, rd, opcode]
+        if (values.some((value) => value === undefined)) this.syntax_error = true
         return funct7 + rs2 + rs1 + funct3 + rd + opcode
     }
 
@@ -702,6 +771,10 @@ export default class Assembler {
             }
 
             let string = ''
+            if (this.FMT[t[0]] === 'A') {
+                string = this.AType(ins[i])
+            }
+
             if (this.FMT[t[0]] === 'R') {
                 string = this.RType(ins[i])
             }
@@ -723,9 +796,11 @@ export default class Assembler {
                 string = this.UJType(ins[i])
             }
 
-            const type = ['R', 'I', 'S', 'SB', 'U', 'UJ']
-            // console.log('this.syntax_error', this.syntax_error)
-            if (!type.includes(this.FMT[t[0]]) && ins[i].charAt(ins[i].length - 1) !== ':') {
+            const type = ['R', 'I', 'S', 'SB', 'U', 'UJ', 'A']
+
+            if ((!type.includes(this.FMT[t[0]]) 
+                && ins[i].charAt(ins[i].length - 1) !== ':')) {
+                
                 this.syntax_error = true
             }
 
@@ -734,5 +809,6 @@ export default class Assembler {
         }
 
         this.binary_code = result.split('\n')
+        console.log('this.binary_code',this.binary_code)
     }
 }

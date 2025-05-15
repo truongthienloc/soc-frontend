@@ -63,11 +63,16 @@ const SOC               = new Soc('super SoC')
 const code              = 
 `
 .text
+addi t0, zero, 0xfff
+lui t1, 0x3
 example_amo:
-    amoswap.w t3, t1, (t0)
-    amoand.w  t4, t1, (t0)
-    amoor.w   t5, t1, (t0)
-    amoxor.w  t6, t1, (t0)
+    //amoswap.w t3, t1, t0
+    //amoand.w  t4, t1, t0
+    //amoor.w   t5, t1, t0
+    //amoxor.w  t6, t1, t0
+    //amomin.w  t6, t1, t0
+    //amomaxu.w  t6, t1, t1
+    amoadd.w    t6, t1, t0
 `
 
 SOC.Processor.active    = true
@@ -83,4 +88,4 @@ SOC.assemble(
             ,[]                            
         	)
 
-// SOC.RunAll()
+SOC.RunAll()

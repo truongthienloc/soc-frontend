@@ -289,6 +289,7 @@ export default class RiscVProcessor {
                     this.register['01010'] = (Math.floor(Math.random() * Math.pow(2, 32)) & 0xFFFFFFFF).toString(2).padStart(32, '0')
                 }
             }
+            console.log ('message', message)
             if (message == 'PUT' 
                 || message == 'GET'
                 || message === 'SWAP'
@@ -349,7 +350,11 @@ export default class RiscVProcessor {
                 )
             }
 
-            if (this.Processor_messeage === 'AND') {
+            if (this.Processor_messeage === 'AND'
+                || this.Processor_messeage === 'XOR'
+                || this.Processor_messeage === 'OR'
+                || this.Processor_messeage === 'SWAP'
+            ) {
                 this.println (
                     this.active_println
                     ,'Cycle '
@@ -358,71 +363,18 @@ export default class RiscVProcessor {
                 )
             }
 
-            if (this.Processor_messeage === 'XOR') {
-                this.println (
-                    this.active_println
-                    ,'Cycle '
-                    + cycle.toString() 
-                    +': The PROCESSOR is sending messeage LogicalData to INTERCONNCET.'
-                )                
-            }
-
-            if (this.Processor_messeage === 'OR') {
-                this.println (
-                    this.active_println
-                    ,'Cycle '
-                    + cycle.toString() 
-                    +': The PROCESSOR is sending messeage LogicalData to INTERCONNCET.'
-                )  
-            }
-            if (this.Processor_messeage === 'MIN') {
+            if (this.Processor_messeage === 'MIN'
+                || this.Processor_messeage === 'MAX'
+                || this.Processor_messeage === 'MINU'
+                || this.Processor_messeage === 'MAXU'
+                || this.Processor_messeage === 'ADD'
+            ) {
                 this.println (
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
                     +': The PROCESSOR is sending messeage ArithmeticData to INTERCONNCET.'
                 )                  
-            }
-            if (this.Processor_messeage === 'MAX') {
-                this.println (
-                    this.active_println
-                    ,'Cycle '
-                    + cycle.toString() 
-                    +': The PROCESSOR is sending messeage ArithmeticData to INTERCONNCET.'
-                )                 
-            }
-            if (this.Processor_messeage === 'MINU') {
-                this.println (
-                    this.active_println
-                    ,'Cycle '
-                    + cycle.toString() 
-                    +': The PROCESSOR is sending messeage ArithmeticData to INTERCONNCET.'
-                )                  
-            }
-            if (this.Processor_messeage === 'MAXU') {
-                this.println (
-                    this.active_println
-                    ,'Cycle '
-                    + cycle.toString() 
-                    +': The PROCESSOR is sending messeage ArithmeticData to INTERCONNCET.'
-                )                 
-            }
-
-            if (this.Processor_messeage === 'ADD') {
-                this.println (
-                    this.active_println
-                    ,'Cycle '
-                    + cycle.toString() 
-                    +': The PROCESSOR is sending messeage ArithmeticData to INTERCONNCET.'
-                )  
-            }
-            if (this.Processor_messeage === 'SWAP') {
-                this.println (
-                    this.active_println
-                    ,'Cycle '
-                    + cycle.toString() 
-                    +': The PROCESSOR is sending messeage LogicalData to INTERCONNCET.'
-                )  
             }
             
             if (this.MMU.MMU_message == ' TLB: VPN is missed.') {
@@ -900,7 +852,7 @@ export default class RiscVProcessor {
 
     immGen(instruction: string): string {
         let imm = '';
-        //console.log("instruction: ", instruction);
+        console.log("instruction: ", instruction);
 
         if (instruction.slice(-7) === '0110011') {
             // R-type
@@ -940,6 +892,7 @@ export default class RiscVProcessor {
         }
 
         // console.log('imm', this.imm)
+        if (instruction.slice(-7) == '0101111') return this.imm = ''.padStart(32, '0')
         if (['0110111', '0010111'].includes(instruction.slice(-7))) {
             return this.imm.padStart(32, '0')
         } else {
@@ -1354,9 +1307,10 @@ export default class RiscVProcessor {
                 data = ''
                 address = ALUResult.padStart(32,'0')
             }
-
+            
             if (instruction.slice(25, 32) == '0101111') {
-                const funct7 = instruction.slice(1,2)
+                console.log ('instruction -> ', instruction.slice(0,7))
+                const funct7 = instruction.slice(0,7)
                 if (funct7  ==  '0000111') {
                     message = 'SWAP'
                     data = readData2
@@ -1409,8 +1363,9 @@ export default class RiscVProcessor {
                     message = 'MAXU'
                     data = readData2
                     address = readData1
-
                 }
+                console.log('readData1', readData1)
+                // return [message, data, address, writeRegister, size]
             }
 
 

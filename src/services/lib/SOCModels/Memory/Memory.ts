@@ -27,26 +27,7 @@ export default class Memory {
     SEND_ACCESSACKDATA_STATE            = 3
     SEND_ACCESSACK_STATE                = 4
     
-    RECEIVE_ArithmeticData_Min_STATE    = 5
-    RECEIVE_ArithmeticData_Max_STATE    = 6
-    RECEIVE_ArithmeticData_MinU_STATE   = 7
-    RECEIVE_ArithmeticData_MaxU_STATE   = 8
-    RECEIVE_ArithmeticData_Add_STATE    = 9
-    RECEIVE_LogicalData_Xor_STATE       = 10
-    RECEIVE_LogicalData_Or_STATE        = 11
-    RECEIVE_LogicalData_And_STATE       = 12
-    RECEIVE_LogicalData_Swap_STATE      = 13
-
-    SEND_ArithmeticData_Min_STATE       = 14
-    SEND_ArithmeticData_Max_STATE       = 15
-    SEND_ArithmeticData_MinU_STATE      = 16
-    SEND_ArithmeticData_MaxU_STATE      = 17
-    SEND_ArithmeticData_Add_STATE       = 18
-    SEND_LogicalData_Xor_STATE          = 19
-    SEND_LogicalData_Or_STATE           = 20
-    SEND_LogicalData_And_STATE          = 21
-    SEND_LogicalData_Swap_STATE         = 22
-
+    RECEIVE_AMO_STATE    = 5
 
     constructor(active: boolean) {
         this.state              = 0 
@@ -78,34 +59,13 @@ export default class Memory {
             if (Int2Memory_.valid == '1') {
                 this.slaveMemory.ChannelD.valid = '1'
                 if (Int2Memory_.opcode == '100' ) this.state = this.RECEIVE_GET_STATE
-                if (Int2Memory_.opcode == '010' ) {
-                    if (Int2Memory_.param == '000')
-                        this.state = this.RECEIVE_ArithmeticData_Min_STATE
-                    if (Int2Memory_.param == '001')
-                        this.state = this.RECEIVE_ArithmeticData_Max_STATE
-                    if (Int2Memory_.param == '010')
-                        this.state = this.RECEIVE_ArithmeticData_MinU_STATE
-                    if (Int2Memory_.param == '011')
-                        this.state = this.RECEIVE_ArithmeticData_MaxU_STATE
-                    if (Int2Memory_.param == '100')
-                        this.state = this.RECEIVE_ArithmeticData_Add_STATE
-                }
-                    
-                if (Int2Memory_.opcode == '011' ) {
-                    if (Int2Memory_.param == '000')
-                        this.state = this.RECEIVE_LogicalData_Xor_STATE
-                    if (Int2Memory_.param == '001')
-                        this.state = this.RECEIVE_LogicalData_Or_STATE
-                    if (Int2Memory_.param == '010')
-                        this.state = this.RECEIVE_LogicalData_And_STATE
-                    if (Int2Memory_.param == '011')
-                        this.state = this.RECEIVE_LogicalData_Swap_STATE
-                }
-                if (Int2Memory_.opcode == '000') this.state = this.RECEIVE_PUT_STATA
+                if (Int2Memory_.opcode == '010'
+                || Int2Memory_.opcode == '011'  ) this.state = this.RECEIVE_AMO_STATE
+                if (Int2Memory_.opcode == '000' ) this.state = this.RECEIVE_PUT_STATA
             }
         }
 
-        if (this.state == this.RECEIVE_GET_STATE)                   {
+        if (this.state == this.RECEIVE_GET_STATE)          {
             this.slaveMemory.ChannelD.valid = '0'
             this.slaveMemory.receive (Int2Memory_)
             this.println (this.active_println,
@@ -119,7 +79,7 @@ export default class Memory {
             return 
         }
 
-        if (this.state == this.RECEIVE_ArithmeticData_Min_STATE)               {
+        if (this.state == this.RECEIVE_AMO_STATE)          {
             this.slaveMemory.ChannelD.valid = '0'
             this.slaveMemory.receive (Int2Memory_)
             this.println (this.active_println,
@@ -128,105 +88,7 @@ export default class Memory {
                             ': The MEMORY is receiving ArithmeticData message from the INTERCONNECT.'
                             )
             this.slaveMemory.receive (Int2Memory_)
-            this.state = this.SEND_ArithmeticData_Min_STATE
-
-            return 
-        }
-
-        if (this.state == this.RECEIVE_ArithmeticData_Max_STATE)                {
-            this.slaveMemory.ChannelD.valid = '0'
-            this.slaveMemory.receive (Int2Memory_)
-            this.println (this.active_println,
-                            'Cycle '             +
-                            cycle.toString()     +
-                            ': The MEMORY is receiving ArithmeticData message from the INTERCONNECT.'
-                            )
-            this.slaveMemory.receive (Int2Memory_)
-            this.state = this.SEND_ArithmeticData_Max_STATE
-
-            return 
-        }
-
-        if (this.state == this.RECEIVE_ArithmeticData_MinU_STATE)                 {
-            this.slaveMemory.ChannelD.valid = '0'
-            this.slaveMemory.receive (Int2Memory_)
-            this.println (this.active_println,
-                            'Cycle '             +
-                            cycle.toString()     +
-                            ': The MEMORY is receiving ArithmeticData message from the INTERCONNECT.'
-                            )
-            this.slaveMemory.receive (Int2Memory_)
-            this.state = this.SEND_ArithmeticData_MinU_STATE
-            return 
-        }
-
-        if (this.state == this.RECEIVE_ArithmeticData_MaxU_STATE)                   {
-            this.slaveMemory.ChannelD.valid = '0'
-            this.slaveMemory.receive (Int2Memory_)
-            this.println (this.active_println,
-                            'Cycle '             +
-                            cycle.toString()     +
-                            ': The MEMORY is receiving ArithmeticData message from the INTERCONNECT.'
-                            )
-            this.slaveMemory.receive (Int2Memory_)
-            this.state = this.SEND_ArithmeticData_MaxU_STATE
-
-            return 
-        }
-
-        if (this.state == this.RECEIVE_LogicalData_Xor_STATE)                   {
-            this.slaveMemory.ChannelD.valid = '0'
-            this.slaveMemory.receive (Int2Memory_)
-            this.println (this.active_println,
-                            'Cycle '             +
-                            cycle.toString()     +
-                            ': The MEMORY is receiving LogicalData message from the INTERCONNECT.'
-                            )
-            this.slaveMemory.receive (Int2Memory_)
-            this.state = this.SEND_LogicalData_Xor_STATE
-
-            return 
-        }
-
-        if (this.state == this.RECEIVE_LogicalData_Or_STATE)                   {
-            this.slaveMemory.ChannelD.valid = '0'
-            this.slaveMemory.receive (Int2Memory_)
-            this.println (this.active_println,
-                            'Cycle '             +
-                            cycle.toString()     +
-                            ': The MEMORY is receiving LogicalData message from the INTERCONNECT.'
-                            )
-            this.slaveMemory.receive (Int2Memory_)
-            this.state = this.SEND_LogicalData_Or_STATE
-
-            return 
-        }
-        
-        if (this.state == this.RECEIVE_LogicalData_And_STATE)                   {
-            this.slaveMemory.ChannelD.valid = '0'
-            this.slaveMemory.receive (Int2Memory_)
-            this.println (this.active_println,
-                            'Cycle '             +
-                            cycle.toString()     +
-                            ': The MEMORY is receiving LogicalData message from the INTERCONNECT.'
-                            )
-            this.slaveMemory.receive (Int2Memory_)
-            this.state = this.SEND_LogicalData_And_STATE
-
-            return 
-        }
-
-        if (this.state == this.RECEIVE_LogicalData_Swap_STATE)                   {
-            this.slaveMemory.ChannelD.valid = '0'
-            this.slaveMemory.receive (Int2Memory_)
-            this.println (this.active_println,
-                            'Cycle '             +
-                            cycle.toString()     +
-                            ': The MEMORY is receiving LogicalData message from the INTERCONNECT.'
-                            )
-            this.slaveMemory.receive (Int2Memory_)
-            this.state = this.SEND_LogicalData_Swap_STATE
-
+            this.state = this.SEND_ACCESSACKDATA_STATE
             return 
         }
 
@@ -235,22 +97,190 @@ export default class Memory {
             if (ready) {
                 if (this.slaveMemory.ChannelA.size == '00') {
                     this.slaveMemory.ChannelD.valid = '1'
-    
                     this.slaveMemory.send(
-                        'AccessAckData', 
-                        this.slaveMemory.ChannelA.source, 
-                        this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
-                        this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
-                        this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
-                        this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+                    'AccessAckData', 
+                    this.slaveMemory.ChannelA.source, 
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
                     )
                     this.burst.push ({...this.slaveMemory.ChannelD})
-    
+
+                    console.log('this.slaveMemory.ChannelD', this.slaveMemory.ChannelD)
+
                     this.println (this.active_println,
-                        'Cycle '             +
-                        cycle.toString()     +
-                        ': The MEMORY is sending an AccessAckData message to the INTERCONNECT.' 
+                    'Cycle '             +
+                    cycle.toString()     +
+                    ': The MEMORY is sending an AccessAckData message to the INTERCONNECT.' 
                     )
+                    console.log ('this.slaveMemory.ChannelA.opcode', this.slaveMemory.ChannelA.opcode)
+                    console.log ('this.slaveMemory.ChannelA.param', this.slaveMemory.ChannelA.param)
+                    if (this.slaveMemory.ChannelA.opcode == '011') {
+                        if (this.slaveMemory.ChannelA.param == '000') {
+                            let memory_data = 
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+
+                            let access_data = this.slaveMemory.ChannelA.data
+                            let mdata       = BigInt('0b' + memory_data);
+                            let adata       = BigInt('0b' + access_data);
+                            let result      = (mdata ^ adata).toString(2).padStart(32, '0')
+
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
+                        }
+
+                        if (this.slaveMemory.ChannelA.param == '001') {
+                            let memory_data = 
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+
+                            let access_data = this.slaveMemory.ChannelA.data
+                            let mdata       = BigInt('0b' + memory_data);
+                            let adata       = BigInt('0b' + access_data);
+                            let result      = (mdata | adata).toString(2).padStart(32, '0')
+
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
+                        }
+
+                        if (this.slaveMemory.ChannelA.param == '010') {
+                            let memory_data = 
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+
+                            let access_data = this.slaveMemory.ChannelA.data
+                            let mdata       = BigInt('0b' + memory_data);
+                            let adata       = BigInt('0b' + access_data);
+                            let result      = (mdata & adata).toString(2).padStart(32, '0')
+
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
+                        }
+
+                        if (this.slaveMemory.ChannelA.param == '011') {
+                            let result      = (BigInt('0b' + this.slaveMemory.ChannelA.data)).toString(2).padStart(32, '0')
+                            console.log('result', result)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
+                        }
+                    }
+
+                    if (this.slaveMemory.ChannelA.opcode == '010') {
+                        if (this.slaveMemory.ChannelA.param == '000') {
+                            let memory_data = 
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+
+                            let access_data = this.slaveMemory.ChannelA.data
+
+                            let mdata       = dec(memory_data)
+                            let adata       = dec(access_data)
+                            let result      = (((mdata > adata) ? adata : mdata) < 0
+                                                ? 0x100000000 + ((mdata > adata) ? adata : mdata) 
+                                                : ((mdata > adata) ? adata : mdata)).toString(2).padStart(32, '0')
+
+
+
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
+                        }
+
+                        if (this.slaveMemory.ChannelA.param == '001') {
+                            let memory_data = 
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+
+                            let access_data = this.slaveMemory.ChannelA.data
+                            let mdata       = dec(memory_data)
+                            let adata       = dec(access_data)
+                            let result      = (((mdata > adata) ? mdata : adata) < 0
+                                                ? 0x100000000 + ((mdata > adata) ? mdata : adata) 
+                                                : ((mdata > adata) ? mdata : adata)).toString(2).padStart(32, '0')
+                            console.log ('result', result, mdata, adata)
+
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
+                        }
+
+                        if (this.slaveMemory.ChannelA.param == '010') {
+                            let memory_data = 
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+
+                            let access_data = this.slaveMemory.ChannelA.data
+                            let mdata       = dec('0'+memory_data)
+                            let adata       = dec('0'+access_data)
+                            let result      = ((mdata > adata) ? adata : mdata).toString(2).padStart(32, '0')
+
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
+                        }
+
+                        if (this.slaveMemory.ChannelA.param == '011') {
+                            let memory_data = 
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+
+                            let access_data = this.slaveMemory.ChannelA.data
+                            let mdata       = dec('0'+memory_data)
+                            let adata       = dec('0'+access_data)
+                            let result      = ((mdata > adata) ? mdata : adata).toString(2).padStart(32, '0')
+
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
+                        }
+
+                        if (this.slaveMemory.ChannelA.param == '100') {
+                            let memory_data = 
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+
+                            let access_data = this.slaveMemory.ChannelA.data
+                            let mdata       = dec('0'+memory_data)
+                            let adata       = dec('0'+access_data)
+                            let result      = ( mdata + adata).toString(2).padStart(32, '0')
+
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
+                            this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
+                        }
+                    }
+                    
                 }
     
                 if (this.slaveMemory.ChannelA.size == '10') {
@@ -312,7 +342,7 @@ export default class Memory {
             return
         }   
         
-        if (this.state == this.RECEIVE_PUT_STATA)                   {
+        if (this.state == this.RECEIVE_PUT_STATA)          {
             if (Int2Memory_.opcode == '000') {
                 this.slaveMemory.ChannelD.valid = '0'
                 this.slaveMemory.receive (Int2Memory_)
@@ -325,7 +355,7 @@ export default class Memory {
             }
         }
 
-        if (this.state ==  this.SEND_ACCESSACK_STATE)       {
+        if (this.state ==  this.SEND_ACCESSACK_STATE)      {
             this.slaveMemory.ChannelA.ready = '0'
             if (ready) {
                 

@@ -13,20 +13,11 @@ export function assemble(
                 ,Mem_tb             : Register[]
                 ,break_point        : number[]
     ) {
-        console.log('break_point', break_point)
-    //****************SYNC ACTIVED MODEL VS VIEW****************
-    if (this.view) {
-        this.Processor.active   = this.view.cpuModule.getActivated()
-        this.MMU.active         = this.view.mmuModule.getActivated()
-        this.Bus0.active        = this.view.interconnect.getActivated()
-        this.Bus1.active        = this.view.interconnect.getActivated()
-        this.Memory.active      = this.view.memoryModule.getActivated()
-    }
-    
+    console.log('break_point', break_point)
     //****************CHECK SYNTAX ERROR****************
 
     this.Assembler.reset()
-    this.Assembler.assemblerFromIns(code, break_point.sort()[0])        
+    this.Assembler.assemblerFromIns(code, break_point)        
     
     //****************SET INITIAL STATUS****************
     // SET INITIAL DATA
@@ -38,11 +29,6 @@ export function assemble(
     this.DMA.reset()
     this.Memory.reset (Mem_tb)
     this.Memory.SetInstructionMemory(this.Assembler.binary_code) 
-
-    if (break_point.length != 0) 
-        this.Processor.InsLength = (this.Assembler.break_point + 1) * 4
-    else
-        this.Processor.InsLength = this.Memory.Ins_pointer
 
     this.Processor.MMU.Set(
         [

@@ -371,10 +371,14 @@ export default class Memory {
                     '0'.padStart(32, '0')
                 )
                 this.burst.push ({...this.slaveMemory.ChannelD})
-                this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(0,8)
+                if (this.slaveMemory.ChannelA.mask.slice(0,1)=='1')
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(0,8)
+                if (this.slaveMemory.ChannelA.mask.slice(1,2)=='1') 
                 this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(8,16)
-                this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(16,24)
-                this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(24,32)
+                if (this.slaveMemory.ChannelA.mask.slice(2,3)=='1')
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(16,24)
+                if (this.slaveMemory.ChannelA.mask.slice(3,4)=='1') 
+                    this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = this.slaveMemory.ChannelA.data.slice(24,32)
                 this.state   = this.IDLE_STATE
             }
         }

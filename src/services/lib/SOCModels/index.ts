@@ -60,19 +60,40 @@ const SOC               = new Soc('super SoC')
 // sw   t0, 12(t1)       // DMA control register (non-zero = active).
 
 // `
-const code              = 
-`
+// const code              = 
+// `
+// .text
+// addi t0, zero, 0xfff
+// lui t1, 0x3
+// example_amo:
+//     //amoswap.w t3, t1, t0
+//     //amoand.w  t4, t1, t0
+//     //amoor.w   t5, t1, t0
+//     //amoxor.w  t6, t1, t0
+//     //amomin.w  t6, t1, t0
+//     //amomaxu.w  t6, t1, t1
+//     amoadd.w    t6, t1, t0
+// `
+
+// const code              = 
+// `
+// .text
+// addi x1, x0, 0xfff
+// lui x2, 0x3
+// sb x1, 0(x2)
+// lb x3, 0(x2)
+// `
+const code = `
+.data
+    .word 0xf, 2, 3, 4
+    .half 1, 2, 3, 4
+    .byte 1, 2, 3, 4
+    .asciz "hello world"
 .text
-addi t0, zero, 0xfff
-lui t1, 0x3
-example_amo:
-    //amoswap.w t3, t1, t0
-    //amoand.w  t4, t1, t0
-    //amoor.w   t5, t1, t0
-    //amoxor.w  t6, t1, t0
-    //amomin.w  t6, t1, t0
-    //amomaxu.w  t6, t1, t1
-    amoadd.w    t6, t1, t0
+addi x1, x0, 0xff
+lui t0, 0x10010
+sb x1, 0(t0)
+lw x3, 0(t0)
 `
 
 SOC.Processor.active    = true
@@ -80,12 +101,15 @@ SOC.MMU.active          = true
 SOC.Bus0.active         = true
 SOC.Bus1.active         = true
 SOC.Memory.active       = true
+SOC.Assembler.run (code,[])
+console.log(SOC.Assembler.data)
+// SOC.Assembler.splitSections (code)
+// console.log (SOC.Assembler.splitSections (code))
+// SOC.assemble(
+//             code                                     
+//             ,32 * 4096                               
+//             ,[]                                                                                     
+//             ,[]                            
+//         	)
 
-SOC.assemble(
-            code                                     
-            ,32 * 4096                               
-            ,[]                                                                                     
-            ,[]                            
-        	)
-
-SOC.RunAll()
+// SOC.RunAll()

@@ -63,6 +63,7 @@ export default class RiscVProcessor {
     wb                          : any
     imm                         : any
     stalled                     : any
+    size                        : string
 
     logger                     ?: Logger
     monitor                    ?: Monitor
@@ -306,6 +307,7 @@ export default class RiscVProcessor {
                 this.SendData           = data
                 this.SendAddress        = logic_address
                 this.writeReg           = writeRegister
+                this.size               = size
                 this.state              = this.ACESS_INTERCONNECT_STATE
                 
             }
@@ -338,6 +340,7 @@ export default class RiscVProcessor {
                     + cycle.toString() 
                     +': The PROCESSOR is sending messeage PUT to INTERCONNCET.'
                 )
+
             }
 
             if (this.Processor_messeage == 'GET') {
@@ -423,6 +426,9 @@ export default class RiscVProcessor {
             else {
                 this.state =  this.RECEIVE_INTERCONNECT_STATE 
                 this.master.send (this.Processor_messeage,  this.MMU.physical_address, this.SendData)
+                if (this.size == 'sb') this.master.ChannelA.mask = '0001'
+                if (this.size == 'sh') this.master.ChannelA.mask = '0011'
+                if (this.size == 'sw') this.master.ChannelA.mask = '1111'
 
                 this.println (
                     this.active_println
@@ -445,7 +451,6 @@ export default class RiscVProcessor {
             }
         }
         
-
         return
     }
 
@@ -473,7 +478,18 @@ export default class RiscVProcessor {
                     + cycle.toString() 
                     +': The PROCESSOR is receiving messeage AccessAckData from INTERCONNECT.'
                 )
-                this.register[this.writeReg] =  this.master.ChannelD.data
+                console.log (this.size,'this.size', this.master.ChannelD.data.slice(24,32))
+                if (this.size == 'lb') 
+                    this.register[this.writeReg] =  this.master.ChannelD.data.slice(24,32).padStart(32, this.master.ChannelD.data.slice(24,25))
+                if (this.size == 'lbu')
+                    this.register[this.writeReg] =  this.master.ChannelD.data.slice(24,32).padStart(32, '0')
+                if (this.size == 'lh')
+                    this.register[this.writeReg] =  this.master.ChannelD.data.slice(16,32).padStart(32, this.master.ChannelD.data.slice(16,17))
+                if (this.size == 'lhu')
+                    this.register[this.writeReg] =  this.master.ChannelD.data.slice(16,32).padStart(32, '0')
+                if (this.size == 'lw') 
+                    this.register[this.writeReg] =  this.master.ChannelD.data
+
             }
             
             this.master.receive (InterConnect2CPU)
@@ -618,6 +634,7 @@ export default class RiscVProcessor {
         this.active_println             = true
         this.InsLength                  = 0
         this.keyBoard_waiting           = false
+        this.size                       = ''
 
         // this.Ecall                      = new Ecall ()
 

@@ -1,3 +1,7 @@
+import { chownSync } from "fs"
+import { start } from "repl"
+import { workerData } from "worker_threads"
+
 interface Registers {
     [key: string]: string
 }
@@ -23,13 +27,16 @@ export enum AMO_OP {
 export default class Assembler {
     private address: { [key: string]: number } = {}
     public binary_code: string[] = []
+    public data         : string[][] = []
     public Instructions: string[] = []
     public syntax_error: boolean
-    public break_point : number
+    public break_point_text : number[]
+    public break_point_data : number[]
     constructor() {
-        this.binary_code    = []
-        this.syntax_error   = false
-        this.break_point    = Infinity
+        this.binary_code         = []
+        this.syntax_error        = false
+        this.break_point_text    = []
+        this.break_point_data    = []
     }
     private register: Registers = {
         x0: '00000',
@@ -694,12 +701,264 @@ export default class Assembler {
         return imm + rd + opcode
     }
 
-    public assemblerFromIns(code: string, break_point: number) {
-        const string = code
+    public splitSections(input: string) {
+
+        const lines = input.split(/\r?\n/)
+        const dataLines: string[] = []
+        const textLines: string[] = []
+        let current    : string   = ''
+        let dataStart = -1, dataEnd = -1
+        let textStart = -1, textEnd = -1
+
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            if (line.includes('.data')) {
+                if (current === 'text' && textEnd < 0) {
+                    textEnd = i - 1
+                }
+                if (dataStart < 0) {
+                    dataStart = i
+                }
+                current = 'data'
+                continue
+            }
+
+            if (line.includes('.text')) {
+                if (current === 'data' && dataEnd < 0) {
+                    dataEnd = i - 1;
+                }
+                if (textStart < 0) {
+                    textStart = i;
+                }
+                current = 'text';
+                continue;
+            }
+            
+            if (current === 'data') {
+                dataLines.push(line);
+            } else if (current === 'text') {
+                textLines.push(line);
+            }
+        }
+
+        return {
+            data        : dataLines.join('\n'),
+            start_data  : dataStart,
+            end_data    : dataEnd,
+            text        : textLines.join('\n'),
+            start_text  : textStart,
+            end_text    : textEnd
+        };
+    }
+
+    public HandleWord (array: string[]){
+        const wordArray: string[] = [];
+        for (let i = 0; i < array.length; i++) {
+                const num = array[i].startsWith('0x')
+                ? parseInt(array[i], 16)
+                : array[i].startsWith('0b') 
+                    ? parseInt(array[i], 2) 
+                    : parseInt(array[i], 10)
+            wordArray[i] = (num & 0xFFFFFFFF).toString(2).padStart(32,'0')
+        }
+            
+        return wordArray
+    }
+
+    public HandleHalf (array: string[]){
+        const halfdArray: string[] = [];
+        
+        for (let i = 0; i < array.length; i+=2) {
+            const num0 = array[i].startsWith('0x')
+                ? parseInt(array[i], 16)
+                : array[i].startsWith('0b') 
+                    ? parseInt(array[i], 2) 
+                    : parseInt(array[i], 10)
+
+            const num1 = ( i+1 <array.length) 
+            ? 
+                array[i+1].startsWith('0x')
+                    ? parseInt(array[i+1], 16)
+                    : array[i+1].startsWith('0b') 
+                        ? parseInt(array[i+1], 2) 
+                        : parseInt(array[i+1], 10)
+            :   0
+
+            let half_num0= (num0 & 0xFFFF).toString(2).padStart(16,'0')
+            let half_num1= (num1 & 0xFFFF).toString(2).padStart(16,'0')
+
+            halfdArray[i/2] = half_num1+half_num0
+
+        }
+        return halfdArray
+    }
+
+    public HandleByte (array: string[]){
+        const byteArray: string[] = [];
+        
+        for (let i = 0; i < array.length; i+=4) {
+            const num0 = array[i].startsWith('0x')
+                ? parseInt(array[i], 16)
+                : array[i].startsWith('0b') 
+                    ? parseInt(array[i], 2) 
+                    : parseInt(array[i], 10)
+
+            const num1 = ( i+1 <array.length) 
+            ? 
+                array[i+1].startsWith('0x')
+                    ? parseInt(array[i+1], 16)
+                    : array[i+1].startsWith('0b') 
+                        ? parseInt(array[i+1], 2) 
+                        : parseInt(array[i+1], 10)
+            :   0
+
+            const num2 = ( i+2 <array.length) 
+            ? 
+                array[i+2].startsWith('0x')
+                    ? parseInt(array[i+2], 16)
+                    : array[i+1].startsWith('0b') 
+                        ? parseInt(array[i+2], 2) 
+                        : parseInt(array[i+2], 10)
+            :   0
+
+            const num3 = ( i+3 <array.length) 
+            ? 
+                array[i+3].startsWith('0x')
+                    ? parseInt(array[i+3], 16)
+                    : array[i+3].startsWith('0b') 
+                        ? parseInt(array[i+3], 2) 
+                        : parseInt(array[i+3], 10)
+            :   0
+
+            let half_num0= (num0 & 0xFF).toString(2).padStart(8,'0')
+            let half_num1= (num1 & 0xFF).toString(2).padStart(8,'0')
+            let half_num2= (num2 & 0xFF).toString(2).padStart(8,'0')
+            let half_num3= (num3 & 0xFF).toString(2).padStart(8,'0')
+
+            byteArray[i/4] = half_num3 + half_num2 + half_num1 + half_num0
+        }
+            
+        return byteArray
+    }
+
+    public HandleAscii(array: string[]){
+        const asciiArray: string[] = [];
+        console.log('asciiArray', array)
+
+        for (let i = 0; i < array.length; i++) {
+            const s = array[i];
+            for (let j = 0; j < s.length; j+=4) {
+                
+                const char0 = (j < s.length)     ? s.charCodeAt(j)   : '0'   
+                const char1 = (j + 1 < s.length) ? s.charCodeAt(j+1) : '0'
+                const char2 = (j + 2 < s.length) ? s.charCodeAt(j+2) : '0'
+                const char3 = (j + 3 < s.length) ? s.charCodeAt(j+3) : '0'
+                let word    = char3.toString(2).padStart(8,'0')
+                + char2.toString(2).padStart(8,'0') 
+                + char1.toString(2).padStart(8,'0') 
+                + char0.toString(2).padStart(8,'0')      
+                asciiArray.push(word);
+            }
+        }
+        return asciiArray
+    }
+
+    public HandleAsciiz (array: string[]){
+        const asciiArray: string[] = [];
+        console.log('asciiArray', array)
+
+        for (let i = 0; i < array.length; i++) {
+            const s = array[i] + '\0';
+            for (let j = 0; j < s.length; j+=4) {
+                
+                const char0 = (j < s.length)     ? s.charCodeAt(j)   : '0'   
+                const char1 = (j + 1 < s.length) ? s.charCodeAt(j+1) : '0'
+                const char2 = (j + 2 < s.length) ? s.charCodeAt(j+2) : '0'
+                const char3 = (j + 3 < s.length) ? s.charCodeAt(j+3) : '0'
+                let word    = char3.toString(2).padStart(8,'0')
+                + char2.toString(2).padStart(8,'0') 
+                + char1.toString(2).padStart(8,'0') 
+                + char0.toString(2).padStart(8,'0')      
+                asciiArray.push(word);
+            }
+        }
+        return asciiArray
+    }
+
+    public run (code: string, break_point: number[]) {
+        const {data: data_section, 
+            start_data: start_data_section,
+            end_data: end_data_section,
+            text: text_section,
+            start_text: start_text_section,
+            end_text: end_text_section 
+        } = this.splitSections (code)
+
+        this.TextCompile (
+            text_section
+            ,break_point
+            ,end_text_section
+            ,start_text_section
+        )
+        console.log (this. DataCompile (
+            data_section
+        ))
+    }
+
+    public DataCompile(data_section: string) {
+        const lines = data_section.split(/\r?\n/);
+        const entries: Array<{ directive: any; operands: string[] }> = [];
+        const directives = ['.word', '.half', '.byte', '.asciz', '.ascii'] as const;
+
+        for (let raw of lines) {
+            let line = raw.trim();
+            if (!line || line.endsWith(':')) continue;
+            line = line.split(/[#;]/)[0].trim();
+            if (!line) continue;
+
+            const match_dir = directives.find(dir => line.startsWith(dir));
+            if (!match_dir) continue;
+            const args = line.slice(match_dir.length).trim();
+
+            let operands: string[];
+            if (match_dir === '.ascii' || match_dir === '.asciz') {
+                const m = args.match(/^"(.*)"$/);
+                operands = m ? [m[1]] : [args];
+            } else {
+            // Tách bằng dấu phẩy, bỏ khoảng trắng thừa
+                operands = args.split(',').map(s => s.trim()).filter(Boolean);
+            }
+
+            entries.push({ directive: match_dir, operands });
+        }
+
+        console.log('entries', entries)
+
+        for (let i= 0; i< entries.length; i++) {
+            
+            if (entries[i]['directive'] == '.word') 
+                this.data.push (this.HandleWord (entries[i]['operands']))
+            if (entries[i]['directive'] == '.half') 
+                this.data.push (this.HandleHalf (entries[i]['operands'])) 
+            if (entries[i]['directive'] == '.byte') 
+                this.data.push (this.HandleByte (entries[i]['operands'])) 
+            if (entries[i]['directive'] == '.ascii') 
+                this.data.push (this.HandleAscii (entries[i]['operands']))
+            if (entries[i]['directive'] == '.asciz') 
+                this.data.push (this.HandleAsciiz (entries[i]['operands']))
+        }
+    }
+
+    public TextCompile(
+        text_section: string
+        , break_point: number[]
+        , end_text_section : number
+        , start_text_section : number
+    ) {
+
+        const string = text_section
         let result = ''
         const ins = string.split('\n')
-        this.break_point = break_point
-
 
         let PC = 0
         let pos = 0
@@ -710,26 +969,31 @@ export default class Assembler {
             }
             pos++
         }
-
-        for (let i = pos; i < ins.length; i++) {
-            if ((ins[i]=='.text'||ins[i] ==''
-                ||ins[i].split('//')[0]  == ''
-                ||ins[i].split('#')[0]   == ''
-                ||ins[i].includes(':')
-                ) && i < break_point
-            ) {
-                this.break_point --
-                console.log('ins[i]', ins[i])
-                console.log('this.break_point', this.break_point)
+        for (let i = 0; i < break_point.length; i++) {
+            for (let i = pos; i < ins.length; i++) {
+                if ((ins[i]=='.text'
+                    ||ins[i] == '.data'
+                    ||ins[i] ==''
+                    ||ins[i].split('//')[0]  == ''
+                    ||ins[i].split('#')[0]   == ''
+                    ||ins[i].includes(':')
+                    ) && i < break_point[i]
+                ) {
+                    break_point[i] --
+                }
+            if (break_point[i] < end_text_section
+                && break_point[i] > start_text_section
+            )
+                this.break_point_text.push (break_point[i])
             }
         }
+        
 
         for (let i = pos + 1; i < ins.length; i++) {
             
             ins[i] = this.handlerString(ins[i])
             
             if (ins[i] === ' ' || ins[i] === '' || ins[i] === '\n') {
-                // if (i < this.break_point) this.break_point --
                 continue
             }
             const li = ins[i].split(' ')

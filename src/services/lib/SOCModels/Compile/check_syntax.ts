@@ -886,7 +886,8 @@ export default class Assembler {
     }
 
     public run (code: string, break_point: number[]) {
-        const {data: data_section, 
+        const {
+            data: data_section, 
             start_data: start_data_section,
             end_data: end_data_section,
             text: text_section,
@@ -900,9 +901,10 @@ export default class Assembler {
             ,end_text_section
             ,start_text_section
         )
-        console.log (this. DataCompile (
+
+        this. DataCompile (
             data_section
-        ))
+        )
     }
 
     public DataCompile(data_section: string) {

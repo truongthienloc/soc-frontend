@@ -17,7 +17,7 @@ export function assemble(
     //****************CHECK SYNTAX ERROR****************
 
     this.Assembler.reset()
-    this.Assembler.assemblerFromIns(code, break_point)        
+    this.Assembler.run(code, break_point)        
     
     //****************SET INITIAL STATUS****************
     // SET INITIAL DATA

@@ -11,7 +11,6 @@ export default class MMU {
     MMU_message         : string
 
     step                : number
-    endAddress          : number
     done                : boolean
     logger             ?: Logger
     active_println      = true
@@ -19,7 +18,6 @@ export default class MMU {
 
     constructor(active: boolean) {
         this.active             = active
-        this.endAddress         = 0
 
         this.physical_address   = '' // Initialized with a number
         this.satp               = 0
@@ -94,14 +92,9 @@ export default class MMU {
 
     public Set(
         P            : [ number, number, number, number, number, number, number][]
-        , satp       : number
-        , endAddress : number 
 
     ){
         this.TLB               = P
-        this.endAddress        = endAddress
-
-    
     }
 
     public search_in_TLB(
@@ -109,7 +102,6 @@ export default class MMU {
         , Processor_action: string
     ) {
         const VPN               = logic_address.slice(0, 20)// 10 bit đầu tiên
-        // console.log ('VPN', VPN)
         const OFFSET            = logic_address.slice(20, 32) // 12 bit cuối cùng
         const vpn_dec           = parseInt(VPN, 2) & 0b11111 
         const offset_dec        = parseInt(OFFSET, 2) & 0xfff 

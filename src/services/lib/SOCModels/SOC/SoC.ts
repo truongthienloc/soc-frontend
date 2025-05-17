@@ -2,35 +2,21 @@ import RiscVProcessor from '../Processor/RiscV_processor'
 import InterConnect from '../Interconnect/Interconnect'
 import disAssembly from '../Compile/Disassembly'
 import MMU from '../Processor/MMU'
-import { dec, stringToAsciiAndBinary, BinToHex } from '../Compile/convert'
 import Memory from '../Memory/Memory'
 import { Keyboard, Logger, Monitor } from '../Compile/soc.d'
-// import {Logger } from './soc.d'
-import Ecall from '../Ecall/Ecall'
 import { NCKHBoard } from '../../soc/boards'
 import DMA from '../DMA/DMA'
 import Assembler from '../Compile/check_syntax'
-// import LedMatrix from '../control/LedMatrix'
 import { Register } from '~/types/register'
-// import { eventNames } from 'process'
 import EventEmitter from '../../EventEmitter/EventEmitter'
-import type { TLB, TLBEntries } from '../Compile/soc.d'
-import { Disassembly } from '~/components/CodeEditor'
 import { assemble } from '../SOC/SOC.assemble'
 
 import { RunAll } from '../SOC/SOC.runAll'
-// import { Step } from '../SOC/SOC.step'
 import BuddyAllocator from "../Memory/BuddyAllocator"
 import sub_InterConnect from '../Interconnect/sub_Interconnect'
-import ChannelA from '../Interconnect/ChannelA'
-import ChannelD from "./../Interconnect/ChannelD"
 import Bridge from "./../Interconnect/Bridge"
-import { FIFO_ChannelA } from '../Interconnect/FIFO_ChannelA'
 import LEDMatrix from '../DMA/Led_matrix'
 import Cycle from '../Compile/cycle'
-// import { Console } from 'console'
-// import {Monitor} from './Monitor'
-// import {Keyboard} from './Keyboard'
 
 export default class Soc {
     name        : string
@@ -127,15 +113,12 @@ export default class Soc {
 
     public assemble(                 
         code               : string 
-        ,required_mem       : number
         ,Mem_tb             : Register[]
         ,break_point        : number[]
 
         ) {
         return assemble.bind(this) (
-            code                 
-            ,required_mem                
-            ,Mem_tb             
+            code                             
             ,break_point                                       
         )
     }

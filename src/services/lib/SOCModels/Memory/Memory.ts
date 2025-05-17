@@ -48,7 +48,6 @@ export default class Memory {
         , Int2Memory    : any // FIFO_ChannelA
         , ready         : boolean
     ) {
-        // console.log ('Int2Memory', Int2Memory)
         let Int2Memory_ = Int2Memory.peek()
         if (this.state == this.IDLE_STATE)                          {
             Int2Memory_ = Int2Memory.dequeue ()
@@ -107,15 +106,13 @@ export default class Memory {
                     )
                     this.burst.push ({...this.slaveMemory.ChannelD})
 
-                    console.log('this.slaveMemory.ChannelD', this.slaveMemory.ChannelD)
 
                     this.println (this.active_println,
                     'Cycle '             +
                     cycle.toString()     +
                     ': The MEMORY is sending an AccessAckData message to the INTERCONNECT.' 
                     )
-                    console.log ('this.slaveMemory.ChannelA.opcode', this.slaveMemory.ChannelA.opcode)
-                    console.log ('this.slaveMemory.ChannelA.param', this.slaveMemory.ChannelA.param)
+
                     if (this.slaveMemory.ChannelA.opcode == '011') {
                         if (this.slaveMemory.ChannelA.param == '000') {
                             let memory_data = 
@@ -173,7 +170,6 @@ export default class Memory {
 
                         if (this.slaveMemory.ChannelA.param == '011') {
                             let result      = (BigInt('0b' + this.slaveMemory.ChannelA.data)).toString(2).padStart(32, '0')
-                            console.log('result', result)
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
@@ -218,7 +214,6 @@ export default class Memory {
                             let result      = (((mdata > adata) ? mdata : adata) < 0
                                                 ? 0x100000000 + ((mdata > adata) ? mdata : adata) 
                                                 : ((mdata > adata) ? mdata : adata)).toString(2).padStart(32, '0')
-                            console.log ('result', result, mdata, adata)
 
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
@@ -404,7 +399,7 @@ export default class Memory {
         }
     }
 
-    public reset(Mem_tb: Register[]){
+    public reset(){
         // MEMORY AREA OF Kernel
         for (let i = 0; i < 0X1FFFF  + 1; i+=1) 
             this.Memory[i.toString(2).padStart(17,'0')] = '0'.padStart(8,'0')
@@ -437,8 +432,7 @@ export default class Memory {
     public SetInstructionMemory(Instruction_memory: string[] = []) {
         let count =  0
         this.Ins_pointer = 0 
-        // for (let i = 0; i < 0X1FFFF  + 1; i+=1) 
-        //     this.Memory[i.toString(2).padStart(17,'0')] = '0'.padStart(8,'0')
+
         for (const binString of Instruction_memory) {
             if (binString !== '') {
                 for (let i = 3; i >= 0; i--) {
@@ -452,6 +446,21 @@ export default class Memory {
         this.Ins_pointer = (Object.values(Instruction_memory).length - 1) * 4
     }
 
+    public SetDataMemory (Data_memory: string[][] ){
+        const data_base_addr = 0x4000
+        let count            = 0
+        for (let i = 0; i < Data_memory.length; i++) {
+            for (let j = 0; j < Data_memory[i].length; j++) {
+
+                this.Memory[(data_base_addr + count + 0).toString(2).padStart(17, '0')] = Data_memory[i][j].slice(24, 32)
+                this.Memory[(data_base_addr + count + 1).toString(2).padStart(17, '0')] = Data_memory[i][j].slice(16, 24)
+                this.Memory[(data_base_addr + count + 2).toString(2).padStart(17, '0')] = Data_memory[i][j].slice(8, 16)
+                this.Memory[(data_base_addr + count + 3).toString(2).padStart(17, '0')] = Data_memory[i][j].slice(0, 8)
+                count +=4
+            }
+        }
+    }
+
     public GetMemory() {
 
         const newFormMemory = Object.entries(this.Memory) // CONVERT INTO [KEY, VALUE] FORM
@@ -462,6 +471,7 @@ export default class Memory {
             let element = ''
             for (let j = 3; j>=0 ; j--) {
                 if (i+j < sortMemory.length) element += sortMemory[i+j][1]
+
             }
             littleEndianMemory [i.toString(2).padStart(17, '0')] = element
 
@@ -470,34 +480,4 @@ export default class Memory {
         return littleEndianMemory
     }
     
-    
-    // public setMemoryFromString(input: string): { beforeColon: string; afterColon: string }[] {
-    //     // Split the input into sections using regex that considers new lines and colons
-    //     const sections = input.split(/\n(?=0x)/).map(section => section.trim());
-    //     // TAO CODE 
-    //     const result = sections.map(section => {
-    //         // Split each section into beforeColon and afterColon based on the first colon
-    //         const [beforeColon, afterColon] = section.split(/:\s*/);
-    //         return {
-    //             beforeColon: beforeColon.trim(),
-    //             afterColon: (afterColon || '').trim().replace(/\s+/g, ' ') // Replace multiple spaces/newlines with single space
-    //         };
-    //     });
-        
-    //     for (const element of result) {
-    //         let count = 0
-    //         const address = parseInt(element.beforeColon, 16)
-            
-    //         for (const element1 of element.afterColon.split(" ")) {
-                
-    //             const data    = hexToBinary (element1).padStart(32,'0')
-    //             console.log(data)
-    //             this.Memory[ (address + count).toString(2).padStart(32,'0')] = data
-    //             //console.log('address',hexToBinary (address + count).padStart(32,'0'))
-    //             count+=4
-    //         }
-    //     }
-        
-    //     return result
-    // }
 }

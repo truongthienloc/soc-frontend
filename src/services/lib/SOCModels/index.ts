@@ -1,11 +1,4 @@
-// import DMA from './DMA'
 import Soc from './SOC/SoC'
-// import ChannelD from './Interconnect/ChannelD'
-// import ChannelA from "./Interconnect/ChannelA";
-// import DMA from './DMA/DMA';
-// import { LayersTwoTone } from '@mui/icons-material';
-// import { cyan } from '@mui/material/colors';
-// import { Console } from 'console';
 
 const SOC               = new Soc('super SoC')
 // const code              = 
@@ -89,8 +82,9 @@ const code = `
     .half 1, 2, 3, 4
     .byte 1, 2, 3, 4
     .asciz "hello world"
+    .ascii "UIT"
 .text
-addi x1, x0, 0xff
+addi x1, x0, 0xfff
 lui t0, 0x10010
 sb x1, 0(t0)
 lw x3, 0(t0)
@@ -101,15 +95,10 @@ SOC.MMU.active          = true
 SOC.Bus0.active         = true
 SOC.Bus1.active         = true
 SOC.Memory.active       = true
-SOC.Assembler.run (code,[])
-console.log(SOC.Assembler.data)
-// SOC.Assembler.splitSections (code)
-// console.log (SOC.Assembler.splitSections (code))
-// SOC.assemble(
-//             code                                     
-//             ,32 * 4096                               
-//             ,[]                                                                                     
-//             ,[]                            
-//         	)
+SOC.assemble(
+            code                                                                   
+            ,[]                                                                                     
+            ,[]                            
+)
 
-// SOC.RunAll()
+SOC.RunAll()

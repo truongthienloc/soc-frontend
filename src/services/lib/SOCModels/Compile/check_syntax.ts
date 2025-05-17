@@ -366,7 +366,6 @@ export default class Assembler {
 
     public handlerString(input: string): string {
         let string = input
-        // console.log('string', string)
         if (string.includes('//')) {
             string = string.split('//')[0]
         }
@@ -843,7 +842,6 @@ export default class Assembler {
 
     public HandleAscii(array: string[]){
         const asciiArray: string[] = [];
-        console.log('asciiArray', array)
 
         for (let i = 0; i < array.length; i++) {
             const s = array[i];
@@ -865,7 +863,6 @@ export default class Assembler {
 
     public HandleAsciiz (array: string[]){
         const asciiArray: string[] = [];
-        console.log('asciiArray', array)
 
         for (let i = 0; i < array.length; i++) {
             const s = array[i] + '\0';
@@ -927,14 +924,11 @@ export default class Assembler {
                 const m = args.match(/^"(.*)"$/);
                 operands = m ? [m[1]] : [args];
             } else {
-            // Tách bằng dấu phẩy, bỏ khoảng trắng thừa
                 operands = args.split(',').map(s => s.trim()).filter(Boolean);
             }
 
             entries.push({ directive: match_dir, operands });
         }
-
-        console.log('entries', entries)
 
         for (let i= 0; i< entries.length; i++) {
             
@@ -958,28 +952,26 @@ export default class Assembler {
         , start_text_section : number
     ) {
 
-        const string = text_section
-        let result = ''
-        const ins = string.split('\n')
+        const string    = text_section
+        let result      = ''
+        const ins       = text_section.split('\n')
+
 
         let PC = 0
         let pos = 0
-        while (pos < ins.length - 1) {
-            ins[pos] = this.handlerString(ins[pos])
-            if (ins[pos] === '.text') {
-                break
-            }
-            pos++
-        }
+
         for (let i = 0; i < break_point.length; i++) {
-            for (let i = pos; i < ins.length; i++) {
-                if ((ins[i]=='.text'
-                    ||ins[i] == '.data'
-                    ||ins[i] ==''
-                    ||ins[i].split('//')[0]  == ''
-                    ||ins[i].split('#')[0]   == ''
-                    ||ins[i].includes(':')
-                    ) && i < break_point[i]
+            for (let j = 0; j < ins.length; j++) {
+                if (
+                    (
+                        ins[j]=='.text'
+                        ||ins[j] ==''
+                        ||ins[j].split('//')[0]  == ''
+                        ||ins[j].split('#')[0]   == ''
+                        ||ins[j].includes(':')
+                    ) 
+                    && 
+                    i < break_point[i]
                 ) {
                     break_point[i] --
                 }
@@ -989,10 +981,8 @@ export default class Assembler {
                 this.break_point_text.push (break_point[i])
             }
         }
-        
 
-        for (let i = pos + 1; i < ins.length; i++) {
-            
+        for (let i = 0; i < ins.length; i++) {
             ins[i] = this.handlerString(ins[i])
             
             if (ins[i] === ' ' || ins[i] === '' || ins[i] === '\n') {
@@ -1024,11 +1014,12 @@ export default class Assembler {
 
         this.Instructions = ins
 
-        for (let i = pos + 1; i < ins.length; i++) {
+        for (let i =0; i < ins.length; i++) {
 
             if (!ins[i].trim()) continue;
-            ins[i] = this.handlerString(ins[i])//.slice(0, ins[i].length - 2)
+            ins[i]  = this.handlerString(ins[i])//.slice(0, ins[i].length - 2)
             const t = ins[i].split(' ').filter(word => word.length > 0); // Avoid empty strings
+
             if (t.length < 2) {
         
                 if (!t[0] || String (t[0]).toUpperCase() !== 'ECALL') {
@@ -1074,7 +1065,8 @@ export default class Assembler {
             result += string + '\n'
         }
 
+
         this.binary_code = result.split('\n')
-        console.log('this.binary_code',this.binary_code)
+
     }
 }

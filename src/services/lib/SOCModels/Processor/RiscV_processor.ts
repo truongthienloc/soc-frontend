@@ -290,7 +290,6 @@ export default class RiscVProcessor {
                     this.register['01010'] = (Math.floor(Math.random() * Math.pow(2, 32)) & 0xFFFFFFFF).toString(2).padStart(32, '0')
                 }
             }
-            console.log ('message', message)
             if (message == 'PUT' 
                 || message == 'GET'
                 || message === 'SWAP'
@@ -478,7 +477,6 @@ export default class RiscVProcessor {
                     + cycle.toString() 
                     +': The PROCESSOR is receiving messeage AccessAckData from INTERCONNECT.'
                 )
-                console.log (this.size,'this.size', this.master.ChannelD.data.slice(24,32))
                 if (this.size == 'lb') 
                     this.register[this.writeReg] =  this.master.ChannelD.data.slice(24,32).padStart(32, this.master.ChannelD.data.slice(24,25))
                 if (this.size == 'lbu')
@@ -806,7 +804,6 @@ export default class RiscVProcessor {
             operand2 = Math.abs(operand2)
         }
         const signOperand1 = operand1 < 0 ? 1 : 0
-        // console.log(' operation',operation.slice(1))
         switch (operation.slice(1)) {
             case '000':
                 ALUResult = operand1 & operand2
@@ -852,7 +849,6 @@ export default class RiscVProcessor {
         
         if (ALUResult[0] === '-') ALUResult = ALUResult.slice(3).padStart(32, '1')
         if (ALUResult[0] === '0') ALUResult = ALUResult.slice(2).padStart(32, '0')
-        //console.log('operand: ', operand1, operand2, dec('0'+ALUResult), operation, operation.slice(1))
 
         return ALUResult
     }
@@ -868,8 +864,7 @@ export default class RiscVProcessor {
     }
 
     immGen(instruction: string): string {
-        let imm = '';
-        console.log("instruction: ", instruction);
+        let imm = ''
 
         if (instruction.slice(-7) === '0110011') {
             // R-type
@@ -908,7 +903,6 @@ export default class RiscVProcessor {
             this.imm = instruction.slice(0, 20)
         }
 
-        // console.log('imm', this.imm)
         if (instruction.slice(-7) == '0101111') return this.imm = ''.padStart(32, '0')
         if (['0110111', '0010111'].includes(instruction.slice(-7))) {
             return this.imm.padStart(32, '0')
@@ -1326,7 +1320,6 @@ export default class RiscVProcessor {
             }
             
             if (instruction.slice(25, 32) == '0101111') {
-                console.log ('instruction -> ', instruction.slice(0,7))
                 const funct7 = instruction.slice(0,7)
                 if (funct7  ==  '0000111') {
                     message = 'SWAP'
@@ -1381,7 +1374,6 @@ export default class RiscVProcessor {
                     data = readData2
                     address = readData1
                 }
-                console.log('readData1', readData1)
                 // return [message, data, address, writeRegister, size]
             }
 

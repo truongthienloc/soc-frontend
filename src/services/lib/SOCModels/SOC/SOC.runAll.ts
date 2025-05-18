@@ -8,26 +8,30 @@ export async function RunAll(this: Soc) {
         return
     }
     let bre = 0
-
+    let bb  = 0
+    console.log ('this.Assembler.break_point_text.length', this.Assembler.break_point_text.length)
     if (this.Assembler.break_point_text.length > 0) {
-        for (let i =0; i < this.Assembler.break_point_text.length; i++) {
-            this.Processor.InsLength = this.Assembler.break_point_text[i]*4
-            while (
+        let break_point = this.Assembler.break_point_text.pop()
+        if (break_point != undefined) this.Processor.InsLength = break_point*4
+        else this.Processor.InsLength = 0
+        console.log ('this.Processor.InsLength', this.Processor.InsLength)
+        while (
             this.Processor.pc <
-            this.Assembler.break_point_text[i]*4 || this.Processor.state != 0 
+            this.Processor.InsLength || this.Processor.state != 0 
             || 
             !(
                 this.DMA.controlRegister == '00000000000000000000000000000000' || 
                 (this.DMA.controlRegister != '00000000000000000000000000000000' 
                 && this.DMA.statusRegister == '00000000000000000000000000000001')
             )
-            ) {
-                await this.Step_()
-            }
+        ) {
+            await this.Step()
         }
+        this.Processor.InsLength = this.Memory.Ins_pointer       
     }
     else {
         this.Processor.InsLength = this.Memory.Ins_pointer
+        console.log ('this.Memory.Ins_pointer', this.Memory.Ins_pointer)
         while (
             this.Processor.pc <
             this.Memory.Ins_pointer || this.Processor.state != 0 
@@ -38,9 +42,7 @@ export async function RunAll(this: Soc) {
                 && this.DMA.statusRegister == '00000000000000000000000000000001')
             )
         ) {
-                bre ++ 
-                if (bre>10) break
-                await this.Step_()
+                await this.Step()
             }
     }
 

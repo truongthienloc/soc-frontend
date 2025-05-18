@@ -9,6 +9,16 @@ export function assemble(
                 ,break_point        : number[]
     ) {
 
+    //****************SYNC ACTIVED MODEL VS VIEW****************
+    if (this.view) {
+        this.Processor.active   = this.view.cpuModule.getActivated()
+        this.MMU.active         = this.view.mmuModule.getActivated()
+        this.Bus0.active        = this.view.interconnect.getActivated()
+        this.Bus1.active        = this.view.interconnect.getActivated()
+        this.Memory.active      = this.view.memoryModule.getActivated()
+    }
+    console.log ('break_point', break_point)
+    this.Assembly_code = []
     //****************CHECK SYNTAX ERROR****************
     this.Assembler.reset()
     this.Assembler.run(code, break_point)        

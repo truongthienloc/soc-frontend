@@ -289,7 +289,7 @@ export default function SocPage({}: Props) {
     })
 
     socModelRef.current.RunAll()
-    setAllowRun(false)
+    // setAllowRun(false)
   }
 
   const handleImportClick = () => {
@@ -392,8 +392,6 @@ export default function SocPage({}: Props) {
     if (
       !socModelRef.current?.assemble(
         code,
-        requirementMem,
-        memoryData.map((mem) => ({ name: hexToBinary(mem.name), value: hexToBinary(mem.value) })),
         breakpoints
       )
     ) {

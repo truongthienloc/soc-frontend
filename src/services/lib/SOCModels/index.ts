@@ -97,8 +97,7 @@ SOC.Bus1.active         = true
 SOC.Memory.active       = true
 SOC.assemble(
             code                                                                   
-            ,[]                                                                                     
-            ,[]                            
+            ,[]                                                                                                         
 )
 
 SOC.RunAll()

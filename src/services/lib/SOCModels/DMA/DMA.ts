@@ -48,6 +48,7 @@ export default class DMA {
         if (this.state == this.REC_state)      {
             this.DMA_Master.ChannelA.valid  = '0'    
             this.DMA_Master.ChannelD.ready  = '1'
+            console.log ('subnterConnect2DMA',subnterConnect2DMA)
             let data_from_sub_interconnect  = subnterConnect2DMA.peek()
             let data_from_interconncet      = InterConnect2DMA.peek()
             let active                      = this.controlRegister != '00000000000000000000000000000000'

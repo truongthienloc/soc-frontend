@@ -233,6 +233,8 @@ export default class Memory {
                             let adata       = dec('0'+access_data)
                             let result      = ((mdata > adata) ? adata : mdata).toString(2).padStart(32, '0')
 
+                            console.log ('mdata, adata, result',mdata, adata, result)
+
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)

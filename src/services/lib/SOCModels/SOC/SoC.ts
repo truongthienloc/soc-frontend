@@ -113,7 +113,6 @@ export default class Soc {
 
     public assemble(                 
         code               : string 
-        ,Mem_tb             : Register[]
         ,break_point        : number[]
 
         ) {
@@ -132,78 +131,8 @@ export default class Soc {
         this.event.emit(Soc.SOCEVENT.STEP_END)
     }
 
-    public async Step()  {     
 
-        await this.Processor.Run(
-            false
-            , this.cycle
-            , this.Bus0.Pout[0].dequeue()
-            , this.Bus0.ready
-        )
-        
-        this.DMA.Run (
-            this.Bus1.Pout[1].dequeue()
-            ,this.Bus0.Pout[1].dequeue()
-            , this.cycle
-            , this.Bus0.state == 0
-            , this.Bus1.state == 0
-        )
-            
-        this.Memory.Run(
-            this.cycle
-            , this.Bus0.Pout[2].dequeue()
-            , this.Bus0.state == 0
-        )
-        
-        this.Bus0.Run (
-            this.Processor.FIFO.dequeue()
-            ,this.DMA.TX_FIFO_0
-            ,this.Memory.burst
-            ,this.Bridge.Bridge_slave.ChannelD
-            //valid signal
-            ,this.Processor.master.ChannelA.valid       == '1'
-            ,this.DMA.DMA_Master.ChannelA.valid         == '1'
-            ,this.Memory.slaveMemory.ChannelD.valid     == '1'
-            ,this.Bridge.Bridge_slave.ChannelD.valid    == '1'
-            //ready signal
-            ,this.Processor.master.ChannelD.ready       == '1'
-            ,this.DMA.DMA_Master.ChannelD.ready         == '1'
-            ,this.Memory.slaveMemory.ChannelA.ready     == '1'
-            ,this.Bridge.Bridge_master.ChannelA.ready   == '1'
-            //cycle
-            ,this.cycle
-        )
-
-        this.Bridge.Run (
-            this.Bus0.Pout[3]
-            , this.Bus1.Pout[0]
-            , this.Bus0.state == 0
-            , this.Bus1.state == 0
-            , this.cycle
-        )
-        
-        this.Bus1.Run (
-            this.Bridge.fifo_to_subInterconnect
-            , this.DMA.TX_FIFO_1
-            , this.Led_matrix.Matrix_Slave.ChannelD
-            , this.Bridge.Bridge_master.ChannelA.valid      == '1'
-            , this.Led_matrix.ready
-            , this.Bridge.Bridge_master.ChannelA.ready      == '1'
-            , this.DMA.DMA_Slave.ChannelD.valid             == '1'
-            , this.Led_matrix.Matrix_Slave.ChannelD.valid   == '1'
-            , this.cycle
-        )
-
-        this.Led_matrix.Run(
-            this.Bus1.Pout[2].dequeue()
-            , this.cycle
-            , this.Bus1.state == 0
-        )
-        
-        this.cycle.incr()
-    }
-
-    public async Step_ () {
+    public async Step() {
 
         if (this.cycle.cycle % 1 == 0) {
             await this.Processor.Run(

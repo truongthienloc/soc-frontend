@@ -358,10 +358,13 @@ export default class Assembler {
     }
 
     public reset () {
-        this.address        = {}
-        this.binary_code    = []
-        this.Instructions   = []
-        this.syntax_error   = false
+        this.address            = {}
+        this.binary_code        = []
+        this.Instructions       = []
+        this.data               = []
+        this.break_point_text   = []
+        this.break_point_data   = []
+        this.syntax_error       = false
     }
 
     public handlerString(input: string): string {
@@ -728,6 +731,7 @@ export default class Assembler {
                 }
                 if (textStart < 0) {
                     textStart = i;
+                    textEnd   = textStart
                 }
                 current = 'text';
                 continue;
@@ -737,6 +741,7 @@ export default class Assembler {
                 dataLines.push(line);
             } else if (current === 'text') {
                 textLines.push(line);
+                textEnd+=1
             }
         }
 
@@ -952,15 +957,12 @@ export default class Assembler {
         , start_text_section : number
     ) {
 
-        const string    = text_section
         let result      = ''
         const ins       = text_section.split('\n')
-
-
         let PC = 0
-        let pos = 0
 
         for (let i = 0; i < break_point.length; i++) {
+
             for (let j = 0; j < ins.length; j++) {
                 if (
                     (
@@ -975,11 +977,18 @@ export default class Assembler {
                 ) {
                     break_point[i] --
                 }
-            if (break_point[i] < end_text_section
-                && break_point[i] > start_text_section
-            )
-                this.break_point_text.push (break_point[i])
             }
+            console.log ('break_point[i], end_text_section, start_text_section',
+            break_point[i], end_text_section, start_text_section
+            )
+            if (break_point[i] < end_text_section
+                && break_point[i] >= start_text_section
+            ) {
+                this.break_point_text.push (break_point[i] + 1 - start_text_section)
+            }
+
+            
+            
         }
 
         for (let i = 0; i < ins.length; i++) {

@@ -631,7 +631,6 @@ export default class InterConnect {
                 )
                 if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue(dataFromSInterconnect)
                 this.Timing[3].dequeue()
-                // console.log('this.Pout[0]', this.Pout[0])
             } else {
                 if (DMA_ready) {
                     this.println (

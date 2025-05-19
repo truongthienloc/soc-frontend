@@ -269,10 +269,10 @@ export default function SocPage({}: Props) {
     setStepColors(modelColors2ViewColors(socModelRef.current.Processor.lineColor))
     /** DMA */
     dmaConfigs.setDes(BinToHex_without0x(socModelRef.current.DMA.destRegister))
-    dmaConfigs.setSrc(BinToHex_without0x(socModelRef.current.DMA.sourceRegister ))
-    dmaConfigs.setLen(BinToHex_without0x(socModelRef.current.DMA.lengthRegister ))
-    dmaConfigs.setCtrl(BinToHex_without0x(socModelRef.current.DMA.controlRegister ))
-    dmaConfigs.setSta(BinToHex_without0x(socModelRef.current.DMA.statusRegister ))
+    dmaConfigs.setSrc(BinToHex_without0x(socModelRef.current.DMA.sourceRegister))
+    dmaConfigs.setLen(BinToHex_without0x(socModelRef.current.DMA.lengthRegister))
+    dmaConfigs.setCtrl(BinToHex_without0x(socModelRef.current.DMA.controlRegister))
+    dmaConfigs.setSta(BinToHex_without0x(socModelRef.current.DMA.statusRegister))
     /** Led Matrix */
     dmaConfigs.setLedCtrl(BinToHex_without0x(socModelRef.current.Led_matrix.controlRegister))
     // setDmaData(convertToDMAStandard(socModelRef.current.DMA.Databuffer))
@@ -389,12 +389,7 @@ export default function SocPage({}: Props) {
     const tlbEntries = tlb2Array(tlb.tlbData)
     const requirementMem = decIO_point
 
-    if (
-      !socModelRef.current?.assemble(
-        code,
-        breakpoints
-      )
-    ) {
+    if (!socModelRef.current?.assemble(code, breakpoints)) {
       toast.error('Syntax error')
     } else {
       toast.success('Ready to run')

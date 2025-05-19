@@ -21,13 +21,14 @@ import { createRangeDmemData, LENGTH_OF_DMEM } from '~/helpers/generates/dMemRan
 import { MemoryMapHookReturn } from '~/hooks/memory/useMemoryMap'
 import { Register } from '~/types/register'
 import FunctionButton from './FunctionButton'
+import { generateMultipleDmemRange } from '~/helpers/generates/multiple-dmem-range.generate'
 
 const styles: { [key: string]: SxProps<Theme> } = {
   table: {
-    minWidth: 350,
+    // minWidth: 350,
     // maxWidth: 650,
     '& .MuiTableCell-root': {
-      // height: '2.5rem',
+      height: '2.5rem',
       padding: '0.15rem',
       border: '1px solid black',
       width: 'min-content',
@@ -63,7 +64,7 @@ export default function MemoryTable({
 }: DisplayDataTableProps) {
   const [input, setInput] = useState('0x00000000')
   const [start, setStart] = useState(input)
-  const [displayedData, setDisplayedData] = useState(createRangeDmemData(data || [], start))
+  const [displayedData, setDisplayedData] = useState(generateMultipleDmemRange(data || [], start))
   const [tabIndex, setTabIndex] = useState(0)
   const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value)
@@ -102,7 +103,7 @@ export default function MemoryTable({
       range = calculateMemoryRange(min, max || 'ffffffff')
     }
 
-    const dMemData = createRangeDmemData(data || [], range.startHex, range.endHex)
+    const dMemData = generateMultipleDmemRange(data || [], range.startHex, range.endHex)
     setDisplayedData(dMemData)
   }, [start, data, memoryMap?.savedPoints, tabIndex])
 
@@ -181,31 +182,32 @@ export default function MemoryTable({
           )}
         </div>
       </div>
-      <TableContainer component={Paper}>
-        <Table sx={styles.table} stickyHeader>
-          <TableHead>
-            <TableRow>
-              <TableCell align="center" className="max-w-1 font-bold">
-                Memory Address
-              </TableCell>
-              {/* <TableCell align="center">Dec</TableCell> */}
-              <TableCell align="center" className="max-w-2 font-bold">
-                Hex
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {displayedData &&
-              displayedData.map((value) => (
-                <TableRow
-                  key={value.name}
-                  sx={value.value !== '0x00000000' ? { backgroundColor: '#fff177' } : {}}
-                >
-                  <TableCell className="max-w-1">{value.name}</TableCell>
-                  {/* <TableCell>{parseInt(value.value, 16)}</TableCell> */}
-                  <TableCell className="max-w-2">
-                    <div className="flex items-center">
-                      {/* {value.name === modifiedName ? (
+      <div className="grid w-full grid-cols-4">
+        {displayedData.map((tableData) => (
+          <TableContainer key={tableData.key} component={Paper}>
+            <Table sx={styles.table} stickyHeader>
+              <TableHead>
+                <TableRow>
+                  <TableCell align="center" className="font-bold">
+                    Memory Address
+                  </TableCell>
+                  {/* <TableCell align="center">Dec</TableCell> */}
+                  <TableCell align="center" className="font-bold">
+                    Hex
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {tableData.data.map((value) => (
+                  <TableRow
+                    key={value.name}
+                    sx={value.value !== '0x00000000' ? { backgroundColor: '#fff177' } : {}}
+                  >
+                    <TableCell className="">{value.name}</TableCell>
+                    {/* <TableCell>{parseInt(value.value, 16)}</TableCell> */}
+                    <TableCell className="">
+                      <div className="flex items-center">
+                        {/* {value.name === modifiedName ? (
                         <>
                           <Input
                             className="max-w-28 px-1"
@@ -223,7 +225,7 @@ export default function MemoryTable({
                         </>
                       ) : ( */}
                         <>
-                          <span className='py-3'>{value.value}</span>
+                          <span className="py-2">{value.value}</span>
                           {/* <Button
                             className="ml-auto h-fit w-fit min-w-0 bg-white px-2"
                             variant="outlined"
@@ -234,14 +236,16 @@ export default function MemoryTable({
                             <EditIcon />
                           </Button> */}
                         </>
-                      {/* )} */}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                        {/* )} */}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        ))}
+      </div>
     </div>
   )
 }

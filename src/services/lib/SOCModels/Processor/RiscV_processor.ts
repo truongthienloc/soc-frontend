@@ -477,16 +477,18 @@ export default class RiscVProcessor {
                     + cycle.toString() 
                     +': The PROCESSOR is receiving messeage AccessAckData from INTERCONNECT.'
                 )
+
                 if (this.size == 'lb') 
                     this.register[this.writeReg] =  this.master.ChannelD.data.slice(24,32).padStart(32, this.master.ChannelD.data.slice(24,25))
-                if (this.size == 'lbu')
+                else if (this.size == 'lbu')
                     this.register[this.writeReg] =  this.master.ChannelD.data.slice(24,32).padStart(32, '0')
-                if (this.size == 'lh')
+                else if (this.size == 'lh')
                     this.register[this.writeReg] =  this.master.ChannelD.data.slice(16,32).padStart(32, this.master.ChannelD.data.slice(16,17))
-                if (this.size == 'lhu')
+                else if (this.size == 'lhu')
                     this.register[this.writeReg] =  this.master.ChannelD.data.slice(16,32).padStart(32, '0')
-                if (this.size == 'lw') 
+                else if (this.size == 'lw') 
                     this.register[this.writeReg] =  this.master.ChannelD.data
+                else this.register[this.writeReg] =  this.master.ChannelD.data
 
             }
             

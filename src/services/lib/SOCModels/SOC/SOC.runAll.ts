@@ -7,8 +7,7 @@ export async function RunAll(this: Soc) {
         this.println('CPU has not been actived!!!')
         return
     }
-    let bre = 0
-    let bb  = 0
+
     console.log ('this.Assembler.break_point_text.length', this.Assembler.break_point_text.length)
     if (this.Assembler.break_point_text.length > 0) {
         let break_point = this.Assembler.break_point_text.pop()
@@ -43,6 +42,8 @@ export async function RunAll(this: Soc) {
             )
         ) {
                 await this.Step()
+                // bre++ 
+                // if (bre > 100) break
             }
     }
 

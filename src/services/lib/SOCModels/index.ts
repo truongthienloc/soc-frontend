@@ -76,20 +76,48 @@ const SOC               = new Soc('super SoC')
 // sb x1, 0(x2)
 // lb x3, 0(x2)
 // `
+// const code = `
+// .data
+//     .word 0xf, 2, 3, 4
+//     .half 1, 2, 3, 4
+//     .byte 1, 2, 3, 4
+//     .asciz "hello world"
+//     .ascii "UIT"
+// .text
+// addi x1, x0, 0xfff
+// lui t0, 0x10010
+// sb x1, 0(t0)
+// lw x3, 0(t0)
+// `
 const code = `
-.data
-    .word 0xf, 2, 3, 4
-    .half 1, 2, 3, 4
-    .byte 1, 2, 3, 4
-    .asciz "hello world"
-    .ascii "UIT"
 .text
-addi x1, x0, 0xfff
-lui t0, 0x10010
-sb x1, 0(t0)
-lw x3, 0(t0)
-`
+    # Khởi t2 thành 0x5400 (lớn hơn 0x5000, nhỏ hơn 0x6000)
+    lui   t2, 0x5        # t2 ← 0x5_000
 
+    # 1) amoswap.w: swap giữa [t2] và t1
+    lui   t1, 0x22222    # t1 ← 0x22222_000
+    addi  t1, t1, 0x222  # t1 ← 0x22222222
+    amoswap.w  t0, t2, t1
+
+    # 2) amoand.w: AND giữa [t2] và t1
+    lui   t1, 0xF0F1        # t0 ← 0xF0F1_000
+    addi  t1, t1, -241      # t0 ← t0 + (–241) = 0x0F0F0F0FF
+    amoand.w   t0, t2, t1
+    
+    # 3) amoxor.w: XOR giữa [t2] và t1
+    lui   t1, 0x55555    # t1 ← 0x55555_000
+    addi  t1, t1, 0x555  # t1 ← 0x55555555
+    amoxor.w   t0, t2, t1
+    
+    # 4) amoor.w: OR giữa [t2] và t1
+    lui   t1, 0x12345    # t1 ← 0x12345_000
+    addi  t1, t1, 0x678  # t1 ← 0x12345678
+    amoor.w    t0, t2, t1
+    
+    # 5) amomin.w: min signed giữa [t2] và 10
+    addi  t1, x0, 10
+    amomin.w   t0, t1, (t2)
+`
 SOC.Processor.active    = true
 SOC.MMU.active          = true
 SOC.Bus0.active         = true

@@ -122,8 +122,8 @@ export default class Memory {
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
 
                             let access_data = this.slaveMemory.ChannelA.data
-                            let mdata       = BigInt('0b' + memory_data);
-                            let adata       = BigInt('0b' + access_data);
+                            let mdata       = dec('0' + memory_data);
+                            let adata       = dec('0' + access_data);
                             let result      = (mdata ^ adata).toString(2).padStart(32, '0')
 
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
@@ -140,8 +140,8 @@ export default class Memory {
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
 
                             let access_data = this.slaveMemory.ChannelA.data
-                            let mdata       = BigInt('0b' + memory_data);
-                            let adata       = BigInt('0b' + access_data);
+                            let mdata       = dec('0' + memory_data);
+                            let adata       = dec('0' + access_data);
                             let result      = (mdata | adata).toString(2).padStart(32, '0')
 
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
@@ -158,9 +158,11 @@ export default class Memory {
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
 
                             let access_data = this.slaveMemory.ChannelA.data
-                            let mdata       = BigInt('0b' + memory_data);
-                            let adata       = BigInt('0b' + access_data);
+                            let mdata       = dec('0' + memory_data);
+                            let adata       = dec('0' + access_data);
                             let result      = (mdata & adata).toString(2).padStart(32, '0')
+
+                            console.log ('mdata, adata, result', mdata, adata, result)
 
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
@@ -169,12 +171,16 @@ export default class Memory {
                         }
 
                         if (this.slaveMemory.ChannelA.param == '011') {
-                            let result      = (BigInt('0b' + this.slaveMemory.ChannelA.data)).toString(2).padStart(32, '0')
+                            
+                            let result      = (dec('0' + this.slaveMemory.ChannelA.data)).toString(2).padStart(32, '0')
+                            console.log('result',result)
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
                         }
+                        console.log ('this.slaveMemory.ChannelD.data',
+                            this.slaveMemory.ChannelD.data)
                     }
 
                     if (this.slaveMemory.ChannelA.opcode == '010') {
@@ -187,13 +193,13 @@ export default class Memory {
 
                             let access_data = this.slaveMemory.ChannelA.data
 
-                            let mdata       = dec(memory_data)
-                            let adata       = dec(access_data)
+                            let mdata       = dec(memory_data.padStart(32,'0'))
+                            let adata       = dec(access_data.padStart(32,'0'))
                             let result      = (((mdata > adata) ? adata : mdata) < 0
                                                 ? 0x100000000 + ((mdata > adata) ? adata : mdata) 
                                                 : ((mdata > adata) ? adata : mdata)).toString(2).padStart(32, '0')
 
-
+                            console.log ('mdata, adata, result', mdata, adata, result)
 
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
@@ -232,8 +238,6 @@ export default class Memory {
                             let mdata       = dec('0'+memory_data)
                             let adata       = dec('0'+access_data)
                             let result      = ((mdata > adata) ? adata : mdata).toString(2).padStart(32, '0')
-
-                            console.log ('mdata, adata, result',mdata, adata, result)
 
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
                             this.Memory[(parseInt(this.slaveMemory.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)

@@ -10,24 +10,22 @@ export default class LEDMatrix {
     dataRegisters   : string[]
 
     Matrix_Slave    : Slave
-    state           : number
     logger         ?: Logger
     active_println  : boolean
     led            ?: LedMatrix
     count_beats     = 0
     ready           : boolean
 
-    REC_state       = 0
-    RES_state       = 1
+    Controller      : LED_controller
 
     constructor() {
         this.controlRegister            = '00000000000000000000000000000000'
         this.dataRegisters              = Array(288).fill('00000000000000000000000000000000')
         this.Matrix_Slave               = new Slave('Matrix_Slave', true)
         this.Matrix_Slave.ChannelD.sink = '1'
-        this.state                      = 0
         this.active_println             = true
         this.ready                      = false
+        this.Controller                 = new LED_controller ()
         // this.led                        = new LedMatrix ('.led-matrix')
 
     }
@@ -41,7 +39,7 @@ export default class LEDMatrix {
         this.dataRegisters              = Array(288).fill('00000000000000000000000000000000')
         this.Matrix_Slave               = new Slave('Matrix_Slave', true)
         this.Matrix_Slave.ChannelD.sink = '1'
-        this.state                      = 0
+        this.Controller.state           = 0
         this.ready                      = false
         this.active_println             = true
         this.led?.clear()
@@ -68,31 +66,48 @@ export default class LEDMatrix {
         , ready : boolean
     ) {
 
-        if (this.state == this.REC_state) {
+        if (this.Controller.state == this.Controller.REC_state) {
             this.Matrix_Slave.ChannelD.valid = '0'
             this.ready = true
             if (data_from_sub_interconnect.valid == '1') {
+                console.log ('data_from_sub_interconnect.opcode',data_from_sub_interconnect.opcode)
+                if (data_from_sub_interconnect.opcode == '000') {
 
-                this.println (this.active_println,
+                    this.println (this.active_println,
                     'Cycle '             +
                     cycle.toString()     +
                     ': The LED-MATRIX is receiving a PUT message from the INTERCONNECT.'
-                )
+                    )
 
-                this.Matrix_Slave.receive (data_from_sub_interconnect)
-                if (parseInt (this.Matrix_Slave.ChannelA.address, 2) == 0x20010) {
-                    this.controlRegister = this.Matrix_Slave.ChannelA.data
-                } else {
-                    this.writeData (this.Matrix_Slave.ChannelA.address, this.Matrix_Slave.ChannelA.data)
+                    this.Matrix_Slave.receive (data_from_sub_interconnect)
+                    if (parseInt (this.Matrix_Slave.ChannelA.address, 2) == 0x20010) {
+                        this.controlRegister = this.Matrix_Slave.ChannelA.data
+                    } else {
+                        this.writeData (this.Matrix_Slave.ChannelA.address, this.Matrix_Slave.ChannelA.data)
+                    }
+                    
+                    this.Controller.state = this.Controller.Ack_state
+                    this.ready = false
+                }
+
+                if (data_from_sub_interconnect.opcode == '100') {
+
+                    this.println (this.active_println,
+                    'Cycle '             +
+                    cycle.toString()     +
+                    ': The LED-MATRIX is receiving a GET message from the INTERCONNECT.'
+                    )
+
+                    this.Matrix_Slave.receive (data_from_sub_interconnect)
+                    this.Controller.state = this.Controller.AckData_state
+                    this.ready = false
                 }
                 
-                this.state = this.RES_state
-                this.ready = false
             }
             return
         }
 
-        if (this.state == this.RES_state) {
+        if (this.Controller.state == this.Controller.Ack_state) {
             this.ready = false
             if (ready) {
                 this.println   (
@@ -104,11 +119,33 @@ export default class LEDMatrix {
                 this.Matrix_Slave.send ('AccessAck', this.Matrix_Slave.ChannelA.source, '')
                 this.Matrix_Slave.ChannelD.valid = '1'
                 this.Matrix_Slave.ChannelD.sink  = '1'
-                this.state = this.REC_state
+                this.Controller.state = this.Controller.REC_state
             }
             this.ready = false
 
             return
+        }
+
+        if (this.Controller.state == this.Controller.AckData_state) {
+            this.ready = false
+            if (ready) {
+
+                let index = (parseInt (this.Matrix_Slave.ChannelA.address, 2) - 0x20014 ) / 4
+                let data  = this.dataRegisters[index]
+
+                this.println   (
+                    this.active_println
+                    ,'Cycle ' 
+                    + cycle.toString() 
+                    + ': The LED-MATRIX is sending an AccessAckData message to the SUB-INTERCONNECT.'
+                )
+
+                this.Matrix_Slave.send ('AccessAckData', this.Matrix_Slave.ChannelA.source, data)
+                this.Matrix_Slave.ChannelD.valid = '1'
+                this.Matrix_Slave.ChannelD.sink  = '1'
+                this.Controller.state = this.Controller.REC_state
+            }
+            this.ready = false
         }
     }
 
@@ -125,7 +162,7 @@ export default class LEDMatrix {
            
         }
 
-        let index = (addr -  0x20014) / 4  // Tính toán chỉ số của thành ghi
+        let index = (addr -  0x20014) / 4  // Tính toán chỉ số của thành gh
         if (index >= 384) {
             console.log (addr)
             throw new Error("Address out of range")
@@ -140,5 +177,16 @@ export default class LEDMatrix {
 
 }
 
+class LED_controller {
+    
+    state           : number
+    REC_state       = 0
+    Ack_state       = 1
+    AckData_state   = 2
+
+    constructor () {
+        this.state = 0
+    }
+}
 // STATE 0 : CONFIG LIKE DMA MUST HAVE ALL CONTROL REGISTER.
 // STATE 1 : GET -> DISPLAY

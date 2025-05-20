@@ -537,7 +537,7 @@ export default class InterConnect {
                 ) 
                 && Bridge_ready
         ) {
-                if (dataFromProcessor.opcode == '000') {
+                // if (dataFromProcessor.opcode == '000') {
                     this.println (
                         this.active_println
                         ,'Cycle '
@@ -547,7 +547,7 @@ export default class InterConnect {
 
                     if (this.Pout[3] instanceof FIFO_ChannelA) this.Pout[3].enqueue({...this.Pin[0].dequeue()})
                     this.Timing[0].dequeue()
-                }
+                
             }
         }
 

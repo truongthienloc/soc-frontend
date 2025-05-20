@@ -32,11 +32,12 @@ export default class RiscVProcessor {
     SendData                    : string
     instruction                 : string
     InsLength                   : number
-    state                       = 0
+
     pre_pc                      = 0
     pc                          = 0
     active_println              : boolean
     FIFO                        = new FIFO_ChannelA()
+    Controller                  = new Controller ()
 
     public static PROCESSOR_EVENT = {KEY_WAITING: 'KEY_WAITING', KEY_FREE: 'KEY_FREE'}
     event = new EventEmitter ()
@@ -69,14 +70,6 @@ export default class RiscVProcessor {
     monitor                    ?: Monitor
     keyboard                   ?: Keyboard
 
-    GET_INSTRUCTION_STATE           = 0
-    RECEIVE_INSTRUCTION_STATE       = 1
-    PROCESSING_STATE                = 2
-    ACESS_INTERCONNECT_STATE        = 3
-    RECEIVE_INTERCONNECT_STATE      = 4
-    REPLACE_TABLE_STATE_DATA        = 5
-    REPLACE_TABLE_STATE_INS         = 6
-
     Warnning                        = 0
     keyBoard_waiting        : boolean
 
@@ -88,7 +81,7 @@ export default class RiscVProcessor {
   ) 
     {
 
-    if (this.state == this.GET_INSTRUCTION_STATE)        {
+    if (this.Controller.state == this.Controller.GET_INSTRUCTION_STATE)             {
 
         //########################################################################################
         //#                                                                                      #
@@ -100,7 +93,7 @@ export default class RiscVProcessor {
         this.master.ChannelD.ready = '0'
 
         if (this.pc >= this.InsLength) {
-            this.state = this.GET_INSTRUCTION_STATE
+            this.Controller.state = this.Controller.GET_INSTRUCTION_STATE
             if (this.Warnning == 0) {
                 this.println (
                     this.active_println
@@ -153,7 +146,7 @@ export default class RiscVProcessor {
                 this.master.send ('GET',  this.MMU.physical_address, this.SendData)
                 this.master.ChannelA.valid = '1'
                 this.FIFO.enqueue ({...this.master.ChannelA})
-                this.state = this.REPLACE_TABLE_STATE_INS
+                this.Controller.state = this.Controller.REPLACE_TABLE_STATE_INS
             }
             else if (this.MMU.MMU_message == ' ERROR: Page fault!!!!') {
 
@@ -164,7 +157,7 @@ export default class RiscVProcessor {
                     + this.MMU.MMU_message
                 )
 
-                this.state  = this.GET_INSTRUCTION_STATE
+                this.Controller.state  = this.Controller.GET_INSTRUCTION_STATE
                 this.pc     = this.pc + 4
             }
             else {
@@ -180,14 +173,14 @@ export default class RiscVProcessor {
                 
                 this.master.ChannelA.size  = '00'
                 this.FIFO.enqueue ({...this.master.ChannelA})
-                this.state              = this.RECEIVE_INSTRUCTION_STATE
+                this.Controller.state              = this.Controller.RECEIVE_INSTRUCTION_STATE
 
             }
         }
         return
     }
 
-    if (this.state == this.RECEIVE_INSTRUCTION_STATE)    {
+    if (this.Controller.state == this.Controller.RECEIVE_INSTRUCTION_STATE)         {
 
         //#######################################################
         //#                                                     #
@@ -212,12 +205,12 @@ export default class RiscVProcessor {
                 +BinToHex (this.master.ChannelD.data)
                 +').'
             )
-            this.state              = this.PROCESSING_STATE
+            this.Controller.state              = this.Controller.PROCESSING_STATE
         }
         return
     }
 
-    if (this.state == this.PROCESSING_STATE)             {
+    if (this.Controller.state == this.Controller.PROCESSING_STATE)                  {
         //#######################################################
         //#                                                     #
         //#This state is the 'Receive Instructions' state.      #
@@ -307,11 +300,11 @@ export default class RiscVProcessor {
                 this.SendAddress        = logic_address
                 this.writeReg           = writeRegister
                 this.size               = size
-                this.state              = this.ACESS_INTERCONNECT_STATE
+                this.Controller.state              = this.Controller.ACESS_INTERCONNECT_STATE
                 
             }
             else {
-                this.state = this.GET_INSTRUCTION_STATE
+                this.Controller.state = this.Controller.GET_INSTRUCTION_STATE
                 if (this.pc >= this.InsLength) {
                 if (this.Warnning == 0) {
                     this.println (
@@ -327,7 +320,7 @@ export default class RiscVProcessor {
             return
     }
 
-    if (this.state == this.ACESS_INTERCONNECT_STATE )    {
+    if (this.Controller.state == this.Controller.ACESS_INTERCONNECT_STATE )         {
         this.master.ChannelD.ready = '0'
         if (ready) {
             this.MMU.run(this.SendAddress, this.Processor_messeage)
@@ -408,7 +401,7 @@ export default class RiscVProcessor {
                 this.master.send ('GET',  this.MMU.physical_address, this.SendData)
                 this.master.ChannelA.valid = '1'
                 this.FIFO.enqueue ({...this.master.ChannelA})
-                this.state = this.REPLACE_TABLE_STATE_DATA
+                this.Controller.state = this.Controller.REPLACE_TABLE_STATE_DATA
             }
             else if (this.MMU.MMU_message == ' ERROR: Page fault!!!!') {
 
@@ -419,11 +412,11 @@ export default class RiscVProcessor {
                     + this.MMU.MMU_message
                 )
 
-                this.state = this.GET_INSTRUCTION_STATE
+                this.Controller.state = this.Controller.GET_INSTRUCTION_STATE
 
             }
             else {
-                this.state =  this.RECEIVE_INTERCONNECT_STATE 
+                this.Controller.state =  this.Controller.RECEIVE_INTERCONNECT_STATE 
                 this.master.send (this.Processor_messeage,  this.MMU.physical_address, this.SendData)
                 if (this.size == 'sb') this.master.ChannelA.mask = '0001'
                 if (this.size == 'sh') this.master.ChannelA.mask = '0011'
@@ -453,11 +446,13 @@ export default class RiscVProcessor {
         return
     }
 
-    if (this.state == this.RECEIVE_INTERCONNECT_STATE)   {
+    if (this.Controller.state == this.Controller.RECEIVE_INTERCONNECT_STATE)        {
         this.master.ChannelA.valid = '0'
         this.master.ChannelD.ready = '1'
         if (InterConnect2CPU.valid == '1') {
+
             this.master.receive (InterConnect2CPU)
+
             if (InterConnect2CPU.opcode == '000') {
 
                 this.println (
@@ -493,12 +488,12 @@ export default class RiscVProcessor {
             }
             
             this.master.receive (InterConnect2CPU)
-            this.state =  this.GET_INSTRUCTION_STATE
+            this.Controller.state =  this.Controller.GET_INSTRUCTION_STATE
         }
         return
     }
       
-    if (this.state == this.REPLACE_TABLE_STATE_INS)           {
+    if (this.Controller.state == this.Controller.REPLACE_TABLE_STATE_INS)           {
         this.master.ChannelA.valid = '0'
         this.master.ChannelD.ready = '1'
 
@@ -533,12 +528,12 @@ export default class RiscVProcessor {
                 , cycle.cycle])
 
             this.master.ChannelA.valid = '0'
-            this.state = this.GET_INSTRUCTION_STATE
+            this.Controller.state = this.Controller.GET_INSTRUCTION_STATE
         }
         return
     }
 
-    if (this.state == this.REPLACE_TABLE_STATE_DATA)           {
+    if (this.Controller.state == this.Controller.REPLACE_TABLE_STATE_DATA)          {
         this.master.ChannelA.valid = '0'
         this.master.ChannelD.ready = '1'
 
@@ -579,17 +574,17 @@ export default class RiscVProcessor {
                     + this.MMU.MMU_message
                 )
                 
-                this.state = this.GET_INSTRUCTION_STATE
+                this.Controller.state = this.Controller.GET_INSTRUCTION_STATE
                 this.master.ChannelA.valid = '0'
             } else {
                 this.master.ChannelA.valid = '0'
-                this.state = this.ACESS_INTERCONNECT_STATE
+                this.Controller.state = this.Controller.ACESS_INTERCONNECT_STATE
             }
             
         }
         return
     }
-  }
+    }
 
     public println(active: boolean, ...args: string[]) {
         
@@ -1450,4 +1445,20 @@ export default class RiscVProcessor {
             return [message, data, address, writeRegister, size]
 
     }
+}
+
+class Controller {
+    state                           : number
+    GET_INSTRUCTION_STATE           = 0
+    RECEIVE_INSTRUCTION_STATE       = 1
+    PROCESSING_STATE                = 2
+    ACESS_INTERCONNECT_STATE        = 3
+    RECEIVE_INTERCONNECT_STATE      = 4
+    REPLACE_TABLE_STATE_DATA        = 5
+    REPLACE_TABLE_STATE_INS         = 6
+
+    constructor () {
+        this.state  =   0
+    }
+
 }

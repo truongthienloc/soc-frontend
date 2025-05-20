@@ -960,15 +960,11 @@ export default class Assembler {
         let result      = ''
         const ins       = text_section.split('\n')
         let PC = 0
-        console.log ('ins', ins)
         
         for (let i = 0; i < break_point.length; i++) {
             
             const   tmp_break = break_point[i]
-            console.log ('break_point[i] - start_text_section', tmp_break - start_text_section - 1)
             for (let j = 0; j <= tmp_break - start_text_section - 1; j++) {
-                console.log('ins[j] 1',ins[j], j)
-                console.log('break_point[i]',break_point[i])
                 if (
                     (
                         ins[j]=='.text'
@@ -978,22 +974,16 @@ export default class Assembler {
                         ||ins[j].includes(':')
                     ) 
                 ) {
-                    console.log ('ins 2', ins[j])
                     break_point[i] --
                 }
 
             }
             
-            console.log ('break_point[i], end_text_section, start_text_section',
-            break_point[i], end_text_section, start_text_section
-            )
             if (break_point[i] < end_text_section
                 && break_point[i] >= start_text_section
             ) {
                 this.break_point_text.push (break_point[i] - start_text_section)
             }
-
-            console.log('this.break_point_text', this.break_point_text)
             
         }
 

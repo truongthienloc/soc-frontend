@@ -8,7 +8,6 @@ export async function RunAll(this: Soc) {
         return
     }
     let bre = 0
-    let bb  = 0
     console.log ('this.Assembler.break_point_text.length', this.Assembler.break_point_text.length)
     if (this.Assembler.break_point_text.length > 0) {
         let break_point = this.Assembler.break_point_text.pop()
@@ -17,7 +16,7 @@ export async function RunAll(this: Soc) {
         console.log ('this.Processor.InsLength', this.Processor.InsLength)
         while (
             this.Processor.pc <
-            this.Processor.InsLength || this.Processor.state != 0 
+            this.Processor.InsLength || this.Processor.Controller.state != 0 
             || 
             !(
                 this.DMA.controlRegister == '00000000000000000000000000000000' || 
@@ -34,7 +33,7 @@ export async function RunAll(this: Soc) {
         console.log ('this.Memory.Ins_pointer', this.Memory.Ins_pointer)
         while (
             this.Processor.pc <
-            this.Memory.Ins_pointer || this.Processor.state != 0 
+            this.Memory.Ins_pointer || this.Processor.Controller.state != 0 
             || 
             !(
                 this.DMA.controlRegister == '00000000000000000000000000000000' || 
@@ -43,6 +42,8 @@ export async function RunAll(this: Soc) {
             )
         ) {
                 await this.Step()
+                // bre++ 
+                // if (bre > 100) break
             }
     }
 

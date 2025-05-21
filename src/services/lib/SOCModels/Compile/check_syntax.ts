@@ -960,34 +960,30 @@ export default class Assembler {
         let result      = ''
         const ins       = text_section.split('\n')
         let PC = 0
-
+        
         for (let i = 0; i < break_point.length; i++) {
-
-            for (let j = 0; j < ins.length; j++) {
+            
+            const   tmp_break = break_point[i]
+            for (let j = 0; j <= tmp_break - start_text_section - 1; j++) {
                 if (
                     (
                         ins[j]=='.text'
                         ||ins[j] ==''
-                        ||ins[j].split('//')[0]  == ''
-                        ||ins[j].split('#')[0]   == ''
+                        ||ins[j].split('//')[0].trim()   == ''
+                        ||ins[j].split('#')[0].trim()    == ''
                         ||ins[j].includes(':')
                     ) 
-                    && 
-                    i < break_point[i]
                 ) {
                     break_point[i] --
                 }
+
             }
-            console.log ('break_point[i], end_text_section, start_text_section',
-            break_point[i], end_text_section, start_text_section
-            )
+            
             if (break_point[i] < end_text_section
                 && break_point[i] >= start_text_section
             ) {
-                this.break_point_text.push (break_point[i] + 1 - start_text_section)
+                this.break_point_text.push (break_point[i] - start_text_section)
             }
-
-            
             
         }
 

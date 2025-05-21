@@ -182,7 +182,7 @@ export default function MemoryTable({
           )}
         </div>
       </div>
-      <div className="grid w-full grid-cols-4">
+      <div className="grid w-full grid-cols-4 gap-x-2">
         {displayedData.map((tableData) => (
           <TableContainer key={tableData.key} component={Paper}>
             <Table sx={styles.table} stickyHeader>
@@ -193,7 +193,7 @@ export default function MemoryTable({
                   </TableCell>
                   {/* <TableCell align="center">Dec</TableCell> */}
                   <TableCell align="center" className="font-bold">
-                    Hex
+                    Value
                   </TableCell>
                 </TableRow>
               </TableHead>

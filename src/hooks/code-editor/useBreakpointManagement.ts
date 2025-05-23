@@ -18,7 +18,7 @@ export default function useBreakpointManagement({ breakpoints, editor, hidden }:
         if (hidden) {
             return
         }
-        
+
         applyBreakpointsToEditor(editor, breakpoints)
     }, [breakpoints, editor, hidden])
 }

@@ -36,8 +36,8 @@ export default function GuidePage({}: Props) {
 
           <div>
             <p className="indent-8">
-              We have six control buttons: IMPORT, EXPORT, ASSEMBLE & RESTART, RUN, STEP, FEEDBACK and GUIDE with
-              particular functions.
+              We have six control buttons: IMPORT, EXPORT, ASSEMBLE & RESTART, RUN, STEP, FEEDBACK
+              and GUIDE with particular functions.
             </p>
             <ul className="list-disc pl-8">
               <li>
@@ -45,17 +45,17 @@ export default function GuidePage({}: Props) {
                 editor.
               </li>
               <li>
-                <strong>EXPORT:</strong> Used to export RISC-V code from the code editor.
-                editor.
+                <strong>EXPORT:</strong> Used to export RISC-V code from the code editor. editor.
               </li>
               <li>
-                <strong>ASSEMBLE & RESTART:</strong> Runs the assembler to convert RISC-V instructions into
-                machine code and check for syntax errors. The Assembler is accessed through the
-                “config” button to ensure the system is ready to run. Start new working session.
+                <strong>ASSEMBLE & RESTART:</strong> Runs the assembler to convert RISC-V
+                instructions into machine code and check for syntax errors. The Assembler is
+                accessed through the “config” button to ensure the system is ready to run. Start new
+                working session.
               </li>
               <li>
-                <strong>RUN:</strong> Executes the SoC with all instructions implemented in the
-                same session.
+                <strong>RUN:</strong> Executes the SoC with all instructions implemented in the same
+                session.
               </li>
               <li>
                 <strong>STEP:</strong> Executes the SoC with one instruction implemented per
@@ -348,41 +348,44 @@ export default function GuidePage({}: Props) {
           </div>
         </TabPanel>
         <TabPanel
-            className="max-h-[85dvh] space-y-4 overflow-auto px-4 py-4 text-justify"
-            index={3}
-          >
-            <h2 className="text-center text-2xl font-bold text-[#006EAF]">MEMORY MAP</h2>
-            <img
-              src="/images/guide/memory_map.png"
-              alt="Memory Map"
-              className="mx-auto block"
-            />
-            <p className="indent-8">
-              The system uses a memory map consisting of two main parts: the main memory and memory-mapped registers. 
-              The main memory is used for general data storage, while the memory-mapped registers represent peripheral and DMA control registers, which are not located within the main memory space.
-            </p>
-            <ul className="list-disc list-inside space-y-1">
-              <li>
-                <strong>DMA_start_address</strong>: Contains the address of the first byte in main memory that the DMA will access.
-              </li>
-              <li>
-                <strong>DMA_dest_address</strong>: Contains the address of the target register in the peripheral that the DMA will write to.
-              </li>
-              <li>
-                <strong>DMA_length</strong>: Specifies the number of bytes to be transferred by the DMA.
-              </li>
-              <li>
-                <strong>DMA_control</strong>: Control register for the DMA. A non-zero value indicates that the DMA is active.
-              </li>
-              <li>
-                <strong>LED_control</strong>: Control register for the LED. A non-zero value means the LED is active.
-              </li>
-              <li>
-                <strong>LED_data</strong>: The LED data registers. Writing 1 turns the corresponding LED on, while writing 0 turns it off.
-              </li>
-            </ul>
-          </TabPanel>
-
+          className="max-h-[85dvh] space-y-4 overflow-auto px-4 py-4 text-justify"
+          index={3}
+        >
+          <h2 className="text-center text-2xl font-bold text-[#006EAF]">MEMORY MAP</h2>
+          <img src="/images/guide/memory_map.png" alt="Memory Map" className="mx-auto block" />
+          <p className="indent-8">
+            The system uses a memory map consisting of two main parts: the main memory and
+            memory-mapped registers. The main memory is used for general data storage, while the
+            memory-mapped registers represent peripheral and DMA control registers, which are not
+            located within the main memory space.
+          </p>
+          <ul className="list-inside list-disc space-y-1">
+            <li>
+              <strong>DMA_start_address</strong>: Contains the address of the first byte in main
+              memory that the DMA will access.
+            </li>
+            <li>
+              <strong>DMA_dest_address</strong>: Contains the address of the target register in the
+              peripheral that the DMA will write to.
+            </li>
+            <li>
+              <strong>DMA_length</strong>: Specifies the number of bytes to be transferred by the
+              DMA.
+            </li>
+            <li>
+              <strong>DMA_control</strong>: Control register for the DMA. A non-zero value indicates
+              that the DMA is active.
+            </li>
+            <li>
+              <strong>LED_control</strong>: Control register for the LED. A non-zero value means the
+              LED is active.
+            </li>
+            <li>
+              <strong>LED_data</strong>: The LED data registers. Writing 1 turns the corresponding
+              LED on, while writing 0 turns it off.
+            </li>
+          </ul>
+        </TabPanel>
       </TabContext>
     </div>
   )

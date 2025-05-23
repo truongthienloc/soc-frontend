@@ -225,7 +225,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                     disabled={editingIndex !== index}
                   />
                 </TableCell>
-                <TableCell >
+                <TableCell>
                   <Input
                     value={editingIndex === index ? editingTLB?.timestamp : row.timestamp}
                     onChange={(e) =>

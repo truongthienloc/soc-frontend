@@ -44,13 +44,16 @@ export async function RunAll(this: Soc) {
         ) {
                 await this.Step()
                 // bre++ 
-                // if (bre > 9763 + 10 ) break
+                // if (bre > 9856 + 30) break
             }
     }
 
-    console.log(this.Processor.getRegisters())
-    console.log(this.Led_matrix.dataRegisters)
-    console.log (this.DMA.RX_FIFO.size())
+    // console.log(this.Processor.getRegisters())
+    // console.log(this.Led_matrix.dataRegisters)
+    // console.log (this.DMA.RX_FIFO.size())
+    console.log (this.cycle.cycle)
+    console.log (this.Bus1)
+    console.log (this.DMA)
 
    this.event.emit(Soc.SOCEVENT.DONE_ALL)
 }

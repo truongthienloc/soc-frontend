@@ -46,9 +46,9 @@ sw   t0, 16(t1)      // Led control register at address: 0x20010.
 // Config for led-matrix's operation registers.
 dma:
 lui  t5, 0x1c         // Create DMA source register's value.
-sw   t5, 0(t1)        // DMA source register 
-addi t6, t1, 0x14     // Create DMA destination register's value.
-sw   t6, 4(t1)        // DMA destination register.
+addi t6, t1, 0x18     // Create DMA destination register's value.
+sw   t5, 4(t1)        // DMA source register 
+sw   t6, 0(t1)        // DMA destination register.
 addi t0, zero, 0x480  // Create DMA length register value.
 sw   t0, 8(t1)        // DMA length register.
 sw   t0, 12(t1)       // DMA control register (non-zero = active).

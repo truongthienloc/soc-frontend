@@ -90,6 +90,7 @@ export default class InterConnect {
                 ,dataFromLed_valid              
                 ,cycle                      
             )
+
             if (! ((this.Pin[0].isEmpty()) && (this.Pin[1].isEmpty()) && (this.Pin[2].isEmpty()))) {
                 this.state +=1
                 this.ready = false
@@ -101,6 +102,7 @@ export default class InterConnect {
             this.ready = false
             this.Route (this.Abiter(), cycle, Bridge_ready, Led_ready)
             this.state = 0
+            this.ready = true
             return
         }
     }
@@ -197,7 +199,6 @@ export default class InterConnect {
 
         for (let i = 0; i < this.Timming.length; i++) {
             if (this.Timming[i].peek() === firstTimming) {
-                this.Timming[i].dequeue();
                 return i;
             }
         }
@@ -210,7 +211,7 @@ export default class InterConnect {
         , Bridge_ready: boolean
         , Led_ready   : boolean
     ) {
-        // console.log(Abiter)
+
         if (Abiter == 0 ) {
             const dataFromBridge = {...this.Pin[0].peek()}
                 // console.log ('dataFromBridge', dataFromBridge)
@@ -234,6 +235,7 @@ export default class InterConnect {
                     )
                     // console.log (Led_ready)
                     if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue({...this.Pin[0].dequeue()})
+                    this.Timming[0].dequeue()
                 }
                 if (
                     (parseInt('0'+dataFromBridge.address, 2) == 0x0020000) 
@@ -251,6 +253,7 @@ export default class InterConnect {
                     )
 
                     if (this.Pout[1] instanceof FIFO_ChannelA) this.Pout[1].enqueue({...this.Pin[0].dequeue()})
+                    this.Timming[0].dequeue()
                 }
             //}
         }
@@ -268,7 +271,7 @@ export default class InterConnect {
                 )
                 
                 if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue({...this.Pin[1].dequeue()})
-                // console.log ('dataFromDMA', this.Pout[0])
+                this.Timming[1].dequeue()
             }
         }
 
@@ -283,6 +286,7 @@ export default class InterConnect {
                 )
                         
                 if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue({...this.Pin[2].dequeue()})
+                this.Timming[2].dequeue()
             }
             
         } 

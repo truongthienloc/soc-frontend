@@ -162,7 +162,7 @@ export default class DMA {
     
                 this.DMA_Master.send(
                     'GET',
-                    (parseInt(this.sourceRegister.slice(-17), 2) + this.count_sentBeats * 4).toString(2).padStart(17, '0'),
+                    (parseInt(this.sourceRegister.slice(-18), 2) + this.count_sentBeats * 4).toString(2).padStart(17, '0'),
                     ''
                 )
     
@@ -213,6 +213,7 @@ export default class DMA {
         }
 
         if (this.state == this.ACK_state)   {
+
             if (subInterconnect_ready) {
                 this.DMA_Slave.send ('AccessAck', '00', '')
                 this.DMA_Slave.ChannelD.sink = '01'

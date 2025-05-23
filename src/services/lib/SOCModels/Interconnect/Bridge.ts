@@ -61,11 +61,10 @@ export default class Bridge {
             this.Bridge_master.ChannelD.ready = '1'
             if (!dataFrInterconnect.isEmpty()) {
 
-                while (!dataFrInterconnect.isEmpty()) {
-                    if (dataFrInterconnect.peek().valid == '1') {
-                        this.fifo_from_Interconnect.enqueue ({...dataFrInterconnect.dequeue()})
-                    }
+                if (dataFrInterconnect.peek().valid == '1') {
+                    this.fifo_from_Interconnect.enqueue ({...dataFrInterconnect.dequeue()})
                 }
+
                 this.println (
                     this.active_println
                     ,'Cycle '
@@ -87,7 +86,6 @@ export default class Bridge {
                     this.fifo_from_subInterconnect.enqueue ({...this.Bridge_master.ChannelD})
                 }
                 this.state = this.STATE_SEND 
-                // console.log (this.fifo_from_subInterconnect.isEmpty())
            }
            if ((dataFrsubInterconnect.isEmpty())
                 && (dataFrInterconnect.isEmpty())

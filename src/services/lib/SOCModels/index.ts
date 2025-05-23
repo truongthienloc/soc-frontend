@@ -2,56 +2,57 @@ import Soc from './SOC/SoC'
 
 const SOC               = new Soc('super SoC')
 // const code              = 
-// `
-// .text
-// // Create page table base address
-// lui t0, 0x3
+const code              = 
+`
+.text
+// Create page table base address
+lui t0, 0x3
 
-// // Generate instruction page table
-// page_table_ins:
-// addi t1, zero, 0x0009       // first page table for instructions with PPN = 0x0000, executable = 1, valid = 1
-// sw   t1, 0(t0)
+// Generate instruction page table
+page_table_ins:
+addi t1, zero, 0x0009       // first page table for instructions with PPN = 0x0000, executable = 1, valid = 1
+sw   t1, 0(t0)
 
-// page_table_peri:
-// lui  t1, 0x7
-// addi t1, t1, 0x7
-// sw   t1, 112(t0)
+page_table_peri:
+lui  t1, 0x7
+addi t1, t1, 0x7
+sw   t1, 112(t0)
 
-// lui t0, 0x80003     
-// csrrw zero, satp, t0 
+lui t0, 0x80003     
+csrrw zero, satp, t0 
 
-// lui t1, 0x1c
-// lui t2, 0xfff
-// ori t2, t2, 0xfff
-// addi t0, zero, 288
+lui t1, 0x1c
+lui t2, 0xfff
+ori t2, t2, 0xfff
+addi t0, zero, 288
 
-// mmio:
-// addi t4, t4, 1
-// sw   t4, 0(t1)
-// addi t1, t1, 4
-// bne  t0, t4, mmio
+mmio:
+addi t4, t4, 1
+sw   t4, 0(t1)
+addi t1, t1, 4
+bne  t0, t4, mmio
 
-// // Create base memory map address register: 0x20000 
-// addi t1, zero, 0x2
-// slli t1, t1, 16
+// Create base memory map address register: 0x20000 
+addi t1, zero, 0x2
+slli t1, t1, 16
 
-// csrrw zero, satp, zero
+csrrw zero, satp, zero
 
-// // Config for led-matrix's control registers.
-// led:
-// addi t0, zero, 1
-// sw   t0, 16(t1)      // Led control register at address: 0x20010.
+// Config for led-matrix's control registers.
+led:
+addi t0, zero, 1
+sw   t0, 16(t1)      // Led control register at address: 0x20010.
 
-// // Config for led-matrix's operation registers.
-// dma:
-// lui  t5, 0x1c         // Create DMA source register's value.
-// sw   t5, 0(t1)        // DMA source register 
-// addi t6, t1, 0x14     // Create DMA destination register's value.
-// sw   t6, 4(t1)        // DMA destination register.
-// addi t0, zero, 0x480  // Create DMA length register value.
-// sw   t0, 8(t1)        // DMA length register.
-// sw   t0, 12(t1)       // DMA control register (non-zero = active).
-
+// Config for led-matrix's operation registers.
+dma:
+lui  t5, 0x1c         // Create DMA source register's value.
+sw   t5, 0(t1)        // DMA source register 
+addi t6, t1, 0x14     // Create DMA destination register's value.
+sw   t6, 4(t1)        // DMA destination register.
+addi t0, zero, 0x480  // Create DMA length register value.
+sw   t0, 8(t1)        // DMA length register.
+sw   t0, 12(t1)       // DMA control register (non-zero = active).
+`
 // `
 // const code              = 
 // `
@@ -119,16 +120,16 @@ const SOC               = new Soc('super SoC')
 //     amomin.w   t0, t1, (t2)
 // `
 0x0020000
-const code = `
-.text
+// const code = `
+// .text
 
-    addi t1, zero, 1
-    lui t0, 0x20
-    addi t0, t0, 0x14
+//     addi t1, zero, 1
+//     lui t0, 0x20
+//     addi t0, t0, 0x14
 
-    sw t1, 0(t0)
-    lw t3, 0(t0)
-`
+//     sw t1, 0(t0)
+//     lw t3, 0(t0)
+// `
 SOC.Processor.active    = true
 SOC.MMU.active          = true
 SOC.Bus0.active         = true

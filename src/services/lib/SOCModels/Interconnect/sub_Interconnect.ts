@@ -67,7 +67,7 @@ export default class InterConnect {
 
     Run (
         dataFromBridge           : FIFO_ChannelA
-        ,dataFromDMA             : FIFO_ChannelD
+        ,dataFromDMA             : ChannelD
         ,dataFromLed             : ChannelD
         ,dataFromBridge_valid    : boolean
         ,Led_ready               : boolean
@@ -107,7 +107,7 @@ export default class InterConnect {
 
     RecData(
         dataFromBridge           : FIFO_ChannelA
-        ,dataFromDMA             : FIFO_ChannelD
+        ,dataFromDMA             : ChannelD
         ,dataFromLed             : ChannelD
 
         ,dataFromBridge_valid    : boolean
@@ -144,9 +144,9 @@ export default class InterConnect {
         }
     }
 
-    RecFromDMA(data: FIFO_ChannelD, cycle : Cycle, valid: boolean): void {
-        if (this.active && this.Pactived[1] && !data.isEmpty()) {
-            if (data.peek().valid == '1') {
+    RecFromDMA(data: ChannelD, cycle : Cycle, valid: boolean): void {
+        if (this.active && this.Pactived[1]) {
+            if (data.valid == '1') {
                 this.println (
                     this.active_println
                     ,'Cycle '
@@ -155,7 +155,7 @@ export default class InterConnect {
                 )
 
                 if (this.Pin[1] instanceof FIFO_ChannelD) {
-                    this.Pin[1].enqueue (data.dequeue())
+                    this.Pin[1].enqueue ({...data})
                     this.Timming[1].enqueue(cycle.cycle)
                 } else {
                     console.error("Error: Pin[1] is not FIFO_ChannelA")

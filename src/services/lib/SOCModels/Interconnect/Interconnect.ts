@@ -74,8 +74,8 @@ export default class InterConnect {
 
     Run (
         dataFromProcessor           : ChannelA
-        ,dataFromDMA                : FIFO_ChannelA
-        ,dataFromMemory             : ChannelD[]
+        ,dataFromDMA                : ChannelA
+        ,dataFromMemory             : ChannelD
         ,dataFromSub                : ChannelD
         ,dataFromProcessor_valid    : boolean
         ,dataFromDMA_valid          : boolean
@@ -127,8 +127,8 @@ export default class InterConnect {
 
     RecData(
         dataFromProcessor           : ChannelA
-        ,dataFromDMA                : FIFO_ChannelA
-        ,dataFromMemory             : ChannelD[]
+        ,dataFromDMA                : ChannelA
+        ,dataFromMemory             : ChannelD
         ,dataFromSub                : ChannelD
         ,dataFromProcessor_valid    : boolean
         ,dataFromDMA_valid          : boolean
@@ -167,38 +167,33 @@ export default class InterConnect {
         }
     }
 
-    RecFromDMA(data: FIFO_ChannelA, cycle: Cycle, valid: boolean): void {
+    RecFromDMA(data: ChannelA, cycle: Cycle, valid: boolean): void {
         if (this.active && this.Pactived[1]) {
 
             if (this.Pin[1] instanceof FIFO_ChannelA) {
                 // console.log('data', data)
-                if (data.peek().valid == '1') {
+                if (data.valid == '1') {
                     this.println (
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
                         +': The INTERCONNECT is receiving data from DMA.'
                     )
-                }
-                while (!data.isEmpty()) {
-                    if (data.peek().valid == '1') {
-
-                        this.Pin[1].enqueue({...data.dequeue()})
-                        this.Timing[1].enqueue(cycle.cycle)
-                    }
-                }
-            } else {
-                this.println (
-                    this.active_println
-                    ,'Cycle '
-                    + cycle.toString() 
-                    +': The DATA from DMA is invalid!'
-                )
+                    this.Pin[1].enqueue({...data})
+                    this.Timing[1].enqueue(cycle.cycle)
+                }    
             }
+        } else {
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The DATA from DMA is invalid!'
+            )
         }
     }
 
-    RecFromMem(data: ChannelD[], cycle: Cycle, valid: boolean): void {
+    RecFromMem(data: ChannelD, cycle: Cycle, valid: boolean): void {
         if (this.Pactived[2] && valid) {
 
             if (this.Pin[2] instanceof FIFO_ChannelD) {
@@ -208,13 +203,12 @@ export default class InterConnect {
                     + cycle.toString() 
                     +': The INTERCONNECT is receiving data from MEMORY.'
                 )
-                for (let item of data) {
-                    if (item.valid == '1') {
-                        this.Pin[2].enqueue({...item})
+
+                    if (data.valid == '1') {
+                        this.Pin[2].enqueue({...data})
                         this.Timing[2].enqueue(cycle.cycle)
                         // cycle.incr()
                     }
-                }
             } else {
                 this.println (
                     this.active_println
@@ -555,7 +549,6 @@ export default class InterConnect {
             && !this.Pin[1].isEmpty()
         ) {
             const dataFromDMA       = {...this.Pin[1].peek()}
-            // console.log ('this.Pin[1]',this.Pin[1])
             if (parseInt('0'+dataFromDMA.address, 2) < 0x20014) { //2 001A parseInt('0'+dataFromDMA.address, 2)
                 if (Memory_ready) {
                     this.println (
@@ -564,11 +557,8 @@ export default class InterConnect {
                         + cycle.toString() 
                         +': The INTERCONNECT is sending data from DMA to MEMORY.'
                     )
-                    while (!this.Pin[1].isEmpty()) {
-                        if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue({...this.Pin[1].dequeue()})
-                        this.Timing[1].dequeue()
-                    }
-
+                    if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue({...this.Pin[1].dequeue()})
+                    this.Timing[1].dequeue()
                 }
             } else {
                 if (Bridge_ready) {

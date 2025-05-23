@@ -11,7 +11,6 @@ export class FIFO_ChannelA {
         this.queue.push(item)
     }
 
-    // Sửa đổi phương thức dequeue để trả về một đối tượng ChannelA mặc định nếu hàng đợi rỗng
     dequeue(): ChannelA {
         if (this.queue.length === 0) {
             // Trả về một đối tượng mới của ChannelA với các giá trị mặc định khi hàng đợi rỗng

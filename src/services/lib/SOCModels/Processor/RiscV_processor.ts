@@ -170,6 +170,15 @@ export default class RiscVProcessor {
                     + cycle.toString() + ':'
                     + this.MMU.MMU_message
                 )
+
+                this.println(this.active_println,
+                    'Cycle ' 
+                    + cycle.toString()  
+                    +': Logical_address: ' 
+                    +BinToHex((this.pc).toString(2).padStart(32, '0')) 
+                    +' -> Physical address: ' 
+                    +BinToHex(this.MMU.physical_address)
+                )
                 
                 this.master.ChannelA.size  = '00'
                 this.FIFO.enqueue ({...this.master.ChannelA})

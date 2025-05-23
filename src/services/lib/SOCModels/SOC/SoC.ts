@@ -12,7 +12,6 @@ import EventEmitter from '../../EventEmitter/EventEmitter'
 import { assemble } from '../SOC/SOC.assemble'
 
 import { RunAll } from '../SOC/SOC.runAll'
-import BuddyAllocator from "../Memory/BuddyAllocator"
 import sub_InterConnect from '../Interconnect/sub_Interconnect'
 import Bridge from "./../Interconnect/Bridge"
 import LEDMatrix from '../DMA/Led_matrix'
@@ -31,7 +30,6 @@ export default class Soc {
 
     Assembler   : Assembler
     Disassembly : disAssembly
-    Allocator   : BuddyAllocator
     cycle       : Cycle
     MMU_endAddr : number
     public static SOCEVENT = {DONE_ALL: 'DONE ALL', STEP_END: 'STEP END'}
@@ -91,7 +89,6 @@ export default class Soc {
 
         this.Assembler      = new Assembler()
         this.Assembly_code  = []
-        this.Allocator      = new BuddyAllocator (0x0BFFF, 0X0C000)
         this.MMU_endAddr    = 0
         this.Disassembly    = new disAssembly ('')
         this.cycle          = new Cycle (0)
@@ -144,8 +141,8 @@ export default class Soc {
 
             this.Bus0.Run (
                 this.Processor.FIFO.dequeue()
-                ,this.DMA.TX_FIFO_0
-                ,this.Memory.burst
+                ,this.DMA.DMA_Master.ChannelA
+                ,this.Memory.slaveMemory.ChannelD
                 ,this.Bridge.Bridge_slave.ChannelD
                 //valid signal
                 ,this.Processor.master.ChannelA.valid       == '1'
@@ -176,22 +173,21 @@ export default class Soc {
             )
         }
 
-        if (this.cycle.cycle % 2 == 0) {
+        if (this.cycle.cycle % 1 == 0) {
 
-            this.DMA.Run (
+            this.DMA.Controller (
                 this.Bus1.Pout[1]
                 ,this.Bus0.Pout[1]
                 , this.cycle
                 , this.Bus0.ready
                 , this.Bus1.state == 0
             )
-
         }
 
-        if (this.cycle.cycle % 8 == 0) {
+        if (this.cycle.cycle % 1 == 0) {
             this.Bus1.Run (
                 this.Bridge.fifo_to_subInterconnect
-                , this.DMA.TX_FIFO_1
+                , this.DMA.DMA_Slave.ChannelD
                 , this.Led_matrix.Matrix_Slave.ChannelD
                 , this.Bridge.Bridge_master.ChannelA.valid      == '1'
                 , this.Led_matrix.ready

@@ -25,6 +25,7 @@ export async function RunAll(this: Soc) {
             )
         ) {
             await this.Step()
+            
         }
         this.Processor.InsLength = this.Memory.Ins_pointer       
     }
@@ -43,11 +44,13 @@ export async function RunAll(this: Soc) {
         ) {
                 await this.Step()
                 // bre++ 
-                // if (bre > 100) break
+                // if (bre > 9763 + 10 ) break
             }
     }
 
     console.log(this.Processor.getRegisters())
+    console.log(this.Led_matrix.dataRegisters)
+    console.log (this.DMA.RX_FIFO.size())
 
    this.event.emit(Soc.SOCEVENT.DONE_ALL)
 }

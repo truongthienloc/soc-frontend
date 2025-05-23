@@ -70,7 +70,7 @@ export default class LEDMatrix {
             this.Matrix_Slave.ChannelD.valid = '0'
             this.ready = true
             if (data_from_sub_interconnect.valid == '1') {
-                console.log ('data_from_sub_interconnect.opcode',data_from_sub_interconnect.opcode)
+
                 if (data_from_sub_interconnect.opcode == '000') {
 
                     this.println (this.active_println,

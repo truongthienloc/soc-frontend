@@ -9,8 +9,10 @@ export async function RunAll(this: Soc) {
     }
     let bre = 0
     console.log ('this.Assembler.break_point_text.length', this.Assembler.break_point_text.length)
+    this.Assembler.break_point_text.sort((a, b) => a - b);
     if (this.Assembler.break_point_text.length > 0) {
-        let break_point = this.Assembler.break_point_text.pop()
+        let break_point = this.Assembler.break_point_text.shift();
+        console.log ('break_point', break_point)
         if (break_point != undefined) this.Processor.InsLength = break_point*4
         else this.Processor.InsLength = 0
         console.log ('this.Processor.InsLength', this.Processor.InsLength)

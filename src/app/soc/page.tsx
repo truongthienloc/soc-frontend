@@ -259,6 +259,7 @@ export default function SocPage({}: Props) {
     tlb.setTLBEntries(newTLB)
     tlb.setPointer(socModelRef.current.Processor.MMU.satp.toString(16))
     /** Processor */
+
     setRegisters([
       ...socModelRef.current.Processor.getRegisters(),
       {
@@ -286,6 +287,7 @@ export default function SocPage({}: Props) {
     logRef.current?.clear()
     socModelRef.current.event.once(Soc.SOCEVENT.DONE_ALL, () => {
       updateCoreDataAfterRun()
+      handleStepClick()
     })
 
     socModelRef.current.RunAll()
@@ -339,6 +341,8 @@ export default function SocPage({}: Props) {
       return
     }
 
+
+
     function step() {
       if (!socModelRef.current) {
         return
@@ -367,7 +371,14 @@ export default function SocPage({}: Props) {
     }
 
     // End Stepping
-    if (socModelRef.current.Processor.pc >= stepCode.length * 4) {
+    if (socModelRef.current.Processor.pc == stepCode.length * 4) {
+      step()
+      return
+    }
+
+
+    // End Stepping
+    if (socModelRef.current.Processor.pc > stepCode.length * 4) {
       setAllowRun(false)
       setPc(undefined)
       setIsStepping(false)
@@ -379,7 +390,8 @@ export default function SocPage({}: Props) {
   }
 
   const handleAssembleClick = () => {
-    setIsStepping(false)
+
+    
     setPc(undefined)
 
     const { instructionPoint, pageTablePoint, dataPoint, peripheralPoint } = memoryMap
@@ -396,6 +408,13 @@ export default function SocPage({}: Props) {
       setAllowRun(true)
       updateCoreDataAfterRun()
       setIsKeyboardWaiting(false)
+      setIsStepping(true)
+      setStepCode(
+      socModelRef.current.Assembly_code.map((value: string) => {
+        const split = value.split(' ')
+        return split.slice(0, split.length - 1).join(' ')
+      }),
+      )
       localStorage.setItem('soc_code', code)
     }
   }

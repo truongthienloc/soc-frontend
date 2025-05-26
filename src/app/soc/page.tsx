@@ -378,6 +378,12 @@ export default function SocPage({}: Props) {
     step()
   }
 
+  const handleRestartClick = () => {
+    setIsStepping(false)
+    setPc(undefined)
+    setAllowRun(false)
+  }
+
   const handleAssembleClick = () => {
     setIsStepping(false)
     setPc(undefined)
@@ -848,8 +854,11 @@ export default function SocPage({}: Props) {
           </Button>
         </div>
         <div className="flex flex-row flex-wrap gap-2">
+          <Button className="h-fit capitalize" variant="outlined" onClick={handleRestartClick}>
+            Restart
+          </Button>
           <Button className="h-fit capitalize" variant="outlined" onClick={handleAssembleClick}>
-            Assemble & Restart
+            Assemble
           </Button>
           <Button
             className="h-fit normal-case"

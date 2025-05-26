@@ -149,25 +149,25 @@ export default class LEDMatrix {
     }
 
     writeData(address: string, data: string) {
-        // Kiểm tra địa chỉ và dữ liệu có hợp lệ không
+
         if (address.length !== 18 || data.length !== 32) {
             throw new Error("Invalid address or data length")
         }
 
-        let addr = parseInt(address, 2)  // Chuyển địa chỉ từ chuỗi nhị phân sang số nguyên
+        let addr = parseInt(address, 2)
         if (addr % 4 !== 0) {
             console.log (addr)
             throw new Error("Address must be a multiple of 4")
            
         }
 
-        let index = (addr -  0x20018) / 4  // Tính toán chỉ số của thành gh
+        let index = (addr -  0x20018) / 4 
         if (index >= 384) {
             console.log (addr)
             throw new Error("Address out of range")
         }
 
-        this.dataRegisters[index] = data  // Gán giá trị vào thành ghi
+        this.dataRegisters[index] = data
         for (let i = 0 ; i< 32; i++) {
             if (this.dataRegisters[index][i]  == '1' && this.led != undefined) 
                 this.led.turnOn(~~(index / 3), i + (index % 3) * 32)

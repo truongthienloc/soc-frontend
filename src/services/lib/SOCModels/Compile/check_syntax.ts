@@ -984,6 +984,7 @@ export default class Assembler {
             ) {
                 this.break_point_text.push (break_point[i] - start_text_section)
             }
+            console.log ('this.break_point_text',  this.break_point_text)
             
         }
 

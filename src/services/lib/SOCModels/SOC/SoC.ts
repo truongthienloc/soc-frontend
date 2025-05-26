@@ -173,18 +173,18 @@ export default class Soc {
             )
         }
 
-        if (this.cycle.cycle % 2 == 0) {
+        if (this.cycle.cycle % 1 == 0) {
 
             this.DMA.Controller (
                 this.Bus1.Pout[1]
                 ,this.Bus0.Pout[1]
                 , this.cycle
                 , this.Bus0.ready
-                , this.Bus1.ready && this.cycle.cycle % 8 == 0
+                , this.Bus1.ready && this.cycle.cycle % 1 == 0
             )
         }
 
-        if (this.cycle.cycle % 8 == 0) {
+        if (this.cycle.cycle % 1 == 0) {
             this.Bus1.Run (
                 this.Bridge.fifo_to_subInterconnect
                 , this.DMA.DMA_Slave.ChannelD
@@ -200,7 +200,7 @@ export default class Soc {
             this.Led_matrix.Run(
                 this.Bus1.Pout[2].dequeue()
                 , this.cycle
-                , this.Bus1.ready && this.cycle.cycle % 8 == 0
+                , this.Bus1.ready && this.cycle.cycle % 1 == 0
             )
         }
         

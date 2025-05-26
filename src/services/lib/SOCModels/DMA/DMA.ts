@@ -22,6 +22,8 @@ export default class DMA {
     count_sentByte         = 0
     count_recByte          = 0
 
+    burst                   = false
+
     state                   : number
     REC_state               =   0
     GET_state               =   1
@@ -64,8 +66,9 @@ export default class DMA {
 
                         this.RegisterFiles (
                             this.DMA_Slave.ChannelA.address
-                            , '0'.padStart(32,'0')
-                            , this.DMA_Slave.ChannelA.data)
+                            , '0'.padStart(18,'0')
+                            , this.DMA_Slave.ChannelA.data
+                        )
                         
                         active      = this.controlRegister != '00000000000000000000000000000000'
 
@@ -115,8 +118,12 @@ export default class DMA {
                             && this.count_recByte % 16 == 0
                         ) {
                             if (active) this.state = this.PUT_state
+                            this.burst = true
+                        } else {
+                            this.state = this.REC_state
+                            this.burst = false
                         }
-                        else this.state = this.REC_state
+
                     } else 
                     if (active) this.state = this.PUT_state
                     
@@ -155,7 +162,8 @@ export default class DMA {
             this.DMA_Master.ChannelD.ready = '0'
             this.DMA_Slave.ChannelD.valid  = '0'
             if (Interconnect_ready) {
-                this.println (
+                if (this.count_recByte < parseInt (this.lengthRegister, 2)) {
+                    this.println (
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
@@ -164,7 +172,7 @@ export default class DMA {
     
                 this.DMA_Master.send(
                     'GET',
-                    (parseInt(this.sourceRegister.slice(-18), 2) + this.count_sentByte).toString(2).padStart(17, '0'),
+                    (parseInt(this.sourceRegister.slice(-18), 2) + this.count_recByte).toString(2).padStart(17, '0'),
                     ''
                 )
                 if (parseInt (this.DMA_Master.ChannelA.address, 2) < 0x20000)
@@ -173,6 +181,11 @@ export default class DMA {
                 
                 this.DMA_Master.ChannelA.valid = '1'
                 this.state = this.REC_state
+                }
+                else {
+                    this.state = this.PUT_state
+                }
+                
             }
         }
 
@@ -195,7 +208,8 @@ export default class DMA {
                 )
                 this.DMA_Master.ChannelA.valid = '1'
                 this.DMA_Master.ChannelD.ready = '0'
-                this.DMA_Master.ChannelA.size  = '10'
+                if (this.burst) this.DMA_Master.ChannelA.size  = '10'
+                else this.DMA_Master.ChannelA.size ='00'
                 this.DMA_Slave.ChannelD.valid  = '0'
 
                 this.count_sentByte += 4
@@ -203,8 +217,9 @@ export default class DMA {
                     this.state        = this.REC_state 
                     
                 } else {
-                    if (this.count_sentByte != 0   
-                        && this.count_sentByte %16 == 0
+                    if ((this.count_sentByte != 0   
+                        && this.count_sentByte %16 == 0)
+                        || this.internal_FIFO.size() == 0
                     ) this.state = this.REC_state
                     else {
                         this.state        = this.PUT_state 
@@ -243,9 +258,9 @@ export default class DMA {
 
         if (this.state == this.ACKData_state)   {
             if (subInterconnect_ready) {
-                const data = this.RegisterFiles('0', 
+                const data = this.RegisterFiles('0'.padStart (18, '0'), 
                     this.DMA_Slave.ChannelA.address, 
-                    '0')
+                    '0'.padStart (32, '0'))
                 this.DMA_Slave.send ('AccessAckData', '00', data)
                 this.DMA_Slave.ChannelD.sink = '01'
                 this.println (
@@ -306,6 +321,7 @@ export default class DMA {
 
     // 4. Phần READ: trả về dữ liệu từ register tương ứng
     let result = '0'.repeat(32);
+    console.log ()
     switch (readAddrNum) {
         case 0x20000:
         result = this.sourceRegister;

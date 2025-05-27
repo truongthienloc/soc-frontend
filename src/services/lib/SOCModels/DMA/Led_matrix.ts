@@ -130,7 +130,7 @@ export default class LEDMatrix {
         if (this.Controller.state == this.Controller.AckData_state) {
             this.ready = false
             if (ready) {
-                let index = (parseInt (this.Matrix_Slave.ChannelA.address, 2) - 0x20018 ) / 4
+                let index = (parseInt (this.Matrix_Slave.ChannelA.address, 2) - 0x20014 ) / 4
                 let data  = this.dataRegisters[index]
                 this.println   (
                     this.active_println
@@ -161,7 +161,7 @@ export default class LEDMatrix {
            
         }
 
-        let index = (addr -  0x20018) / 4 
+        let index = (addr -  0x20014) / 4 
         if (index >= 384) {
             console.log (addr)
             throw new Error("Address out of range")

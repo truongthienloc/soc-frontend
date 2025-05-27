@@ -70,6 +70,7 @@ export default function SocPage({}: Props) {
   const [allowRun, setAllowRun] = useState(false)
 
   const [stepCode, setStepCode] = useState<string[]>([])
+  const [assembledBreakpoints, setAssembledBreakpoints] = useState<number[]>([])
   const [isStepping, setIsStepping] = useState(false)
   const [pc, setPc] = useState<number | undefined>(undefined)
   const [stepColors, setStepColors] = useState<Register[]>([])
@@ -341,8 +342,6 @@ export default function SocPage({}: Props) {
       return
     }
 
-
-
     function step() {
       if (!socModelRef.current) {
         return
@@ -376,7 +375,6 @@ export default function SocPage({}: Props) {
       return
     }
 
-
     // End Stepping
     if (socModelRef.current.Processor.pc > stepCode.length * 4) {
       setAllowRun(false)
@@ -396,8 +394,6 @@ export default function SocPage({}: Props) {
   }
 
   const handleAssembleClick = () => {
-
-    
     setPc(undefined)
 
     const { instructionPoint, pageTablePoint, dataPoint, peripheralPoint } = memoryMap
@@ -416,11 +412,12 @@ export default function SocPage({}: Props) {
       setIsKeyboardWaiting(false)
       setIsStepping(true)
       setStepCode(
-      socModelRef.current.Assembly_code.map((value: string) => {
-        const split = value.split(' ')
-        return split.slice(0, split.length - 1).join(' ')
-      }),
+        socModelRef.current.Assembly_code.map((value: string) => {
+          const split = value.split(' ')
+          return split.slice(0, split.length - 1).join(' ')
+        }),
       )
+      setAssembledBreakpoints(socModelRef.current.Assembler.break_point_text)
       localStorage.setItem('soc_code', code)
     }
   }
@@ -570,7 +567,7 @@ export default function SocPage({}: Props) {
                 <div className="grid grid-cols-[6fr_4fr]">
                   <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
                     {isStepping ? (
-                      <DisplayStepCode code={stepCode} pc={pc} />
+                      <DisplayStepCode code={stepCode} pc={pc} breakpoints={assembledBreakpoints} />
                     ) : (
                       <CodeEditor
                         value={code}
@@ -599,7 +596,7 @@ export default function SocPage({}: Props) {
                 <div className="grid grid-cols-[4fr_6fr]">
                   <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
                     {isStepping ? (
-                      <DisplayStepCode code={stepCode} pc={pc} />
+                      <DisplayStepCode code={stepCode} pc={pc} breakpoints={assembledBreakpoints} />
                     ) : (
                       <CodeEditor
                         value={code}
@@ -641,7 +638,7 @@ export default function SocPage({}: Props) {
               <TabPanel index={2} className="grid grid-cols-[4fr_6fr] pt-8">
                 <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
                   {isStepping ? (
-                    <DisplayStepCode code={stepCode} pc={pc} />
+                    <DisplayStepCode code={stepCode} pc={pc} breakpoints={assembledBreakpoints} />
                   ) : (
                     <CodeEditor
                       value={code}
@@ -668,7 +665,7 @@ export default function SocPage({}: Props) {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex h-[calc(100dvh-151px)] flex-col overflow-auto border border-black">
                     {isStepping ? (
-                      <DisplayStepCode code={stepCode} pc={pc} />
+                      <DisplayStepCode code={stepCode} pc={pc} breakpoints={assembledBreakpoints} />
                     ) : (
                       <CodeEditor
                         value={code}

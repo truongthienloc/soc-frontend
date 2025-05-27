@@ -216,22 +216,22 @@ export default function MemoryTable({
             <TableBody>
               {(() => {
                 // Flatten all data into a single array
-                const allData = displayedData.flatMap(tableData => tableData.data);
-                
+                const allData = displayedData.flatMap((tableData) => tableData.data)
+
                 // Group data into chunks of 4 items (for 4 columns)
-                const rows = [];
+                const rows = []
                 for (let i = 0; i < allData.length; i += 4) {
-                  const rowData = allData.slice(i, i + 4);
+                  const rowData = allData.slice(i, i + 4)
                   rows.push(
                     <TableRow key={`row-${i}`}>
                       {rowData.map((value) => (
                         <Fragment key={value.name}>
-                          <TableCell 
+                          <TableCell
                             sx={value.value !== '0x00000000' ? { backgroundColor: '#fff177' } : {}}
                           >
                             {value.name}
                           </TableCell>
-                          <TableCell 
+                          <TableCell
                             sx={value.value !== '0x00000000' ? { backgroundColor: '#fff177' } : {}}
                           >
                             <div className="flex items-center">
@@ -247,10 +247,10 @@ export default function MemoryTable({
                           <TableCell />
                         </Fragment>
                       ))}
-                    </TableRow>
-                  );
+                    </TableRow>,
+                  )
                 }
-                return rows;
+                return rows
               })()}
             </TableBody>
           </Table>

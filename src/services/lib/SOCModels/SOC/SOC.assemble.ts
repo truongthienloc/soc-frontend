@@ -17,7 +17,7 @@ export function assemble(
         this.Bus1.active        = this.view.interconnect.getActivated()
         this.Memory.active      = this.view.memoryModule.getActivated()
     }
-
+    console.log ('code', code)
     this.Assembly_code = []
     //****************CHECK SYNTAX ERROR****************
     this.Assembler.reset()
@@ -32,6 +32,8 @@ export function assemble(
     this.Led_matrix.reset ()
     this.DMA.reset()
     this.Memory.reset ()
+    this.Bus0.reset()
+    this.Bus1.reset()
     this.Memory.SetInstructionMemory(this.Assembler.binary_code)
     this.Memory.SetDataMemory(this.Assembler.data)
     this.Processor.MMU.Set(

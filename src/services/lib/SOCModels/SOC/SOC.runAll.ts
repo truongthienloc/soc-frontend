@@ -18,7 +18,7 @@ export async function RunAll(this: Soc) {
         console.log ('this.Processor.InsLength', this.Processor.InsLength)
         while (
             this.Processor.pc <
-            this.Processor.InsLength || this.Processor.Controller.state != 0 
+            this.Processor.InsLength || this.Processor.state != 0 
             || 
             !(
                 this.DMA.controlRegister == '00000000000000000000000000000000' || 
@@ -36,7 +36,7 @@ export async function RunAll(this: Soc) {
         console.log ('this.Memory.Ins_pointer', this.Memory.Ins_pointer)
         while (
             this.Processor.pc <
-            this.Memory.Ins_pointer || this.Processor.Controller.state != 0 
+            this.Memory.Ins_pointer || this.Processor.state != 0 
             || 
             !(
                 this.DMA.controlRegister == '00000000000000000000000000000000' || 
@@ -46,15 +46,15 @@ export async function RunAll(this: Soc) {
         ) {
                 await this.Step()
                 // bre++ 
-                // if (bre > 9856 + 30) break
+                // if (bre > 330) break
             }
     }
 
     // console.log(this.Processor.getRegisters())
-    console.log(this.Led_matrix.dataRegisters)
-    // console.log (this.DMA.RX_FIFO.size())
-    // console.log (this.cycle.cycle)
-    // console.log (this.Bus1)
+    // console.log(this.Led_matrix.dataRegisters)
+    // // console.log (this.DMA.RX_FIFO.size())
+    console.log (this.Bridge)
+    console.log (this.Bus1)
     console.log (this.DMA)
 
    this.event.emit(Soc.SOCEVENT.DONE_ALL)

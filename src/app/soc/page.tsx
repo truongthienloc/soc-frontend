@@ -388,6 +388,13 @@ export default function SocPage({}: Props) {
   }
 
   const handleRestartClick = () => {
+    socModelRef.current?.Assembler.reset()
+    socModelRef.current?.Memory.reset()
+    socModelRef.current?.Processor.reset()
+    socModelRef.current?.DMA.reset()
+
+    updateCoreDataAfterRun()
+
     setIsStepping(false)
     setPc(undefined)
     setAllowRun(false)
@@ -402,6 +409,11 @@ export default function SocPage({}: Props) {
 
     const tlbEntries = tlb2Array(tlb.tlbData)
     const requirementMem = decIO_point
+
+    socModelRef.current?.Assembler.reset()
+    socModelRef.current?.Memory.reset()
+    socModelRef.current?.Processor.reset()
+    socModelRef.current?.DMA.reset()
 
     if (!socModelRef.current?.assemble(code, breakpoints)) {
       toast.error('Syntax error')

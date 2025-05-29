@@ -9,9 +9,9 @@ import { LedMatrix } from "~/components/LedMatrix"
 
 export default class InterConnect {
     active      : boolean
-    Pin         : (FIFO_ChannelD | FIFO_ChannelA)[]
+    port_in         : (FIFO_ChannelD | FIFO_ChannelA)[]
     Timming     : FIFO_timing[]
-    Pout        : (FIFO_ChannelD | FIFO_ChannelA)[]
+    port_out        : (FIFO_ChannelD | FIFO_ChannelA)[]
     Pactived    : boolean[]
     state       : number
     ready       : boolean
@@ -24,13 +24,13 @@ export default class InterConnect {
         this.active_println = true
         this.ready          = false
 
-        this.Pin           = [
+        this.port_in           = [
                             new FIFO_ChannelA() // Bridge
                             , new FIFO_ChannelD() // DMA
                             , new FIFO_ChannelD() // Led
                             ]
 
-        this.Pout = [
+        this.port_out = [
                     new FIFO_ChannelD()
                     ,new FIFO_ChannelA()
                     ,new FIFO_ChannelA()
@@ -44,6 +44,32 @@ export default class InterConnect {
 
         this.Pactived = [true, true, true, true]
 
+    }
+
+    reset (){
+        this.state          = 0
+        this.active_println = true
+        this.ready          = false
+
+        this.port_in           = [
+                            new FIFO_ChannelA() // Bridge
+                            , new FIFO_ChannelD() // DMA
+                            , new FIFO_ChannelD() // Led
+                            ]
+
+        this.port_out = [
+                    new FIFO_ChannelD()
+                    ,new FIFO_ChannelA()
+                    ,new FIFO_ChannelA()
+        ]
+
+        this.Timming = [
+                    new FIFO_timing()
+                    ,new FIFO_timing()
+                    ,new FIFO_timing()
+        ]
+
+        this.Pactived = [true, true, true, true]
     }
 
     public setLogger(logger: Logger) {
@@ -65,7 +91,7 @@ export default class InterConnect {
         }
     }
 
-    Run (
+    Controller (
         dataFromBridge           : FIFO_ChannelA
         ,dataFromDMA             : ChannelD
         ,dataFromLed             : ChannelD
@@ -91,7 +117,7 @@ export default class InterConnect {
                 ,cycle                      
             )
 
-            if (! ((this.Pin[0].isEmpty()) && (this.Pin[1].isEmpty()) && (this.Pin[2].isEmpty()))) {
+            if (! ((this.port_in[0].isEmpty()) && (this.port_in[1].isEmpty()) && (this.port_in[2].isEmpty()))) {
                 this.state +=1
                 this.ready = false
             }
@@ -135,11 +161,11 @@ export default class InterConnect {
                     +': The SUB-INTERCONNECT is receiving data from BRIDGE.'
                 )
     
-                if (this.Pin[0] instanceof FIFO_ChannelA) {
-                    this.Pin[0].enqueue(data.dequeue())
+                if (this.port_in[0] instanceof FIFO_ChannelA) {
+                    this.port_in[0].enqueue(data.dequeue())
                     this.Timming[0].enqueue(cycle.cycle)
                 } else {
-                    console.error("Error: Pin[0] is not FIFO_ChannelA")
+                    console.error("Error: port_in[0] is not FIFO_ChannelA")
                 }
             }
             
@@ -156,11 +182,11 @@ export default class InterConnect {
                     +': The SUB-INTERCONNECT is receiving data from DMA.'
                 )
 
-                if (this.Pin[1] instanceof FIFO_ChannelD) {
-                    this.Pin[1].enqueue ({...data})
+                if (this.port_in[1] instanceof FIFO_ChannelD) {
+                    this.port_in[1].enqueue ({...data})
                     this.Timming[1].enqueue(cycle.cycle)
                 } else {
-                    console.error("Error: Pin[1] is not FIFO_ChannelA")
+                    console.error("Error: port_in[1] is not FIFO_ChannelA")
                 }
             }
         }
@@ -176,11 +202,11 @@ export default class InterConnect {
                 +': The SUB-INTERCONNECT is receiving data from LED-MATRIX.'
             )
 
-            if (this.Pin[2] instanceof FIFO_ChannelD) {
-                this.Pin[2].enqueue({...data})
+            if (this.port_in[2] instanceof FIFO_ChannelD) {
+                this.port_in[2].enqueue({...data})
                 this.Timming[2].enqueue(cycle.cycle)
             } else {
-                console.error("Error: Pin[2] is not FIFO_ChannelD")
+                console.error("Error: port_in[2] is not FIFO_ChannelD")
             }
         }
     }
@@ -213,7 +239,7 @@ export default class InterConnect {
     ) {
 
         if (Abiter == 0 ) {
-            const dataFromBridge = {...this.Pin[0].peek()}
+            const dataFromBridge = {...this.port_in[0].peek()}
                 // console.log ('dataFromBridge', dataFromBridge)
                 if (
                     (
@@ -223,7 +249,7 @@ export default class InterConnect {
                     )
                     ||  (parseInt('0'+dataFromBridge.address, 2)    == 0x0020010    )
                     )
-                &&  !this.Pin[0].isEmpty () && Led_ready
+                &&  !this.port_in[0].isEmpty () && Led_ready
 
                 ) {
                    
@@ -234,7 +260,7 @@ export default class InterConnect {
                         +': The SUB-INTERCONNECT is sending data from BRIDGE to LED-MATRIX.'
                     )
                     // console.log (Led_ready)
-                    if (this.Pout[2] instanceof FIFO_ChannelA) this.Pout[2].enqueue({...this.Pin[0].dequeue()})
+                    if (this.port_out[2] instanceof FIFO_ChannelA) this.port_out[2].enqueue({...this.port_in[0].dequeue()})
                     this.Timming[0].dequeue()
                 }
                 if (
@@ -242,7 +268,7 @@ export default class InterConnect {
                 ||  (parseInt('0'+dataFromBridge.address, 2) == 0x0020004)
                 ||  (parseInt('0'+dataFromBridge.address, 2) == 0x0020008)
                 ||  (parseInt('0'+dataFromBridge.address, 2) == 0x002000C)
-                &&  !this.Pin[0].isEmpty()
+                &&  !this.port_in[0].isEmpty()
                 ) {
 
                     this.println (
@@ -252,15 +278,15 @@ export default class InterConnect {
                         +': The SUB-INTERCONNECT is sending data from BRIDGE to DMA.'
                     )
 
-                    if (this.Pout[1] instanceof FIFO_ChannelA) this.Pout[1].enqueue({...this.Pin[0].dequeue()})
+                    if (this.port_out[1] instanceof FIFO_ChannelA) this.port_out[1].enqueue({...this.port_in[0].dequeue()})
                     this.Timming[0].dequeue()
                 }
             //}
         }
         if (Abiter == 1) {
-            const dataFromDMA = {...this.Pin[1].peek()}
+            const dataFromDMA = {...this.port_in[1].peek()}
             // if (dataFromDMA instanceof ChannelD) {
-            if (!this.Pin[1].isEmpty() && Bridge_ready
+            if (!this.port_in[1].isEmpty() && Bridge_ready
             
             ) {
                 this.println (
@@ -270,14 +296,14 @@ export default class InterConnect {
                     +': The SUB-INTERCONNECT is sending data from DMA to BRIDGE.'
                 )
                 
-                if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue({...this.Pin[1].dequeue()})
+                if (this.port_out[0] instanceof FIFO_ChannelD) this.port_out[0].enqueue({...this.port_in[1].dequeue()})
                 this.Timming[1].dequeue()
             }
         }
 
         if (Abiter == 2) {
-            const dataFromLED = {...this.Pin[2].peek()}
-            if (!this.Pin[2].isEmpty()) {
+            const dataFromLED = {...this.port_in[2].peek()}
+            if (!this.port_in[2].isEmpty()) {
                 this.println (
                     this.active_println
                     ,'Cycle '
@@ -285,7 +311,7 @@ export default class InterConnect {
                     +': The SUB-INTERCONNECT is sending data from LED-MATRIX to BRIDGE.'
                 )
                         
-                if (this.Pout[0] instanceof FIFO_ChannelD) this.Pout[0].enqueue({...this.Pin[2].dequeue()})
+                if (this.port_out[0] instanceof FIFO_ChannelD) this.port_out[0].enqueue({...this.port_in[2].dequeue()})
                 this.Timming[2].dequeue()
             }
             

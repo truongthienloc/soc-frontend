@@ -15,8 +15,6 @@ export default class Memory {
     active          : boolean
     slaveMemory     : Slave
     state           : number 
-    address         : string
-    data            : string
     Ins_pointer     : number
     logger          ?: Logger
     active_println  : boolean
@@ -32,8 +30,6 @@ export default class Memory {
 
     constructor(active: boolean) {
         this.state              = 0 
-        this.address            = ''
-        this.data               = ''
         
         this.Memory             = {}
         this.active             = active
@@ -44,7 +40,7 @@ export default class Memory {
         this.count_beats        = 0
     }
 
-    public Run (
+    public Controller (
         cycle           : Cycle
         , Int2Memory    : any // FIFO_ChannelA
         , ready         : boolean

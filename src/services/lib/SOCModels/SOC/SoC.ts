@@ -1,6 +1,6 @@
 import RiscVProcessor from '../Processor/RiscV_processor'
 import InterConnect from '../Interconnect/Interconnect'
-import disAssembly from '../Compile/Disassembly'
+import Disassembly from '../Compile/Disassembly'
 import MMU from '../Processor/MMU'
 import Memory from '../Memory/Memory'
 import { Keyboard, Logger, Monitor } from '../Compile/soc.d'
@@ -29,7 +29,7 @@ export default class Soc {
     Led_matrix  : LEDMatrix
 
     Assembler   : Assembler
-    Disassembly : disAssembly
+    Disassembly : Disassembly
     cycle       : Cycle
     MMU_endAddr : number
     public static SOCEVENT = {DONE_ALL: 'DONE ALL', STEP_END: 'STEP END'}
@@ -90,7 +90,7 @@ export default class Soc {
         this.Assembler      = new Assembler()
         this.Assembly_code  = []
         this.MMU_endAddr    = 0
-        this.Disassembly    = new disAssembly ('')
+        this.Disassembly    = new Disassembly ('')
         this.cycle          = new Cycle (0)
 
         this.name = name
@@ -132,14 +132,14 @@ export default class Soc {
     public async Step() {
 
         if (this.cycle.cycle % 1 == 0) {
-            await this.Processor.Run(
+            await this.Processor.Controller(
                 false
                 , this.cycle
-                , this.Bus0.Pout[0].dequeue()
+                , this.Bus0.port_out[0].dequeue()
                 , this.Bus0.ready
             )
 
-            this.Bus0.Run (
+            this.Bus0.Controller (
                 this.Processor.FIFO.dequeue()
                 ,this.DMA.DMA_Master.ChannelA
                 ,this.Memory.slaveMemory.ChannelD
@@ -158,34 +158,34 @@ export default class Soc {
                 ,this.cycle
             )
 
-            this.Memory.Run(
+            this.Memory.Controller(
                 this.cycle
-                , this.Bus0.Pout[2]
+                , this.Bus0.port_out[2]
                 , this.Bus0.ready
             )
 
-            this.Bridge.Run (
-                this.Bus0.Pout[3]
-                , this.Bus1.Pout[0]
+            this.Bridge.Controller (
+                this.Bus0.port_out[3]
+                , this.Bus1.port_out[0]
                 , this.Bus0.ready
                 , this.Bus1.ready
                 , this.cycle
             )
         }
 
-        if (this.cycle.cycle % 1 == 0) {
+        if (this.cycle.cycle % 2 == 0) {
 
             this.DMA.Controller (
-                this.Bus1.Pout[1]
-                ,this.Bus0.Pout[1]
+                this.Bus1.port_out[1]
+                ,this.Bus0.port_out[1]
                 , this.cycle
                 , this.Bus0.ready
-                , this.Bus1.ready && this.cycle.cycle % 1 == 0
+                , this.Bus1.ready && this.cycle.cycle % 8 == 0
             )
         }
 
-        if (this.cycle.cycle % 1 == 0) {
-            this.Bus1.Run (
+        if (this.cycle.cycle % 8 == 0) {
+            this.Bus1.Controller (
                 this.Bridge.fifo_to_subInterconnect
                 , this.DMA.DMA_Slave.ChannelD
                 , this.Led_matrix.Matrix_Slave.ChannelD
@@ -197,10 +197,10 @@ export default class Soc {
                 , this.cycle
             )
 
-            this.Led_matrix.Run(
-                this.Bus1.Pout[2].dequeue()
+            this.Led_matrix.Controller(
+                this.Bus1.port_out[2].dequeue()
                 , this.cycle
-                , this.Bus1.ready && this.cycle.cycle % 1 == 0
+                , this.Bus1.ready && this.cycle.cycle % 8 == 0
             )
         }
         

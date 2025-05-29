@@ -167,7 +167,7 @@ class UJType extends Instruction {
 }
 
 // InstructionProcessor Class
-export default class DisAssembly {
+export default class Disassembly {
     private binaryCode: string;
     private instructionResult: { [key: number]: string } = {};
 

@@ -46,7 +46,7 @@ export default class Bridge {
         }
     }
 
-    public Run (
+    public Controller (
         dataFrInterconnect          : any//FIFO_ChannelA
         ,dataFrsubInterconnect      : any//ChannelD
         ,ready0                     : boolean  // interconncet ready

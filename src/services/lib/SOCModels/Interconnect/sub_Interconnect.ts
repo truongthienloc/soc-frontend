@@ -5,9 +5,8 @@ import { FIFO_ChannelD }    from "./FIFO_ChannelD"
 import { FIFO_timing }      from "./FIFO_timing"
 import Cycle                from "../Compile/cycle"
 import {Logger }            from '../Compile/soc.d'
-import { LedMatrix } from "~/components/LedMatrix"
 
-export default class InterConnect {
+export default class TL_UL {
     active      : boolean
     port_in         : (FIFO_ChannelD | FIFO_ChannelA)[]
     Timming     : FIFO_timing[]

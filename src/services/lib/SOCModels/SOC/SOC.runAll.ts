@@ -54,7 +54,7 @@ export async function RunAll(this: Soc) {
     // console.log(this.Led_matrix.dataRegisters)
     // // console.log (this.DMA.RX_FIFO.size())
     console.log (this.Bridge)
-    console.log (this.Bus1)
+    console.log (this.TL_UL)
     console.log (this.DMA)
 
    this.event.emit(Soc.SOCEVENT.DONE_ALL)

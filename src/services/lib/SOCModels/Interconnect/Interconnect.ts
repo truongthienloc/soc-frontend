@@ -9,7 +9,7 @@ import { constrainedMemory } from "process"
 import { Concert_One } from "next/font/google"
 import { Buffer_01 } from "../../datapath/Block/Buffer"
 
-export default class InterConnect {
+export default class TL_UH {
     active              : boolean
     port_in                 : (FIFO_ChannelD | FIFO_ChannelA)[]
     Timing              : FIFO_timing[]

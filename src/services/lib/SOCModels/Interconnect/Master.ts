@@ -3,7 +3,7 @@ import { measureMemory } from "vm"
 import ChannelA from "./ChannelA"
 import ChannelD from "./ChannelD"
 
-export default class Master {
+export default class master_interface {
     name        : string
     active      : boolean
     source      : string

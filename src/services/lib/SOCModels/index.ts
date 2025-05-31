@@ -1,6 +1,6 @@
 import Soc from './SOC/SoC'
 
-const SOC               = new Soc('super SoC')
+const SOC               = new Soc()
 // const code              = 
 const code              = 
 `
@@ -105,9 +105,8 @@ sw   t0, 12(t1)       // DMA control register (non-zero = active).
 //     lw t3, 0(t0)
 // `
 SOC.Processor.active    = true
-SOC.MMU.active          = true
-SOC.Bus0.active         = true
-SOC.Bus1.active         = true
+SOC.TL_UH.active         = true
+SOC.TL_UL.active         = true
 SOC.Memory.active       = true
 SOC.assemble(
             code                                                                   

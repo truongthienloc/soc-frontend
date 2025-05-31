@@ -12,9 +12,8 @@ export function assemble(
     //****************SYNC ACTIVED MODEL VS VIEW****************
     if (this.view) {
         this.Processor.active   = this.view.cpuModule.getActivated()
-        this.MMU.active         = this.view.mmuModule.getActivated()
-        this.Bus0.active        = this.view.interconnect.getActivated()
-        this.Bus1.active        = this.view.interconnect.getActivated()
+        this.TL_UH.active        = this.view.interconnect.getActivated()
+        this.TL_UL.active        = this.view.interconnect.getActivated()
         this.Memory.active      = this.view.memoryModule.getActivated()
     }
     console.log ('code', code)
@@ -32,8 +31,8 @@ export function assemble(
     this.Led_matrix.reset ()
     this.DMA.reset()
     this.Memory.reset ()
-    this.Bus0.reset()
-    this.Bus1.reset()
+    this.TL_UH.reset()
+    this.TL_UL.reset()
     this.Memory.SetInstructionMemory(this.Assembler.binary_code)
     this.Memory.SetDataMemory(this.Assembler.data)
     this.Processor.MMU.Set(

@@ -1,7 +1,7 @@
 import ChannelA from "./ChannelA"
 import ChannelD from "./ChannelD"
 
-export default class Slave {
+export default class slave_interface {
     name    : string
     active  : boolean
     ChannelD: ChannelD

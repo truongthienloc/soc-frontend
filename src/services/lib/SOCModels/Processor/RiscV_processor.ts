@@ -1,6 +1,6 @@
 import MMU from '../Processor/MMU'
 import {handleRegister, mux } from '../Compile/sub_function'
-import Master from '../Interconnect/Master'
+import master_interface from '../Interconnect/Master'
 import { dec, stringToAsciiAndBinary, BinToHex } from '../Compile/convert'
 import { Keyboard, Logger, Monitor } from '../Compile/soc.d'
 import Ecall from '../Ecall/Ecall'
@@ -19,10 +19,8 @@ import EventEmitter from '../../EventEmitter/EventEmitter'
 export default class RiscVProcessor {
     name                        : string
     active                      : boolean
-    master                      : Master
+    master_interface            : master_interface
     register                    : { [key: string]: string }
-    Data_memory                 : { [key: string]: string }
-    Instruction_memory          : { [key: string]: string }
     MMU                         : MMU
     lineColor                   : { [key: string]: string }
     colorCode                   : { [key: string]: string }
@@ -63,7 +61,7 @@ export default class RiscVProcessor {
     wb                          : any
     imm                         : any
     stalled                     : any
-    size                        : string
+    mask                        : string
 
     logger                     ?: Logger
     monitor                    ?: Monitor
@@ -82,8 +80,7 @@ export default class RiscVProcessor {
     REPLACE_TLBE_INS         = 6
 
     async Controller  (
-        icBusy            : boolean
-      , cycle             : Cycle
+      cycle               : Cycle
       , InterConnect2CPU  : any
       , ready             : boolean
   ) 
@@ -98,7 +95,7 @@ export default class RiscVProcessor {
         //#This state also checks the available values of the Program Counter.                   #
         //#                                                                                      #
         //########################################################################################
-        this.master.ChannelD.ready = '0'
+        this.master_interface.ChannelD.ready = '0'
 
         if (this.pc >= this.InsLength) {
             this.state = this.GET_INSTRUCTION
@@ -150,10 +147,10 @@ export default class RiscVProcessor {
                     +BinToHex(this.MMU.physical_address)
                 )
                 
-                this.master.ChannelA.valid = '1'
-                this.master.send ('GET',  this.MMU.physical_address, this.SendData)
-                this.master.ChannelA.valid = '1'
-                this.FIFO.enqueue ({...this.master.ChannelA})
+                this.master_interface.ChannelA.valid = '1'
+                this.master_interface.send ('GET',  this.MMU.physical_address, this.SendData)
+                this.master_interface.ChannelA.valid = '1'
+                this.FIFO.enqueue ({...this.master_interface.ChannelA})
                 this.state = this.REPLACE_TLBE_INS
             }
             else if (this.MMU.MMU_message == ' ERROR: Page fault!!!!') {
@@ -169,8 +166,8 @@ export default class RiscVProcessor {
                 this.pc     = this.pc + 4
             }
             else {
-                this.master.ChannelA.valid = '1'
-                this.master.send ('GET',  (this.pc).toString(2).padStart(17, '0'), this.SendData)
+                this.master_interface.ChannelA.valid = '1'
+                this.master_interface.send ('GET',  (this.pc).toString(2).padStart(17, '0'), this.SendData)
 
                 this.println (
                     this.active_println
@@ -188,8 +185,8 @@ export default class RiscVProcessor {
                     +BinToHex(this.MMU.physical_address)
                 )
                 
-                this.master.ChannelA.size  = '00'
-                this.FIFO.enqueue ({...this.master.ChannelA})
+                this.master_interface.ChannelA.mask  = '00'
+                this.FIFO.enqueue ({...this.master_interface.ChannelA})
                 this.state              = this.RECEIVE_INSTRUCTION
 
             }
@@ -208,18 +205,18 @@ export default class RiscVProcessor {
         //#                                                     #
         //#######################################################
 
-        this.master.ChannelA.valid = '0'
-        this.master.ChannelD.ready = '1'
+        this.master_interface.ChannelA.valid = '0'
+        this.master_interface.ChannelD.ready = '1'
         if (InterConnect2CPU.valid == '1') {
-            this.master.receive (InterConnect2CPU)
-            this.instruction = this.master.ChannelD.data
+            this.master_interface.receive (InterConnect2CPU)
+            this.instruction = this.master_interface.ChannelD.data
 
             this.println (
                 this.active_println
                 ,'Cycle '
                 + cycle.toString() 
                 +': The PROCESSOR is receiving messeage AccessAckData from INTERCONNECT. ('
-                +BinToHex (this.master.ChannelD.data)
+                +BinToHex (this.master_interface.ChannelD.data)
                 +').'
             )
             this.state              = this.PROCESSING
@@ -236,8 +233,8 @@ export default class RiscVProcessor {
         //#Next state is Internal Processing state.             #
         //#                                                     #
         //#######################################################
-        this.master.ChannelA.valid = '0'
-        this.master.ChannelD.ready = '0'
+        this.master_interface.ChannelA.valid = '0'
+        this.master_interface.ChannelD.ready = '0'
 
         this.println (
             this.active_println
@@ -246,8 +243,7 @@ export default class RiscVProcessor {
             +': The PROCESSOR is processing.'
         )
         
-            let [message, data, logic_address, writeRegister, size] = this.Datapath (this.instruction, this.pc, icBusy)
-            console.log (this.getRegisters())
+            let [message, data, logic_address, writeRegister, mask] = this.Datapath (this.instruction, '')
             if (message == 'ECALL') {
                 this.println (this.active_println, 'Ecall instruction')
                 if (parseInt(this.register['10001'], 2) == 1) {
@@ -300,7 +296,8 @@ export default class RiscVProcessor {
                     this.register['01010'] = (Math.floor(Math.random() * Math.pow(2, 32)) & 0xFFFFFFFF).toString(2).padStart(32, '0')
                 }
             }
-            const access_interconnect = (message == 'PUT' 
+            const access_interconnect = (
+                   message == 'PUT' 
                 || message == 'GET'
                 || message === 'SWAP'
                 || message === 'ADD'
@@ -319,7 +316,7 @@ export default class RiscVProcessor {
                 this.SendData           = data
                 this.SendAddress        = logic_address
                 this.writeReg           = writeRegister
-                this.size               = size
+                this.mask               = mask
                 this.state   = this.ACESS_INTERCONNECT
                 
             }
@@ -341,7 +338,7 @@ export default class RiscVProcessor {
     }
 
     if (this.state == this.ACESS_INTERCONNECT )         {
-        this.master.ChannelD.ready = '0'
+        this.master_interface.ChannelD.ready = '0'
         this.MMU.run(this.SendAddress, this.Processor_messeage)
         if (this.MMU.MMU_message == ' ERROR: Page fault!!!!') {
 
@@ -430,18 +427,18 @@ export default class RiscVProcessor {
                     +BinToHex(this.MMU.physical_address)
                 )
                 
-                this.master.ChannelA.valid = '1'
-                this.master.send ('GET',  this.MMU.physical_address, this.SendData)
-                this.master.ChannelA.valid = '1'
-                this.FIFO.enqueue ({...this.master.ChannelA})
+                this.master_interface.ChannelA.valid = '1'
+                this.master_interface.send ('GET',  this.MMU.physical_address, this.SendData)
+                this.master_interface.ChannelA.valid = '1'
+                this.FIFO.enqueue ({...this.master_interface.ChannelA})
                 this.state = this.REPLACE_TLBE_DATA
             }
             else {
                 this.state =  this.RECEIVE_INTERCONNECT 
-                this.master.send (this.Processor_messeage,  this.MMU.physical_address, this.SendData)
-                if (this.size == 'sb') this.master.ChannelA.mask = '0001'
-                if (this.size == 'sh') this.master.ChannelA.mask = '0011'
-                if (this.size == 'sw') this.master.ChannelA.mask = '1111'
+                this.master_interface.send (this.Processor_messeage,  this.MMU.physical_address, this.SendData)
+                if (this.mask == 'sb') this.master_interface.ChannelA.mask = '0001'
+                if (this.mask == 'sh') this.master_interface.ChannelA.mask = '0011'
+                if (this.mask == 'sw') this.master_interface.ChannelA.mask = '1111'
 
                 this.println (
                     this.active_println
@@ -458,8 +455,8 @@ export default class RiscVProcessor {
                     +' -> Physical address: ' 
                     +BinToHex(this.MMU.physical_address)
                 )
-                this.master.ChannelA.valid = '1'
-                this.FIFO.enqueue ({...this.master.ChannelA})
+                this.master_interface.ChannelA.valid = '1'
+                this.FIFO.enqueue ({...this.master_interface.ChannelA})
 
             }
         }
@@ -468,11 +465,11 @@ export default class RiscVProcessor {
     }
 
     if (this.state == this.RECEIVE_INTERCONNECT)        {
-        this.master.ChannelA.valid = '0'
-        this.master.ChannelD.ready = '1'
+        this.master_interface.ChannelA.valid = '0'
+        this.master_interface.ChannelD.ready = '1'
         if (InterConnect2CPU.valid == '1') {
 
-            this.master.receive (InterConnect2CPU)
+            this.master_interface.receive (InterConnect2CPU)
 
             if (InterConnect2CPU.opcode == '000') {
 
@@ -494,29 +491,19 @@ export default class RiscVProcessor {
                     +': The PROCESSOR is receiving messeage AccessAckData from INTERCONNECT.'
                 )
 
-                if (this.size == 'lb') 
-                    this.register[this.writeReg] =  this.master.ChannelD.data.slice(24,32).padStart(32, this.master.ChannelD.data.slice(24,25))
-                else if (this.size == 'lbu')
-                    this.register[this.writeReg] =  this.master.ChannelD.data.slice(24,32).padStart(32, '0')
-                else if (this.size == 'lh')
-                    this.register[this.writeReg] =  this.master.ChannelD.data.slice(16,32).padStart(32, this.master.ChannelD.data.slice(16,17))
-                else if (this.size == 'lhu')
-                    this.register[this.writeReg] =  this.master.ChannelD.data.slice(16,32).padStart(32, '0')
-                else if (this.size == 'lw') 
-                    this.register[this.writeReg] =  this.master.ChannelD.data
-                else this.register[this.writeReg] =  this.master.ChannelD.data
+                this.Datapath ('', this.master_interface.ChannelD.data)
 
             }
             
-            this.master.receive (InterConnect2CPU)
+            this.master_interface.receive (InterConnect2CPU)
             this.state =  this.GET_INSTRUCTION
         }
         return
     }
       
     if (this.state == this.REPLACE_TLBE_INS)           {
-        this.master.ChannelA.valid = '0'
-        this.master.ChannelD.ready = '1'
+        this.master_interface.ChannelA.valid = '0'
+        this.master_interface.ChannelD.ready = '1'
 
         if (InterConnect2CPU.valid == '1') {
 
@@ -528,8 +515,8 @@ export default class RiscVProcessor {
             )
 
             const VPN       = this.SendAddress.slice(0, 20)  
-            this.master.receive (InterConnect2CPU)
-            const frame     = this.master.ChannelD.data
+            this.master_interface.receive (InterConnect2CPU)
+            const frame     = this.master_interface.ChannelD.data
 
             this.println (
                 this.active_println
@@ -548,15 +535,15 @@ export default class RiscVProcessor {
                 , (dec (frame) & 0X0001) 
                 , cycle.cycle])
 
-            this.master.ChannelA.valid = '0'
+            this.master_interface.ChannelA.valid = '0'
             this.state = this.GET_INSTRUCTION
         }
         return
     }
 
     if (this.state == this.REPLACE_TLBE_DATA)          {
-        this.master.ChannelA.valid = '0'
-        this.master.ChannelD.ready = '1'
+        this.master_interface.ChannelA.valid = '0'
+        this.master_interface.ChannelD.ready = '1'
 
         if (InterConnect2CPU.valid == '1') {
 
@@ -568,8 +555,8 @@ export default class RiscVProcessor {
             )
 
             const VPN       = this.SendAddress.slice(0, 20)  
-            this.master.receive (InterConnect2CPU)
-            const frame     = this.master.ChannelD.data
+            this.master_interface.receive (InterConnect2CPU)
+            const frame     = this.master_interface.ChannelD.data
 
             this.println (
                 this.active_println
@@ -596,9 +583,9 @@ export default class RiscVProcessor {
                 )
                 
                 this.state = this.GET_INSTRUCTION
-                this.master.ChannelA.valid = '0'
+                this.master_interface.ChannelA.valid = '0'
             } else {
-                this.master.ChannelA.valid = '0'
+                this.master_interface.ChannelA.valid = '0'
                 this.state = this.ACESS_INTERCONNECT
             }
             
@@ -640,7 +627,7 @@ export default class RiscVProcessor {
     constructor(name: string, source: string, active: boolean) {
         this.name                       = name
         this.active                     = active
-        this.master                     = new Master(name, true, source)
+        this.master_interface                     = new master_interface(name, true, source)
         this.MMU                        = new MMU   (active)
         this.writeReg                   = ''
         this.Processor_messeage         = ''
@@ -650,7 +637,7 @@ export default class RiscVProcessor {
         this.active_println             = true
         this.InsLength                  = 0
         this.keyBoard_waiting           = false
-        this.size                       = ''
+        this.mask                       = ''
         this.state                      = 0
 
         // this.Ecall                      = new Ecall ()
@@ -752,8 +739,6 @@ export default class RiscVProcessor {
         this.regWrite = 0
         this.ALUOp = 'z'
         this.slt = 0
-        this.Data_memory = {}
-        this.Instruction_memory = {}
         this.pc = 0
         this.stalled = false
     }
@@ -797,8 +782,6 @@ export default class RiscVProcessor {
             '11110': '00000000000000000000000000000000',
             '11111': '00000000000000000000000000000000',
         }
-        this.Data_memory = {}
-        this.Instruction_memory = {}
         this.pc = 0
         this.state = 0
         this.FIFO = new FIFO_ChannelA()
@@ -1236,21 +1219,14 @@ export default class RiscVProcessor {
         }
     }
 
-    Datapath (instruction: string, pc: number, icBusy: boolean): [string, string, string, string, string] {
+    Datapath (instruction: string, readData: string): [string, string, string, string, string] {
 
-                   
-            this.pre_pc = pc
+        if (instruction != '') {
             this.stalled = false 
             let readData = ''
 
             if (instruction == '00000000000000000000000001110011') {
-                
-                if (icBusy) {
-                    this.stalled = true
-                    this.pc = this.pc 
-                }
-                else {
-                    this.stalled = false
+                {
                     this.pc = this.pc + 4
                 }
                     
@@ -1270,23 +1246,23 @@ export default class RiscVProcessor {
 
             this.control(instruction.slice(25, 32), instruction.slice(17, 20))
 
-            let size = 'none'
+            let mask = 'none'
             if (instruction.slice(25, 32) === '0000011')
                 switch (instruction.slice(17, 20)) {
                     case '000':
-                        size = 'lb'
+                        mask = 'lb'
                         break
                     case '001':
-                        size = 'lh'
+                        mask = 'lh'
                         break
                     case '010':
-                        size = 'lw'
+                        mask = 'lw'
                         break
                     case '100':
-                        size = 'lbu'
+                        mask = 'lbu'
                         break
                     case '101':
-                        size = 'lhu'
+                        mask = 'lhu'
                         break
                     default:
                         break
@@ -1295,13 +1271,13 @@ export default class RiscVProcessor {
             if (instruction.slice(25, 32) === '0100011')
                 switch (instruction.slice(17, 20)) {
                     case '000': //Load
-                        size = 'sb'
+                        mask = 'sb'
                         break
                     case '001': //Store
-                        size = 'sh'
+                        mask = 'sh'
                         break
                     case '010': //Load
-                        size = 'sw'
+                        mask = 'sw'
                         break
                     default:
                         break
@@ -1317,14 +1293,14 @@ export default class RiscVProcessor {
             this.aluControl(this.ALUOp, instruction.slice(17, 20), instruction.slice(1,2))
 
             const ALUResult = this.ALU(readData1, mux(readData2, imm, this.ALUSrc), this.operation)
-             
+                
 
             this.branchControl(this.jal, this.jalr, this.branch)
 
             let message = 'None'
             let data = '0'
             let address = ''
-           
+            
             
             if (instruction.slice(25, 32) === '0100011') {
                 // SW
@@ -1394,48 +1370,45 @@ export default class RiscVProcessor {
                     data = readData2
                     address = readData1
                 }
-                // return [message, data, address, writeRegister, size]
+                // return [message, data, address, writeRegister, mask]
             }
 
 
-            if (this.stalled == false) {
                 // readData = this.dataMemory(ALUResult, this.memRead, this.memWrite, readData2)
 
-                readData = ''
-                let writeDataR = mux(
+            readData = ''
+            let writeDataR = mux(
+                mux(
                     mux(
-                        mux(
-                            mux(ALUResult, readData, this.memToReg),
-                            pc.toString(2).padStart(32, '0'),
-                            this.jump,
-                        ),
-                        mux(
-                            '00000000000000000000000000000000',
-                            '00000000000000000000000000000001',
-                            this.signBit,
-                        ),
-                        this.slt,
+                        mux(ALUResult, readData, this.memToReg),
+                        this.pc.toString(2).padStart(32, '0'),
+                        this.jump,
                     ),
                     mux(
-                        (parseInt (imm,2) * 4096).toString(2).padStart(32, '0') +
-                            pc.toString(2).padStart(32, '0'),
-                        (parseInt (imm,2) * 4096).toString(2).padStart(32, '0'),
-                        this.auiOrLui,
+                        '00000000000000000000000000000000',
+                        '00000000000000000000000000000001',
+                        this.signBit,
                     ),
-                    this.wb,
-                )
+                    this.slt,
+                ),
+                mux(
+                    (parseInt (imm,2) * 4096).toString(2).padStart(32, '0') +
+                        this.pc.toString(2).padStart(32, '0'),
+                    (parseInt (imm,2) * 4096).toString(2).padStart(32, '0'),
+                    this.auiOrLui,
+                ),
+                this.wb,
+            )
 
-                writeDataR = writeDataR.padStart(32, '0')
-                if (this.regWrite === 1) {
-                    this.register[writeRegister] = writeDataR
-                }
-
-                this.register['00000'] = '00000000000000000000000000000000'
+            writeDataR = writeDataR.padStart(32, '0')
+            if (this.regWrite === 1) {
+                this.register[writeRegister] = writeDataR
             }
-            if (this.stalled == false) {
-                this.pc     = mux(mux(pc + 4, (dec(imm) << 1) + pc, this.pcSrc1), dec ('0'+ALUResult), this.pcSrc2)
-            } else this.pc = pc
 
+            this.register['00000'] = '00000000000000000000000000000000'
+            
+            this.pc     = mux(mux(this.pc + 4, (dec(imm) << 1) + this.pc, this.pcSrc1), dec ('0'+ALUResult), this.pcSrc2)
+            
             this.lineColor['3']         = mux(this.lineColor['2'], this.lineColor['1'], this.ALUSrc);
             this.lineColor['6']         = mux(this.lineColor['0'], this.lineColor['4'], this.pcSrc1);
             this.lineColor['9']         = mux(this.lineColor['6'], this.lineColor['5'], this.pcSrc2);
@@ -1465,7 +1438,25 @@ export default class RiscVProcessor {
             this.lineColor['auiOrLui']  = this.auiOrLui     .toString()     
             this.lineColor['wb'      ]  = this.wb           .toString()           
             this.lineColor['imm'     ]  = this.imm          .toString()     
-            return [message, data, address, writeRegister, size]
+            return [message, data, address, writeRegister, mask]
+        } else {
+            if (readData != '') {
+                if (this.mask == 'lb') 
+                    this.register[this.writeReg] =  readData.slice(24,32).padStart(32, readData.slice(24,25))
+                else if (this.mask == 'lbu')
+                    this.register[this.writeReg] =  readData.slice(24,32).padStart(32, '0')
+                else if (this.mask == 'lh')
+                    this.register[this.writeReg] =  readData.slice(16,32).padStart(32, readData.slice(16,17))
+                else if (this.mask == 'lhu')
+                    this.register[this.writeReg] =  readData.slice(16,32).padStart(32, '0')
+                else if (this.mask == 'lw') 
+                    this.register[this.writeReg] =  readData
+                else 
+                    this.register[this.writeReg] =  readData
+            }
+            return ['', '', '', '', '']
+        }
+        
 
     }
 }

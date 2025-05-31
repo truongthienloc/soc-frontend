@@ -1,5 +1,5 @@
-import Slave                from './../Interconnect/Slave'
-import Master               from './../Interconnect/Master'
+import slave_interface from '../Interconnect/Slave'
+import master_interface     from '../Interconnect/Master'
 import { FIFO_ChannelD }    from "../Interconnect/FIFO_ChannelD"
 import Cycle                from "../Compile/cycle"
 import {Logger }            from '../Compile/soc.d'
@@ -13,9 +13,9 @@ export default class DMA {
     controlRegister         : string
     statusRegister          : string
 
-    DMA_Master              : Master
-    DMA_Slave               : Slave
-    internal_FIFO                 : FIFO_ChannelD
+    master_interface        : master_interface
+    slave_interface         : slave_interface
+    internal_FIFO           : FIFO_ChannelD
 
     count_burst             = 0
     count_beats             = 0 
@@ -44,10 +44,10 @@ export default class DMA {
     ) {
 
         if (this.state == this.REC_state)      {
-            this.DMA_Master.ChannelA.valid  = '0'    
-            this.DMA_Slave.ChannelD.valid   = '0' 
-            this.DMA_Master.ChannelD.ready  = '1'
-            this.DMA_Slave.ChannelA.ready   = '1'
+            this.master_interface.ChannelA.valid  = '0'    
+            this.slave_interface.ChannelD.valid   = '0' 
+            this.master_interface.ChannelD.ready  = '1'
+            this.slave_interface.ChannelA.ready   = '1'
             let active                      = this.controlRegister != '00000000000000000000000000000000'
 
             if (!subnterConnect2DMA.isEmpty()) {
@@ -55,7 +55,7 @@ export default class DMA {
                 if (data_from_sub_interconnect.valid == '1') {
                     if (data_from_sub_interconnect.opcode == '000') {
 
-                        this.DMA_Slave.receive({...data_from_sub_interconnect})
+                        this.slave_interface.receive({...data_from_sub_interconnect})
 
                         this.println (
                             this.active_println
@@ -65,9 +65,9 @@ export default class DMA {
                         )
 
                         this.RegisterFiles (
-                            this.DMA_Slave.ChannelA.address
+                            this.slave_interface.ChannelA.address
                             , '0'.padStart(18,'0')
-                            , this.DMA_Slave.ChannelA.data
+                            , this.slave_interface.ChannelA.data
                         )
                         
                         active      = this.controlRegister != '00000000000000000000000000000000'
@@ -85,7 +85,7 @@ export default class DMA {
                             + cycle.toString() 
                             +': The DMA is receiving messeage GET from SUB-INTERCONNECT.'
                         )
-                        this.DMA_Slave.receive ({...data_from_sub_interconnect})
+                        this.slave_interface.receive ({...data_from_sub_interconnect})
                         this.state = this.ACKData_state
                         return
                     } 
@@ -99,19 +99,19 @@ export default class DMA {
 
                 if (data_from_interconncet.opcode == '001') {
 
-                    this.DMA_Master.receive(data_from_interconncet)
+                    this.master_interface.receive(data_from_interconncet)
 
                     this.println (
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
                         +': The DMA is receiving messeage AccessAckData from INTERCONNET. ('
-                        + BinToHex (this.DMA_Master.ChannelD.data) 
+                        + BinToHex (this.master_interface.ChannelD.data) 
                         +')'
                     )
 
-                    this.DMA_Master.ChannelA.valid = '0'
-                    this.internal_FIFO.enqueue(this.DMA_Master.ChannelD)
+                    this.master_interface.ChannelA.valid = '0'
+                    this.internal_FIFO.enqueue(this.master_interface.ChannelD)
                     this.count_recByte +=4
                     if (data_from_interconncet.sink == '0') {
                         if (this.count_recByte != 0
@@ -137,7 +137,7 @@ export default class DMA {
                         +': The DMA is receiving messeage AccessAck from INTERCONNECT.'
                     )
                     
-                    this.DMA_Master.receive(data_from_interconncet)
+                    this.master_interface.receive(data_from_interconncet)
                     if (this.count_sentByte >= parseInt (this.lengthRegister, 2) 
                         && this.controlRegister != '00000000000000000000000000000000'
                     ) {
@@ -159,8 +159,8 @@ export default class DMA {
         }
 
         if (this.state == this.GET_state)   {
-            this.DMA_Master.ChannelD.ready = '0'
-            this.DMA_Slave.ChannelD.valid  = '0'
+            this.master_interface.ChannelD.ready = '0'
+            this.slave_interface.ChannelD.valid  = '0'
             if (Interconnect_ready) {
                 if (this.count_recByte < parseInt (this.lengthRegister, 2)) {
                     this.println (
@@ -170,16 +170,16 @@ export default class DMA {
                     +': The DMA is sending messeage GET to INTERCONNET.'
                 )
     
-                this.DMA_Master.send(
+                this.master_interface.send(
                     'GET',
                     (parseInt(this.sourceRegister.slice(-18), 2) + this.count_recByte).toString(2).padStart(17, '0'),
                     ''
                 )
-                if (parseInt (this.DMA_Master.ChannelA.address, 2) < 0x20000)
-                this.DMA_Master.ChannelA.size = '10'
-                else this.DMA_Master.ChannelA.size = '00'
+                if (parseInt (this.master_interface.ChannelA.address, 2) < 0x20000)
+                this.master_interface.ChannelA.size = '10'
+                else this.master_interface.ChannelA.size = '00'
                 
-                this.DMA_Master.ChannelA.valid = '1'
+                this.master_interface.ChannelA.valid = '1'
                 this.state = this.REC_state
                 }
                 else {
@@ -190,8 +190,8 @@ export default class DMA {
         }
 
         if (this.state == this.PUT_state)   {
-            this.DMA_Master.ChannelD.ready = '0'
-            this.DMA_Master.ChannelA.valid = '0'
+            this.master_interface.ChannelD.ready = '0'
+            this.master_interface.ChannelA.valid = '0'
             if (Interconnect_ready) {
 
                 this.println (
@@ -201,16 +201,16 @@ export default class DMA {
                     +': The DMA is sending messeage PUT to INTERCONNET.'
                 )
                 
-                this.DMA_Master.send(
+                this.master_interface.send(
                     'PUT',
                     ((parseInt(this.destRegister, 2) + 0 + this.count_sentByte)).toString(2).padStart(17, '0'),
                     this.internal_FIFO.dequeue().data
                 )
-                this.DMA_Master.ChannelA.valid = '1'
-                this.DMA_Master.ChannelD.ready = '0'
-                if (this.burst) this.DMA_Master.ChannelA.size  = '10'
-                else this.DMA_Master.ChannelA.size ='00'
-                this.DMA_Slave.ChannelD.valid  = '0'
+                this.master_interface.ChannelA.valid = '1'
+                this.master_interface.ChannelD.ready = '0'
+                if (this.burst) this.master_interface.ChannelA.size  = '10'
+                else this.master_interface.ChannelA.size ='00'
+                this.slave_interface.ChannelD.valid  = '0'
 
                 this.count_sentByte += 4
                 if (parseInt ('0'+this.destRegister, 2) >= 0x20014) {
@@ -233,8 +233,8 @@ export default class DMA {
         if (this.state == this.ACK_state)   {
 
             if (subInterconnect_ready) {
-                this.DMA_Slave.send ('AccessAck', '00', '')
-                this.DMA_Slave.ChannelD.sink = '01'
+                this.slave_interface.send ('AccessAck', '00', '')
+                this.slave_interface.ChannelD.sink = '01'
                 this.println (
                     this.active_println
                     ,'Cycle '
@@ -249,7 +249,7 @@ export default class DMA {
                         + cycle.toString() 
                         +': The DMA is actived.'
                     )
-                    this.DMA_Master.ChannelD.ready = '0'
+                    this.master_interface.ChannelD.ready = '0'
                     this.state = this.GET_state
                     return
                 } else this.state = this.REC_state
@@ -259,10 +259,10 @@ export default class DMA {
         if (this.state == this.ACKData_state)   {
             if (subInterconnect_ready) {
                 const data = this.RegisterFiles('0'.padStart (18, '0'), 
-                    this.DMA_Slave.ChannelA.address, 
+                    this.slave_interface.ChannelA.address, 
                     '0'.padStart (32, '0'))
-                this.DMA_Slave.send ('AccessAckData', '00', data)
-                this.DMA_Slave.ChannelD.sink = '01'
+                this.slave_interface.send ('AccessAckData', '00', data)
+                this.slave_interface.ChannelD.sink = '01'
                 this.println (
                     this.active_println
                     ,'Cycle '
@@ -352,9 +352,9 @@ export default class DMA {
         this.controlRegister            = '00000000000000000000000000000000'
         this.statusRegister             = '00000000000000000000000000000000'
         this.state                      = 0
-        this.DMA_Master                 = new Master('DMA_Master', true, '01')
-        this.DMA_Master.ChannelA.size   = '10'
-        this.DMA_Slave                  = new Slave ('DMA_Slave', true)
+        this.master_interface                 = new master_interface('master_interface', true, '01')
+        this.master_interface.ChannelA.size   = '10'
+        this.slave_interface                  = new slave_interface ('slave_interface', true)
         this.internal_FIFO                    = new FIFO_ChannelD ()
         this.active_println             = true
 
@@ -367,9 +367,9 @@ export default class DMA {
         this.controlRegister            = '00000000000000000000000000000000'
         this.statusRegister             = '00000000000000000000000000000000'
         this.state                      = 0
-        this.DMA_Master                 = new Master('DMA_Master', true, '01')
-        this.DMA_Master.ChannelA.size   = '10'
-        this.DMA_Slave                  = new Slave ('DMA_Slave', true)
+        this.master_interface                 = new master_interface('master_interface', true, '01')
+        this.master_interface.ChannelA.size   = '10'
+        this.slave_interface                  = new slave_interface ('slave_interface', true)
         this.internal_FIFO                    = new FIFO_ChannelD ()
         this.active_println             = true
     }

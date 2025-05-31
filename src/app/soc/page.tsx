@@ -392,6 +392,7 @@ export default function SocPage({}: Props) {
     socModelRef.current?.Memory.reset()
     socModelRef.current?.Processor.reset()
     socModelRef.current?.DMA.reset()
+    logRef.current?.clear()
 
     updateCoreDataAfterRun()
 

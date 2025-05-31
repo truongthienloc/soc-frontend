@@ -23,7 +23,7 @@ export default function DisplayStepCode({
           <div className="flex flex-row items-center gap-1">
             <span
               className={cn('h-2 w-2 rounded-full', {
-                'bg-red-500': breakpoints.includes(index),
+                'bg-red-500': breakpoints.includes(index + 1),
               })}
             ></span>
             <p

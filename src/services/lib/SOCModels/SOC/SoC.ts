@@ -5,6 +5,7 @@ import Assembler from '../Compile/check_syntax'
 import EventEmitter from '../../EventEmitter/EventEmitter'
 import { assemble } from '../SOC/SOC.assemble'
 import { RunAll } from '../SOC/SOC.runAll'
+import { StepIns } from '../SOC/SOC.StepIns'
 
 
 import RiscVProcessor from '../Processor/RiscV_processor'
@@ -15,6 +16,7 @@ import TL_UL from '../Interconnect/sub_Interconnect'
 import Bridge from "./../Interconnect/Bridge"
 import LEDMatrix from '../DMA/Led_matrix'
 import Cycle from '../Compile/cycle'
+import { Imprima } from 'next/font/google'
 
 export default class Soc {
     name        : string
@@ -125,6 +127,11 @@ export default class Soc {
         this.event.emit(Soc.SOCEVENT.STEP_END)
     }
 
+    public async stepInsWithEvent() {
+        await this.StepIns()
+        this.event.emit(Soc.SOCEVENT.STEP_END)
+    }
+
 
     public async Step() {
 
@@ -202,5 +209,9 @@ export default class Soc {
         
         this.cycle.incr()
 
+    }
+
+    public StepIns() {
+        return StepIns.bind(this)()
     }
 }

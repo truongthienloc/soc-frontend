@@ -67,7 +67,8 @@ export default class RiscVProcessor {
     monitor                    ?: Monitor
     keyboard                   ?: Keyboard
 
-    Warnning                        = 0
+    Warnning                = 0
+    stepDone                = 2
     keyBoard_waiting        : boolean
 
     state                           : number
@@ -96,7 +97,6 @@ export default class RiscVProcessor {
         //#                                                                                      #
         //########################################################################################
         this.master_interface.ChannelD.ready = '0'
-
         if (this.pc >= this.InsLength) {
             this.state = this.GET_INSTRUCTION
             if (this.Warnning == 0) {
@@ -317,11 +317,13 @@ export default class RiscVProcessor {
                 this.SendAddress        = logic_address
                 this.writeReg           = writeRegister
                 this.mask               = mask
-                this.state   = this.ACESS_INTERCONNECT
+                this.state              = this.ACESS_INTERCONNECT
+                this.stepDone           = 0
                 
             }
             else {
-                this.state = this.GET_INSTRUCTION
+                this.state      = this.GET_INSTRUCTION
+                this.stepDone   = 1
                 if (this.pc >= this.InsLength) {
                 if (this.Warnning == 0) {
                     this.println (
@@ -492,9 +494,11 @@ export default class RiscVProcessor {
                 )
 
                 this.Datapath ('', this.master_interface.ChannelD.data)
+                
 
             }
-            
+
+            this.stepDone = 1
             this.master_interface.receive (InterConnect2CPU)
             this.state =  this.GET_INSTRUCTION
         }

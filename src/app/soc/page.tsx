@@ -176,7 +176,7 @@ export default function SocPage({}: Props) {
         // viewKeyboard.getEvent().on(Agent.Event.CLICK, handleIOClick)
         viewLedMatrix.getEvent().on(Agent.Event.CLICK, handleLedMatrixClick)
 
-        const socModel = new Soc('abc')
+        const socModel = new Soc()
         socModelRef.current = socModel
         logRef.current = logs
         socModel.setLogger(logs)
@@ -337,6 +337,74 @@ export default function SocPage({}: Props) {
     window.open('/soc/guide', 'soc__guide', `width=500, height=500, left=${x}`)
   }
 
+  const handleStepInsClick = () => {
+    if (!socModelRef.current) {
+      return
+    }
+
+    function step() {
+      if (!socModelRef.current) {
+        return
+      }
+
+      setPc(socModelRef.current.Processor.pc)
+      socModelRef.current.StepIns()
+
+      updateCoreDataAfterRun()
+    }
+    console.log ('socModelRef.current.Processor.pc', socModelRef.current.Processor.pc)
+    // Start Stepping
+    if (pc === undefined) {
+      console.log ('1')
+      setIsStepping(true)
+      setStepCode(
+        socModelRef.current.Assembly_code.map((value: string) => {
+          const split = value.split(' ')
+          return split.slice(0, split.length - 1).join(' ')
+        }),
+      )
+      setShowSimulatorType('CODE_EDITOR')
+      step()
+
+      return
+    }
+  // End Stepping
+    if (socModelRef.current.Processor.pc == stepCode.length * 4) {
+            console.log ('2')
+      updateCoreDataAfterRun()
+
+      setAllowRun(false)
+      setPc(undefined)
+      setPc(socModelRef.current.Processor.pc)
+      socModelRef.current.Processor.pc += 4
+      return
+    }
+
+    // End Stepping
+    if (socModelRef.current.Processor.pc > stepCode.length * 4) {
+            console.log ('3')
+      // setAllowRun(false)
+      // setPc(undefined)
+      // setPc(socModelRef.current.Processor.pc)
+      // setIsStepping(false)
+      // setShowSimulatorType('CODE_EDITOR')
+      return
+    }
+
+    // if (socModelRef.current.Processor.pc >= stepCode.length * 4) {
+    //   // step()
+    //   updateCoreDataAfterRun()
+    //   console.log ('1')
+    //   setAllowRun(false)
+    //   setPc(undefined)
+    //   setIsStepping(false)
+      
+    //   return
+    // }
+
+      step()
+  }
+
   const handleStepClick = () => {
     if (!socModelRef.current) {
       return
@@ -403,6 +471,7 @@ export default function SocPage({}: Props) {
 
   const handleAssembleClick = () => {
     setPc(undefined)
+    logRef.current?.clear()
 
     const { instructionPoint, pageTablePoint, dataPoint, peripheralPoint } = memoryMap
 
@@ -881,6 +950,9 @@ export default function SocPage({}: Props) {
           >
             Status
           </Button>
+          <Button className="h-fit capitalize" variant="outlined" onClick={handleStepInsClick}>
+            Step Instruction
+          </Button>
         </div>
         <div className="flex flex-row flex-wrap gap-2">
           <Button className="h-fit capitalize" variant="outlined" onClick={handleRestartClick}>
@@ -889,6 +961,7 @@ export default function SocPage({}: Props) {
           <Button className="h-fit capitalize" variant="outlined" onClick={handleAssembleClick}>
             Assemble
           </Button>
+
           <Button
             className="h-fit normal-case"
             variant="outlined"
@@ -903,7 +976,7 @@ export default function SocPage({}: Props) {
             onClick={handleStepClick}
             disabled={!allowRun}
           >
-            Step
+            Step cycle
           </Button>
         </div>
       </div>

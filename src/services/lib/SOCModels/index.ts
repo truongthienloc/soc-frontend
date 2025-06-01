@@ -2,7 +2,7 @@ import Soc from './SOC/SoC'
 
 const SOC               = new Soc()
 // const code              = 
-const code              = 
+let code              = 
 `
 .text
 
@@ -108,9 +108,19 @@ SOC.Processor.active    = true
 SOC.TL_UH.active         = true
 SOC.TL_UL.active         = true
 SOC.Memory.active       = true
+code              = 
+`
+.text
+addi x1, x0 , 1  
+addi x2, x0 , 2
+addi x3, x0 , 3
+`
 SOC.assemble(
             code                                                                   
             ,[]                                                                                                         
 )
+SOC.StepIns()
+SOC.StepIns()
+SOC.StepIns()
+// SOC.RunAll()
 
-SOC.RunAll()

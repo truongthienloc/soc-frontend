@@ -460,6 +460,7 @@ export default function SocPage({}: Props) {
     socModelRef.current?.Memory.reset()
     socModelRef.current?.Processor.reset()
     socModelRef.current?.DMA.reset()
+    socModelRef.current?.Led_matrix.reset()
     logRef.current?.clear()
 
     updateCoreDataAfterRun()
@@ -950,7 +951,7 @@ export default function SocPage({}: Props) {
           >
             Status
           </Button>
-          <Button className="h-fit capitalize" variant="outlined" onClick={handleStepInsClick}>
+          <Button className="h-fit capitalize" variant="outlined" onClick={handleStepInsClick} disabled={!allowRun}>
             Step Instruction
           </Button>
         </div>

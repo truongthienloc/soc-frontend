@@ -8,7 +8,6 @@ export function assemble(
                 ,code               : string 
                 ,break_point        : number[]
     ) {
-    console.log ('0 break_point', break_point)
     //****************SYNC ACTIVED MODEL VS VIEW****************
     if (this.view) {
         this.Processor.active   = this.view.cpuModule.getActivated()
@@ -16,7 +15,6 @@ export function assemble(
         this.TL_UL.active        = this.view.interconnect.getActivated()
         this.Memory.active      = this.view.memoryModule.getActivated()
     }
-    console.log ('code', code)
     this.Assembly_code = []
     //****************CHECK SYNTAX ERROR****************
     this.Assembler.reset()

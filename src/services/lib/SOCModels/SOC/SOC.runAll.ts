@@ -8,14 +8,11 @@ export async function RunAll(this: Soc) {
         return
     }
     let bre = 0
-    console.log ('this.Assembler.break_point_text.length', this.Assembler.break_point_text.length)
     this.Assembler.break_point_text.sort((a, b) => a - b);
     if (this.Assembler.break_point_text.length > 0) {
         let break_point = this.Assembler.break_point_text.shift();
-        console.log ('break_point', break_point)
         if (break_point != undefined) this.Processor.InsLength = break_point*4
         else this.Processor.InsLength = 0
-        console.log ('this.Processor.InsLength', this.Processor.InsLength)
         while (
             this.Processor.pc <
             this.Processor.InsLength || this.Processor.state != 0 
@@ -33,7 +30,6 @@ export async function RunAll(this: Soc) {
     }
     else {
         this.Processor.InsLength = this.Memory.Ins_pointer
-        console.log ('this.Memory.Ins_pointer', this.Memory.Ins_pointer)
         while (
             this.Processor.pc <
             this.Memory.Ins_pointer || this.Processor.state != 0 
@@ -53,9 +49,9 @@ export async function RunAll(this: Soc) {
     // console.log(this.Processor.getRegisters())
     // console.log(this.Led_matrix.dataRegisters)
     // // console.log (this.DMA.RX_FIFO.size())
-    console.log (this.Bridge)
-    console.log (this.TL_UL)
-    console.log (this.DMA)
+    // console.log (this.Bridge)
+    // console.log (this.TL_UL)
+    // console.log (this.DMA)
 
    this.event.emit(Soc.SOCEVENT.DONE_ALL)
 }

@@ -152,6 +152,7 @@ export default class DMA {
                         return
                     }
                     else  if (active) this.state = this.GET_state
+                    
                 }
             }
             }
@@ -161,6 +162,7 @@ export default class DMA {
         if (this.state == this.GET_state)   {
             this.master_interface.ChannelD.ready = '0'
             this.slave_interface.ChannelD.valid  = '0'
+            
             if (Interconnect_ready) {
                 if (this.count_recByte < parseInt (this.lengthRegister, 2)) {
                     this.println (
@@ -187,6 +189,7 @@ export default class DMA {
                 }
                 
             }
+            console.log('this.state',this.state)
         }
 
         if (this.state == this.PUT_state)   {
@@ -213,7 +216,7 @@ export default class DMA {
                 this.slave_interface.ChannelD.valid  = '0'
 
                 this.count_sentByte += 4
-                if (parseInt ('0'+this.destRegister, 2) >= 0x20014) {
+                if (parseInt ('0'+this.destRegister, 2) > 0x2000C) {
                     this.state        = this.REC_state 
                     
                 } else {
@@ -253,6 +256,7 @@ export default class DMA {
                     this.state = this.GET_state
                     return
                 } else this.state = this.REC_state
+                
             }
         }
 
@@ -372,6 +376,10 @@ export default class DMA {
         this.slave_interface                  = new slave_interface ('slave_interface', true)
         this.internal_FIFO                    = new FIFO_ChannelD ()
         this.active_println             = true
+        this.count_burst             = 0
+        this.count_beats             = 0 
+        this.count_sentByte         = 0
+        this.count_recByte          = 0
     }
     
     public println(active: boolean, ...args: string[]) {

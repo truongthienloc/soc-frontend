@@ -178,7 +178,7 @@ export default class TL_UH {
                 this.active_println
                 ,'Cycle '
                 + cycle.toString() 
-                +': The INTERCONNECT is receiving data from PROCESSOR.'
+                +': TL-UH is receiving data from PROCESSOR.'
             )
             if (this.port_in[0] instanceof FIFO_ChannelA) {
                 this.port_in[0].enqueue({...data})
@@ -205,7 +205,7 @@ export default class TL_UH {
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': The INTERCONNECT is receiving data from DMA.'
+                        +': TL-UH is receiving data from DMA.'
                     )
                     this.port_in[1].enqueue({...data})
                     this.Timing[1].enqueue(cycle.cycle)
@@ -229,7 +229,7 @@ export default class TL_UH {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The INTERCONNECT is receiving data from MEMORY.'
+                    +': TL-UH is receiving data from MEMORY.'
                 )
 
                     if (data.valid == '1') {
@@ -254,7 +254,7 @@ export default class TL_UH {
                 this.active_println
                 ,'Cycle '
                 + cycle.toString() 
-                +': The INTERCONNECT is receiving data from SUB-INTERCONNECT.'
+                +': TL-UH is receiving data from TL-UL.'
             )
             if (this.port_in[3] instanceof FIFO_ChannelD) {
                 this.port_in[3].enqueue({...data})
@@ -264,7 +264,7 @@ export default class TL_UH {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The DATA from SUB-INTERCONNECT is invalid!'
+                    +': The DATA from TL-UL is invalid!'
                 )
             }
         }
@@ -542,7 +542,7 @@ export default class TL_UH {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The INTERCONNECT is sending data from PROCESSOR to MEMORY.'
+                    +': TL-UH is sending data from PROCESSOR to MEMORY.'
                 )
                 if (this.port_out[2] instanceof FIFO_ChannelA) this.port_out[2].enqueue({...this.port_in[0].dequeue()})
                 this.Timing[0].dequeue()
@@ -564,7 +564,7 @@ export default class TL_UH {
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': The INTERCONNECT is sending data from PROCESSOR to SUB-INTERCONNECT.'
+                        +': TL-UH is sending data from PROCESSOR to TL-UH.'
                     )
 
                     if (this.port_out[3] instanceof FIFO_ChannelA) this.port_out[3].enqueue({...this.port_in[0].dequeue()})
@@ -583,7 +583,7 @@ export default class TL_UH {
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': The INTERCONNECT is sending data from DMA to MEMORY.'
+                        +': TL-UH is sending data from DMA to MEMORY.'
                     )
                     if (this.port_out[2] instanceof FIFO_ChannelA) this.port_out[2].enqueue({...this.port_in[1].dequeue()})
                     this.Timing[1].dequeue()
@@ -594,7 +594,7 @@ export default class TL_UH {
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': The INTERCONNECT is sending data from DMA to SUB-INTERCONNCET.'
+                        +': TL-UH is sending data from DMA to SUB-INTERCONNCET.'
                     )
                     while (!this.port_in[1].isEmpty()) {
                         if (this.port_out[3] instanceof FIFO_ChannelA) this.port_out[3].enqueue({...this.port_in[1].dequeue()})
@@ -615,7 +615,7 @@ export default class TL_UH {
                                 this.active_println
                                 ,'Cycle '
                                 + cycle.toString() 
-                                +': The INTERCONNECT is sending data from MEMORY to PROCESSOR.'
+                                +': TL-UH is sending data from MEMORY to PROCESSOR.'
                             )
                             this.Timing[2].dequeue()
                     }
@@ -625,7 +625,7 @@ export default class TL_UH {
                             this.active_println
                             ,'Cycle '
                             + cycle.toString() 
-                            +': The INTERCONNECT is sending data from MEMORY to DMA.'
+                            +': TL-UH is sending data from MEMORY to DMA.'
                         )
                         if (this.port_out[1] instanceof FIFO_ChannelD) {
                             this.port_out[1].enqueue({...this.port_in[2].dequeue()})
@@ -645,7 +645,7 @@ export default class TL_UH {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The INTERCONNECT is sending data from SUB-INTERCONNECT to PROCESSOR.'
+                    +': TL-UH is sending data from TL-UL to PROCESSOR.'
                 )
                 if (this.port_out[0] instanceof FIFO_ChannelD) this.port_out[0].enqueue(dataFromSInterconnect)
                 this.Timing[3].dequeue()
@@ -655,7 +655,7 @@ export default class TL_UH {
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': The INTERCONNECT is sending data from SUB-INTERCONNECT to DMA.'
+                        +': TL-UH is sending data from TL-UL to DMA.'
                     )
                     if (this.port_out[1] instanceof FIFO_ChannelD) this.port_out[1].enqueue(dataFromSInterconnect)
                         this.Timing[3].dequeue()

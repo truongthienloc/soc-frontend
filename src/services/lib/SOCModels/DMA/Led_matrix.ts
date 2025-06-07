@@ -48,7 +48,14 @@ export default class LEDMatrix {
         this.state           = 0
         this.ready                      = false
         this.active_println             = true
-        this.led?.clear()
+        // this.led                        = new LedMatrix ('.led-matrix')
+        for (let i = 0 ; i< 96 ; i++) {
+            for (let j =0; j< 96; j++)
+            {
+                this.led?.turnOff(i,j)
+            }
+        }
+        // this.led?.clear()
     }
 
     public println(active: boolean, ...args: string[]) {

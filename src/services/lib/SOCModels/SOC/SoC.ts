@@ -176,18 +176,18 @@ export default class Soc {
             )
         }
 
-        if (this.cycle.cycle % 2 == 0) {
+        if (this.cycle.cycle % 1 == 0) {
 
             this.DMA.Controller (
                 this.TL_UL.port_out[1]
                 ,this.TL_UH.port_out[1]
                 , this.cycle
                 , this.TL_UH.ready
-                , this.TL_UL.ready && this.cycle.cycle % 8 == 0
+                , this.TL_UL.ready && this.cycle.cycle % 1 == 0
             )
         }
 
-        if (this.cycle.cycle % 8 == 0) {
+        if (this.cycle.cycle % 1 == 0) {
             this.TL_UL.Controller (
                 this.Bridge.fifo_to_subInterconnect
                 , this.DMA.slave_interface.ChannelD
@@ -203,7 +203,7 @@ export default class Soc {
             this.Led_matrix.Controller(
                 this.TL_UL.port_out[2].dequeue()
                 , this.cycle
-                , this.TL_UL.ready && this.cycle.cycle % 8 == 0
+                , this.TL_UL.ready && this.cycle.cycle % 1 == 0
             )
         }
         

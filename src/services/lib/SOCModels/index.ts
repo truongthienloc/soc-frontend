@@ -111,16 +111,21 @@ SOC.Memory.active       = true
 code              = 
 `
 .text
-addi x1, x0 , 1  
-addi x2, x0 , 2
-addi x3, x0 , 3
+    # Khởi t2 thành 0x5400 (lớn hơn 0x5000, nhỏ hơn 0x6000)
+    lui   t2, 0x5        # t2 ← 0x5_000
+
+    # 2) amoand.w: AND giữa [t2] và t1
+    lui   t1, 0xF0F1        # t0 ← 0xF0F1_000
+    addi  t1, t1, -241      # t0 ← t0 + (–241) = 0x0F0F0F0FF
+    amoand.w   t0, t2, t1    
 `
 SOC.assemble(
             code                                                                   
             ,[]                                                                                                         
 )
-SOC.StepIns()
-SOC.StepIns()
-SOC.StepIns()
-// SOC.RunAll()
+// // SOC.StepIns()
+// // SOC.StepIns()
+// // SOC.StepIns()
+SOC.RunAll()
+// SOC.DMA.Controller()
 

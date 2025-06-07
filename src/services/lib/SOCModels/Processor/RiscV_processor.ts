@@ -116,7 +116,7 @@ export default class RiscVProcessor {
                 this.active_println
                 ,'Cycle '
                 + cycle.toString() 
-                +': The PROCESSOR is sending messeage GET to INTERCONNCET.'
+                +': The PROCESSOR is sending messeage GET to TL-UH.'
             )
 
             this.MMU.run ((this.pc).toString(2).padStart(32, '0'), 'FETCH')
@@ -135,7 +135,7 @@ export default class RiscVProcessor {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The PROCESSOR is sending messeage GET to INTERCONNCET.'
+                    +': The PROCESSOR is sending messeage GET to TL-UH.'
                 )
 
                 this.println(this.active_println,
@@ -215,7 +215,7 @@ export default class RiscVProcessor {
                 this.active_println
                 ,'Cycle '
                 + cycle.toString() 
-                +': The PROCESSOR is receiving messeage AccessAckData from INTERCONNECT. ('
+                +': The PROCESSOR is receiving messeage AccessAckData from TL-UH. ('
                 +BinToHex (this.master_interface.ChannelD.data)
                 +').'
             )
@@ -362,7 +362,7 @@ export default class RiscVProcessor {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The PROCESSOR is sending messeage PUT to INTERCONNCET.'
+                    +': The PROCESSOR is sending messeage PUT to TL-UH.'
                 )
 
             }
@@ -372,7 +372,7 @@ export default class RiscVProcessor {
                     this.active_println
                     ,'Cycle '
                     +cycle.toString() 
-                    +': The PROCESSOR is sending messeage GET to INTERCONNCET.'
+                    +': The PROCESSOR is sending messeage GET to TL-UH.'
 
                 )
             }
@@ -386,7 +386,7 @@ export default class RiscVProcessor {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The PROCESSOR is sending messeage LogicalData to INTERCONNCET.'
+                    +': The PROCESSOR is sending messeage LogicalData to TL-UH.'
                 )
             }
 
@@ -400,7 +400,7 @@ export default class RiscVProcessor {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The PROCESSOR is sending messeage ArithmeticData to INTERCONNCET.'
+                    +': The PROCESSOR is sending messeage ArithmeticData to TL-UH.'
                 )                  
             }
             
@@ -417,7 +417,7 @@ export default class RiscVProcessor {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The PROCESSOR is sending messeage GET to INTERCONNCET.'
+                    +': The PROCESSOR is sending messeage GET to TL-UH.'
                 )
 
                 this.println(this.active_println,
@@ -479,7 +479,7 @@ export default class RiscVProcessor {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The PROCESSOR is receiving messeage AccessAck from INTERCONNECT.'
+                    +': The PROCESSOR is receiving messeage AccessAck from TL-UH.'
                 )
                 
             }
@@ -490,7 +490,7 @@ export default class RiscVProcessor {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The PROCESSOR is receiving messeage AccessAckData from INTERCONNECT.'
+                    +': The PROCESSOR is receiving messeage AccessAckData from TL-UH.'
                 )
 
                 this.Datapath ('', this.master_interface.ChannelD.data)
@@ -515,7 +515,7 @@ export default class RiscVProcessor {
                 this.active_println
                 ,'Cycle '
                 + cycle.toString() 
-                +': The PROCESSOR is receiving messeage AccessAckData from INTERCONNECT.'
+                +': The PROCESSOR is receiving messeage AccessAckData from TL-UH.'
             )
 
             const VPN       = this.SendAddress.slice(0, 20)  
@@ -555,7 +555,7 @@ export default class RiscVProcessor {
                 this.active_println
                 ,'Cycle '
                 + cycle.toString() 
-                +': The PROCESSOR is receiving messeage AccessAckData from INTERCONNECT.'
+                +': The PROCESSOR is receiving messeage AccessAckData from TL-UH.'
             )
 
             const VPN       = this.SendAddress.slice(0, 20)  
@@ -835,8 +835,10 @@ export default class RiscVProcessor {
                 ALUResult = operand1 >> operand2
                 break
             case '111':
+
+                if (operand1 < 0) operand1 = 0x100000000 + operand1
                 ALUResult = signOperand1
-                    ? dec((operand1 >> operand2).toString(2).padStart(32, '1'))
+                    ? dec((operand1 >>> operand2).toString(2).padStart(32, '1'))
                     : dec((operand1 >> operand2).toString(2).padStart(32, '0'))
                 break
         }
@@ -856,7 +858,6 @@ export default class RiscVProcessor {
         
         if (ALUResult[0] === '-') ALUResult = ALUResult.slice(3).padStart(32, '1')
         if (ALUResult[0] === '0') ALUResult = ALUResult.slice(2).padStart(32, '0')
-
         return ALUResult
     }
 
@@ -881,6 +882,7 @@ export default class RiscVProcessor {
         if (['0010011', '0000011', '1100111'].includes(instruction.slice(-7))) {
             // I-TYPE
             this.imm = instruction.slice(0, 12)
+            if (instruction.slice(-15, -12) === '101') return instruction.slice(7, 12).padStart (32,'0')
             if (instruction.slice(-15, -12) === '011') return this.imm.padStart(32, '0')
         }
         
@@ -935,6 +937,7 @@ export default class RiscVProcessor {
                 this.regWrite = 1
                 this.ALUOp = '10'
                 if (funct3 === '010' || funct3 === '011') this.slt = 1
+                else this.slt = 0
                 break
             case '1100011': // BEQ
                 this.jal = 0
@@ -1247,7 +1250,6 @@ export default class RiscVProcessor {
                 this.pc = this.pc + 4
                 return ['','','','','']
             }
-
             this.control(instruction.slice(25, 32), instruction.slice(17, 20))
 
             let mask = 'none'
@@ -1295,7 +1297,6 @@ export default class RiscVProcessor {
             const imm = this.immGen(instruction)
             
             this.aluControl(this.ALUOp, instruction.slice(17, 20), instruction.slice(1,2))
-
             const ALUResult = this.ALU(readData1, mux(readData2, imm, this.ALUSrc), this.operation)
                 
 
@@ -1385,7 +1386,7 @@ export default class RiscVProcessor {
                 mux(
                     mux(
                         mux(ALUResult, readData, this.memToReg),
-                        this.pc.toString(2).padStart(32, '0'),
+                        (this.pc+4).toString(2).padStart(32, '0'),
                         this.jump,
                     ),
                     mux(
@@ -1396,14 +1397,12 @@ export default class RiscVProcessor {
                     this.slt,
                 ),
                 mux(
-                    (parseInt (imm,2) * 4096).toString(2).padStart(32, '0') +
-                        this.pc.toString(2).padStart(32, '0'),
+                    (parseInt (imm,2) * 4096 + this.pc).toString(2).padStart(32, '0'),
                     (parseInt (imm,2) * 4096).toString(2).padStart(32, '0'),
                     this.auiOrLui,
                 ),
                 this.wb,
             )
-
             writeDataR = writeDataR.padStart(32, '0')
             if (this.regWrite === 1) {
                 this.register[writeRegister] = writeDataR

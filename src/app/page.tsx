@@ -392,7 +392,7 @@ export default function Home() {
               </h3>
               <p className="mb-3 text-gray-600">Computing Science and Engineering Conference</p>
               <p className="mb-4">
-                A methodology for visualizing the execution of instructions through a processor's
+                A methodology for visualizing the execution of instructions through a processor
                 datapath, implemented in our SoC simulator to enhance understanding of computer
                 architecture.
               </p>

@@ -20,7 +20,7 @@ export default function DisplayStepCode({
     <div className="flex max-h-[450px] min-w-[250px] flex-1 flex-col gap-2 overflow-auto px-4 py-2 font-mono text-base">
       {code &&
         code.map((value, index) => (
-          <div className="flex flex-row items-center gap-1">
+          <div key ={index} className="flex flex-row items-center gap-1">
             <span
               className={cn('h-2 w-2 rounded-full', {
                 'bg-red-500': breakpoints.includes(index + 1),

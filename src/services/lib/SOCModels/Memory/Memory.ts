@@ -46,217 +46,49 @@ export default class Memory {
         , ready         : boolean
     ) {
         let Int2Memory_ = Int2Memory.peek()
-        if (this.state == this.IDLE_STATE)                 {
+        if (this.state == this.IDLE_STATE)                          {
             Int2Memory_ = Int2Memory.dequeue ()
             this.slave_interface.ChannelD.valid = '0'
             this.slave_interface.ChannelA.ready = '1'
 
             if (Int2Memory_.valid == '1') {
-                // this.slave_interface.ChannelD.valid = '1'
+                this.slave_interface.ChannelD.valid = '1'
                 if (Int2Memory_.opcode == '100' ) this.state = this.RECEIVE_GET_STATE
                 if (Int2Memory_.opcode == '010'
-                || Int2Memory_.opcode  == '011' ) this.state = this.RECEIVE_AMO_STATE
+                || Int2Memory_.opcode == '011'  ) this.state = this.RECEIVE_AMO_STATE
                 if (Int2Memory_.opcode == '000' ) this.state = this.RECEIVE_PUT_STATA
-                this.slave_interface.receive (Int2Memory_)
             }
-            return
         }
 
         if (this.state == this.RECEIVE_GET_STATE)          {
             this.slave_interface.ChannelD.valid = '0'
+            this.slave_interface.receive (Int2Memory_)
             this.println (this.active_println,
                             'Cycle '             +
                             cycle.toString()     +
-                            ': The MEMORY is receiving GET message from the TL-UH.'
+                            ': The MEMORY is receiving GET message from the INTERCONNECT.'
                             )
-
+            this.slave_interface.receive (Int2Memory_)
             this.state = this.SEND_ACCESSACKDATA_STATE
+
             return 
         }
 
         if (this.state == this.RECEIVE_AMO_STATE)          {
             this.slave_interface.ChannelD.valid = '0'
+            this.slave_interface.receive (Int2Memory_)
             this.println (this.active_println,
                             'Cycle '             +
                             cycle.toString()     +
-                            ': The MEMORY is receiving ArithmeticData message from the TL-UH.'
+                            ': The MEMORY is receiving ArithmeticData message from the INTERCONNECT.'
                             )
-            if (this.slave_interface.ChannelA.opcode == '011') {
-                if (this.slave_interface.ChannelA.param == '000') {
-                    let memory_data = 
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
-
-                    let access_data = this.slave_interface.ChannelA.data
-                    let mdata       = dec('0' + memory_data);
-                    let adata       = dec('0' + access_data);
-                    let result      = (mdata ^ adata).toString(2).padStart(32, '0')
-
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
-                }
-
-                if (this.slave_interface.ChannelA.param == '001') {
-                    let memory_data = 
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
-
-                    let access_data = this.slave_interface.ChannelA.data
-                    let mdata       = dec('0' + memory_data);
-                    let adata       = dec('0' + access_data);
-                    let result      = (mdata | adata).toString(2).padStart(32, '0')
-
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
-                }
-
-                if (this.slave_interface.ChannelA.param == '010') {
-                    console.log ('this.slave_interface.ChannelA.address', this.slave_interface.ChannelA.address)
-                    let memory_data = 
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
-
-                    let access_data = this.slave_interface.ChannelA.data
-                    let mdata       = dec('0' + memory_data);
-                    let adata       = dec('0' + access_data);
-                    let result      = (mdata & adata).toString(2).padStart(32, '0')
-
-                    console.log ('mdata, adata, result', mdata, adata, result)
-
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
-                }
-
-                if (this.slave_interface.ChannelA.param == '011') {
-                    
-                    let result      = (dec('0' + this.slave_interface.ChannelA.data)).toString(2).padStart(32, '0')
-                    console.log('result',result)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
-                }
-                console.log ('this.slave_interface.ChannelD.data',
-                    this.slave_interface.ChannelD.data)
-            }
-
-            if (this.slave_interface.ChannelA.opcode == '010') {
-                if (this.slave_interface.ChannelA.param == '000') {
-                    let memory_data = 
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
-
-                    let access_data = this.slave_interface.ChannelA.data
-
-                    let mdata       = dec(memory_data.padStart(32,'0'))
-                    let adata       = dec(access_data.padStart(32,'0'))
-                    let result      = (((mdata > adata) ? adata : mdata) < 0
-                                        ? 0x100000000 + ((mdata > adata) ? adata : mdata) 
-                                        : ((mdata > adata) ? adata : mdata)).toString(2).padStart(32, '0')
-
-                    console.log ('mdata, adata, result', mdata, adata, result)
-
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
-                }
-
-                if (this.slave_interface.ChannelA.param == '001') {
-                    let memory_data = 
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
-
-                    let access_data = this.slave_interface.ChannelA.data
-                    let mdata       = dec(memory_data)
-                    let adata       = dec(access_data)
-                    let result      = (((mdata > adata) ? mdata : adata) < 0
-                                        ? 0x100000000 + ((mdata > adata) ? mdata : adata) 
-                                        : ((mdata > adata) ? mdata : adata)).toString(2).padStart(32, '0')
-
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
-                }
-
-                if (this.slave_interface.ChannelA.param == '010') {
-                    let memory_data = 
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
-
-                    let access_data = this.slave_interface.ChannelA.data
-                    let mdata       = dec('0'+memory_data)
-                    let adata       = dec('0'+access_data)
-                    let result      = ((mdata > adata) ? adata : mdata).toString(2).padStart(32, '0')
-
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
-                }
-
-                if (this.slave_interface.ChannelA.param == '011') {
-                    let memory_data = 
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
-
-                    let access_data = this.slave_interface.ChannelA.data
-                    let mdata       = dec('0'+memory_data)
-                    let adata       = dec('0'+access_data)
-                    let result      = ((mdata > adata) ? mdata : adata).toString(2).padStart(32, '0')
-
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
-                }
-
-                if (this.slave_interface.ChannelA.param == '100') {
-                    let memory_data = 
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
-
-                    let access_data = this.slave_interface.ChannelA.data
-                    let mdata       = dec('0'+memory_data)
-                    let adata       = dec('0'+access_data)
-                    let result      = ( mdata + adata).toString(2).padStart(32, '0')
-
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
-                    this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
-                }
-            }
+            this.slave_interface.receive (Int2Memory_)
             this.state = this.SEND_ACCESSACKDATA_STATE
             return 
         }
 
         if (this.state == this.SEND_ACCESSACKDATA_STATE)   {
             this.slave_interface.ChannelA.ready = '0'
-
             if (ready) {
                 if (this.slave_interface.ChannelA.size == '00') {
                     this.slave_interface.ChannelD.valid = '1'
@@ -273,10 +105,177 @@ export default class Memory {
                     this.println (this.active_println,
                     'Cycle '             +
                     cycle.toString()     +
-                    ': The MEMORY is sending an AccessAckData message to the TL-UH.' 
+                    ': The MEMORY is sending an AccessAckData message to the INTERCONNECT.' 
                     )
 
+                    if (this.slave_interface.ChannelA.opcode == '011') {
+                        if (this.slave_interface.ChannelA.param == '000') {
+                            let memory_data = 
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
 
+                            let access_data = this.slave_interface.ChannelA.data
+                            let mdata       = dec('0' + memory_data);
+                            let adata       = dec('0' + access_data);
+                            let result      = (mdata ^ adata).toString(2).padStart(32, '0')
+
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
+                        }
+
+                        if (this.slave_interface.ChannelA.param == '001') {
+                            let memory_data = 
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+
+                            let access_data = this.slave_interface.ChannelA.data
+                            let mdata       = dec('0' + memory_data);
+                            let adata       = dec('0' + access_data);
+                            let result      = (mdata | adata).toString(2).padStart(32, '0')
+
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
+                        }
+
+                        if (this.slave_interface.ChannelA.param == '010') {
+                            let memory_data = 
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+
+                            let access_data = this.slave_interface.ChannelA.data
+                            let mdata       = dec('0' + memory_data);
+                            let adata       = dec('0' + access_data);
+                            let result      = (mdata & adata).toString(2).padStart(32, '0')
+
+                            console.log ('mdata, adata, result', mdata, adata, result)
+
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
+                        }
+
+                        if (this.slave_interface.ChannelA.param == '011') {
+                            
+                            let result      = (dec('0' + this.slave_interface.ChannelA.data)).toString(2).padStart(32, '0')
+                            console.log('result',result)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
+                        }
+                        console.log ('this.slave_interface.ChannelD.data',
+                            this.slave_interface.ChannelD.data)
+                    }
+
+                    if (this.slave_interface.ChannelA.opcode == '010') {
+                        if (this.slave_interface.ChannelA.param == '000') {
+                            let memory_data = 
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+
+                            let access_data = this.slave_interface.ChannelA.data
+
+                            let mdata       = dec(memory_data.padStart(32,'0'))
+                            let adata       = dec(access_data.padStart(32,'0'))
+                            let result      = (((mdata > adata) ? adata : mdata) < 0
+                                                ? 0x100000000 + ((mdata > adata) ? adata : mdata) 
+                                                : ((mdata > adata) ? adata : mdata)).toString(2).padStart(32, '0')
+
+                            console.log ('mdata, adata, result', mdata, adata, result)
+
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
+                        }
+
+                        if (this.slave_interface.ChannelA.param == '001') {
+                            let memory_data = 
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+
+                            let access_data = this.slave_interface.ChannelA.data
+                            let mdata       = dec(memory_data)
+                            let adata       = dec(access_data)
+                            let result      = (((mdata > adata) ? mdata : adata) < 0
+                                                ? 0x100000000 + ((mdata > adata) ? mdata : adata) 
+                                                : ((mdata > adata) ? mdata : adata)).toString(2).padStart(32, '0')
+
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
+                        }
+
+                        if (this.slave_interface.ChannelA.param == '010') {
+                            let memory_data = 
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+
+                            let access_data = this.slave_interface.ChannelA.data
+                            let mdata       = dec('0'+memory_data)
+                            let adata       = dec('0'+access_data)
+                            let result      = ((mdata > adata) ? adata : mdata).toString(2).padStart(32, '0')
+
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
+                        }
+
+                        if (this.slave_interface.ChannelA.param == '011') {
+                            let memory_data = 
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+
+                            let access_data = this.slave_interface.ChannelA.data
+                            let mdata       = dec('0'+memory_data)
+                            let adata       = dec('0'+access_data)
+                            let result      = ((mdata > adata) ? mdata : adata).toString(2).padStart(32, '0')
+
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
+                        }
+
+                        if (this.slave_interface.ChannelA.param == '100') {
+                            let memory_data = 
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] + 
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
+
+                            let access_data = this.slave_interface.ChannelA.data
+                            let mdata       = dec('0'+memory_data)
+                            let adata       = dec('0'+access_data)
+                            let result      = ( mdata + adata).toString(2).padStart(32, '0')
+
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = result.slice(0, 8)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 2).toString(2).padStart(17, '0')] = result.slice(8, 16)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
+                            this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
+                        }
+                    }
                     this.state   = this.IDLE_STATE
                     
                 }
@@ -296,7 +295,7 @@ export default class Memory {
                     this.println (this.active_println,
                         'Cycle '             +
                         cycle.toString()     +
-                        ': The MEMORY is sending an AccessAckData message to the TL-UH.'
+                        ': The MEMORY is sending an AccessAckData message to the INTERCONNECT.'
                     )
                     this.count_beats ++ 
                     if (this.count_beats >= 4) {
@@ -313,11 +312,11 @@ export default class Memory {
         if (this.state == this.RECEIVE_PUT_STATA)          {
             if (Int2Memory_.opcode == '000') {
                 this.slave_interface.ChannelD.valid = '0'
-
+                this.slave_interface.receive (Int2Memory_)
                 this.println (this.active_println,
                     'Cycle '             +
                     cycle.toString()     +
-                    ': The MEMORY is receiving a PUT message from the TL-UH.'
+                    ': The MEMORY is receiving a PUT message from the INTERCONNECT.'
                 )
 
                 if (this.slave_interface.ChannelA.size == '10') {
@@ -348,7 +347,7 @@ export default class Memory {
                 this.println (this.active_println,
                     'Cycle '             +
                     cycle.toString()     +
-                    ': The MEMORY is sending an AccessAck message to the TL-UH.'
+                    ': The MEMORY is sending an AccessAck message to the INTERCONNECT.'
                 )
                 
                 this.slave_interface.send(

@@ -48,7 +48,7 @@ export async function RunAll(this: Soc) {
 
     // console.log(this.Processor.getRegisters())
     // console.log(this.Led_matrix.dataRegisters)
-    // // console.log (this.DMA.RX_FIFO.size())
+    // console.log (this.DMA)
     // console.log (this.Bridge)
     // console.log (this.TL_UL)
     // console.log (this.DMA)

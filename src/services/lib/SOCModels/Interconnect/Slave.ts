@@ -41,6 +41,8 @@ export default class slave_interface {
 
         let opcode = message === "AccessAck" ? '000' : message === "AccessAckData" ? '001' : ''
 
+        if (message == 'HINT_ACK') opcode = '010'
+
         this.ChannelD = new ChannelD (opcode
                                     , '000'
                                     , '10'

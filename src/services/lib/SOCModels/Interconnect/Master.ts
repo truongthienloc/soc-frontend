@@ -163,6 +163,28 @@ export default class master_interface {
             this.ChannelA.data     = data.padStart(32, '0')   
             this.ChannelA.corrupt  = '0' 
         }
+
+        if (message === 'INTENT_READ') {
+            this.ChannelA.opcode   = '101' 
+            this.ChannelA.param    = '000'
+            this.ChannelA.size     = '00'
+            this.ChannelA.source   = this.source  
+            this.ChannelA.address  = address.padStart(17, '0') 
+            this.ChannelA.mask     = '1111'   
+            this.ChannelA.data     = data.padStart(32, '0')   
+            this.ChannelA.corrupt  = '0' 
+        }
+
+        if (message === 'INTENT_WRITE') {
+            this.ChannelA.opcode   = '101' 
+            this.ChannelA.param    = '001'
+            this.ChannelA.size     = '00'
+            this.ChannelA.source   = this.source  
+            this.ChannelA.address  = address.padStart(17, '0') 
+            this.ChannelA.mask     = '1111'   
+            this.ChannelA.data     = data.padStart(32, '0')   
+            this.ChannelA.corrupt  = '0' 
+        }
     }
 
     receive(

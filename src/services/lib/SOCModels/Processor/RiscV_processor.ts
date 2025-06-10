@@ -529,7 +529,7 @@ export default class RiscVProcessor {
                 +': The TLB is replacing an entry.'
             )
             // VA, PA, excute, read, write, valid, timetime 
-
+            console.log ('frame', frame)
             this.MMU.pageReplace ([
                 parseInt(VPN , 2) & 0x1f
                 , (dec (frame) & 0XFFF0) * 4
@@ -569,6 +569,7 @@ export default class RiscVProcessor {
                 +': The TLB is replacing an entry.'
             )
             // VA, PA, excute, read, write, valid, timetime 
+            console.log ('frame', frame)
             this.MMU.pageReplace ([
                 parseInt(VPN , 2) & 0x1f
                 , (dec (frame) & 0XFFF0) * 4

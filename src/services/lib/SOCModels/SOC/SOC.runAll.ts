@@ -31,8 +31,8 @@ export async function RunAll(this: Soc) {
     else {
         this.Processor.InsLength = this.Memory.Ins_pointer
         while (
-            this.Processor.pc <
-            this.Memory.Ins_pointer || this.Processor.state != 0 
+            (this.Processor.pc <
+            this.Memory.Ins_pointer || this.Processor.state != 0 ) && this.Processor.state != this.Processor.OUT_WORK
             || 
             !(
                 this.DMA.controlRegister == '00000000000000000000000000000000' || 
@@ -42,11 +42,12 @@ export async function RunAll(this: Soc) {
         ) {
                 await this.Step()
                 // bre++ 
+
                 // if (bre > 330) break
             }
     }
 
-    // console.log(this.Processor.getRegisters())
+    console.log(this.Processor.getRegisters())
     // console.log(this.Led_matrix.dataRegisters)
     // console.log (this.DMA)
     // console.log (this.Bridge)

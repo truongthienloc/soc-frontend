@@ -17,13 +17,30 @@ lui t1, 0x8
 addi t1, t1, 0x3 // PPN = 0x0004, execute = 0, write= 0, read= 1, valid = 1 
 sw t1, 4(t0)
 
-lui t0, 0x80003  
-csrrw zero, satp, t0  
 
 main:
+
+addi t1, zero, 0x2
+slli t1, t1, 16		  # Create base address of memory-mapped registers
+
+dma:
+lui  t5, 0x10 		  # Create DMA ource register's value.
+addi t6, t1, 0x14     # Create DMA destination register's value.
+addi t0, zero, 32     # Create DMA length register's value.
+sw   t0, 16(t1)		  # Store to Led control register (non-zero = active).
+sw   t5, 0(t1)        # Store to DMA source register's value.
+sw   t6, 4(t1)        # Store to DMA destination register's value.
+sw   t0, 8(t1)        # Store to DMA length register value.
+sw   t0, 12(t1)       # Store to DMA control register (non-zero = active).
+
+lui t0, 0x80003  
+csrrw zero, satp, t0  
 lui t0, 0x1
 addi t3, zero, 4
 sw t3, 0(t0)
+addi a0, a0, 1
+lw t5, 0(t0)
+
 `
 // const code              = 
 // `

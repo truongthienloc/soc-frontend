@@ -80,6 +80,8 @@ export default class RiscVProcessor {
     REPLACE_TLBE_DATA        = 5
     REPLACE_TLBE_INS         = 6
 
+    OUT_WORK                  = 7 
+
     async Controller  (
       cycle               : Cycle
       , InterConnect2CPU  : any
@@ -162,7 +164,7 @@ export default class RiscVProcessor {
                     + this.MMU.MMU_message
                 )
 
-                this.state  = this.GET_INSTRUCTION
+                this.state  = this.OUT_WORK
                 this.pc     = this.pc + 4
             }
             else {
@@ -351,7 +353,7 @@ export default class RiscVProcessor {
                     + this.MMU.MMU_message
                 )
 
-                this.state = this.GET_INSTRUCTION
+                this.state = this.OUT_WORK
 
         } else 
         if (ready) {
@@ -583,11 +585,11 @@ export default class RiscVProcessor {
                 this.println (
                     this.active_println
                     ,'Cycle '
-                    + cycle.toString()+':2'
+                    + cycle.toString()+':'
                     + this.MMU.MMU_message
                 )
                 
-                this.state = this.GET_INSTRUCTION
+                this.state = this.OUT_WORK
                 this.master_interface.ChannelA.valid = '0'
             } else {
                 this.master_interface.ChannelA.valid = '0'

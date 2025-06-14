@@ -54,7 +54,7 @@ export default class Interconnect extends TileLinkObject {
         this.initShape()
         this.initText()
         this.initAdapter()
-        this.initSwitch()
+        // this.initSwitch()
     }
 
     protected initShape(): void {
@@ -84,7 +84,7 @@ export default class Interconnect extends TileLinkObject {
         const text = new Konva.Text({
             width: toPixel(w),
             height: toPixel(h),
-            text: 'Interconnect',
+            text: 'TileLink - UH',
             verticalAlign: 'middle',
             align: 'center',
             fill: 'white',

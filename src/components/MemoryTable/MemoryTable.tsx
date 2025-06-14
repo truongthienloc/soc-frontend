@@ -15,19 +15,20 @@ import Tabs from '@mui/material/Tabs'
 import Tooltip from '@mui/material/Tooltip'
 import type { SxProps, Theme } from '@mui/material/styles'
 import { styled } from '@mui/material/styles'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Fragment } from 'react'
 import { MEMORY_SECTION } from '~/configs/memoryPoint.constant'
 import { createRangeDmemData, LENGTH_OF_DMEM } from '~/helpers/generates/dMemRange.generate'
 import { MemoryMapHookReturn } from '~/hooks/memory/useMemoryMap'
 import { Register } from '~/types/register'
 import FunctionButton from './FunctionButton'
+import { generateMultipleDmemRange } from '~/helpers/generates/multiple-dmem-range.generate'
 
 const styles: { [key: string]: SxProps<Theme> } = {
   table: {
-    minWidth: 350,
+    // minWidth: 350,
     // maxWidth: 650,
     '& .MuiTableCell-root': {
-      // height: '2.5rem',
+      height: '2.5rem',
       padding: '0.15rem',
       border: '1px solid black',
       width: 'min-content',
@@ -63,7 +64,7 @@ export default function MemoryTable({
 }: DisplayDataTableProps) {
   const [input, setInput] = useState('0x00000000')
   const [start, setStart] = useState(input)
-  const [displayedData, setDisplayedData] = useState(createRangeDmemData(data || [], start))
+  const [displayedData, setDisplayedData] = useState(generateMultipleDmemRange(data || [], start))
   const [tabIndex, setTabIndex] = useState(0)
   const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value)
@@ -92,18 +93,17 @@ export default function MemoryTable({
       range = { startHex: startDec.toString(16) }
     } else {
       const memoryRanges = [
-        { min: memoryMap.lmPoint, max: memoryMap.ioPoint },
-        { min: memoryMap.ioPoint, max: memoryMap.iMemPoint },
-        { min: memoryMap.iMemPoint, max: memoryMap.dMemPoint },
-        { min: memoryMap.dMemPoint, max: memoryMap.stackPoint },
-        { min: memoryMap.stackPoint, max: undefined },
+        { min: memoryMap.instructionPoint, max: memoryMap.pageTablePoint },
+        { min: memoryMap.pageTablePoint, max: memoryMap.dataPoint },
+        { min: memoryMap.dataPoint, max: memoryMap.peripheralPoint },
+        { min: memoryMap.peripheralPoint, max: undefined },
       ]
 
       const { min, max } = memoryRanges[tabIndex - 1]
       range = calculateMemoryRange(min, max || 'ffffffff')
     }
 
-    const dMemData = createRangeDmemData(data || [], range.startHex, range.endHex)
+    const dMemData = generateMultipleDmemRange(data || [], range.startHex, range.endHex)
     setDisplayedData(dMemData)
   }, [start, data, memoryMap?.savedPoints, tabIndex])
 
@@ -139,11 +139,10 @@ export default function MemoryTable({
         className="max-sm:w-screen"
       >
         <Tab label="ALL" />
-        <Tab label="LED" />
-        <Tab label="IO" />
-        <Tab label="IMEM" />
-        <Tab label="DMEM" />
-        <Tab label="STACK" />
+        {/* <Tab label="INS" />
+        <Tab label="PAGE" />
+        <Tab label="DATA" />
+        <Tab label="PERI" /> */}
       </Tabs>
       <div className="mb-3 mt-1 flex justify-center gap-2 max-sm:flex-col">
         <div className="flex gap-2">
@@ -183,67 +182,80 @@ export default function MemoryTable({
           )}
         </div>
       </div>
-      <TableContainer component={Paper}>
-        <Table sx={styles.table} stickyHeader>
-          <TableHead>
-            <TableRow>
-              <TableCell align="center" className="max-w-1 font-bold">
-                Memory Address
-              </TableCell>
-              {/* <TableCell align="center">Dec</TableCell> */}
-              <TableCell align="center" className="max-w-2 font-bold">
-                Hex
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {displayedData &&
-              displayedData.map((value) => (
-                <TableRow
-                  key={value.name}
-                  sx={value.value !== '0x00000000' ? { backgroundColor: '#fff177' } : {}}
-                >
-                  <TableCell className="max-w-1">{value.name}</TableCell>
-                  {/* <TableCell>{parseInt(value.value, 16)}</TableCell> */}
-                  <TableCell className="max-w-2">
-                    <div className="flex items-center">
-                      {value.name === modifiedName ? (
-                        <>
-                          <Input
-                            className="max-w-28 px-1"
-                            value={modifiedValue}
-                            onChange={(e) => setModifiedValue(e.target.value)}
-                          />
-                          <Button
-                            className="ml-auto h-fit w-fit min-w-0 bg-white px-2"
-                            variant="outlined"
-                            color="success"
-                            onClick={handleDoneClick}
+      <div className="grid w-full grid-cols-1 gap-x-2">
+        <TableContainer component={Paper}>
+          <Table sx={styles.table} stickyHeader>
+            <TableHead>
+              <TableRow>
+                <TableCell align="center" className="font-bold">
+                  Memory Address
+                </TableCell>
+                <TableCell align="center" className="font-bold">
+                  Value
+                </TableCell>
+                <TableCell align="center" className="font-bold">
+                  Memory Address
+                </TableCell>
+                <TableCell align="center" className="font-bold">
+                  Value
+                </TableCell>
+                <TableCell align="center" className="font-bold">
+                  Memory Address
+                </TableCell>
+                <TableCell align="center" className="font-bold">
+                  Value
+                </TableCell>
+                <TableCell align="center" className="font-bold">
+                  Memory Address
+                </TableCell>
+                <TableCell align="center" className="font-bold">
+                  Value
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {(() => {
+                // Flatten all data into a single array
+                const allData = displayedData.flatMap((tableData) => tableData.data)
+
+                // Group data into chunks of 4 items (for 4 columns)
+                const rows = []
+                for (let i = 0; i < allData.length; i += 4) {
+                  const rowData = allData.slice(i, i + 4)
+                  rows.push(
+                    <TableRow key={`row-${i}`}>
+                      {rowData.map((value) => (
+                        <Fragment key={value.name}>
+                          <TableCell
+                            sx={value.value !== '0x00000000' ? { backgroundColor: '#fff177' } : {}}
                           >
-                            <DoneIcon />
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <span>{value.value}</span>
-                          <Button
-                            className="ml-auto h-fit w-fit min-w-0 bg-white px-2"
-                            variant="outlined"
-                            color="warning"
-                            onClick={() => handleEditClick(value.name, value.value)}
-                            disabled={disabled}
+                            {value.name}
+                          </TableCell>
+                          <TableCell
+                            sx={value.value !== '0x00000000' ? { backgroundColor: '#fff177' } : {}}
                           >
-                            <EditIcon />
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                            <div className="flex items-center">
+                              <span className="py-2">{value.value}</span>
+                            </div>
+                          </TableCell>
+                        </Fragment>
+                      ))}
+                      {/* Add empty cells if the row is not complete */}
+                      {Array.from({ length: 4 - rowData.length }).map((_, idx) => (
+                        <Fragment key={`empty-${i}-${idx}`}>
+                          <TableCell />
+                          <TableCell />
+                        </Fragment>
+                      ))}
+                    </TableRow>,
+                  )
+                }
+                return rows
+              })()}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </div>
     </div>
   )
 }

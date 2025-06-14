@@ -1,7 +1,12 @@
 import React from 'react'
+import { CodeEditor } from '~/components/CodeEditor'
 
 type Props = {}
 
 export default function SocCodingPage({}: Props) {
-  return <div>SocCodingPage</div>
+  return (
+    <div>
+      <CodeEditor />
+    </div>
+  )
 }

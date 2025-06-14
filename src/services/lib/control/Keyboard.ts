@@ -6,7 +6,7 @@ import { CallBack } from './type'
 export default class Keyboard {
     protected containerQuery: string
 
-    private keyboardIO: IOModule
+    private keyboardIO?: IOModule
     private monitorManagement: Monitor
     private closeBehavior: CallBack[] = []
     private keyQueue: string = ''
@@ -20,19 +20,19 @@ export default class Keyboard {
         return this.event
     }
 
-    constructor(containerQuery: string, keyboardIO: IOModule, monitorManagement: Monitor) {
+    constructor(containerQuery: string, monitorManagement: Monitor, keyboardIO?: IOModule) {
         this.containerQuery = containerQuery
         this.keyboardIO = keyboardIO
         this.monitorManagement = monitorManagement
         this.openKeyboardBehavior()
-        this.initIOEvent()
+        // this.initIOEvent()
     }
 
     private initIOEvent() {
-        this.keyboardIO.getEvent().on(Module.EVENT.ACTIVATE, () => {
+        this.keyboardIO?.getEvent().on(Module.EVENT.ACTIVATE, () => {
             this.openKeyboardBehavior()
         })
-        this.keyboardIO.getEvent().on(Module.EVENT.INACTIVATE, () => {
+        this.keyboardIO?.getEvent().on(Module.EVENT.INACTIVATE, () => {
             this.closeKeyboardBehavior()
         })
     }
@@ -56,7 +56,7 @@ export default class Keyboard {
         const enter_btn = keyboard.querySelector('.enter') as HTMLButtonElement
 
         const handleKeyClick = (key: string) => {
-            this.monitorManagement.print(key)
+            this.monitorManagement?.print(key)
             this.keyQueue += key
         }
 
@@ -72,7 +72,7 @@ export default class Keyboard {
         })
 
         const handleDeleteClick = () => {
-            this.monitorManagement.print('Backspace')
+            this.monitorManagement?.print('Backspace')
             this.keyQueue = this.keyQueue.slice(0, this.keyQueue.length - 1)
         }
         delete_btn.addEventListener('click', handleDeleteClick)
@@ -81,7 +81,7 @@ export default class Keyboard {
         })
 
         const handleSpaceClick = () => {
-            this.monitorManagement.print(' ')
+            this.monitorManagement?.print(' ')
             this.keyQueue += ' '
         }
         space_btn.addEventListener('click', handleSpaceClick)
@@ -100,7 +100,7 @@ export default class Keyboard {
         })
 
         const handleEnterClick = () => {
-            this.monitorManagement.print('Enter')
+            this.monitorManagement?.print('Enter')
             if (this.keyQueue.length > 0) {
                 this.getEvent().emit(Keyboard.EVENT.LINE_DOWN, this.keyQueue)
             }
@@ -148,8 +148,8 @@ export default class Keyboard {
 
     public destroy() {
         this.closeKeyboardBehavior()
-        this.keyboardIO.getEvent().off(Module.EVENT.ACTIVATE, this.openKeyboardBehavior)
-        this.keyboardIO.getEvent().off(Module.EVENT.INACTIVATE, this.closeKeyboardBehavior)
+        this.keyboardIO?.getEvent().off(Module.EVENT.ACTIVATE, this.openKeyboardBehavior)
+        this.keyboardIO?.getEvent().off(Module.EVENT.INACTIVATE, this.closeKeyboardBehavior)
         this.event.clearAll()
     }
 }

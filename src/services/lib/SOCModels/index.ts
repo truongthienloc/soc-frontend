@@ -1,129 +1,145 @@
-import Soc from './SoC'
-import *as path from 'path'
-import *as fs from 'fs'
-// const fp                = path.join(__dirname, '/testing/input/Code_editor.txt')
-// const data              = fs.readFileSync(fp, "utf-8")
-// const code              = ".text\n addi x1, x0, 2047\n lw x1,1024(x0)\n"
-// const code              = ".text\n addi x1, x0, 2048\n slli x1, x1, 2\n addi x2, x0, 1\n sw x2, 0(x1)\n lw x3, 0(x1)"
-// const code              = `
-// .text 
-// addi x3, x0, 80
-// addi x4, x0, 0x480
-// sw   x3, 0(x4)
-// loop:
-// addi x2, x0, 0xFFF
-// sw x2, 0(x1)
-// addi x1, x1, 4
-// beq x1, x3, exit
-// jal x0, loop
-// exit:
-// `
-const code              = 
+import Soc from './SOC/SoC'
+
+const SOC               = new Soc()
+// const code              = 
+let code              = 
 `
 .text 
-addi x3, x0, 9
-sw   x3, 8(x4)
-lw   x3, 0(x4)
+// Create page table base address
+lui t0, 0x3
+
+page_table_ins: 
+addi t1, zero, 0x0009 // PPN = 0x0000, execute = 1, valid = 1 s 
+sw t1, 0(t0)
+
+page_table_data: 
+lui t1, 0x8
+addi t1, t1, 0x3 // PPN = 0x0004, execute = 0, write= 0, read= 1, valid = 1 
+sw t1, 4(t0)
+
+
+main:
+
+addi t1, zero, 0x2
+slli t1, t1, 16		  # Create base address of memory-mapped registers
+
+dma:
+lui  t5, 0x10 		  # Create DMA ource register's value.
+addi t6, t1, 0x14     # Create DMA destination register's value.
+addi t0, zero, 32     # Create DMA length register's value.
+sw   t0, 16(t1)		  # Store to Led control register (non-zero = active).
+sw   t5, 0(t1)        # Store to DMA source register's value.
+sw   t6, 4(t1)        # Store to DMA destination register's value.
+sw   t0, 8(t1)        # Store to DMA length register value.
+sw   t0, 12(t1)       # Store to DMA control register (non-zero = active).
+
+lui t0, 0x80003  
+csrrw zero, satp, t0  
+lui t0, 0x1
+addi t3, zero, 4
+sw t3, 0(t0)
+addi a0, a0, 1
+lw t5, 0(t0)
+
 `
-const SOC               = new Soc('super SoC')
+// const code              = 
+// `
+// .text
+// addi t0, zero, 0xfff
+// lui t1, 0x3
+// example_amo:
+//     //amoswap.w t3, t1, t0
+//     //amoand.w  t4, t1, t0
+//     //amoor.w   t5, t1, t0
+//     //amoxor.w  t6, t1, t0
+//     //amomin.w  t6, t1, t0
+//     //amomaxu.w  t6, t1, t1
+//     amoadd.w    t6, t1, t0
+// `
+
+// const code              = 
+// `
+// .text
+// addi x1, x0, 0xfff
+// lui x2, 0x3
+// sb x1, 0(x2)
+// lb x3, 0(x2)
+// `
+// const code = `
+// .data
+//     .word 0xf, 2, 3, 4
+//     .half 1, 2, 3, 4
+//     .byte 1, 2, 3, 4
+//     .asciz "hello world"
+//     .ascii "UIT"
+// .text
+// addi x1, x0, 0xfff
+// lui t0, 0x10010
+// sb x1, 0(t0)
+// lw x3, 0(t0)
+// `
+// const code = `
+// .text
+//     # Khởi t2 thành 0x5400 (lớn hơn 0x5000, nhỏ hơn 0x6000)
+//     lui   t2, 0x5        # t2 ← 0x5_000
+
+//     # 1) amoswap.w: swap giữa [t2] và t1
+//     lui   t1, 0x22222    # t1 ← 0x22222_000
+//     addi  t1, t1, 0x222  # t1 ← 0x22222222
+//     amoswap.w  t0, t2, t1
+
+//     # 2) amoand.w: AND giữa [t2] và t1
+//     lui   t1, 0xF0F1        # t0 ← 0xF0F1_000
+//     addi  t1, t1, -241      # t0 ← t0 + (–241) = 0x0F0F0F0FF
+//     amoand.w   t0, t2, t1
+    
+//     # 3) amoxor.w: XOR giữa [t2] và t1
+//     lui   t1, 0x55555    # t1 ← 0x55555_000
+//     addi  t1, t1, 0x555  # t1 ← 0x55555555
+//     amoxor.w   t0, t2, t1
+    
+//     # 4) amoor.w: OR giữa [t2] và t1
+//     lui   t1, 0x12345    # t1 ← 0x12345_000
+//     addi  t1, t1, 0x678  # t1 ← 0x12345678
+//     amoor.w    t0, t2, t1
+    
+//     # 5) amomin.w: min signed giữa [t2] và 10
+//     addi  t1, x0, 10
+//     amomin.w   t0, t1, (t2)
+// `
+0x0020000
+// const code = `
+// .text
+
+//     addi t1, zero, 1
+//     lui t0, 0x20
+//     addi t0, t0, 0x14
+
+//     sw t1, 0(t0)
+//     lw t3, 0(t0)
+// `
 SOC.Processor.active    = true
-SOC.MMU.active          = true
-SOC.Bus.active          = true
+SOC.TL_UH.active         = true
+SOC.TL_UL.active         = true
 SOC.Memory.active       = true
-SOC.DMA.active          = true
-// const binaryCode = `
-// 00000000011000000000110110010011
-// 00010000000000000000001000010011
-// 00000000000000000000010100110011
-// 00000010000000000000100110010011
-// 00000000001001010001000100010011
-// 00000001001100010000010010110011
-// 00000010010001001010111100000011
-// 00000001111000100000001000110011
-// 00000000000101010000010100010011
-// 11111111101101010001011011100011
-// 00010000000000000000110010010011
-// 00000000010011001001011001100011
-// 00000101010000000000000010010011
-// 00000000100000000000000001101111
-// 00000100011000000000000010010011
-// 00000000000000000000000001101111
-// 00101001101000000000000010010011
-// 00000010000100000010000000100011
-// `;
+// code              = 
+// `
+// .text
+//     # Khởi t2 thành 0x5400 (lớn hơn 0x5000, nhỏ hơn 0x6000)
+//     lui   t2, 0x5        # t2 ← 0x5_000
 
-// SOC.Disassembly.setBinaryCode(binaryCode);
-// console.log(SOC.Disassembly.process());
-
-// SOC.DMA.config(0, (96 * 3 + 16)*4)
-// //console.log(SOC.DMA.ScanData())
-// // SOC.MMU.SetTLB([0, (0*4095) + (96 + 16 + 1024) *4, 1, 1],
-// //                [1, (1*4095) + (96 + 16 + 1024) *4, 1, 2],
-// //                [2, (2*4095) + (96 + 16 + 1024) *4, 1, 3],
-// //                [3, (3*4095) + (96 + 16 + 1024) *4, 1, 4],
-// //                [4, (4*4095) + (96 + 16 + 1024) *4, 1, 5],
-// //                [5, (5*4095) + (96 + 16 + 1024) *4, 1, 6],
-// //                [6, (6*4095) + (96 + 16 + 1024) *4, 1, 7],
-// //                [244 , (244*4095) + (96 + 16 + 1024) *4, 1, 8],
-// // )
-// SOC.assemble(
-//     code, 
-//     0 * 4, //   LM point
-//     96 * 3 * 4, //  I/O point //0x480
-//    (96 * 3 + 16) * 4, // I-Mem point // 4C0
-//    (96 * 3+ 16 + 1024) *4, // D-Mem point  // 14C0
-//    (96 * 3 + 16 + 1024 + 1024*16) *4, //Stack point // 114c0
-//    //4095*0xffffff, //Stack point
-//    [],
-//     [
-//     [0, (0*1023) + (96 + 16 + 1024) *4, 1, 0], // 11c0
-//     [1, (1*1023) + (96 + 16 + 1024) *4, 1, 1], // 
-//     [2, (2*1023) + (96 + 16 + 1024) *4, 1, 1], // 19be
-//     [3, (3*1023) + (96 + 16 + 1024) *4, 1, 1], // 
-//     [4, (4*1023) + (96 + 16 + 1024) *4, 1, 1],
-//     [5, (5*1023) + (96 + 16 + 1024) *4, 1, 1],
-//     [6, (6*1023) + (96 + 16 + 1024) *4, 1, 1],
-//     [7, (7*1023) + (96 + 16 + 1024) *4, 1, 1],
-// ]   ,
-//     70208,
-//     0,
-//     16
-// )
-// SOC.DMA.active = true
-// SOC.DMA.masterDMA.active = true
-// SOC.DMA.config(0, 0, 16, 16)
-// SOC.DMA_operate()
-// SOC.DMA.Send2Memory()
-// SOC.DMA.ReceivefMemory(SOC.Memory.slaveMemory.send('AccessAckData','1'.padStart(32, '1')))
-// SOC.DMA.Send2Peri()
-
-// SOC.DMA.Send2Memory()
-// SOC.DMA.ReceivefMemory(SOC.Memory.slaveMemory.send('AccessAckData','1'.padStart(32, '1')))
-// const sendperi = SOC.DMA.Send2Peri()
-// console.log()
-
-// //console.log(code)
+//     # 2) amoand.w: AND giữa [t2] và t1
+//     lui   t1, 0xF0F1        # t0 ← 0xF0F1_000
+//     addi  t1, t1, -241      # t0 ← t0 + (–241) = 0x0F0F0F0FF
+//     amoand.w   t0, t2, t1    
+// `
+SOC.assemble(
+            code                                                                   
+            ,[]                                                                                                         
+)
+// // SOC.StepIns()
+// // SOC.StepIns()
+// // SOC.StepIns()
 SOC.RunAll()
-// //SOC.DMA_operate()
-console.log(SOC.DMA.Databuffer)
-console.log(SOC.Memory.Memory['00000000000000000000000000001000'])
+// SOC.DMA.Controller()
 
-// const sourcePUT = sendperi.slice(8, 10);
-
-// // Extract address (bits 17-48, indices 16-47)
-// const addressPUT = sendperi.slice(10, 42);
-
-// // Extract data (bits 49 onwards, index 48 to end)
-// const dataPUT = sendperi.slice(45);
-// console.log(sourcePUT, addressPUT, dataPUT)
-// console.log(SOC.DMA.ScanData())
-// console.log(SOC.Processor.lineColor)
-
-// //console.log(SOC.Memory.getLedMatrix())
-// console.log(SOC.Memory.IO_point)
-// console.log(SOC.Memory.getIO())
-// console.log(SOC.Led_matrix)
-
-// console.log(SOC.Processor.getRegisters())
-// // console.log(SOC.MMU.TLB)
-// SOC.Memory.getPageNumber()

@@ -9,6 +9,7 @@ export default class LedMatrix {
 
     constructor(containerQuery: string) {
         this.container = document.querySelector(containerQuery)
+        console.log('container', this.container)
     }
 
     /**
@@ -33,6 +34,7 @@ export default class LedMatrix {
         if (!this.container) return
 
         const led = this.container?.querySelector(`#led-${row}-${column}`) as HTMLDivElement | null
+        // console.log ('!led',!led)
 
         if (!led) {
             return

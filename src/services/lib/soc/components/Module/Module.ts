@@ -64,7 +64,7 @@ export default class Module extends TileLinkObject {
     public onReady(): void {
         this.initShape()
         this.initAdapter()
-        this.initSwitch()
+        // this.initSwitch()
         this.handleDrop()
         this.handleOptions()
     }
@@ -186,7 +186,7 @@ export default class Module extends TileLinkObject {
             x: toPixel(this.w / 2),
             y: toPixel(this.h / 2),
         })
-        this.switch.moveToTop()
+        // this.switch.moveToTop()
     }
 
     public getAgent(): Agent | undefined {
@@ -216,12 +216,12 @@ export default class Module extends TileLinkObject {
         } else {
             this.event.emit(Module.EVENT.INACTIVATE)
         }
-        const circle = this.switch.children[0] as Konva.Circle
-        if (this.activated) {
-            circle.fill(Scene.ACTIVATE_COLOR)
-        } else {
-            circle.fill(Scene.DEACTIVATE_COLOR)
-        }
+        // const circle = this.switch.children[0] as Konva.Circle
+        // if (this.activated) {
+        //     circle.fill(Scene.ACTIVATE_COLOR)
+        // } else {
+        //     circle.fill(Scene.DEACTIVATE_COLOR)
+        // }
     }
 
     public destroy() {

@@ -11,6 +11,8 @@ export default function GuidePage({}: Props) {
           <Tab label="OVERVIEW" />
           <Tab label="CONTROL BUTTON" />
           <Tab label="INSTRUCTIONS SUPPORTED" />
+          <Tab label="MEMORY MAP" />
+          <Tab label="MMU" />
         </Tabs>
 
         <TabPanel
@@ -35,22 +37,26 @@ export default function GuidePage({}: Props) {
 
           <div>
             <p className="indent-8">
-              We have six control buttons: IMPORT, ASSEMBLE, RUN ALL, STEP, FEEDBACK and GUIDE with
-              particular functions.
+              We have six control buttons: IMPORT, EXPORT, ASSEMBLE & RESTART, RUN, STEP, FEEDBACK
+              and GUIDE with particular functions.
             </p>
             <ul className="list-disc pl-8">
               <li>
-                <strong>IMPORT:</strong> Used to import RISC-V code into the system without a code
+                <strong>IMPORT:</strong> Used to import RISC-V code into the system without a code.
                 editor.
               </li>
               <li>
-                <strong>ASSEMBLE:</strong> Runs the assembler to convert RISC-V instructions into
-                machine code and check for syntax errors. The Assembler is accessed through the
-                “config” button to ensure the system is ready to run.
+                <strong>EXPORT:</strong> Used to export RISC-V code from the code editor. editor.
               </li>
               <li>
-                <strong>RUN ALL:</strong> Executes the SoC with all instructions implemented in the
-                same session.
+                <strong>ASSEMBLE & RESTART:</strong> Runs the assembler to convert RISC-V
+                instructions into machine code and check for syntax errors. The Assembler is
+                accessed through the “config” button to ensure the system is ready to run. Start new
+                working session.
+              </li>
+              <li>
+                <strong>RUN:</strong> Executes the SoC with all instructions implemented in the same
+                session.
               </li>
               <li>
                 <strong>STEP:</strong> Executes the SoC with one instruction implemented per
@@ -340,7 +346,107 @@ export default function GuidePage({}: Props) {
               </li>
               <img src="/images/guide/u-type/auipc-instruction.png" alt="AUIPC instruction" />
             </ul>
+             <p>
+              <strong>AMO instruction:</strong>
+            </p>
+            <ul className="list-disc space-y-2 pl-8">
+              <li>
+                AMOSWAP – Exchanges the value in a register with the value located at a specified memory address.
+              </li>
+
+              <li>
+                AMOADD – Adds the value in a register to the value at a specified memory address, then stores the result back at that memory location.
+              </li>
+
+              <li>
+                AMOAND, AMOOR, AMOXOR – Perform bitwise AND, OR, and XOR operations between a register and a memory-resident value, and write the result back to the same memory address.
+              </li>
+
+              <li>
+                AMOMAX, AMOMIN, AMOMAXU, AMOMINU – Compare the register value with a value in memory and store the maximum or minimum of the two at the memory location. The operations can be either signed (AMOMAX, AMOMIN) or unsigned (AMOMAXU, AMOMINU).
+              </li>
+
+              
+            </ul>
           </div>
+        </TabPanel>
+        <TabPanel
+          className="max-h-[85dvh] space-y-4 overflow-auto px-4 py-4 text-justify"
+          index={3}
+        >
+          <h2 className="text-center text-2xl font-bold text-[#006EAF]">MEMORY MAP</h2>
+          <img src="/images/guide/memory_map.png" alt="Memory Map" className="mx-auto block" />
+          <p className="indent-8">
+            The system uses a memory map consisting of two main parts: the main memory and
+            memory-mapped registers. The main memory is used for general data storage, while the
+            memory-mapped registers represent peripheral and DMA control registers, which are not
+            located within the main memory space.
+          </p>
+          <ul className="list-inside list-disc space-y-1">
+            <li>
+              <strong>DMA_start_address</strong>: Contains the address of the first byte in main
+              memory that the DMA will access.
+            </li>
+            <li>
+              <strong>DMA_dest_address</strong>: Contains the address of the target register in the
+              peripheral that the DMA will write to.
+            </li>
+            <li>
+              <strong>DMA_length</strong>: Specifies the number of bytes to be transferred by the
+              DMA.
+            </li>
+            <li>
+              <strong>DMA_control</strong>: Control register for the DMA. A non-zero value indicates
+              that the DMA is active.
+            </li>
+            <li>
+              <strong>LED_control</strong>: Control register for the LED. A non-zero value means the
+              LED is active.
+            </li>
+            <li>
+              <strong>LED_data</strong>: The LED data registers. Writing 1 turns the corresponding
+              LED on, while writing 0 turns it off.
+            </li>
+          </ul>
+        </TabPanel>
+        <TabPanel
+          className="max-h-[85dvh] space-y-4 overflow-auto px-4 py-4 text-justify"
+          index={4}
+        >
+          <h2 className="text-center text-2xl font-bold text-[#006EAF]">MMU</h2>
+         
+          <p className="indent-8">
+           The MMU consists of a TLB and the satp register. To enable MMU functionality, 
+           you need to configure it using the csrrw instruction, setting the mode field to 1, 
+           which indicates that the PPN field holds the root of the page table in memory.
+            <img src="/images/guide/MMU/stap.png" alt="MMU" className="mx-auto block" />
+           The MMU contains 8 TLB entries, each of which includes the following components: 
+            <li>
+              <strong>VPN</strong>: represents the data field corresponding to the virtual page address.
+            </li>
+            <li>
+              <strong>PPN</strong>: is the field that holds the physical page address mapped to that virtual address
+            </li>
+            <li>
+              <strong>E</strong>:  Specifies whether the instructions stored in this memory page are permitted to execute.
+            </li>
+            <li>
+              <strong>R</strong>:  Indicates whether the processor has permission to read data from the page.
+            </li>
+            <li>
+              <strong>W</strong>:  Indicates whether the processor has permission to write data to the page.
+            </li>
+            <li>
+              <strong>V</strong>: Indicates whether the corresponding entry in the MMU is valid.
+            </li>
+            <li>
+              <strong>T</strong>:  Records the most recent cycle in which the corresponding page table entry was accessed.
+            </li>
+
+            <img src="/images/guide/MMU/TLB.png" alt="MMU" className="mx-auto block" />
+          </p>
+          <ul className="list-inside list-disc space-y-1">
+          </ul>
         </TabPanel>
       </TabContext>
     </div>

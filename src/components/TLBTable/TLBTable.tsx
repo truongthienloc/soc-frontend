@@ -72,13 +72,13 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
         <TextField
           value={editingPointer ? editingPointer : pointer}
           onChange={(e) => setEditingPointer(e.target.value)}
-          label="Page Table Pointer"
+          label="SATP"
           InputProps={{
             startAdornment: '0x',
           }}
           disabled={!editingPointer}
         />
-        {editingPointer ? (
+        {/* {editingPointer ? (
           <Button
             variant="contained"
             className="h-fit w-fit min-w-0 px-2"
@@ -95,12 +95,12 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
           >
             <EditIcon />
           </Button>
-        )}
+        )} */}
         {/* <Button variant="contained" className="h-fit w-fit min-w-0 px-2" onClick={handleReset}>
           <RestartAltIcon />
         </Button> */}
       </div>
-      <div className="flex w-[263px] flex-row items-center gap-1">
+      {/* <div className="flex w-[263px] flex-row items-center gap-1">
         <TextField
           value={editingLength}
           onChange={(e) => setEditingLength(e.target.value)}
@@ -125,7 +125,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
             <SaveIcon />
           </Button>
         )}
-      </div>
+      </div> */}
 
       <TableContainer component={Paper}>
         <Table sx={styles.table}>
@@ -133,9 +133,12 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
             <TableRow>
               <TableCell align="center">VPN</TableCell>
               <TableCell align="center">PPN</TableCell>
+              <TableCell align="center">E</TableCell>
+              <TableCell align="center">R</TableCell>
+              <TableCell align="center">W</TableCell>
               <TableCell align="center">Valid</TableCell>
               <TableCell align="center">Timestamp</TableCell>
-              <TableCell></TableCell>
+              {/* <TableCell></TableCell> */}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -144,30 +147,68 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                 <TableCell>
                   <Input
                     className={cn('px-2', {})}
-                    value={editingIndex === index ? editingTLB?.pageNumber : row.pageNumber}
+                    value={editingIndex === index ? editingTLB?.VPN : row.VPN}
                     onChange={(e) =>
                       setEditingTLB({
                         ...editingTLB!,
-                        pageNumber: e.target.value,
+                        VPN: e.target.value,
                       })
                     }
                     startAdornment="0x"
                     disabled={editingIndex !== index}
                   />
                 </TableCell>
+
                 <TableCell>
                   <Input
-                    value={
-                      editingIndex === index ? editingTLB?.physicalAddress : row.physicalAddress
-                    }
+                    value={editingIndex === index ? editingTLB?.PPN : row.PPN}
                     onChange={(e) =>
                       setEditingTLB({
                         ...editingTLB!,
-                        physicalAddress: e.target.value,
+                        PPN: e.target.value,
                       })
                     }
                     className={cn({})}
                     startAdornment="0x"
+                    disabled={editingIndex !== index}
+                  />
+                </TableCell>
+                <TableCell className="text-center">
+                  <Input
+                    className={cn('w-10 px-1 [&>input]:inline-block [&>input]:text-center', {})}
+                    value={editingIndex === index ? editingTLB?.E : row.E}
+                    onChange={(e) =>
+                      setEditingTLB({
+                        ...editingTLB!,
+                        E: e.target.value,
+                      })
+                    }
+                    disabled={editingIndex !== index}
+                  />
+                </TableCell>
+                <TableCell className="text-center">
+                  <Input
+                    className={cn('w-10 px-1 [&>input]:inline-block [&>input]:text-center', {})}
+                    value={editingIndex === index ? editingTLB?.R : row.R}
+                    onChange={(e) =>
+                      setEditingTLB({
+                        ...editingTLB!,
+                        R: e.target.value,
+                      })
+                    }
+                    disabled={editingIndex !== index}
+                  />
+                </TableCell>
+                <TableCell className="text-center">
+                  <Input
+                    className={cn('w-10 px-1 [&>input]:inline-block [&>input]:text-center', {})}
+                    value={editingIndex === index ? editingTLB?.W : row.W}
+                    onChange={(e) =>
+                      setEditingTLB({
+                        ...editingTLB!,
+                        W: e.target.value,
+                      })
+                    }
                     disabled={editingIndex !== index}
                   />
                 </TableCell>
@@ -193,11 +234,13 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                         timestamp: e.target.value,
                       })
                     }
-                    className={cn('[&>input]:inline-block [&>input]:text-center')}
+                    // className={cn('[&>input]:inline-block [&>input]:text-center')}
+                    className={cn({})}
+                    startAdornment=""
                     disabled={editingIndex !== index}
                   />
                 </TableCell>
-                <TableCell align="right">
+                {/* <TableCell align="right">
                   {editingIndex !== index ? (
                     <Button
                       variant="outlined"
@@ -219,7 +262,7 @@ export default function TLBTable({ tlb, disabled = false }: Props) {
                       <SaveIcon />
                     </Button>
                   )}
-                </TableCell>
+                </TableCell> */}
               </TableRow>
             ))}
           </TableBody>

@@ -1,45 +1,40 @@
 'use client'
 
-import dynamic from 'next/dynamic'
 import { useRef, useEffect, useCallback } from 'react'
+import useBreakpointManagement, {
+  applyBreakpointsToEditor,
+} from '~/hooks/code-editor/useBreakpointManagement'
 import { defineMode } from '~/services/codemirror'
-// import CodeMirror from 'codemirror'
-// import 'codemirror/addon/mode/simple'
 
 interface CodeEditorProps {
   value?: string
   onChange?: (value: string) => void
   disable?: boolean
   hidden?: boolean
+  breakpoints?: number[]
+  setBreakpoints?: React.Dispatch<React.SetStateAction<number[]>>
 }
 
-function CodeEditor({ value = '', onChange, disable = false, hidden }: CodeEditorProps) {
+function CodeEditor({
+  value = '',
+  onChange,
+  disable = false,
+  hidden,
+  breakpoints,
+  setBreakpoints,
+}: CodeEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const codeRef = useRef<CodeMirror.EditorFromTextArea>()
   const isStart = useRef<boolean>(true)
 
-  const handleContainerResize = useCallback(() => {
-    // console.log('Resizing container');
-    if (!containerRef.current || !codeRef.current) {
-      return
-    }
-
-    // const width = containerRef.current.clientWidth
-    // const height = containerRef.current.clientHeight
-
-    // console.log("width=" + width + " height=" + height);
-
-    // codeRef.current.setSize(width, height)
-  }, [])
-
   const createCodeEditor = useCallback(async () => {
+    await import('codemirror/addon/mode/simple')
     if (codeRef.current) {
       return
     }
 
     const CodeMirror = (await import('codemirror')).default
-    // console.log(CodeMirror.defineMode);
 
     defineMode(CodeMirror)
 
@@ -47,60 +42,71 @@ function CodeEditor({ value = '', onChange, disable = false, hidden }: CodeEdito
       return
     }
 
-    const code = CodeMirror.fromTextArea(textareaRef.current, {
+    const editor = CodeMirror.fromTextArea(textareaRef.current, {
       mode: 'risc-v',
-      // mode: 'javascript',
       theme: 'codewars',
       lineNumbers: true,
+      gutters: ['breakpoints'],
     })
-    codeRef.current = code
+    codeRef.current = editor
 
-    code.setOption('readOnly', disable)
+    /** Breakpoint Listener */
+    editor.on('gutterClick', function (instance, line) {
+      const info = instance.lineInfo(line)
+      const hasBreakpoint = info.gutterMarkers && info.gutterMarkers.breakpoints
+      if (hasBreakpoint) {
+        setBreakpoints?.((prev) => prev.filter((l) => l !== line))
+      } else {
+        setBreakpoints?.((prev) => [...prev, line])
+      }
+    })
 
-    code.setValue(value)
-    code.setSize('100%', '100%')
+    /** Initialize breakpoints */
+    if (breakpoints) {
+      applyBreakpointsToEditor(editor, breakpoints)
+    }
 
-    // console.log('container size: ', containerRef.current.clientWidth, containerRef.current.clientHeight);
+    editor.setSize('100%', '100%')
 
-    code.on('change', (ins) => {
+    editor.on('change', (ins) => {
       onChange?.(ins.getValue())
     })
-  }, [value])
+  }, [value, breakpoints])
+
+  useBreakpointManagement({ breakpoints, editor: codeRef.current, hidden })
 
   useEffect(() => {
-    import('codemirror/addon/mode/simple')
     if (isStart.current && !hidden) {
       isStart.current = false
-      // import('codemirror')
       createCodeEditor()
     }
-
-    window.addEventListener('resize', handleContainerResize)
-
-    return () => {
-      window.removeEventListener('resize', handleContainerResize)
-    }
-  }, [handleContainerResize, createCodeEditor, hidden])
+  }, [createCodeEditor, hidden])
 
   useEffect(() => {
-    if (codeRef.current) {
-      codeRef.current.setOption('readOnly', disable)
+    if (!codeRef.current) {
+      return
     }
-  }, [disable])
 
-  useEffect(() => {
-    if (codeRef.current && disable) {
-      codeRef.current.setValue(value)
+    if (disable || hidden) {
+      if (textareaRef.current?.style.display === 'none') {
+        codeRef.current.setValue(value)
+      }
+    } else {
+      codeRef.current.refresh()
+      console.log('codeRef.current.refresh: ', codeRef.current)
     }
-  }, [value])
+  }, [value, disable, hidden])
 
   return (
-    <div
-      ref={containerRef}
-      className="h-full min-h-[300px] min-w-[250px] flex-1 text-base"
-      onResize={handleContainerResize}
-    >
-      <textarea ref={textareaRef} name="code-editor" id="code-editor"></textarea>
+    <div ref={containerRef} className="h-full min-h-[300px] min-w-[250px] flex-1 text-base">
+      <textarea
+        ref={textareaRef}
+        name="code-editor"
+        id="code-editor"
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
+        disabled={disable}
+      ></textarea>
     </div>
   )
 }

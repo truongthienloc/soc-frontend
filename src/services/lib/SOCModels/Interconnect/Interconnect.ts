@@ -8,6 +8,7 @@ import Cycle from "../Compile/cycle"
 import { constrainedMemory } from "process"
 import { Concert_One } from "next/font/google"
 import { Buffer_01 } from "../../datapath/Block/Buffer"
+import { binaryToHex } from "~/helpers/converts/Hextobin"
 
 export default class TL_UH {
     active              : boolean
@@ -289,24 +290,24 @@ export default class TL_UH {
 
         const Pro2Memory             = 
         (
-            (
-                (parseInt('0'+dataFromProcessor.address, 2)    > 0x000305C + 1) 
-            &&  (parseInt('0'+dataFromProcessor.address, 2)    < 0X1BFFF    + 1)
-            ) || 
-            (
-                (parseInt('0'+dataFromProcessor.address, 2)    >= 0)
-            &&  (parseInt('0'+dataFromProcessor.address, 2)    < 0x000304C  )
-            )
-            
+                    (parseInt('0'+dataFromProcessor.address, 2)    >= 0         )
+                &&  (parseInt('0'+dataFromProcessor.address, 2)    <= 0X1FFFF   )
         )
+            
+        
 
         const Pro2Sub               = 
         (
-            (parseInt('0'+dataFromProcessor.address, 2) >= 0x000304C) 
-            && (parseInt('0'+dataFromProcessor.address, 2) <= 0x000305C)
+                    (parseInt('0'+dataFromProcessor.address, 2) == 0x0020000) 
+                ||  (parseInt('0'+dataFromProcessor.address, 2) == 0x0020004)
+                ||  (parseInt('0'+dataFromProcessor.address, 2) == 0x0020008)
+                ||  (parseInt('0'+dataFromProcessor.address, 2) == 0x002000C)
+                ||  (parseInt('0'+dataFromProcessor.address, 2) == 0x0020010)
+                ||  (parseInt('0'+dataFromProcessor.address, 2) >= 0x0020014 
+                    && parseInt('0'+dataFromProcessor.address, 2) <= 0x0020014 + 288 * 4 )
         )
 
-        const DMA2Mem               = dataFromDMA.opcode == '100'
+        const DMA2Mem               = parseInt('0'+dataFromDMA.address, 2) < 0x20014
         const DMA2Sub               = !DMA2Mem
 
         const Mem2Pro               = dataFromMem.source == '00'
@@ -334,6 +335,7 @@ export default class TL_UH {
 
         for (let i = 0; i < minIndices.length; i++) {
             if ( minIndices[i] == 0) {
+                
                 if (Pro2Memory && DMA2Mem && minIndices.includes(1)) {
                     this.Route (0
                         , cycle
@@ -352,6 +354,7 @@ export default class TL_UH {
                         , Memory_ready      
                         , Bridge_ready   
                     )
+                    
                     // this.Timing[0].dequeue()
                 }
                 else {
@@ -524,12 +527,10 @@ export default class TL_UH {
         , Memory_ready      : boolean
         , Bridge_ready      : boolean
     ) {
-
         if (Abiter == 0 
             && !this.port_in[0].isEmpty()
         ) {
             const dataFromProcessor = {...this.port_in[0].peek()}
-            
             if (
                 (
                     (parseInt('0'+dataFromProcessor.address, 2)    >= 0         )
@@ -543,6 +544,9 @@ export default class TL_UH {
                     ,'Cycle '
                     + cycle.toString() 
                     +': TL-UH is sending data from PROCESSOR to MEMORY.'
+                    +'('
+                    + binaryToHex(dataFromProcessor.address)
+                    +')'
                 )
                 if (this.port_out[2] instanceof FIFO_ChannelA) this.port_out[2].enqueue({...this.port_in[0].dequeue()})
                 this.Timing[0].dequeue()
@@ -564,7 +568,10 @@ export default class TL_UH {
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': TL-UH is sending data from PROCESSOR to TL-UH.'
+                        +': TL-UH is sending data from PROCESSOR to TL-UL. '
+                                            +'(address = '
+                    + binaryToHex(dataFromProcessor.address)
+                    +')'
                     )
 
                     if (this.port_out[3] instanceof FIFO_ChannelA) this.port_out[3].enqueue({...this.port_in[0].dequeue()})
@@ -584,6 +591,9 @@ export default class TL_UH {
                         ,'Cycle '
                         + cycle.toString() 
                         +': TL-UH is sending data from DMA to MEMORY.'
+                        +'(address = '
+                    + binaryToHex(dataFromDMA.address)
+                    +')'
                     )
                     if (this.port_out[2] instanceof FIFO_ChannelA) this.port_out[2].enqueue({...this.port_in[1].dequeue()})
                     this.Timing[1].dequeue()
@@ -594,7 +604,10 @@ export default class TL_UH {
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': TL-UH is sending data from DMA to SUB-INTERCONNCET.'
+                        +': TL-UH is sending data from DMA to TL-UL.'
+                        +'(address = '
+                        + binaryToHex(dataFromDMA.address)
+                        +')'
                     )
                     while (!this.port_in[1].isEmpty()) {
                         if (this.port_out[3] instanceof FIFO_ChannelA) this.port_out[3].enqueue({...this.port_in[1].dequeue()})

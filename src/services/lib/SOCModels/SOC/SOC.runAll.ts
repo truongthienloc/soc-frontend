@@ -45,6 +45,7 @@ export async function RunAll(this: Soc) {
 
                 // if (bre > 330) break
             }
+            this.Memory.Ins_pointer = -1
     }
 
     console.log(this.Processor.getRegisters())

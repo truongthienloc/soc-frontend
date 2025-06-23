@@ -10,6 +10,7 @@ export default class Keyboard {
     private monitorManagement: Monitor
     private closeBehavior: CallBack[] = []
     private keyQueue: string = ''
+    private upper : boolean = false
 
     private event = new EventEmitter()
     public static EVENT = {
@@ -56,6 +57,10 @@ export default class Keyboard {
         const enter_btn = keyboard.querySelector('.enter') as HTMLButtonElement
 
         const handleKeyClick = (key: string) => {
+            if (this.upper === true) {
+                key = key.toUpperCase()
+                this.upper = false
+            }
             this.monitorManagement?.print(key)
             this.keyQueue += key
         }
@@ -93,6 +98,8 @@ export default class Keyboard {
             buttons.forEach((btn) => {
                 btn.classList.toggle('upper')
             })
+
+            this.upper = true
         }
         shift_btn.addEventListener('click', handleShiftClick)
         this.closeBehavior.push(() => {

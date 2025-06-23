@@ -51,14 +51,13 @@ export default class Bridge {
         ,ready1                     : boolean // sub-interconnect ready
         ,cycle                      : Cycle
     ) {
-        // console.log ('this.dataFrsubInterconnect', dataFrsubInterconnect)
+
         if (this.state == this.STATE_RECEIVE)    {
             this.master_interface.ChannelA.valid = '0'
             this.master_interface.ChannelD.valid = '0'
             this.master_interface.ChannelA.ready = '1'
             this.master_interface.ChannelD.ready = '1'
             if (!dataFrInterconnect.isEmpty()) {
-
                 if (dataFrInterconnect.peek().valid == '1') {
                     this.fifo_from_Interconnect.enqueue ({...dataFrInterconnect.dequeue()})
                 }
@@ -67,7 +66,7 @@ export default class Bridge {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The BRIDGE is receiving data from INTERCONNECT.'
+                    +': The BRIDGE is receiving data from TL-UH.'
                 )
                 this.state = this.STATE_SEND 
            } 
@@ -79,7 +78,7 @@ export default class Bridge {
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': The BRIDGE is receiving data from SUB-INTERCONNECT.'
+                        +': The BRIDGE is receiving data from TL-UL.'
                     )
                     this.fifo_from_subInterconnect.enqueue ({...this.master_interface.ChannelD})
                 }
@@ -106,7 +105,7 @@ export default class Bridge {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The BRIDGE is sending data to SUB-INTERCONNECT.'
+                    +': The BRIDGE is sending data to TL-UL.'
                 )  
                 this.state = this.STATE_RECEIVE
             } 
@@ -119,7 +118,7 @@ export default class Bridge {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The BRIDGE is sending data to INTERCONNECT.'
+                    +': The BRIDGE is sending data to TL-UH.'
                 )
                 this.state = this.STATE_RECEIVE
     

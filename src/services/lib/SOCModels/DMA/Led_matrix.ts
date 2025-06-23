@@ -23,16 +23,16 @@ export default class LEDMatrix {
     AckData_state   = 2
 
     constructor() {
-        this.controlRegister            = '00000000000000000000000000000000'
-        this.dataRegisters              = Array(288).fill('00000000000000000000000000000000')
-        this.slave_interface               = new slave_interface('slave_interface', true)
-        this.slave_interface.ChannelD.sink = '1'
-        this.active_println             = true
-        this.ready                      = false
-        this.state                      = 0
+        this.controlRegister                = '00000000000000000000000000000001'
+        this.dataRegisters                  = Array(288).fill('00000000000000000000000000000000')
+        this.slave_interface                = new slave_interface('slave_interface', true)
+        this.slave_interface.ChannelD.sink  = '1'
+        this.active_println                 = true
+        this.ready                          = false
+        this.state                          = 0
 
 
-        this.led                        = new LedMatrix ('.led-matrix')
+        // this.led                        = new LedMatrix ('.led-matrix')
 
     }
 
@@ -42,7 +42,7 @@ export default class LEDMatrix {
 
     public reset () {
         this.controlRegister            = '00000000000000000000000000000000'
-        this.dataRegisters              = Array(288).fill('00000000000000000000000000000000')
+        this.dataRegisters              = Array(288).fill(''.padStart(32, '1') )
         this.slave_interface               = new slave_interface('slave_interface', true)
         this.slave_interface.ChannelD.sink = '1'
         this.state           = 0
@@ -55,6 +55,9 @@ export default class LEDMatrix {
                 this.led?.turnOff(i,j)
             }
         }
+        // let adrr = ''.padStart(18, '0')
+        // let data = ''.padStart(32, '1')     
+        // this.writeData(adrr, data)
         // this.led?.clear()
     }
 
@@ -163,6 +166,7 @@ export default class LEDMatrix {
     writeData(address: string, data: string) {
 
         if (address.length !== 18 || data.length !== 32) {
+            console.log (address.length)
             throw new Error("Invalid address or data length")
         }
 
@@ -180,10 +184,20 @@ export default class LEDMatrix {
         }
 
         this.dataRegisters[index] = data
-        for (let i = 0 ; i< 32; i++) {
-            if (this.dataRegisters[index][i]  == '1' && this.led != undefined) 
-                this.led.turnOn(~~(index / 3), i + (index % 3) * 32)
-        }
+        // let a = '100000000000010100'.padStart(18, '0')
+        // let d = '1'.padStart(32, '1')
+        // this.dataRegisters[ (parseInt (a, 2)  - 0x20014) / 4] = d
+        // console.log ('this.dataRegisters[ parseInt (a)]', this.dataRegisters[ (parseInt (a, 2)  - 0x20014) / 4])
+        // console.log (parseInt (a, 2))
+        // for (let index = 0; index < 288; index ++) {
+            for (let i = 0 ; i< 32; i++) {
+                // console.log (this.dataRegisters[index][i]  == '1' && this.led != undefined && parseInt (this.controlRegister, 2) != 0)
+                if (this.dataRegisters[index][i]  == '1' && this.led != undefined && parseInt (this.controlRegister, 2) != 0) 
+                    this.led.turnOn(~~(index / 3), i + (index % 3) * 32)
+            }
+        // }
+        // console.log (this.dataRegisters)
+            
     }
 
 }

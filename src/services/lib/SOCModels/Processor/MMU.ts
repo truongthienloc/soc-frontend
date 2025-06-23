@@ -1,6 +1,7 @@
 import Cycle                                        from "../Compile/cycle"
 import {Logger }                                    from '../Compile/soc.d'
 import { dec, stringToAsciiAndBinary, BinToHex }    from '../Compile/convert'
+import { log } from "console"
 
 export default class MMU {
     active              : boolean
@@ -60,6 +61,23 @@ export default class MMU {
             this.MMU_message = ' MMU is bypassed'
             this.physical_address = logic_address.slice(-18)
         } else {
+            console.log ('MMU is actived.')
+            console.log ('satp:', BinToHex(this.satp.toString(2)))
+            console.log()
+            console.log ('TLB: ')
+             for (let i = 0; i < 8; i++) {
+                console.log (
+                BinToHex(this.TLB[i][0].toString(2))
+                , BinToHex(this.TLB[i][1].toString(2))
+                , BinToHex(this.TLB[i][2].toString(2))
+                , BinToHex(this.TLB[i][3].toString(2))
+                , BinToHex(this.TLB[i][4].toString(2))
+                , BinToHex(this.TLB[i][5].toString(2))
+                , BinToHex(this.TLB[i][6].toString(2))
+                // , BinToHex(this.TLB[i][7].toString(2))
+            )
+            }
+            console.log()
             this.search_in_TLB(logic_address, Processor_action)
         }
 
@@ -111,6 +129,7 @@ export default class MMU {
         if (Processor_action == 'PUT') {
             check_pagenum = this.TLB.map(
                 (tlbEntry) => vpn_dec === tlbEntry[0] && tlbEntry[5] === 1
+                
             )
 
             check_func  = this.TLB.map(
@@ -149,11 +168,9 @@ export default class MMU {
         // console.log ('tlb', this.TLB)
         // console.log ((this.satp & 0xFFFF) + vpn_dec*4, vpn_dec)
 
-        // console.log ('exist check_func ', exist, valid)
-
         if (exist) {
             if (valid) {
-                this.MMU_message = " TLB: VPN is caught."
+                this.MMU_message = " TLB: TLB is caught."
                 this.physical_address = (physical_addresses[check_pagenum.indexOf(true)]).toString(2).padStart(17, '0')
             }
             else {
@@ -161,9 +178,13 @@ export default class MMU {
             }
             
         } else {
-            this.MMU_message = " TLB: VPN is missed."
+            this.MMU_message = " TLB: TLB is missed."
             this.physical_address = ((this.satp & 0xFFFF) + vpn_dec*4).toString(2).padStart(17, '0')
         }
+
+        console.log ('MMU status:'+this.MMU_message)
+        // console.log ('Logical address:', BinToHex(logic_address)+'.')
+        // console.log ('Physical address:', BinToHex(this.physical_address.padStart(32, '0'))+'.')
 
     }
 }

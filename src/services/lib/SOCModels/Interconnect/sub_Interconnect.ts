@@ -1,5 +1,6 @@
 import ChannelA             from "./ChannelA"
 import ChannelD             from "./ChannelD"
+import { BinToHex } from "../Compile/convert"
 import { FIFO_ChannelA }    from "./FIFO_ChannelA"
 import { FIFO_ChannelD }    from "./FIFO_ChannelD"
 import { FIFO_timing }      from "./FIFO_timing"
@@ -157,7 +158,7 @@ export default class TL_UL {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The SUB-INTERCONNECT is receiving data from BRIDGE.'
+                    +': The TL-UL is receiving data from BRIDGE.'
                 )
     
                 if (this.port_in[0] instanceof FIFO_ChannelA) {
@@ -178,7 +179,7 @@ export default class TL_UL {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The SUB-INTERCONNECT is receiving data from DMA.'
+                    +': The TL-UL is receiving data from DMA.'
                 )
 
                 if (this.port_in[1] instanceof FIFO_ChannelD) {
@@ -198,7 +199,7 @@ export default class TL_UL {
                 this.active_println
                 ,'Cycle '
                 + cycle.toString() 
-                +': The SUB-INTERCONNECT is receiving data from LED-MATRIX.'
+                +': The TL-UL is receiving data from LED-MATRIX.'
             )
 
             if (this.port_in[2] instanceof FIFO_ChannelD) {
@@ -256,7 +257,10 @@ export default class TL_UL {
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': The SUB-INTERCONNECT is sending data from BRIDGE to LED-MATRIX.'
+                        +': The TL-UL is sending data from BRIDGE to LED-MATRIX.'
+                        +'(address = '
+                        + BinToHex(dataFromBridge.address)
+                        +')'
                     )
                     // console.log (Led_ready)
                     if (this.port_out[2] instanceof FIFO_ChannelA) this.port_out[2].enqueue({...this.port_in[0].dequeue()})
@@ -274,7 +278,10 @@ export default class TL_UL {
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': The SUB-INTERCONNECT is sending data from BRIDGE to DMA.'
+                        +': The TL-UL is sending data from BRIDGE to DMA.'
+                        +'(address = '
+                        + BinToHex(dataFromBridge.address)
+                        +')'
                     )
 
                     if (this.port_out[1] instanceof FIFO_ChannelA) this.port_out[1].enqueue({...this.port_in[0].dequeue()})
@@ -292,7 +299,7 @@ export default class TL_UL {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The SUB-INTERCONNECT is sending data from DMA to BRIDGE.'
+                    +': The TL-UL is sending data from DMA to BRIDGE.'
                 )
                 
                 if (this.port_out[0] instanceof FIFO_ChannelD) this.port_out[0].enqueue({...this.port_in[1].dequeue()})
@@ -307,7 +314,7 @@ export default class TL_UL {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The SUB-INTERCONNECT is sending data from LED-MATRIX to BRIDGE.'
+                    +': The TL-UL is sending data from LED-MATRIX to BRIDGE.'
                 )
                         
                 if (this.port_out[0] instanceof FIFO_ChannelD) this.port_out[0].enqueue({...this.port_in[2].dequeue()})

@@ -203,7 +203,7 @@ export default function SocPage({}: Props) {
         socModelRef.current.Processor.event.on(RiscVProcessor.PROCESSOR_EVENT.KEY_WAITING, () => {
           console.log('keyboard is waiting')
           setShowSimulatorType('CODE_EDITOR')
-          setTabIndex(3)
+          setTabIndex(2)
           setIsKeyboardWaiting(true)
         })
 

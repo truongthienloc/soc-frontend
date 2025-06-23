@@ -124,7 +124,7 @@ export default class RiscVProcessor {
             this.MMU.run ((this.pc).toString(2).padStart(32, '0'), 'FETCH')
             this.SendAddress = (this.pc).toString(2).padStart(32, '0')
 
-            if (this.MMU.MMU_message == ' TLB: VPN is missed.') {
+            if (this.MMU.MMU_message == ' TLB: TLB is missed.') {
 
                 this.println (
                     this.active_println
@@ -275,7 +275,35 @@ export default class RiscVProcessor {
                 }
 
                 if (parseInt(this.register['10001'], 2) == 12) {
+                                        this.keyBoard_waiting = true
+                    this.event.emit(RiscVProcessor.PROCESSOR_EVENT.KEY_WAITING)
+                    const ecall_read = new Promise((resolve) => {
+                                    this.keyboard?.getEvent().on('line-down', (line: string) => {
+                                    if (line.length == 4)
+                                        this.register['01010']  = ((line.charCodeAt(0) << 24) |
+                                                                    (line.charCodeAt(1) << 16) |
+                                                                    (line.charCodeAt(2) << 8)  |
+                                                                    (line.charCodeAt(3))).toString(2).padStart(32,'0')
+                                    
+                                    if (line.length == 3) 
+                                        this.register['01010']  = ((line.charCodeAt(0) << 16) |
+                                                                    (line.charCodeAt(1) << 8)  |
+                                                                    (line.charCodeAt(2))).toString(2).padStart(32,'0')
+                                    
+                                    if (line.length == 2) 
+                                        this.register['01010']  = ( (line.charCodeAt(0) << 8)  |
+                                                                    (line.charCodeAt(1))).toString(2).padStart(32,'0')
+                                    
+                                    if (line.length == 1) 
+                                        this.register['01010']  = ( (line.charCodeAt(0))).toString(2).padStart(32,'0')
+                                    
+                                    this.keyBoard_waiting   = false
+                                    this.event.emit(RiscVProcessor.PROCESSOR_EVENT.KEY_FREE)
+                                    resolve(parseInt(line))
+                                    })
+                                })
 
+                    await ecall_read
                 }
 
 
@@ -406,7 +434,7 @@ export default class RiscVProcessor {
                 )                  
             }
             
-            if (this.MMU.MMU_message == ' TLB: VPN is missed.') {
+            if (this.MMU.MMU_message == ' TLB: TLB is missed.') {
 
                 this.println (
                     this.active_println

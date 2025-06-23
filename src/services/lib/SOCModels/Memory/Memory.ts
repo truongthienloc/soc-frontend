@@ -8,7 +8,7 @@ import Cycle from '../Compile/cycle'
 import { Rock_3D } from 'next/font/google'
 import { BinToHex } from '../Compile/convert'
 import { FIFO_ChannelA }    from "../Interconnect/FIFO_ChannelA"
-import { CommentBankSharp } from '@mui/icons-material'
+import { Co2Sharp, CommentBankSharp } from '@mui/icons-material'
 
 export default class Memory {
     Memory          : { [key: string]: string }
@@ -50,12 +50,11 @@ export default class Memory {
             Int2Memory_ = Int2Memory.dequeue ()
             this.slave_interface.ChannelD.valid = '0'
             this.slave_interface.ChannelA.ready = '1'
-
             if (Int2Memory_.valid == '1') {
                 this.slave_interface.ChannelD.valid = '1'
                 if (Int2Memory_.opcode == '100' ) this.state = this.RECEIVE_GET_STATE
                 if (Int2Memory_.opcode == '010'
-                || Int2Memory_.opcode == '011'  ) this.state = this.RECEIVE_AMO_STATE
+                || Int2Memory_.opcode  == '011'  ) this.state = this.RECEIVE_AMO_STATE
                 if (Int2Memory_.opcode == '000' ) this.state = this.RECEIVE_PUT_STATA
             }
         }
@@ -66,7 +65,7 @@ export default class Memory {
             this.println (this.active_println,
                             'Cycle '             +
                             cycle.toString()     +
-                            ': The MEMORY is receiving GET message from the INTERCONNECT.'
+                            ': The MEMORY is receiving GET message from the TL-UH.'
                             )
             this.slave_interface.receive (Int2Memory_)
             this.state = this.SEND_ACCESSACKDATA_STATE
@@ -80,7 +79,7 @@ export default class Memory {
             this.println (this.active_println,
                             'Cycle '             +
                             cycle.toString()     +
-                            ': The MEMORY is receiving ArithmeticData message from the INTERCONNECT.'
+                            ': The MEMORY is receiving ArithmeticData message from the TL-UH.'
                             )
             this.slave_interface.receive (Int2Memory_)
             this.state = this.SEND_ACCESSACKDATA_STATE
@@ -101,11 +100,17 @@ export default class Memory {
                     this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] +
                     this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')]
                     )
+                    // console.log ('this.slave_interface.ChannelA.address', this.slave_interface.ChannelA.address)
+                    // console.log ('this.slave_interface.ChannelD.data', this.slave_interface.ChannelD.data)
 
                     this.println (this.active_println,
-                    'Cycle '             +
-                    cycle.toString()     +
-                    ': The MEMORY is sending an AccessAckData message to the INTERCONNECT.' 
+                        'Cycle '             +
+                        cycle.toString()     +
+                        ': The MEMORY is sending an AccessAckData message to the TL-UH.(data = '
+                        + BinToHex(this.slave_interface.ChannelD.data)
+                        + ', address = '
+                        + BinToHex((parseInt(this.slave_interface.ChannelA.address, 2) + 0 + this.count_beats * 4).toString(2))
+                        +')'
                     )
 
                     if (this.slave_interface.ChannelA.opcode == '011') {
@@ -174,8 +179,6 @@ export default class Memory {
                             this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1).toString(2).padStart(17, '0')] = result.slice(16, 23)
                             this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0).toString(2).padStart(17, '0')] = result.slice(23, 32)
                         }
-                        console.log ('this.slave_interface.ChannelD.data',
-                            this.slave_interface.ChannelD.data)
                     }
 
                     if (this.slave_interface.ChannelA.opcode == '010') {
@@ -291,11 +294,15 @@ export default class Memory {
                         this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1 + this.count_beats * 4).toString(2).padStart(17, '0')] +
                         this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0 + this.count_beats * 4).toString(2).padStart(17, '0')]
                     )
-
+                   
                     this.println (this.active_println,
                         'Cycle '             +
                         cycle.toString()     +
-                        ': The MEMORY is sending an AccessAckData message to the INTERCONNECT.'
+                        ': The MEMORY is sending an AccessAckData message to the TL-UH.(data = '
+                        + BinToHex(this.slave_interface.ChannelD.data)
+                        + ', address = '
+                        + BinToHex((parseInt(this.slave_interface.ChannelA.address, 2) + 0 + this.count_beats * 4).toString(2))
+                        +')'
                     )
                     this.count_beats ++ 
                     if (this.count_beats >= 4) {
@@ -316,9 +323,13 @@ export default class Memory {
                 this.println (this.active_println,
                     'Cycle '             +
                     cycle.toString()     +
-                    ': The MEMORY is receiving a PUT message from the INTERCONNECT.'
+                    ': The MEMORY is receiving a PUT message from the TL-UH.(data = '
+                    + BinToHex(this.slave_interface.ChannelA.data)
+                    + ', address = '
+                    + BinToHex(this.slave_interface.ChannelA.address)
+                    +')'
                 )
-
+                
                 if (this.slave_interface.ChannelA.size == '10') {
                     this.count_beats ++
                     if (this.count_beats >= 4) {
@@ -327,6 +338,7 @@ export default class Memory {
                     }
                     else this.state = this.IDLE_STATE
                 } else  this.state = this.SEND_ACCESSACK_STATE
+                // console.log('(parseInt(this.slave_interface.ChannelA.address, 2)', (parseInt(this.slave_interface.ChannelA.address, 2)))
                 if (this.slave_interface.ChannelA.mask.slice(0,1)=='1')
                     this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3).toString(2).padStart(17, '0')] = this.slave_interface.ChannelA.data.slice(0,8)
                 if (this.slave_interface.ChannelA.mask.slice(1,2)=='1') 
@@ -347,7 +359,7 @@ export default class Memory {
                 this.println (this.active_println,
                     'Cycle '             +
                     cycle.toString()     +
-                    ': The MEMORY is sending an AccessAck message to the INTERCONNECT.'
+                    ': The MEMORY is sending an AccessAck message to the TL-UH.'
                 )
                 
                 this.slave_interface.send(

@@ -530,7 +530,7 @@ export default class Assembler {
                 mlist[3] = this.convertHexToDec(mlist[3]).toString()
             }
             let imm = parseInt(mlist[3]).toString(2).padStart(5, '0')
-            console.log ('imm', imm)
+            // console.log ('imm', imm)
             if (parseInt(mlist[3]) < 0) {
                 imm = (1 << (12 + parseInt(mlist[3]))).toString(2).slice(-5)
             }

@@ -42,13 +42,13 @@ export default class LEDMatrix {
 
     public reset () {
         this.controlRegister            = '00000000000000000000000000000000'
-        this.dataRegisters              = Array(288).fill(''.padStart(32, '1') )
+        this.dataRegisters              = Array(288).fill(''.padStart(32, '0') )
         this.slave_interface               = new slave_interface('slave_interface', true)
         this.slave_interface.ChannelD.sink = '1'
         this.state           = 0
         this.ready                      = false
         this.active_println             = true
-        this.led                        = new LedMatrix ('.led-matrix')
+        // this.led                        = new LedMatrix ('.led-matrix')
         for (let i = 0 ; i< 96 ; i++) {
             for (let j =0; j< 96; j++)
             {
@@ -130,7 +130,7 @@ export default class LEDMatrix {
                     this.active_println
                     ,'Cycle ' 
                     + cycle.toString() 
-                    + ': The LED-MATRIX is sending an AccessAck message to the SUB-INTERCONNECT.2'
+                    + ': The LED-MATRIX is sending an AccessAck message to the SUB-INTERCONNECT.'
                 )
                 this.slave_interface.send ('AccessAck', this.slave_interface.ChannelA.source, '')
                 this.slave_interface.ChannelD.valid = '1'

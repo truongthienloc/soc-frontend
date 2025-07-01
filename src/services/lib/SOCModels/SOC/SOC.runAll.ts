@@ -1,5 +1,5 @@
 import Soc from "../SOC/SoC"
-
+import * as fs from 'fs';
 export async function RunAll(this: Soc) {
     // CHECK PROCESSOR IS ACTIVED OR NOT
     if (this.Processor.active == false) {
@@ -43,7 +43,7 @@ export async function RunAll(this: Soc) {
                 await this.Step()
                 // bre++ 
 
-                // if (bre > 330) break
+                // if (bre > 30) break
             }
             this.Memory.Ins_pointer = -1
     }
@@ -57,3 +57,4 @@ export async function RunAll(this: Soc) {
 
    this.event.emit(Soc.SOCEVENT.DONE_ALL)
 }
+

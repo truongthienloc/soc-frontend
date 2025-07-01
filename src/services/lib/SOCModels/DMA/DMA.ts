@@ -40,7 +40,7 @@ export default class DMA {
         , cycle                 : Cycle
         , Interconnect_ready    : boolean
         , subInterconnect_ready : boolean
-        , 
+        
     ) {
 
         if (this.state == this.REC_state)      {
@@ -61,7 +61,7 @@ export default class DMA {
                             this.active_println
                             ,'Cycle '
                             + cycle.toString() 
-                            +': The DMA is receiving messeage PUT from SUB-INTERCONNECT.'
+                            +': The DMA is receiving messeage PUT from TL-UL.'
                         )
 
                         this.RegisterFiles (
@@ -83,7 +83,7 @@ export default class DMA {
                             this.active_println
                             ,'Cycle '
                             + cycle.toString() 
-                            +': The DMA is receiving messeage GET from SUB-INTERCONNECT.'
+                            +': The DMA is receiving messeage GET from TL-UL.'
                         )
                         this.slave_interface.receive ({...data_from_sub_interconnect})
                         this.state = this.ACKData_state
@@ -94,6 +94,7 @@ export default class DMA {
            
             if (!InterConnect2DMA.isEmpty())   {
                 let data_from_interconncet = InterConnect2DMA.dequeue ()
+                // console.log ('data_from_interconncet.valid', data_from_interconncet.valid)
                 if (data_from_interconncet.valid == '1') {
 
 
@@ -105,7 +106,7 @@ export default class DMA {
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': The DMA is receiving messeage AccessAckData from INTERCONNET. ('
+                        +': The DMA is receiving messeage AccessAckData from TL-UL. ('
                         + BinToHex (this.master_interface.ChannelD.data) 
                         +')'
                     )
@@ -134,7 +135,7 @@ export default class DMA {
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': The DMA is receiving messeage AccessAck from INTERCONNECT.'
+                        +': The DMA is receiving messeage AccessAck from TL-UH.'
                     )
                     
                     this.master_interface.receive(data_from_interconncet)
@@ -169,7 +170,7 @@ export default class DMA {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The DMA is sending messeage GET to INTERCONNET.'
+                    +': The DMA is sending messeage GET to TL-UL.'
                 )
     
                 this.master_interface.send(
@@ -178,18 +179,18 @@ export default class DMA {
                     ''
                 )
                 if (parseInt (this.master_interface.ChannelA.address, 2) < 0x20000)
-                this.master_interface.ChannelA.size = '10'
-                else this.master_interface.ChannelA.size = '00'
-                
-                this.master_interface.ChannelA.valid = '1'
-                this.state = this.REC_state
+                    this.master_interface.ChannelA.size = '10'
+                    else this.master_interface.ChannelA.size = '00'
+                    
+                    this.master_interface.ChannelA.valid = '1'
+                    this.state = this.REC_state
                 }
                 else {
                     this.state = this.PUT_state
                 }
                 
             }
-            console.log('this.state',this.state)
+            // console.log('this.state',this.state)
         }
 
         if (this.state == this.PUT_state)   {
@@ -201,7 +202,7 @@ export default class DMA {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The DMA is sending messeage PUT to INTERCONNET.'
+                    +': The DMA is sending messeage PUT to TL-UH.'
                 )
                 
                 this.master_interface.send(
@@ -242,7 +243,7 @@ export default class DMA {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The DMA is sending messeage AccessAck to SUB-INTERCONNECT.'
+                    +': The DMA is sending messeage AccessAck to TL-UL.'
                 )
 
                 if (this.controlRegister != '00000000000000000000000000000000') {
@@ -271,7 +272,7 @@ export default class DMA {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The DMA is sending messeage AccessAckData to SUB-INTERCONNECT.'
+                    +': The DMA is sending messeage AccessAckData to TL-UL.'
                 )
 
                 this.state = this.REC_state

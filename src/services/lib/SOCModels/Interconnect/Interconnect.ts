@@ -546,7 +546,7 @@ export default class TL_UH {
                     +': TL-UH is sending data from PROCESSOR to MEMORY.'
                     +'('
                     + binaryToHex(dataFromProcessor.address)
-                    +')'
+                    + ')'
                 )
                 if (this.port_out[2] instanceof FIFO_ChannelA) this.port_out[2].enqueue({...this.port_in[0].dequeue()})
                 this.Timing[0].dequeue()
@@ -572,6 +572,8 @@ export default class TL_UH {
                                             +'(address = '
                     + binaryToHex(dataFromProcessor.address)
                     +')'
+                    // +'source = '
+                    // + binaryToHex(dataFromProcessor.source)
                     )
 
                     if (this.port_out[3] instanceof FIFO_ChannelA) this.port_out[3].enqueue({...this.port_in[0].dequeue()})
@@ -592,8 +594,10 @@ export default class TL_UH {
                         + cycle.toString() 
                         +': TL-UH is sending data from DMA to MEMORY.'
                         +'(address = '
-                    + binaryToHex(dataFromDMA.address)
-                    +')'
+                        + binaryToHex(dataFromDMA.address)
+                        // +' source = '
+                        // + binaryToHex(dataFromDMA.source)
+                        +')'
                     )
                     if (this.port_out[2] instanceof FIFO_ChannelA) this.port_out[2].enqueue({...this.port_in[1].dequeue()})
                     this.Timing[1].dequeue()
@@ -607,6 +611,8 @@ export default class TL_UH {
                         +': TL-UH is sending data from DMA to TL-UL.'
                         +'(address = '
                         + binaryToHex(dataFromDMA.address)
+                        // +' source = '
+                        // + binaryToHex(dataFromDMA.source)
                         +')'
                     )
                     while (!this.port_in[1].isEmpty()) {

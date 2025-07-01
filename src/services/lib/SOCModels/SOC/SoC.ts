@@ -6,7 +6,7 @@ import EventEmitter from '../../EventEmitter/EventEmitter'
 import { assemble } from '../SOC/SOC.assemble'
 import { RunAll } from '../SOC/SOC.runAll'
 import { StepIns } from '../SOC/SOC.StepIns'
-
+import * as fs from 'fs';
 
 import RiscVProcessor from '../Processor/RiscV_processor'
 import Memory from '../Memory/Memory'
@@ -119,6 +119,7 @@ export default class Soc {
     }
 
     public RunAll() {
+        
         return RunAll.bind(this)()
     }
 
@@ -214,4 +215,113 @@ export default class Soc {
     public StepIns() {
         return StepIns.bind(this)()
     }
+
+    public Steptest() {
+    this.Processor.active_println = false
+    this.TL_UH.active_println = false
+    this.Memory.active_println = false
+    if (this.cycle.cycle % 1 == 0) {
+        this.Processor.Controllertest(
+            this.cycle
+            , this.TL_UH.port_out[0].dequeue()
+            , this.TL_UH.ready
+        )
+
+        this.TL_UH.Controller (
+            this.Processor.FIFO.dequeue()
+            ,this.DMA.master_interface.ChannelA
+            ,this.Memory.slave_interface.ChannelD
+            ,this.Bridge.slave_interface.ChannelD
+            //valid signal
+            ,this.Processor.master_interface.ChannelA.valid   == '1'
+            ,this.DMA.master_interface.ChannelA.valid         == '1'
+            ,this.Memory.slave_interface.ChannelD.valid       == '1'
+            ,this.Bridge.slave_interface.ChannelD.valid       == '1'
+            //ready signal
+            ,this.Processor.master_interface.ChannelD.ready   == '1'
+            ,this.DMA.master_interface.ChannelD.ready         == '1'
+            ,this.Memory.slave_interface.ChannelA.ready       == '1'
+            ,this.Bridge.master_interface.ChannelA.ready      == '1'
+            //cycle
+            ,this.cycle
+        )
+
+        this.Memory.Controller(
+            this.cycle
+            , this.TL_UH.port_out[2]
+            , this.TL_UH.ready
+        )
+
+        this.Bridge.Controller (
+            this.TL_UH.port_out[3]
+            , this.TL_UL.port_out[0]
+            , this.TL_UH.ready
+            , this.TL_UL.ready
+            , this.cycle
+        )
+    }
+
+    if (this.cycle.cycle % 1 == 0) {
+
+        this.DMA.Controller (
+            this.TL_UL.port_out[1]
+            ,this.TL_UH.port_out[1]
+            , this.cycle
+            , this.TL_UH.ready
+            , this.TL_UL.ready && this.cycle.cycle % 1 == 0
+        )
+    }
+
+    if (this.cycle.cycle % 1 == 0) {
+        this.TL_UL.Controller (
+            this.Bridge.fifo_to_subInterconnect
+            , this.DMA.slave_interface.ChannelD
+            , this.Led_matrix.slave_interface.ChannelD
+            , this.Bridge.master_interface.ChannelA.valid      == '1'
+            , this.Led_matrix.ready
+            , this.Bridge.master_interface.ChannelA.ready      == '1'
+            , this.DMA.slave_interface.ChannelD.valid             == '1'
+            , this.Led_matrix.slave_interface.ChannelD.valid   == '1'
+            , this.cycle
+        )
+
+        this.Led_matrix.Controller(
+            this.TL_UL.port_out[2].dequeue()
+            , this.cycle
+            , this.TL_UL.ready && this.cycle.cycle % 1 == 0
+        )
+    }
+    
+    this.cycle.incr()
+    }
+
+    public RunAlltest(this: Soc, i: number) {
+    // CHECK PROCESSOR IS ACTIVED OR NOT
+    let bre =0
+        this.Processor.InsLength = this.Memory.Ins_pointer
+        while (
+            (this.Processor.pc <
+            this.Memory.Ins_pointer || this.Processor.state != 0 ) && this.Processor.state != this.Processor.OUT_WORK
+            || 
+            !(
+                this.DMA.controlRegister == '00000000000000000000000000000000' || 
+                (this.DMA.controlRegister != '00000000000000000000000000000000' 
+                && this.DMA.statusRegister == '00000000000000000000000000000001')
+            )
+        ) {
+                this.Steptest()
+                                bre++ 
+
+                // if (bre > 30) break
+            }
+            // console.log (this.Processor.getRegisters())
+    let output = 'Register Expected Results\n';
+    this.Processor.getRegisters().forEach((reg, i) => {
+    output += `## expect[${i}] = ${reg.value}\n`;
+    });
+
+    fs.writeFileSync('C:/Users/LENOVO/Desktop/KLTN/src/soc-frontend/src/services/lib/SOCModels/testing/output/expect['+i.toString()+'].txt', output, 'utf8');
+
+   this.event.emit(Soc.SOCEVENT.DONE_ALL)
+}
 }

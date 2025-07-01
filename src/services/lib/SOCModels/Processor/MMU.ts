@@ -48,6 +48,22 @@ export default class MMU {
         }
     }
 
+    public reset () {
+        this.TLB =
+        [
+             [0, 0, 0, 0, 0, 0, 0]
+            ,[0, 0, 0, 0, 0, 0, 0]
+            ,[0, 0, 0, 0, 0, 0, 0]
+            ,[0, 0, 0, 0, 0, 0, 0]
+            ,[0, 0, 0, 0, 0, 0, 0]
+            ,[0, 0, 0, 0, 0, 0, 0]
+            ,[0, 0, 0, 0, 0, 0, 0]
+            ,[0, 0, 0, 0, 0, 0, 0]
+        ]                                 
+        this.satp = 0
+
+    }
+
     public run (
         logic_address   : string
         , Processor_action: string
@@ -183,8 +199,8 @@ export default class MMU {
         }
 
         console.log ('MMU status:'+this.MMU_message)
-        // console.log ('Logical address:', BinToHex(logic_address)+'.')
-        // console.log ('Physical address:', BinToHex(this.physical_address.padStart(32, '0'))+'.')
+        console.log ('Logical address:', BinToHex(logic_address)+'.')
+        console.log ('Physical address:', BinToHex(this.physical_address.padStart(32, '0'))+'.')
 
     }
 }

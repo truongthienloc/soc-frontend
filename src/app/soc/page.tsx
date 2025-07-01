@@ -461,10 +461,10 @@ export default function SocPage({}: Props) {
     socModelRef.current?.Processor.reset()
     socModelRef.current?.DMA.reset()
     socModelRef.current?.Led_matrix.reset()
+    socModelRef.current?.Processor.MMU.reset()
     logRef.current?.clear()
 
     updateCoreDataAfterRun()
-
     setIsStepping(false)
     setPc(undefined)
     setAllowRun(false)

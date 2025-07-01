@@ -50,6 +50,7 @@ export default class Memory {
             Int2Memory_ = Int2Memory.dequeue ()
             this.slave_interface.ChannelD.valid = '0'
             this.slave_interface.ChannelA.ready = '1'
+
             if (Int2Memory_.valid == '1') {
                 this.slave_interface.ChannelD.valid = '1'
                 if (Int2Memory_.opcode == '100' ) this.state = this.RECEIVE_GET_STATE
@@ -294,6 +295,9 @@ export default class Memory {
                         this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 1 + this.count_beats * 4).toString(2).padStart(17, '0')] +
                         this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 0 + this.count_beats * 4).toString(2).padStart(17, '0')]
                     )
+                    // console.log ( this.Memory)
+                    // console.log ('address', this.Memory[(parseInt(this.slave_interface.ChannelA.address, 2) + 3 + this.count_beats * 4).toString(2).padStart(17, '0')])
+                    // console.log (this.slave_interface.ChannelD.data)
                    
                     this.println (this.active_println,
                         'Cycle '             +
@@ -423,8 +427,8 @@ export default class Memory {
     }
 
     public SetInstructionMemory(Instruction_memory: string[] = []) {
-        let count =  0
-        this.Ins_pointer = 0 
+        let count =  1000
+        this.Ins_pointer = 0
 
         for (const binString of Instruction_memory) {
             if (binString !== '') {
@@ -436,7 +440,7 @@ export default class Memory {
             }
         }
 
-        this.Ins_pointer = (Object.values(Instruction_memory).length - 1) * 4
+        this.Ins_pointer = (Object.values(Instruction_memory).length - 1) * 4 + 1000
     }
 
     public SetDataMemory (Data_memory: string[][] ){

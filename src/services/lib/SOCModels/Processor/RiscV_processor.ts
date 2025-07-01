@@ -88,7 +88,7 @@ export default class RiscVProcessor {
       , ready             : boolean
   ) 
     {
-
+        this.pc = 1000
     if (this.state == this.GET_INSTRUCTION)             {
 
         //########################################################################################
@@ -1428,7 +1428,7 @@ export default class RiscVProcessor {
                     this.slt,
                 ),
                 mux(
-                    (parseInt (imm,2) * 4096 + this.pc).toString(2).padStart(32, '0'),
+                    (parseInt (imm,2) * 4096 + this.pc - 1000).toString(2).padStart(32, '0'),
                     (parseInt (imm,2) * 4096).toString(2).padStart(32, '0'),
                     this.auiOrLui,
                 ),
@@ -1440,7 +1440,6 @@ export default class RiscVProcessor {
             }
 
             this.register['00000'] = '00000000000000000000000000000000'
-            
             this.pc     = mux(mux(this.pc + 4, (dec(imm) << 1) + this.pc, this.pcSrc1), dec ('0'+ALUResult), this.pcSrc2)
             
             this.lineColor['3']         = mux(this.lineColor['2'], this.lineColor['1'], this.ALUSrc);
@@ -1493,4 +1492,551 @@ export default class RiscVProcessor {
         
 
     }
+
+    Controllertest  (
+      cycle               : Cycle
+      , InterConnect2CPU  : any
+      , ready             : boolean
+  ) 
+    {
+    
+    // this.pc     = 1000
+    if (this.state == this.GET_INSTRUCTION)             {
+
+        //########################################################################################
+        //#                                                                                      #
+        //#This state is an idle state and is used to retrieve instruction data from memory.     #
+        //#The address is the Program Counter.                                                   #
+        //#This state also checks the available values of the Program Counter.                   #
+        //#                                                                                      #
+        //########################################################################################
+        this.master_interface.ChannelD.ready = '0'
+        if (this.pc >= this.InsLength) {
+            this.state = this.GET_INSTRUCTION
+            if (this.Warnning == 0) {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': **********THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.**********'
+                )
+                this.Warnning = 1
+            }
+            return
+        }   
+
+        if (ready) {
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The PROCESSOR is sending messeage GET to TL-UH.'
+            )
+
+            this.MMU.run ((this.pc).toString(2).padStart(32, '0'), 'FETCH')
+            this.SendAddress = (this.pc).toString(2).padStart(32, '0')
+
+            if (this.MMU.MMU_message == ' TLB: TLB is missed.') {
+
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() +':'
+                    + this.MMU.MMU_message
+                )
+
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is sending messeage GET to TL-UH.'
+                )
+
+                this.println(this.active_println,
+                    'Cycle ' 
+                    + cycle.toString()  
+                    +': Logical_address: ' 
+                    +BinToHex((this.pc).toString(2).padStart(32, '0')) 
+                    +' -> Physical address: ' 
+                    +BinToHex(this.MMU.physical_address)
+                )
+                
+                this.master_interface.ChannelA.valid = '1'
+                this.master_interface.send ('GET',  this.MMU.physical_address, this.SendData)
+                this.master_interface.ChannelA.valid = '1'
+                this.FIFO.enqueue ({...this.master_interface.ChannelA})
+                this.state = this.REPLACE_TLBE_INS
+            }
+            else if (this.MMU.MMU_message == ' ERROR: Page fault!!!!') {
+
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString()
+                    + this.MMU.MMU_message
+                )
+
+                this.state  = this.OUT_WORK
+                this.pc     = this.pc + 4
+            }
+            else {
+                this.master_interface.ChannelA.valid = '1'
+                this.master_interface.send ('GET',  (this.pc).toString(2).padStart(17, '0'), this.SendData)
+
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() + ':'
+                    + this.MMU.MMU_message
+                )
+
+                this.println(this.active_println,
+                    'Cycle ' 
+                    + cycle.toString()  
+                    +': Logical_address: ' 
+                    +BinToHex((this.pc).toString(2).padStart(32, '0')) 
+                    +' -> Physical address: ' 
+                    +BinToHex(this.MMU.physical_address)
+                )
+                
+                this.master_interface.ChannelA.mask  = '00'
+                this.FIFO.enqueue ({...this.master_interface.ChannelA})
+                this.state              = this.RECEIVE_INSTRUCTION
+
+            }
+        }
+        return
+    }
+
+    if (this.state == this.RECEIVE_INSTRUCTION)         {
+
+        //#######################################################
+        //#                                                     #
+        //#This state is the 'Receive Instructions' state.      #
+        //#Only when data from the Interconnect is valid,       #
+        //#is the processor's instruction register accepted.    #
+        //#Next state is Internal Processing state.             #
+        //#                                                     #
+        //#######################################################
+
+        this.master_interface.ChannelA.valid = '0'
+        this.master_interface.ChannelD.ready = '1'
+        if (InterConnect2CPU.valid == '1') {
+            this.master_interface.receive (InterConnect2CPU)
+            this.instruction = this.master_interface.ChannelD.data
+
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The PROCESSOR is receiving messeage AccessAckData from TL-UH. ('
+                +BinToHex (this.master_interface.ChannelD.data)
+                +').'
+            )
+            this.state              = this.PROCESSING
+        }
+        return
+    }
+
+    if (this.state == this.PROCESSING)                  {
+        //#######################################################
+        //#                                                     #
+        //#This state is the 'Receive Instructions' state.      #
+        //#Only when data from the Interconnect is valid,       #
+        //#is the processor's instruction register accepted.    #
+        //#Next state is Internal Processing state.             #
+        //#                                                     #
+        //#######################################################
+        this.master_interface.ChannelA.valid = '0'
+        this.master_interface.ChannelD.ready = '0'
+
+        this.println (
+            this.active_println
+            ,'Cycle '
+            + cycle.toString() 
+            +': The PROCESSOR is processing.1'
+        )
+            let [message, data, logic_address, writeRegister, mask] = this.Datapath (this.instruction, '')
+            // if (message == 'ECALL') {
+            //     this.println (this.active_println, 'Ecall instruction')
+            //     if (parseInt(this.register['10001'], 2) == 1) {
+            //         if (this.register['01010'].slice(0,1) == '1') {
+            //             this.println (this.active_println, 'Register a0:'+ ((4294967296 - parseInt(this.register['01010'], 2))*-1).toString())
+            //             this.monitor?.println (((4294967296 - parseInt(this.register['01010'], 2))*-1).toString())
+            //         }
+            //         else {
+            //             this.println (this.active_println, 'Register a0:'+ parseInt(this.register['01010'], 2).toString())
+            //             this.monitor?.println (parseInt(this.register['01010'], 2).toString())
+            //         }
+            //     }
+
+            //     if (parseInt(this.register['10001'], 2) == 5) {
+            //         this.keyBoard_waiting = true
+            //         this.event.emit(RiscVProcessor.PROCESSOR_EVENT.KEY_WAITING)
+            //         const ecall_read = new Promise((resolve) => {
+            //                         this.keyboard?.getEvent().on('line-down', (line: string) => {
+            //                         this.register['01010']  = parseInt(line).toString(2).padStart(32,'0')
+            //                         this.keyBoard_waiting   = false
+            //                         this.event.emit(RiscVProcessor.PROCESSOR_EVENT.KEY_FREE)
+            //                         resolve(parseInt(line))
+            //                         })
+            //                     })
+
+            //         ecall_read
+            //     }
+
+            //     if (parseInt(this.register['10001'], 2) == 12) {
+            //                             this.keyBoard_waiting = true
+            //         this.event.emit(RiscVProcessor.PROCESSOR_EVENT.KEY_WAITING)
+            //         const ecall_read = new Promise((resolve) => {
+            //                         this.keyboard?.getEvent().on('line-down', (line: string) => {
+            //                         if (line.length == 4)
+            //                             this.register['01010']  = ((line.charCodeAt(0) << 24) |
+            //                                                         (line.charCodeAt(1) << 16) |
+            //                                                         (line.charCodeAt(2) << 8)  |
+            //                                                         (line.charCodeAt(3))).toString(2).padStart(32,'0')
+                                    
+            //                         if (line.length == 3) 
+            //                             this.register['01010']  = ((line.charCodeAt(0) << 16) |
+            //                                                         (line.charCodeAt(1) << 8)  |
+            //                                                         (line.charCodeAt(2))).toString(2).padStart(32,'0')
+                                    
+            //                         if (line.length == 2) 
+            //                             this.register['01010']  = ( (line.charCodeAt(0) << 8)  |
+            //                                                         (line.charCodeAt(1))).toString(2).padStart(32,'0')
+                                    
+            //                         if (line.length == 1) 
+            //                             this.register['01010']  = ( (line.charCodeAt(0))).toString(2).padStart(32,'0')
+                                    
+            //                         this.keyBoard_waiting   = false
+            //                         this.event.emit(RiscVProcessor.PROCESSOR_EVENT.KEY_FREE)
+            //                         resolve(parseInt(line))
+            //                         })
+            //                     })
+
+            //         ecall_read
+            //     }
+
+
+            //     if (parseInt(this.register['10001'], 2) == 34) {
+            //         console.log ('Register a0:', '0x'+parseInt(this.register['01010'], 2).toString(16).padStart(8,'0'))
+            //         this.monitor?.println ('0x'+parseInt(this.register['01010'], 2).toString(16).padStart(8,'0').toString())
+            //     }
+
+            //     if (parseInt(this.register['10001'], 2) == 35) {
+            //         console.log ('Register a0:', '0b'+this.register['01010'])
+            //         this.monitor?.println (this.register['01010'].toString())
+            //     }
+
+            //     if (parseInt(this.register['10001'], 2) == 36) {
+            //         console.log ('Register a0:', parseInt(this.register['01010'], 2))
+            //         this.monitor?.println (parseInt(this.register['01010'], 2).toString())
+            //     }
+
+            //     if (parseInt(this.register['10001'], 2) == 41) {
+            //         this.register['01010'] = (Math.floor(Math.random() * Math.pow(2, 32)) & 0xFFFFFFFF).toString(2).padStart(32, '0')
+            //     }
+            // }
+            const access_interconnect = (
+                   message == 'PUT' 
+                || message == 'GET'
+                || message === 'SWAP'
+                || message === 'ADD'
+                || message === 'MAXU'
+                || message === 'MINU'
+                || message === 'MAX'
+                || message === 'MIN'
+                || message === 'OR'
+                || message === 'XOR'
+                || message === 'AND'
+            )
+
+            if (access_interconnect
+            ) {
+                this.Processor_messeage = message
+                this.SendData           = data
+                this.SendAddress        = logic_address
+                this.writeReg           = writeRegister
+                this.mask               = mask
+                this.state              = this.ACESS_INTERCONNECT
+                this.stepDone           = 0
+                
+            }
+            else {
+                this.state      = this.GET_INSTRUCTION
+                this.stepDone   = 1
+                if (this.pc >= this.InsLength) {
+                if (this.Warnning == 0) {
+                    this.println (
+                        this.active_println
+                        ,'Cycle '
+                        + cycle.toString() 
+                        +': **********THE PROGRAM COUNTER IS OUT OF THE INSTRUCTION MEMORY RANGE.**********'
+                    )
+                    this.Warnning = 1
+                }
+            } 
+        }
+            return
+    }
+
+    if (this.state == this.ACESS_INTERCONNECT )         {
+        this.master_interface.ChannelD.ready = '0'
+        this.MMU.run(this.SendAddress, this.Processor_messeage)
+        if (this.MMU.MMU_message == ' ERROR: Page fault!!!!') {
+
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString()+':'
+                    + this.MMU.MMU_message
+                )
+
+                this.state = this.OUT_WORK
+
+        } else 
+        if (ready) {
+            
+
+            if (this.Processor_messeage == 'PUT') {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is sending messeage PUT to TL-UH.'
+                )
+
+            }
+
+            if (this.Processor_messeage == 'GET') {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    +cycle.toString() 
+                    +': The PROCESSOR is sending messeage GET to TL-UH.'
+
+                )
+            }
+
+            if (this.Processor_messeage === 'AND'
+                || this.Processor_messeage === 'XOR'
+                || this.Processor_messeage === 'OR'
+                || this.Processor_messeage === 'SWAP'
+            ) {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is sending messeage LogicalData to TL-UH.'
+                )
+            }
+
+            if (this.Processor_messeage === 'MIN'
+                || this.Processor_messeage === 'MAX'
+                || this.Processor_messeage === 'MINU'
+                || this.Processor_messeage === 'MAXU'
+                || this.Processor_messeage === 'ADD'
+            ) {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is sending messeage ArithmeticData to TL-UH.'
+                )                  
+            }
+            
+            if (this.MMU.MMU_message == ' TLB: TLB is missed.') {
+
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() +':'
+                    + this.MMU.MMU_message
+                )
+
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is sending messeage GET to TL-UH.'
+                )
+
+                this.println(this.active_println,
+                    'Cycle ' 
+                    + cycle.toString()  
+                    +': Logical_address: ' 
+                    +BinToHex(this.SendAddress) 
+                    +' -> Physical address: ' 
+                    +BinToHex(this.MMU.physical_address)
+                )
+                
+                this.master_interface.ChannelA.valid = '1'
+                this.master_interface.send ('GET',  this.MMU.physical_address, this.SendData)
+                this.master_interface.ChannelA.valid = '1'
+                this.FIFO.enqueue ({...this.master_interface.ChannelA})
+                this.state = this.REPLACE_TLBE_DATA
+            }
+            else {
+                this.state =  this.RECEIVE_INTERCONNECT 
+                this.master_interface.send (this.Processor_messeage,  this.MMU.physical_address, this.SendData)
+                if (this.mask == 'sb') this.master_interface.ChannelA.mask = '0001'
+                if (this.mask == 'sh') this.master_interface.ChannelA.mask = '0011'
+                if (this.mask == 'sw') this.master_interface.ChannelA.mask = '1111'
+
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString()
+                    + this.MMU.MMU_message
+                )
+
+                this.println(this.active_println,
+                    'Cycle ' 
+                    + cycle.toString()  
+                    +': Logical_address: ' 
+                    +BinToHex(this.SendAddress) 
+                    +' -> Physical address: ' 
+                    +BinToHex(this.MMU.physical_address)
+                )
+                this.master_interface.ChannelA.valid = '1'
+                this.FIFO.enqueue ({...this.master_interface.ChannelA})
+
+            }
+        }
+        
+        return
+    }
+
+    if (this.state == this.RECEIVE_INTERCONNECT)        {
+        this.master_interface.ChannelA.valid = '0'
+        this.master_interface.ChannelD.ready = '1'
+        if (InterConnect2CPU.valid == '1') {
+
+            this.master_interface.receive (InterConnect2CPU)
+
+            if (InterConnect2CPU.opcode == '000') {
+
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is receiving messeage AccessAck from TL-UH.'
+                )
+                
+            }
+
+            if (InterConnect2CPU.opcode == '001') {
+                
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString() 
+                    +': The PROCESSOR is receiving messeage AccessAckData from TL-UH.'
+                )
+
+                this.Datapath ('', this.master_interface.ChannelD.data)
+                
+
+            }
+
+            this.stepDone = 1
+            this.master_interface.receive (InterConnect2CPU)
+            this.state =  this.GET_INSTRUCTION
+        }
+        return
+    }
+      
+    if (this.state == this.REPLACE_TLBE_INS)           {
+        this.master_interface.ChannelA.valid = '0'
+        this.master_interface.ChannelD.ready = '1'
+
+        if (InterConnect2CPU.valid == '1') {
+
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The PROCESSOR is receiving messeage AccessAckData from TL-UH.'
+            )
+
+            const VPN       = this.SendAddress.slice(0, 20)  
+            this.master_interface.receive (InterConnect2CPU)
+            const frame     = this.master_interface.ChannelD.data
+
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The TLB is replacing an entry.'
+            )
+            // VA, PA, excute, read, write, valid, timetime 
+            console.log ('frame', frame)
+            this.MMU.pageReplace ([
+                parseInt(VPN , 2) & 0x1f
+                , (dec (frame) & 0XFFF0) * 4
+                , (dec (frame) & 0X0008) /8
+                , (dec (frame) & 0X0004) /4
+                , (dec (frame) & 0X0002) /2
+                , (dec (frame) & 0X0001) 
+                , cycle.cycle])
+
+            this.master_interface.ChannelA.valid = '0'
+            this.state = this.GET_INSTRUCTION
+        }
+        return
+    }
+
+    if (this.state == this.REPLACE_TLBE_DATA)          {
+        this.master_interface.ChannelA.valid = '0'
+        this.master_interface.ChannelD.ready = '1'
+
+        if (InterConnect2CPU.valid == '1') {
+
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The PROCESSOR is receiving messeage AccessAckData from TL-UH.'
+            )
+
+            const VPN       = this.SendAddress.slice(0, 20)  
+            this.master_interface.receive (InterConnect2CPU)
+            const frame     = this.master_interface.ChannelD.data
+
+            this.println (
+                this.active_println
+                ,'Cycle '
+                + cycle.toString() 
+                +': The TLB is replacing an entry.'
+            )
+            // VA, PA, excute, read, write, valid, timetime 
+            this.MMU.pageReplace ([
+                parseInt(VPN , 2) & 0x1f
+                , (dec (frame) & 0XFFF0) * 4
+                , (dec (frame) & 0X0008) /8
+                , (dec (frame) & 0X0004) /4
+                , (dec (frame) & 0X0002) /2
+                , (dec (frame) & 0X0001) 
+                , cycle.cycle])
+
+            if (this.MMU.MMU_message == ' ERROR: Page fault!!!!') {
+                this.println (
+                    this.active_println
+                    ,'Cycle '
+                    + cycle.toString()+':'
+                    + this.MMU.MMU_message
+                )
+                
+                this.state = this.OUT_WORK
+                this.master_interface.ChannelA.valid = '0'
+            } else {
+                this.master_interface.ChannelA.valid = '0'
+                this.state = this.ACESS_INTERCONNECT
+            }
+            
+        }
+        return
+    }
+    }
 }
+

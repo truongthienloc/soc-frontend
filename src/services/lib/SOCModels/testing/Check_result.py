@@ -22,11 +22,13 @@ def compare(f1, f2) :
             sys.exit()
     print('=====>TWO FILES ARE INDENTICAL<=====\n')
 
-for i in range (0, 200) :
-    if i == 124 or i == 139 or i ==152 or i== 154 or i==178 or i ==182 :
-        continue
-    f1 = open(r'C:\Users\LENOVO\Desktop\NCKH23\NCKH3rd\soc-frontend\src\services\lib\SOCModels\testing\output\out_'+ str(i) +'.txt', 'r').readlines()
-    f2 = open(r'C:\Users\LENOVO\Desktop\NCKH23\NCKH3rd\soc-frontend\src\services\lib\SOCModels\testing\register_result\registers ('+ str(i) +').txt', 'r', encoding='utf-8-sig').readlines()
+for i in range (0, 201) :
+    # if i == 124 or i == 139 or i ==152 or i== 154 or i==178 or i ==182 :
+    #     continue
+    f1 = open(r'C:\Users\LENOVO\Desktop\KLTN\src\soc-frontend\src\services\lib\SOCModels\testing\output\expect['+str(i)+'].txt', 'r').readlines()
+    f2 = open(r'C:\Users\LENOVO\Desktop\KLTN\src\soc-frontend\src\services\lib\SOCModels\testing\register_result\registers ('+ str(i) +').txt', 'r', encoding='utf-8-sig').readlines()
     compare(f1, f2)
+
+
 #'C:\Users\LENOVO\Desktop\NCKH23\NCKH3rd\soc-frontend\src\services\lib\SOCModels\testing\output\out_'+str(i)+'.txt'
 # C:\Users\LENOVO\Desktop\NCKH23\NCKH3rd\soc-frontend\src\services\lib\SOCModels\testing\register_result\registers ('+str(i)+').txt

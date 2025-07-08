@@ -106,9 +106,10 @@ export default class DMA {
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': The DMA is receiving messeage AccessAckData from TL-UL. ('
+                        +': The DMA is receiving messeage AccessAckData from TL-UH ('
+                        + 'data = '
                         + BinToHex (this.master_interface.ChannelD.data) 
-                        +')'
+                        +').'
                     )
 
                     this.master_interface.ChannelA.valid = '0'
@@ -170,7 +171,7 @@ export default class DMA {
                     this.active_println
                     ,'Cycle '
                     + cycle.toString() 
-                    +': The DMA is sending messeage GET to TL-UL.'
+                    +': The DMA is sending messeage GET to TL-UH.'
                 )
     
                 this.master_interface.send(

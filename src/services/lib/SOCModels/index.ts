@@ -170,42 +170,14 @@ const code = `
 #The main purpose is to check the operation of memory instructions
 
 Main:
-		addi    x17 , x0 , 4 
-		add     x10 , x0 , x0 
-		add     x31 , x0 , x0 
-		addi    x27 , x0 , 16 
-		addi    x30 , x0 , 2 
-InArr:
-		addi    x1 , x0 , 48 
-		addi    x22 , x0 , 8 
-		addi    x20 , x0 , 44 
-		addi    x23 , x0 , 72 
-		sw      x1 , 48 (x27) 
-		sw      x22 , 52 (x27) 
-		sw      x20 , 56 (x27) 
-		sw      x23 , 60 (x27) 
-Loop:
-		sll     x29 , x31 , x30 
-		add     x15 , x29 , x27 
-		lw     x24 , 48 (x15) 
-		add     x10 , x10 , x24 
-		addi    x31 , x31 , 1 
-		beq     x31 , x17 , Result 
-		jal     x0 , Loop 
-Result:
-		addi    x4 , x0 , 172 
-		bne     x4 , x10 , Fail 
-Pass: 
-		addi    x1 , x0 , 84 
-		jal     x0 , End 
-Fail: 
-		addi    x1 , x0 , 70 
-End: 
+		lui x7, 5
 `
-// SOC.assemble(
-//             code                                                                   
-//             ,[]                                                                                                         
-// )
+SOC.assemble(
+            code                                                                   
+            ,[]                                                                                                         
+)
+
+// SOC.RunAll()
 // // // SOC.StepIns()
 // // // SOC.StepIns()
 // // // SOC.StepIns()
@@ -218,23 +190,23 @@ End:
 // let data = ''.padStart(32, '1')
 // SOC.Led_matrix.writeData (adrr, data)
 // console.log (SOC.Led_matrix)
-import * as fs from 'fs';
-function test_Processor (SOC: Soc, i: number) {
-    console.log ('TEST ',i,': ')
-    const filePath = 'C:/Users/LENOVO/Desktop/KLTN/src/soc-frontend/src/services/lib/SOCModels/testing/input/out_'+i.toString()+'.S';
-    const code: string = fs.readFileSync(filePath, 'utf8');
-    // console.log(code)
+// import * as fs from 'fs';
+// function test_Processor (SOC: Soc, i: number) {
+//     console.log ('TEST ',i,': ')
+//     const filePath = 'C:/Users/LENOVO/Desktop/KLTN/src/soc-frontend/src/services/lib/SOCModels/testing/input/out_'+i.toString()+'.S';
+//     const code: string = fs.readFileSync(filePath, 'utf8');
+//     // console.log(code)
 
-    SOC.assemble(
-            code                                                                   
-            ,[]                                                                                                         
-    )
-    SOC.Processor.pc = 1000
-    SOC.RunAlltest(i)
-    // fs.writeFileSync('C:/Users/LENOVO/Desktop/KLTN/src/soc-frontend/src/services/lib/SOCModels/testing/output/register_expect.txt', output, 'utf8');
-}
-for (let i =0; i< 201; i++)
-    test_Processor (SOC, i)
+//     SOC.assemble(
+//             code                                                                   
+//             ,[]                                                                                                         
+//     )
+//     SOC.Processor.pc = 1000
+//     SOC.RunAlltest(i)
+//     // fs.writeFileSync('C:/Users/LENOVO/Desktop/KLTN/src/soc-frontend/src/services/lib/SOCModels/testing/output/register_expect.txt', output, 'utf8');
+// }
+// for (let i =0; i< 201; i++)
+//     test_Processor (SOC, i)
 function test_DMA0 (SOC: Soc) {
     SOC.DMA.sourceRegister             = '00000000000000000000000000100000'
     SOC.DMA.destRegister               = '00000000000000000000000010000000'
@@ -1658,6 +1630,7 @@ function Test_TLUH4 (SOC: Soc) {
 // ******Kiểm tra TL-UH******
 // Test_TLUH0(SOC)
 // Test_TLUH1(SOC)
+Test_TLUH2(SOC)
 // Test_TLUH3(SOC)
 // Test_TLUH4(SOC)
 

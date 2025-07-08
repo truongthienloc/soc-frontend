@@ -257,10 +257,10 @@ export default class TL_UL {
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': The TL-UL is sending data from BRIDGE to LED-MATRIX.'
+                        +': The TL-UL is sending data from BRIDGE to LED-MATRIX '
                         +'(address = '
                         + BinToHex(dataFromBridge.address)
-                        +')'
+                        +').'
                     )
                     // console.log (Led_ready)
                     if (this.port_out[2] instanceof FIFO_ChannelA) this.port_out[2].enqueue({...this.port_in[0].dequeue()})
@@ -278,10 +278,10 @@ export default class TL_UL {
                         this.active_println
                         ,'Cycle '
                         + cycle.toString() 
-                        +': The TL-UL is sending data from BRIDGE to DMA.'
+                        +': The TL-UL is sending data from BRIDGE to DMA '
                         +'(address = '
                         + BinToHex(dataFromBridge.address)
-                        +')'
+                        +').'
                     )
 
                     if (this.port_out[1] instanceof FIFO_ChannelA) this.port_out[1].enqueue({...this.port_in[0].dequeue()})

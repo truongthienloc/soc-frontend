@@ -107,11 +107,11 @@ export default class Memory {
                     this.println (this.active_println,
                         'Cycle '             +
                         cycle.toString()     +
-                        ': The MEMORY is sending an AccessAckData message to the TL-UH.(data = '
+                        ': The MEMORY is sending an AccessAckData message to the TL-UH (data = '
                         + BinToHex(this.slave_interface.ChannelD.data)
                         + ', address = '
                         + BinToHex((parseInt(this.slave_interface.ChannelA.address, 2) + 0 + this.count_beats * 4).toString(2))
-                        +')'
+                        +').'
                     )
 
                     if (this.slave_interface.ChannelA.opcode == '011') {
@@ -302,11 +302,11 @@ export default class Memory {
                     this.println (this.active_println,
                         'Cycle '             +
                         cycle.toString()     +
-                        ': The MEMORY is sending an AccessAckData message to the TL-UH.(data = '
+                        ': The MEMORY is sending an AccessAckData message to the TL-UH (data = '
                         + BinToHex(this.slave_interface.ChannelD.data)
                         + ', address = '
                         + BinToHex((parseInt(this.slave_interface.ChannelA.address, 2) + 0 + this.count_beats * 4).toString(2))
-                        +')'
+                        +').'
                     )
                     this.count_beats ++ 
                     if (this.count_beats >= 4) {
@@ -327,11 +327,11 @@ export default class Memory {
                 this.println (this.active_println,
                     'Cycle '             +
                     cycle.toString()     +
-                    ': The MEMORY is receiving a PUT message from the TL-UH.(data = '
+                    ': The MEMORY is receiving a PUT message from the TL-UH (data = '
                     + BinToHex(this.slave_interface.ChannelA.data)
                     + ', address = '
                     + BinToHex(this.slave_interface.ChannelA.address)
-                    +')'
+                    +').'
                 )
                 
                 if (this.slave_interface.ChannelA.size == '10') {
@@ -427,7 +427,8 @@ export default class Memory {
     }
 
     public SetInstructionMemory(Instruction_memory: string[] = []) {
-        let count =  1000
+        // let count =  1000
+        let count =  0
         this.Ins_pointer = 0
 
         for (const binString of Instruction_memory) {
@@ -439,8 +440,8 @@ export default class Memory {
                 }
             }
         }
-
-        this.Ins_pointer = (Object.values(Instruction_memory).length - 1) * 4 + 1000
+        this.Ins_pointer = (Object.values(Instruction_memory).length - 1) * 4
+        // this.Ins_pointer = (Object.values(Instruction_memory).length - 1) * 4 + 1000
     }
 
     public SetDataMemory (Data_memory: string[][] ){

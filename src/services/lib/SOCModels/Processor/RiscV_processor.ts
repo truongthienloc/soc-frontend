@@ -88,7 +88,7 @@ export default class RiscVProcessor {
       , ready             : boolean
   ) 
     {
-        this.pc = 1000
+        // this.pc = 1000
     if (this.state == this.GET_INSTRUCTION)             {
 
         //########################################################################################
@@ -217,7 +217,8 @@ export default class RiscVProcessor {
                 this.active_println
                 ,'Cycle '
                 + cycle.toString() 
-                +': The PROCESSOR is receiving messeage AccessAckData from TL-UH. ('
+                +': The PROCESSOR is receiving messeage AccessAckData from TL-UH '
+                +'(data = '
                 +BinToHex (this.master_interface.ChannelD.data)
                 +').'
             )

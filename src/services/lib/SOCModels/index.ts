@@ -1630,13 +1630,13 @@ function Test_TLUH4 (SOC: Soc) {
 // ******Kiểm tra TL-UH******
 // Test_TLUH0(SOC)
 // Test_TLUH1(SOC)
-Test_TLUH2(SOC)
+// Test_TLUH2(SOC)
 // Test_TLUH3(SOC)
 // Test_TLUH4(SOC)
 
 // ******Kiểm tra TL_UL******
 // Test_TLUL0(SOC)
-// Test_TLUL1(SOC)
+Test_TLUL1(SOC)
 
 // ******Kiểm tra Memory******
 // Test_Mem0 (SOC)

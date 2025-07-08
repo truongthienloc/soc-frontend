@@ -244,10 +244,10 @@ export default class TL_UL {
                 if (
                     (
                     (
-                        (parseInt('0'+dataFromBridge.address, 2)    >= 0x0020014) 
-                    &&  (parseInt('0'+dataFromBridge.address, 2)    <= 0x0020014 +  288 * 4) 
+                        (parseInt('0'+dataFromBridge.address, 2)    >= 0x0020018) 
+                    &&  (parseInt('0'+dataFromBridge.address, 2)    <= 0x0020018 +  288 * 4) 
                     )
-                    ||  (parseInt('0'+dataFromBridge.address, 2)    == 0x0020010    )
+                    ||  (parseInt('0'+dataFromBridge.address, 2)    == 0x0020014    )
                     )
                 &&  !this.port_in[0].isEmpty () && Led_ready
 
@@ -271,6 +271,7 @@ export default class TL_UL {
                 ||  (parseInt('0'+dataFromBridge.address, 2) == 0x0020004)
                 ||  (parseInt('0'+dataFromBridge.address, 2) == 0x0020008)
                 ||  (parseInt('0'+dataFromBridge.address, 2) == 0x002000C)
+                ||  (parseInt('0'+dataFromBridge.address, 2) == 0x0020010)
                 &&  !this.port_in[0].isEmpty()
                 ) {
 

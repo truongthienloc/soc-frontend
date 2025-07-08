@@ -96,7 +96,7 @@ export default class LEDMatrix {
                     )
 
                     this.slave_interface.receive (data_from_sub_interconnect)
-                    if (parseInt (this.slave_interface.ChannelA.address, 2) == 0x20010) {
+                    if (parseInt (this.slave_interface.ChannelA.address, 2) == 0x20014) {
                         this.controlRegister = this.slave_interface.ChannelA.data
                     } else {
                         this.writeData (this.slave_interface.ChannelA.address, this.slave_interface.ChannelA.data)
@@ -177,7 +177,7 @@ export default class LEDMatrix {
            
         }
 
-        let index = (addr -  0x20014) / 4 
+        let index = (addr -  0x20018) / 4 
         if (index >= 384) {
             console.log (addr)
             throw new Error("Address out of range")

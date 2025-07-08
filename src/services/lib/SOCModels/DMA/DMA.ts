@@ -318,6 +318,8 @@ export default class DMA {
         case 0x2000C:
         this.controlRegister = writeData;
         break;
+        case 0x20010:
+        this.statusRegister = writeData
         default:
         console.log(
             `Invalid writeAddress: 0x${writeAddrNum.toString(16).toUpperCase()}`
@@ -341,6 +343,8 @@ export default class DMA {
         case 0x2000C:
         result = this.controlRegister;
         break;
+        case 0x20010:
+        result = this.statusRegister;
         default:
         console.log(
             `Invalid readAddress: 0x${readAddrNum.toString(16).toUpperCase()}`

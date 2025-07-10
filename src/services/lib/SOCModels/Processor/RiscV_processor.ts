@@ -476,7 +476,7 @@ export default class RiscVProcessor {
                 this.println (
                     this.active_println
                     ,'Cycle '
-                    + cycle.toString()
+                    + cycle.toString() + ': '
                     + this.MMU.MMU_message
                 )
 
@@ -1472,6 +1472,12 @@ export default class RiscVProcessor {
             this.lineColor['auiOrLui']  = this.auiOrLui     .toString()     
             this.lineColor['wb'      ]  = this.wb           .toString()           
             this.lineColor['imm'     ]  = this.imm          .toString()     
+
+            console.log (parseInt (address, 2))
+            // if (parseInt (address, 2)>0x20498) {
+            //     this.state = this.OUT_WORK
+            //     this.println (this.active_println, 'ERROR: ADDRRESS IS OUT OF RANGE')
+            // }
             return [message, data, address, writeRegister, mask]
         } else {
             if (readData != '') {

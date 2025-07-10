@@ -9,6 +9,7 @@ export async function StepIns(this: Soc) {
     while (
         (this.Processor.stepDone == 2 ||  this.Processor.stepDone == 0)
         && (this.Processor.pc <= this.Processor.InsLength)
+        && this.Processor.state != this.Processor.OUT_WORK
     ) {
             await this.Step()
     }

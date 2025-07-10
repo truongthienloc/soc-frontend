@@ -166,18 +166,40 @@ SOC.Memory.active       = true
 const code = `
 .text
 
-#The program to calculate the sum of the array
-#The main purpose is to check the operation of memory instructions
+.text
 
-Main:
-		lui x7, 5
+lui  t5, 0x20 			# Create base address will be written.
+addi t5, t5, 0x14
+addi t2, t5, 32 		# The number of byte will be written. 
+addi t0, t0, 0xfff 		# The value will be written.
+sw   t0, 0(t5) 			# Write the value 0xffff_ffff t0 memory. 
+
+write_led:
+sw 	 t0, 4(t5) 			# Write the value 0xffff_ffff t0 memory. 
+addi t5, t5, 4 			# Move t0 next the next address
+bne  t5, t2, write_led 	# Stop after writing 32 bytes.
+
+addi t1, zero, 0x2
+slli t1, t1, 16   		# Create base address of memory-mapped registers
+
+dma:
+
+addi t6, t1, 0x18 		# Create DMA destination register's value.
+addi t5, t6, 40      	# Create DMA source register's value.
+addi t0, zero, 40 	    # Create DMA length register's value.
+
+sw t6, 0(t1)       		# Store t0 DMA source register's value.
+sw t5, 4(t1)       		# Store t0 DMA destination register's value.
+sw t0, 8(t1)      		# Store t0 DMA length register value.
+sw t0, 12(t1)      		# Store t0 DMA control register (non-zero = active).
+
 `
 SOC.assemble(
             code                                                                   
             ,[]                                                                                                         
 )
 
-// SOC.RunAll()
+SOC.RunAll()
 // // // SOC.StepIns()
 // // // SOC.StepIns()
 // // // SOC.StepIns()
@@ -1636,7 +1658,7 @@ function Test_TLUH4 (SOC: Soc) {
 
 // ******Kiểm tra TL_UL******
 // Test_TLUL0(SOC)
-Test_TLUL1(SOC)
+// Test_TLUL1(SOC)
 
 // ******Kiểm tra Memory******
 // Test_Mem0 (SOC)

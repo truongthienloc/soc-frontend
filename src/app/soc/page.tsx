@@ -352,10 +352,8 @@ export default function SocPage({}: Props) {
 
       updateCoreDataAfterRun()
     }
-    console.log ('socModelRef.current.Processor.pc', socModelRef.current.Processor.pc)
     // Start Stepping
     if (pc === undefined) {
-      console.log ('1')
       setIsStepping(true)
       setStepCode(
         socModelRef.current.Assembly_code.map((value: string) => {
@@ -364,13 +362,13 @@ export default function SocPage({}: Props) {
         }),
       )
       setShowSimulatorType('CODE_EDITOR')
+      setTabIndex(0)
       step()
 
       return
     }
   // End Stepping
     if (socModelRef.current.Processor.pc == stepCode.length * 4) {
-            console.log ('2')
       updateCoreDataAfterRun()
 
       setAllowRun(false)
@@ -382,7 +380,6 @@ export default function SocPage({}: Props) {
 
     // End Stepping
     if (socModelRef.current.Processor.pc > stepCode.length * 4) {
-            console.log ('3')
       // setAllowRun(false)
       // setPc(undefined)
       // setPc(socModelRef.current.Processor.pc)
@@ -433,6 +430,7 @@ export default function SocPage({}: Props) {
         }),
       )
       setShowSimulatorType('CODE_EDITOR')
+      setTabIndex(0)
       step()
       return
     }

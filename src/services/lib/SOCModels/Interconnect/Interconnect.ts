@@ -586,7 +586,7 @@ export default class TL_UH {
             && !this.port_in[1].isEmpty()
         ) {
             const dataFromDMA       = {...this.port_in[1].peek()}
-            if (parseInt('0'+dataFromDMA.address, 2) < 0x20014) { //2 001A parseInt('0'+dataFromDMA.address, 2)
+            if (parseInt('0'+dataFromDMA.address, 2) < 0x20000) { //2 001A parseInt('0'+dataFromDMA.address, 2)
                 if (Memory_ready) {
                     this.println (
                         this.active_println
@@ -603,7 +603,7 @@ export default class TL_UH {
                     this.Timing[1].dequeue()
                 }
             } else {
-                if (Bridge_ready) {
+                if (Bridge_ready && parseInt('0'+dataFromDMA.address, 2) > 0x20010) {
                     this.println (
                         this.active_println
                         ,'Cycle '

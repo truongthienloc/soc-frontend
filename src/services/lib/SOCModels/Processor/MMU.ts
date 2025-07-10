@@ -198,9 +198,9 @@ export default class MMU {
             this.physical_address = ((this.satp & 0xFFFF) + vpn_dec*4).toString(2).padStart(17, '0')
         }
 
-        console.log ('MMU status:'+this.MMU_message)
-        console.log ('Logical address:', BinToHex(logic_address)+'.')
-        console.log ('Physical address:', BinToHex(this.physical_address.padStart(32, '0'))+'.')
+        // console.log ('MMU status:'+this.MMU_message)
+        // console.log ('Logical address:', BinToHex(logic_address)+'.')
+        // console.log ('Physical address:', BinToHex(this.physical_address.padStart(32, '0'))+'.')
 
     }
 }

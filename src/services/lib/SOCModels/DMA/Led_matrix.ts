@@ -23,8 +23,8 @@ export default class LEDMatrix {
     AckData_state   = 2
 
     constructor() {
-        this.controlRegister                = '00000000000000000000000000000001'
-        this.dataRegisters                  = Array(288).fill('00000000000000000000000000000000')
+        this.controlRegister                = '00000000000000000000000000000000'
+        this.dataRegisters                  = Array(288).fill(''.padStart(32, '0') )
         this.slave_interface                = new slave_interface('slave_interface', true)
         this.slave_interface.ChannelD.sink  = '1'
         this.active_println                 = true
@@ -32,7 +32,7 @@ export default class LEDMatrix {
         this.state                          = 0
 
 
-        // this.led                        = new LedMatrix ('.led-matrix')
+        this.led                        = new LedMatrix ('.led-matrix')
 
     }
 
@@ -48,7 +48,7 @@ export default class LEDMatrix {
         this.state           = 0
         this.ready                      = false
         this.active_println             = true
-        // this.led                        = new LedMatrix ('.led-matrix')
+        this.led                        = new LedMatrix ('.led-matrix')
         for (let i = 0 ; i< 96 ; i++) {
             for (let j =0; j< 96; j++)
             {
@@ -92,7 +92,7 @@ export default class LEDMatrix {
                     this.println (this.active_println,
                     'Cycle '             +
                     cycle.toString()     +
-                    ': The LED-MATRIX is receiving a PUT message from the INTERCONNECT.'
+                    ': The LED-MATRIX is receiving a PUT message from the TL-UH.'
                     )
 
                     this.slave_interface.receive (data_from_sub_interconnect)
@@ -111,7 +111,7 @@ export default class LEDMatrix {
                     this.println (this.active_println,
                     'Cycle '             +
                     cycle.toString()     +
-                    ': The LED-MATRIX is receiving a GET message from the INTERCONNECT.'
+                    ': The LED-MATRIX is receiving a GET message from the TL-UH.'
                     )
 
                     this.slave_interface.receive (data_from_sub_interconnect)
@@ -130,7 +130,7 @@ export default class LEDMatrix {
                     this.active_println
                     ,'Cycle ' 
                     + cycle.toString() 
-                    + ': The LED-MATRIX is sending an AccessAck message to the SUB-INTERCONNECT.'
+                    + ': The LED-MATRIX is sending an AccessAck message to the TL-UL.'
                 )
                 this.slave_interface.send ('AccessAck', this.slave_interface.ChannelA.source, '')
                 this.slave_interface.ChannelD.valid = '1'
@@ -145,13 +145,13 @@ export default class LEDMatrix {
         if (this.state == this.AckData_state) {
             this.ready = false
             if (ready) {
-                let index = (parseInt (this.slave_interface.ChannelA.address, 2) - 0x20014 ) / 4
+                let index = (parseInt (this.slave_interface.ChannelA.address, 2) - 0x20018 ) / 4
                 let data  = this.dataRegisters[index]
                 this.println   (
                     this.active_println
-                    ,'Cycle ' 
-                    + cycle.toString() 
-                    + ': The LED-MATRIX is sending an AccessAckData message to the SUB-INTERCONNECT.'
+                    ,'Cycle '
+                    + cycle.toString()
+                    + ': The LED-MATRIX is sending an AccessAckData message to the TL_UL.'
                 )
 
                 this.slave_interface.send ('AccessAckData', this.slave_interface.ChannelA.source, data)
@@ -202,16 +202,16 @@ export default class LEDMatrix {
 
 }
 
-class LED_controller {
+// class LED_controller {
     
-    state           : number
-    REC_state       = 0
-    Ack_state       = 1
-    AckData_state   = 2
+//     state           : number
+//     REC_state       = 0
+//     Ack_state       = 1
+//     AckData_state   = 2
 
-    constructor () {
-        this.state = 0
-    }
-}
+//     constructor () {
+//         this.state = 0
+//     }
+// }
 // STATE 0 : CONFIG LIKE DMA MUST HAVE ALL CONTROL REGISTER.
 // STATE 1 : GET -> DISPLAY

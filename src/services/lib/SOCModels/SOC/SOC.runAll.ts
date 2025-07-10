@@ -14,8 +14,8 @@ export async function RunAll(this: Soc) {
         if (break_point != undefined) this.Processor.InsLength = break_point*4
         else this.Processor.InsLength = 0
         while (
-            this.Processor.pc <
-            this.Processor.InsLength || this.Processor.state != 0 
+            (this.Processor.pc <
+            this.Memory.Ins_pointer || this.Processor.state != 0 ) && this.Processor.state != this.Processor.OUT_WORK
             || 
             !(
                 this.DMA.controlRegister == '00000000000000000000000000000000' || 

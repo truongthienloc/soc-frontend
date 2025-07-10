@@ -283,9 +283,9 @@ export default class DMA {
     
 
     RegisterFiles(
-    writeAddress: string,
-    readAddress: string,
-    writeData: string
+        writeAddress    : string,
+        readAddress     : string,
+        writeData       : string
     ): string {
     // 1. Validate độ dài đầu vào
     if (
@@ -296,59 +296,63 @@ export default class DMA {
         console.log(
         `Invalid length – writeAddress=${writeAddress.length}, ` +
         `readAddress=${readAddress.length}, writeData=${writeData.length}`
-        );
-        return '0'.repeat(32);
+        )
+        return '0'.repeat(32)
     }
 
     // 2. Parse binary string thành số
-    const writeAddrNum = parseInt(writeAddress, 2);
-    const readAddrNum  = parseInt(readAddress,  2);
+    const writeAddrNum = parseInt(writeAddress, 2)
+    const readAddrNum  = parseInt(readAddress,  2)
 
     // 3. Phần WRITE: gán dữ liệu vào register tương ứng
     switch (writeAddrNum) {
         case 0x20000:
-        this.sourceRegister = writeData;
-        break;
+            this.sourceRegister = writeData
+            break
         case 0x20004:
-        this.destRegister   = writeData;
-        break;
+            this.destRegister   = writeData
+            break
         case 0x20008:
-        this.lengthRegister = writeData;
-        break;
+            this.lengthRegister = writeData
+            break
         case 0x2000C:
-        this.controlRegister = writeData;
-        break;
+            this.controlRegister = writeData
+            break
         case 0x20010:
-        this.statusRegister = writeData
+            this.statusRegister = writeData
+            this.println (
+                this.active_println,
+                "DMA's Status register is read-only"
+            )
+            break
         default:
-        console.log(
-            `Invalid writeAddress: 0x${writeAddrNum.toString(16).toUpperCase()}`
-        );
+        // console.log(
+        //     `Invalid writeAddress: 0x${writeAddrNum.toString(16).toUpperCase()}`
+        // );
         // Không return ngay, vẫn phải xử lý phần đọc
     }
 
     // 4. Phần READ: trả về dữ liệu từ register tương ứng
-    let result = '0'.repeat(32);
-    console.log ()
+    let result = '0'.repeat(32)
     switch (readAddrNum) {
         case 0x20000:
-        result = this.sourceRegister;
-        break;
+            result = this.sourceRegister
+            break
         case 0x20004:
-        result = this.destRegister;
-        break;
+            result = this.destRegister
+            break
         case 0x20008:
-        result = this.lengthRegister;
-        break;
+            result = this.lengthRegister
+            break
         case 0x2000C:
-        result = this.controlRegister;
-        break;
+            result = this.controlRegister
+            break
         case 0x20010:
-        result = this.statusRegister;
+        result = this.statusRegister
         default:
-        console.log(
-            `Invalid readAddress: 0x${readAddrNum.toString(16).toUpperCase()}`
-        );
+        // console.log(
+        //     `Invalid readAddress: 0x${readAddrNum.toString(16).toUpperCase()}`
+        // );
     }
 
     return result;
@@ -356,36 +360,36 @@ export default class DMA {
 
 
     constructor() {
-        this.sourceRegister             = '00000000000000000000000000000000'
-        this.destRegister               = '00000000000000000000000000000000'
-        this.lengthRegister             = '00000000000000000000000000000000'
-        this.controlRegister            = '00000000000000000000000000000000'
-        this.statusRegister             = '00000000000000000000000000000000'
-        this.state                      = 0
-        this.master_interface                 = new master_interface('master_interface', true, '01')
-        this.master_interface.ChannelA.size   = '10'
-        this.slave_interface                  = new slave_interface ('slave_interface', true)
-        this.internal_FIFO                    = new FIFO_ChannelD ()
-        this.active_println             = true
+        this.sourceRegister                     = '00000000000000000000000000000000'
+        this.destRegister                       = '00000000000000000000000000000000'
+        this.lengthRegister                     = '00000000000000000000000000000000'
+        this.controlRegister                    = '00000000000000000000000000000000'
+        this.statusRegister                     = '00000000000000000000000000000000'
+        this.state                              = 0
+        this.master_interface                   = new master_interface('master_interface', true, '01')
+        this.master_interface.ChannelA.size     = '10'
+        this.slave_interface                    = new slave_interface ('slave_interface', true)
+        this.internal_FIFO                      = new FIFO_ChannelD ()
+        this.active_println                     = true
 
     }
     
     public reset () {
-        this.sourceRegister             = '00000000000000000000000000000000'
-        this.destRegister               = '00000000000000000000000000000000'
-        this.lengthRegister             = '00000000000000000000000000000000'
-        this.controlRegister            = '00000000000000000000000000000000'
-        this.statusRegister             = '00000000000000000000000000000000'
-        this.state                      = 0
-        this.master_interface                 = new master_interface('master_interface', true, '01')
-        this.master_interface.ChannelA.size   = '10'
-        this.slave_interface                  = new slave_interface ('slave_interface', true)
-        this.internal_FIFO                    = new FIFO_ChannelD ()
-        this.active_println             = true
-        this.count_burst             = 0
-        this.count_beats             = 0 
-        this.count_sentByte         = 0
-        this.count_recByte          = 0
+        this.sourceRegister                     = '00000000000000000000000000000000'
+        this.destRegister                       = '00000000000000000000000000000000'
+        this.lengthRegister                     = '00000000000000000000000000000000'
+        this.controlRegister                    = '00000000000000000000000000000000'
+        this.statusRegister                     = '00000000000000000000000000000000'
+        this.state                              = 0
+        this.master_interface                   = new master_interface('master_interface', true, '01')
+        this.master_interface.ChannelA.size     = '10'
+        this.slave_interface                    = new slave_interface ('slave_interface', true)
+        this.internal_FIFO                      = new FIFO_ChannelD ()
+        this.active_println                     = true
+        this.count_burst                        = 0
+        this.count_beats                        = 0 
+        this.count_sentByte                     = 0
+        this.count_recByte                      = 0
     }
     
     public println(active: boolean, ...args: string[]) {

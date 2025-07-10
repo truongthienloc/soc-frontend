@@ -14,7 +14,7 @@ export default function DisplayStepCode({
   breakpoints = [],
 }: DisplayStepCodeProps) {
   // console.log('length: ', code.length);
-  console.log('pc: ', pc)
+  // console.log('pc: ', pc)
 
   return (
     <div className="flex max-h-[450px] min-w-[250px] flex-1 flex-col gap-2 overflow-auto px-4 py-2 font-mono text-base">

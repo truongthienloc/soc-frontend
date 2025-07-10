@@ -135,7 +135,7 @@ export default class Soc {
 
 
     public async Step() {
-
+        if (this.Processor.state == this.Processor.OUT_WORK) return
         if (this.cycle.cycle % 1 == 0) {
             await this.Processor.Controller(
                 this.cycle

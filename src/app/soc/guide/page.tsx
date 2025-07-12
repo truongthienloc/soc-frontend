@@ -421,6 +421,11 @@ export default function GuidePage({}: Props) {
            which indicates that the PPN field holds the root of the page table in memory.
             <img src="/images/guide/MMU/stap.png" alt="MMU" className="mx-auto block" />
            The MMU contains 8 TLB entries, each of which includes the following components: 
+
+            <img src="/images/guide/MMU/TLB.png" alt="MMU" className="mx-auto block" />
+          </p>
+          
+          <ul className="list-inside list-disc space-y-1">
             <li>
               <strong>VPN</strong>: represents the data field corresponding to the virtual page address.
             </li>
@@ -442,10 +447,6 @@ export default function GuidePage({}: Props) {
             <li>
               <strong>T</strong>:  Records the most recent cycle in which the corresponding page table entry was accessed.
             </li>
-
-            <img src="/images/guide/MMU/TLB.png" alt="MMU" className="mx-auto block" />
-          </p>
-          <ul className="list-inside list-disc space-y-1">
           </ul>
         </TabPanel>
       </TabContext>

@@ -177,6 +177,7 @@ export default class Disassembly {
 
     public setBinaryCode(binaryCode: string) {
         this.binaryCode = binaryCode;
+        this.instructionResult= {};
         return this
     }
 

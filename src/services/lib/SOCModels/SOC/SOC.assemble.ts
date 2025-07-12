@@ -33,6 +33,7 @@ export function assemble(
     this.TL_UL.reset()
     this.Memory.SetInstructionMemory(this.Assembler.binary_code)
     this.Memory.SetDataMemory(this.Assembler.data)
+    this.Processor.InsLength = this.Memory.Ins_pointer
     this.Processor.MMU.Set(
         [
              [0, 0, 0, 0, 0, 0, 0]

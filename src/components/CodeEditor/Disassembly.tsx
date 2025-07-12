@@ -5,6 +5,7 @@ import { ChangeEvent, useState } from 'react'
 import { cn } from '~/helpers/cn'
 import Soc from '~/services/lib/SOCModels/SOC/SoC'
 import CodeEditor from './CodeEditor'
+import { CastConnectedSharp } from '@mui/icons-material'
 
 const roboto = Roboto({ weight: '400', subsets: ['latin'] })
 
@@ -15,9 +16,12 @@ type Props = {
 function DisassemblyPage({ socModel }: Props) {
   const [code, setCode] = useState('')
   const [result, setResult] = useState('')
+
   const handleChangeCode = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const inputValue = e.target.value
-
+    
+    console.log ('e', e)
+    setResult ('')
     const formatText = (inputValue: string) => {
       // Insert a line break after every 32 characters
       const filteredText = inputValue.replace(/[^01\n]/g, '')
@@ -28,16 +32,23 @@ function DisassemblyPage({ socModel }: Props) {
     const formattedText = formatText(inputValue)
 
     const preFormattedText = formattedText.split(/\s+/).join('\n')
-
+    console.log ('preFormattedText', preFormattedText)
     setCode(preFormattedText)
     // setCode(inputValue)
   }
 
   const handleDisassembleClick = async () => {
     if (!socModel) return
+    setResult ('')
     try {
-      const data = socModel?.Disassembly.setBinaryCode(code).process()
+      let data: string[]
+      data = socModel?.Disassembly.setBinaryCode(code).process()
+      console.log ('data', data)
+      // [result, setResult] = useState(data.map((value) => value.split('\t')[1]).join('\n'))
+      
       setResult(data.map((value) => value.split('\t')[1]).join('\n'))
+      setResult(data.map((value) => value.split('\t')[1]).join('\n'))
+      console.log ('data 2', data.map((value) => value.split('\t')[1]).join('\n'))
     } catch (error) {
       // toast.error('Chuyển đổi thất bại')
     }
@@ -76,8 +87,9 @@ function DisassemblyPage({ socModel }: Props) {
               Copy
             </Button>
           </div>
+          
           <div className="flex h-full flex-col border border-black">
-            <CodeEditor value={result} disable={true} />
+            <CodeEditor value={result} disable={true} readOnly = {true}/>
           </div>
         </div>
       </div>

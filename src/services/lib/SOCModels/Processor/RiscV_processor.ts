@@ -99,6 +99,7 @@ export default class RiscVProcessor {
         //#                                                                                      #
         //########################################################################################
         this.master_interface.ChannelD.ready = '0'
+        console.log (this.pc, this.InsLength)
         if (this.pc >= this.InsLength) {
             this.state = this.GET_INSTRUCTION
             if (this.Warnning == 0) {

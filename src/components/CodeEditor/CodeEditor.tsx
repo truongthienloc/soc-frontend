@@ -12,6 +12,7 @@ interface CodeEditorProps {
   disable?: boolean
   hidden?: boolean
   breakpoints?: number[]
+  readOnly?: boolean
   setBreakpoints?: React.Dispatch<React.SetStateAction<number[]>>
 }
 
@@ -21,6 +22,7 @@ function CodeEditor({
   disable = false,
   hidden,
   breakpoints,
+  readOnly,
   setBreakpoints,
 }: CodeEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -49,6 +51,8 @@ function CodeEditor({
       gutters: ['breakpoints'],
     })
     codeRef.current = editor
+    editor.setOption('readOnly', readOnly)
+
 
     /** Breakpoint Listener */
     editor.on('gutterClick', function (instance, line) {
@@ -71,7 +75,7 @@ function CodeEditor({
     editor.on('change', (ins) => {
       onChange?.(ins.getValue())
     })
-  }, [value, breakpoints])
+  }, [value, breakpoints, readOnly])
 
   useBreakpointManagement({ breakpoints, editor: codeRef.current, hidden })
 
@@ -95,6 +99,7 @@ function CodeEditor({
       codeRef.current.refresh()
       console.log('codeRef.current.refresh: ', codeRef.current)
     }
+    codeRef.current.setOption('readOnly', readOnly)
   }, [value, disable, hidden])
 
   return (

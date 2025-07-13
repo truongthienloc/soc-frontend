@@ -59,7 +59,7 @@ export function assemble(
     }
 
     this.Processor.keyBoard_waiting = false
-    this.println('Cycle', this.cycle.toString(),': System is setting up')
+    this.println('Cycle ', this.cycle.toString(),': System is setting up')
     // console.log('Cycle', this.cycle.toString()+': System is setting up')
 
     return !this.Assembler.syntax_error
